@@ -86,7 +86,54 @@ const approveQuote = async (ticketCode, isApproved) => {
     }
 };
 
+
+const trackByPhone = async (phone) => {
+    const query = `
+        SELECT p.ma_tra_cuu, p.trang_thai, p.loai_dich_vu, t.ten_may, t.tinh_trang_may, p.ngay_cap_nhat
+        FROM phieu_sua_chua p
+        JOIN thiet_bi t ON p.thiet_bi_id = t.id
+        JOIN khach_hang k ON t.khach_hang_id = k.id
+        WHERE k.so_dien_thoai = $1
+        ORDER BY p.ngay_tao DESC
+    `;
+    const { rows } = await pool.query(query, [phone]);
+    return rows;
+};
+
+const submitReview = async (ticketCode, so_sao, nhan_xet) => {
+    const { rows } = await pool.query('SELECT id, trang_thai FROM phieu_sua_chua WHERE ma_phieu = $1', [ticketCode]);
+    if (rows.length === 0) throw new Error('Không tìm thấy phiếu!');
+    const ticketId = rows[0].id;
+    if (rows[0].trang_thai !== 'DA_GIAO_KHACH_VA_THU_TIEN') throw new Error('Máy chưa giao khách, chưa thể đánh giá!');
+    
+    // Check if already reviewed
+    const reviewCheck = await pool.query('SELECT id FROM danh_gia WHERE phieu_sua_chua_id = $1', [ticketId]);
+    if (reviewCheck.rows.length > 0) throw new Error('Bạn đã đánh giá phiếu này rồi!');
+
+    const result = await pool.query(
+        'INSERT INTO danh_gia (phieu_sua_chua_id, so_sao, nhan_xet) VALUES ($1, $2, $3) RETURNING *',
+        [ticketId, so_sao, nhan_xet]
+    );
+    return result.rows[0];
+};
+
+const getTopReviews = async () => {
+    const { rows } = await pool.query(`
+        SELECT d.so_sao, d.nhan_xet, d.ngay_danh_gia, k.ho_ten
+        FROM danh_gia d
+        JOIN phieu_sua_chua p ON d.phieu_sua_chua_id = p.id
+        JOIN khach_hang k ON p.khach_hang_id = k.id
+        WHERE d.so_sao >= 4
+        ORDER BY d.ngay_danh_gia DESC
+        LIMIT 5
+    `);
+    return rows;
+};
+
 module.exports = {
+    submitReview,
+    getTopReviews,
+    trackByPhone,
     trackTicket,
     approveQuote
 };

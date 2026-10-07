@@ -45,7 +45,41 @@ const approveQuote = async (req, res, next) => {
     }
 };
 
+
+const trackByPhone = async (req, res, next) => {
+    try {
+        const { phone } = req.params;
+        const data = await publicService.trackByPhone(phone);
+        res.status(200).json({ success: true, data });
+    } catch (err) {
+        next(err);
+    }
+};
+
+const submitReview = async (req, res, next) => {
+    try {
+        const { ticketCode } = req.params;
+        const { so_sao, nhan_xet } = req.body;
+        const result = await publicService.submitReview(ticketCode, so_sao, nhan_xet);
+        res.status(200).json({ success: true, message: 'Cảm ơn bạn đã đánh giá!', data: result });
+    } catch (err) {
+        next(err);
+    }
+};
+
+const getTopReviews = async (req, res, next) => {
+    try {
+        const data = await publicService.getTopReviews();
+        res.status(200).json({ success: true, data });
+    } catch (err) {
+        next(err);
+    }
+};
+
 module.exports = {
+    submitReview,
+    getTopReviews,
+    trackByPhone,
     trackTicket,
     approveQuote
 };

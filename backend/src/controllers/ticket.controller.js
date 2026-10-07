@@ -41,6 +41,98 @@ const submitIntake = async (req, res, next) => {
     }
 };
 
+const getTickets = async (req, res, next) => {
+    try {
+        const tickets = await ticketService.getAllTickets();
+        res.status(200).json({ success: true, data: tickets });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const updateTicketStatus = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { trang_thai } = req.body;
+        await ticketService.updateTicketStatus(id, trang_thai);
+        res.status(200).json({ success: true, message: 'Cập nhật thành công' });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const submitBooking = async (req, res, next) => {
+    try {
+        const { fullName, phone, zaloId, ngayHen, gioHen, moTaLoi, loaiDichVu } = req.body;
+        if (!fullName || !phone || !ngayHen || !gioHen || !moTaLoi) {
+            return res.status(400).json({ success: false, message: "Vui lòng nhập đầy đủ thông tin đặt lịch!" });
+        }
+        await ticketService.submitBooking(req.body);
+        res.status(201).json({ success: true, message: "Đặt lịch thành công!" });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const getBookings = async (req, res, next) => {
+    try {
+        const bookings = await ticketService.getAllBookings();
+        res.status(200).json({ success: true, data: bookings });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const updateBookingStatus = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { trang_thai } = req.body;
+        await ticketService.updateBookingStatus(id, trang_thai);
+        res.status(200).json({ success: true, message: 'Cập nhật lịch hẹn thành công' });
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+const getParts = async (req, res, next) => {
+    try {
+        const data = await ticketService.getParts();
+        res.status(200).json({ success: true, data });
+    } catch (err) {
+        next(err);
+    }
+};
+
+const getTicketParts = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const data = await ticketService.getTicketParts(id);
+        res.status(200).json({ success: true, data });
+    } catch (err) {
+        next(err);
+    }
+};
+
+const addPartToTicket = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { partId, quantity } = req.body;
+        await ticketService.addPartToTicket(id, partId, quantity);
+        res.status(200).json({ success: true, message: 'Đã thêm linh kiện thành công' });
+    } catch (err) {
+        next(err);
+    }
+};
+
 module.exports = {
-    submitIntake
+    getParts,
+    getTicketParts,
+    addPartToTicket,
+    submitIntake,
+    getTickets,
+    updateTicketStatus,
+    submitBooking,
+    getBookings,
+    updateBookingStatus
 };
