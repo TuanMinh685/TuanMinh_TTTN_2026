@@ -101,7 +101,7 @@ const trackByPhone = async (phone) => {
 };
 
 const submitReview = async (ticketCode, so_sao, nhan_xet) => {
-    const { rows } = await pool.query('SELECT id, trang_thai FROM phieu_sua_chua WHERE ma_phieu = $1', [ticketCode]);
+    const { rows } = await pool.query('SELECT id, trang_thai FROM phieu_sua_chua WHERE ma_tra_cuu = $1', [ticketCode]);
     if (rows.length === 0) throw new Error('Không tìm thấy phiếu!');
     const ticketId = rows[0].id;
     if (rows[0].trang_thai !== 'DA_GIAO_KHACH_VA_THU_TIEN') throw new Error('Máy chưa giao khách, chưa thể đánh giá!');
@@ -122,7 +122,8 @@ const getTopReviews = async () => {
         SELECT d.so_sao, d.nhan_xet, d.ngay_danh_gia, k.ho_ten
         FROM danh_gia d
         JOIN phieu_sua_chua p ON d.phieu_sua_chua_id = p.id
-        JOIN khach_hang k ON p.khach_hang_id = k.id
+        JOIN thiet_bi t ON p.thiet_bi_id = t.id
+        JOIN khach_hang k ON t.khach_hang_id = k.id
         WHERE d.so_sao >= 4
         ORDER BY d.ngay_danh_gia DESC
         LIMIT 5
