@@ -60,9 +60,25 @@ const submitReview = async (req, res, next) => {
     try {
         const { ticketCode } = req.params;
         const { so_sao, nhan_xet } = req.body;
-        const result = await publicService.submitReview(ticketCode, so_sao, nhan_xet);
+        if (!Number.isInteger(so_sao) || so_sao < 1 || so_sao > 5) {
+            return res.status(400).json({ success: false, message: 'Số sao phải là số nguyên từ 1 đến 5.' });
+        }
+        if (nhan_xet !== undefined && typeof nhan_xet !== 'string') {
+            return res.status(400).json({ success: false, message: 'Nội dung đánh giá không hợp lệ.' });
+        }
+        if (nhan_xet && nhan_xet.length > 1000) {
+            return res.status(400).json({ success: false, message: 'Nội dung đánh giá không được vượt quá 1000 ký tự.' });
+        }
+
+        const result = await publicService.submitReview(ticketCode, so_sao, nhan_xet?.trim() || null);
         res.status(200).json({ success: true, message: 'Cảm ơn bạn đã đánh giá!', data: result });
     } catch (err) {
+        if (err.message === 'Không tìm thấy phiếu!') {
+            return res.status(404).json({ success: false, message: err.message });
+        }
+        if (err.message === 'Máy chưa giao khách, chưa thể đánh giá!' || err.message === 'Bạn đã đánh giá phiếu này rồi!') {
+            return res.status(409).json({ success: false, message: err.message });
+        }
         next(err);
     }
 };

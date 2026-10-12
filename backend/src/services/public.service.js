@@ -6,7 +6,12 @@ const trackTicket = async (ticketCode) => {
         SELECT 
             p.id, p.ma_tra_cuu, p.trang_thai, p.tong_tien, p.han_bao_hanh, p.ngay_tao, p.ngay_cap_nhat,
             k.ho_ten, k.so_dien_thoai,
-            t.ten_may, t.tinh_trang_may
+            t.ten_may, t.tinh_trang_may,
+            EXISTS (
+                SELECT 1
+                FROM danh_gia d
+                WHERE d.phieu_sua_chua_id = p.id
+            ) AS da_danh_gia
         FROM phieu_sua_chua p
         JOIN thiet_bi t ON p.thiet_bi_id = t.id
         JOIN khach_hang k ON t.khach_hang_id = k.id
@@ -104,7 +109,7 @@ const submitReview = async (ticketCode, so_sao, nhan_xet) => {
     const { rows } = await pool.query('SELECT id, trang_thai FROM phieu_sua_chua WHERE ma_tra_cuu = $1', [ticketCode]);
     if (rows.length === 0) throw new Error('Không tìm thấy phiếu!');
     const ticketId = rows[0].id;
-    if (rows[0].trang_thai !== 'DA_GIAO_KHACH_VA_THU_TIEN') throw new Error('Máy chưa giao khách, chưa thể đánh giá!');
+    if (rows[0].trang_thai !== 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN') throw new Error('Máy chưa giao khách, chưa thể đánh giá!');
     
     // Check if already reviewed
     const reviewCheck = await pool.query('SELECT id FROM danh_gia WHERE phieu_sua_chua_id = $1', [ticketId]);

@@ -7,6 +7,11 @@ function Tracking() {
   const [ticket, setTicket] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [rating, setRating] = useState(5);
+  const [reviewText, setReviewText] = useState('');
+  const [reviewLoading, setReviewLoading] = useState(false);
+  const [reviewMessage, setReviewMessage] = useState('');
+  const [reviewError, setReviewError] = useState('');
 
   const fetchTicket = useCallback(
     () => api.get(`/public/track/${ticketCode}`),
@@ -49,6 +54,27 @@ function Tracking() {
       alert(err.response?.data?.message || 'Có lỗi xảy ra.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSubmitReview = async (event) => {
+    event.preventDefault();
+    setReviewLoading(true);
+    setReviewError('');
+    setReviewMessage('');
+
+    try {
+      const response = await api.post(`/public/track/${ticketCode}/review`, {
+        so_sao: rating,
+        nhan_xet: reviewText.trim()
+      });
+      setReviewMessage(response.data.message || 'Cảm ơn bạn đã đánh giá!');
+      setReviewText('');
+      setTicket(currentTicket => ({ ...currentTicket, da_danh_gia: true }));
+    } catch (err) {
+      setReviewError(err.response?.data?.message || 'Không gửi được đánh giá. Vui lòng thử lại.');
+    } finally {
+      setReviewLoading(false);
     }
   };
 
@@ -147,6 +173,72 @@ function Tracking() {
             <div className="w-full py-4 bg-slate-100 text-slate-500 font-semibold rounded-xl text-center">
               Phiếu đang ở trạng thái: {ticket.trang_thai}
             </div>
+          )}
+
+          {ticket.da_danh_gia ? (
+            <p role="status" className="mt-8 rounded-xl bg-green-50 p-4 text-center font-semibold text-green-700">
+              Cảm ơn bạn! Phiếu này đã được đánh giá.
+            </p>
+          ) : ticket.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' && (
+            <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <h2 className="text-xl font-bold text-brand-blue">Đánh giá dịch vụ</h2>
+              <p className="mt-1 text-sm text-slate-500">Chia sẻ trải nghiệm của bạn về lần sửa chữa này.</p>
+
+              {reviewMessage ? (
+                <p role="status" className="mt-4 rounded-lg bg-green-50 p-3 text-sm font-semibold text-green-700">
+                  {reviewMessage}
+                </p>
+              ) : (
+                <form onSubmit={handleSubmitReview} className="mt-4 space-y-4">
+                  <fieldset>
+                    <legend className="mb-2 text-sm font-semibold text-slate-700">Mức hài lòng</legend>
+                    <div className="flex gap-2" role="radiogroup" aria-label="Chọn số sao đánh giá">
+                      {[1, 2, 3, 4, 5].map(star => (
+                        <button
+                          key={star}
+                          type="button"
+                          role="radio"
+                          aria-checked={rating === star}
+                          aria-label={`${star} sao`}
+                          onClick={() => setRating(star)}
+                          className={`text-3xl transition-colors ${star <= rating ? 'text-amber-400' : 'text-slate-300'}`}
+                        >
+                          ★
+                        </button>
+                      ))}
+                    </div>
+                  </fieldset>
+
+                  <div>
+                    <label htmlFor="review-text" className="mb-1 block text-sm font-semibold text-slate-700">
+                      Nhận xét (không bắt buộc)
+                    </label>
+                    <textarea
+                      id="review-text"
+                      value={reviewText}
+                      onChange={event => setReviewText(event.target.value)}
+                      maxLength={1000}
+                      rows={4}
+                      className="w-full rounded-xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-blue/50"
+                      placeholder="Bạn hài lòng với dịch vụ ở điểm nào?"
+                    />
+                    <p className="mt-1 text-right text-xs text-slate-400">{reviewText.length}/1000</p>
+                  </div>
+
+                  {reviewError && (
+                    <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{reviewError}</p>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={reviewLoading}
+                    className="w-full rounded-xl bg-brand-blue px-5 py-3 font-bold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {reviewLoading ? 'Đang gửi đánh giá...' : 'GỬI ĐÁNH GIÁ'}
+                  </button>
+                </form>
+              )}
+            </section>
           )}
         </div>
       </div>
