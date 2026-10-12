@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../../services/api';
 
@@ -8,22 +8,29 @@ function Tracking() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    fetchTicket();
-  }, [ticketCode]);
+  const fetchTicket = useCallback(
+    () => api.get(`/public/track/${ticketCode}`),
+    [ticketCode]
+  );
 
-  const fetchTicket = async () => {
-    try {
-      const response = await api.get(`/public/track/${ticketCode}`);
-      if (response.data.success) {
-        setTicket(response.data.data);
-      }
-    } catch (err) {
-      setError(err.response?.data?.message || 'Không tìm thấy thông tin phiếu.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    let active = true;
+
+    fetchTicket()
+      .then(response => {
+        if (active && response.data.success) setTicket(response.data.data);
+      })
+      .catch(err => {
+        if (active) setError(err.response?.data?.message || 'Không tìm thấy thông tin phiếu.');
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [fetchTicket]);
 
   const handleApproveQuote = async (isApproved) => {
     try {
@@ -31,7 +38,12 @@ function Tracking() {
       const response = await api.post(`/public/track/${ticketCode}/approve-quote`, { isApproved });
       if (response.data.success) {
         alert(isApproved ? 'Cảm ơn bạn đã đồng ý sửa chữa!' : 'Bạn đã từ chối báo giá.');
-        fetchTicket(); // Reload data
+        try {
+          const ticketResponse = await fetchTicket();
+          if (ticketResponse.data.success) setTicket(ticketResponse.data.data);
+        } catch (refreshError) {
+          console.error('Không tải lại được thông tin phiếu sau khi xác nhận báo giá:', refreshError);
+        }
       }
     } catch (err) {
       alert(err.response?.data?.message || 'Có lỗi xảy ra.');

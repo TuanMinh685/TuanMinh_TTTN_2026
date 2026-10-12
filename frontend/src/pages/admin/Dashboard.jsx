@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import api from '../../services/api';
-import { io } from 'socket.io-client';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell } from 'recharts';
 
 function Dashboard() {
@@ -16,30 +15,15 @@ function Dashboard() {
   const [selectedPartId, setSelectedPartId] = useState('');
   const [partQuantity, setPartQuantity] = useState(1);
 
-  useEffect(() => {
-    fetchTickets();
-    if (role === 'LE_TAN' || role === 'QUAN_LY' || role === 'ADMIN') { fetchBookings(); }
-    if (role === 'QUAN_LY' || role === 'ADMIN') { fetchStats(); }
-    if (role === 'KY_THUAT_VIEN') fetchParts();
+  const fetchStats = useCallback(async () => {
+    const res = await api.get('/admin/dashboard-stats');
+    return res.data.data;
+  }, []);
 
-    /* Socket.io temporarily disabled for Vercel deployment */
-  }, [role]);
-
-  const fetchStats = async () => {
-    try {
-      const res = await api.get('/admin/dashboard-stats');
-      setStats(res.data.data);
-    } catch (err) {}
-  };
-
-  const fetchParts = async () => {
-    try {
-      const res = await api.get('/tickets/parts');
-      setParts(res.data.data || []);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  const fetchParts = useCallback(async () => {
+    const res = await api.get('/tickets/parts');
+    return res.data.data || [];
+  }, []);
 
   const addPartToTicket = async () => {
     if (!selectedPartId || partQuantity < 1) return alert('Vui lòng chọn linh kiện và số lượng hợp lệ');
@@ -47,35 +31,71 @@ function Dashboard() {
       await api.post(`/tickets/${selectedTicketId}/parts`, { partId: selectedPartId, quantity: partQuantity });
       alert('Thêm linh kiện thành công!');
       setShowPartModal(false);
-      fetchTickets();
+      await refreshTickets();
     } catch (err) {
       alert(err.response?.data?.message || 'Lỗi thêm linh kiện');
     }
   };
 
-  const fetchTickets = async () => {
+  const fetchTickets = useCallback(async () => {
+    const res = await api.get('/tickets');
+    return res.data.data || [];
+  }, []);
+
+  const fetchBookings = useCallback(async () => {
+    const res = await api.get('/tickets/booking');
+    return res.data.data || [];
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    const load = (request, setData, description) => {
+      request()
+        .then(data => {
+          if (active) setData(data);
+        })
+        .catch(error => console.error(`Không tải được ${description}:`, error));
+    };
+
+    load(fetchTickets, setTickets, 'danh sách phiếu');
+    if (role === 'LE_TAN' || role === 'QUAN_LY' || role === 'ADMIN') {
+      load(fetchBookings, setBookings, 'danh sách lịch hẹn');
+    }
+    if (role === 'QUAN_LY' || role === 'ADMIN') {
+      load(fetchStats, setStats, 'thống kê dashboard');
+    }
+    if (role === 'KY_THUAT_VIEN') {
+      load(fetchParts, setParts, 'danh sách linh kiện');
+    }
+
+    /* Socket.io temporarily disabled for Vercel deployment */
+    return () => {
+      active = false;
+    };
+  }, [role, fetchTickets, fetchBookings, fetchStats, fetchParts]);
+
+  const refreshTickets = async () => {
     try {
-      const res = await api.get('/tickets');
-      setTickets(res.data.data || []);
-    } catch (err) {
-      console.error(err);
+      setTickets(await fetchTickets());
+    } catch (error) {
+      console.error('Không tải lại được danh sách phiếu:', error);
     }
   };
 
-  const fetchBookings = async () => {
+  const refreshBookings = async () => {
     try {
-      const res = await api.get('/tickets/booking');
-      setBookings(res.data.data || []);
-    } catch (err) {
-      console.error(err);
+      setBookings(await fetchBookings());
+    } catch (error) {
+      console.error('Không tải lại được danh sách lịch hẹn:', error);
     }
   };
 
   const updateStatus = async (id, status) => {
     try {
       await api.patch(`/tickets/${id}/status`, { trang_thai: status });
-      fetchTickets();
+      await refreshTickets();
     } catch (err) {
+      console.error('Không cập nhật được trạng thái phiếu:', err);
       alert('Lỗi cập nhật trạng thái');
     }
   };
@@ -83,8 +103,9 @@ function Dashboard() {
   const updateBookingStatus = async (id, status) => {
     try {
       await api.patch(`/tickets/booking/${id}/status`, { trang_thai: status });
-      fetchBookings();
+      await refreshBookings();
     } catch (err) {
+      console.error('Không cập nhật được trạng thái lịch hẹn:', err);
       alert('Lỗi cập nhật lịch hẹn');
     }
   };
@@ -314,4 +335,3 @@ function Dashboard() {
 }
 
 export default Dashboard;
-

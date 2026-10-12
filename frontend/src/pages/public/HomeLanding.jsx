@@ -7,7 +7,9 @@ function HomeLanding() {
   const [topReviews, setTopReviews] = useState([]);
 
   useEffect(() => {
-    api.get('/reviews/top').then(res => setTopReviews(res.data.data)).catch(err => {});
+    api.get('/public/reviews/top')
+      .then(res => setTopReviews(res.data.data))
+      .catch(error => console.error('Không tải được đánh giá nổi bật:', error));
   }, []);
   return (
     <div className="font-sans text-slate-800 bg-white">

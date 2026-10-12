@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import api from '../../services/api';
 
 function BookingForm() {
-  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     fullName: '', phone: '', zaloId: '', ngayHen: '', gioHen: '', moTaLoi: '', loaiDichVu: 'TAI_CUA_HANG'
   });

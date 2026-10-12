@@ -1,13 +1,10 @@
-import React, { useState } from 'react';
-
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
 
 function PhoneTracking() {
   const [phone, setPhone] = useState('');
   const [tickets, setTickets] = useState([]);
-  const [customerInfo, setCustomerInfo] = useState(null);
-  const [reviewData, setReviewData] = useState({ ticketCode: null, so_sao: 5, nhan_xet: '' });
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 

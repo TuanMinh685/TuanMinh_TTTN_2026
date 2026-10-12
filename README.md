@@ -1,99 +1,86 @@
 # QR Repair Ticket System
 
-Hệ thống tiếp nhận và theo dõi sửa chữa thiết bị bằng mã QR, dành cho khách hàng và nhân viên kỹ thuật.
+Hệ thống tiếp nhận và theo dõi phiếu sửa chữa thiết bị qua QR, gồm giao diện khách hàng và cổng làm việc cho nhân viên.
 
-## Giới thiệu
+## Công nghệ
 
-Dự án này giúp khách hàng:
-- quét mã QR tại quầy hoặc đặt lịch online
-- điền thông tin thiết bị và mô tả lỗi
-- theo dõi tiến độ sửa chữa theo mã tra cứu
-- xác nhận báo giá và gửi đánh giá sau khi hoàn tất
-
-Dành cho nhân viên:
-- quản lý phiếu sửa chữa
-- cập nhật trạng thái
-- thống kê số lượng, phụ tùng và lịch hẹn
-- xem dashboard nội bộ
-
-## Công nghệ sử dụng
-
-- Frontend: React + Vite
-- Backend: Node.js + Express
+- Frontend: React 19, Vite, Tailwind CSS
+- Backend: Node.js, Express
 - Database: PostgreSQL
-- Real-time: Socket.IO
-- Authentication: JWT
+- Đăng nhập: JWT
 
-## Cấu trúc dự án
+## Yêu cầu
 
-```text
-TTTN-CSKH_QR/
-├── backend/
-│   ├── src/
-│   ├── server.js
-│   ├── package.json
-│   └── .env.example
-├── frontend/
-│   ├── src/
-│   ├── package.json
-│   └── vite.config.js
-├── README.md
-└── ...
-```
-
-## Yêu cầu môi trường
-
-- Node.js >= 18
+- Node.js 20.19+ hoặc 22.12+ (Vite 8 yêu cầu các phiên bản này)
 - npm
-- PostgreSQL
+- PostgreSQL và database có schema tương thích với backend
 
-## Cài đặt
+## Cài đặt trên Windows PowerShell
 
-### 1. Backend
+### 1. Cấu hình backend
 
-```bash
-cd backend
+```powershell
+cd D:\qr-repair-system\TTTN-CSKH_QR\backend
 npm install
-cp .env.example .env
+Copy-Item .env.example .env
 ```
 
-Điều chỉnh các biến môi trường trong file `.env` nếu cần.
+Mở `backend\.env`, đặt `DATABASE_URL` tới PostgreSQL của bạn và thay `JWT_SECRET` bằng một giá trị ngẫu nhiên, riêng cho môi trường đó. Không dùng thông tin database hoặc JWT secret của production trong môi trường chia sẻ.
 
-### 2. Frontend
+Backend hiện truy vấn các bảng tiếng Việt, ví dụ `nhan_vien`, `phieu_sua_chua`, `thiet_bi` và `khach_hang`. File `backend\database\01_init_schema_english.sql` định nghĩa một schema tiếng Anh khác, nên không tương thích trực tiếp với các truy vấn backend hiện tại. Cần dùng schema đúng với code trước khi chạy các API; không chạy file SQL này lên database production.
 
-```bash
-cd frontend
+### 2. Cấu hình frontend
+
+Mở một terminal PowerShell khác:
+
+```powershell
+cd D:\qr-repair-system\TTTN-CSKH_QR\frontend
 npm install
+Copy-Item .env.example .env
 ```
 
-## Chạy ứng dụng
+Giá trị local mặc định trong `frontend\.env.example` gọi backend tại `http://localhost:5001/api`. Nếu đổi port backend, cập nhật `VITE_API_URL` tương ứng. Sau khi sửa `.env`, khởi động lại Vite.
 
-### Backend
+### 3. Chạy ứng dụng
 
-```bash
-cd backend
-node server.js
+Terminal backend:
+
+```powershell
+cd D:\qr-repair-system\TTTN-CSKH_QR\backend
+$env:PORT = "5001"
+npm start
 ```
 
-### Frontend
+Terminal frontend:
 
-```bash
-cd frontend
+```powershell
+cd D:\qr-repair-system\TTTN-CSKH_QR\frontend
 npm run dev
 ```
 
-Mặc định:
-- Frontend: http://localhost:5173/
-- Backend: http://localhost:5000/
+Truy cập frontend tại http://localhost:5173 và backend API tại http://localhost:5001/api. Cổng đăng nhập nhân viên ở đường dẫn `/login`; cần tài khoản có sẵn trong database để đăng nhập.
 
-## Một số chức năng chính
+Khi deploy, đặt `VITE_API_URL` thành URL API của backend và đặt `CORS_ORIGIN` ở backend thành URL frontend đã deploy. Không dùng URL local trong môi trường production.
 
-- Tiếp nhận phiếu sửa chữa via QR
-- Tra cứu đơn hàng bằng mã hoặc số điện thoại
-- Đặt lịch hẹn
-- Đánh giá trải nghiệm sau khi sửa xong
-- Dashboard quản lý cho nhân viên
+## Kiểm tra
 
-## Ghi chú
+```powershell
+cd D:\qr-repair-system\TTTN-CSKH_QR\frontend
+npm run lint
+npm run build
+```
 
-Dự án này là sản phẩm thực tập tốt nghiệp với mục tiêu xây dựng hệ thống CSKH IT Support hiện đại, tự động hóa quy trình tiếp nhận và theo dõi sửa chữa thiết bị.
+Backend hiện chưa có bộ test tự động được cấu hình. `npm test` chưa chạy test nghiệp vụ.
+
+## An toàn thông tin
+
+- Không commit `.env`, `.env.vercel`, token, mật khẩu hoặc thông tin kết nối database.
+- Chỉ đưa giá trị giả lập vào các file `.env.example`.
+- Nếu một secret đã từng được đẩy lên remote, hãy thu hồi/thay secret đó ở nhà cung cấp và cập nhật môi trường deploy. Xóa file ở commit mới không xóa secret khỏi lịch sử Git.
+
+## Tính năng chính
+
+- Tiếp nhận phiếu sửa chữa và đặt lịch
+- Tra cứu tiến độ theo mã phiếu hoặc số điện thoại
+- Cập nhật phiếu và quản lý từ cổng nhân viên
+- Duyệt báo giá và gửi đánh giá

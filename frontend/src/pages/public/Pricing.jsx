@@ -1,24 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import api from '../../services/api';
+import { useState } from 'react';
+
+const parts = [
+  { id: 1, ten: 'Màn hình LCD Dell 15.6 inch', gia: 1500000, loai: 'LAPTOP' },
+  { id: 2, ten: 'Bàn phím cơ DareU', gia: 500000, loai: 'PHU_KIEN' },
+  { id: 3, ten: 'Pin Laptop Asus 3 Cell', gia: 800000, loai: 'LAPTOP' },
+  { id: 4, ten: 'Ram DDR4 8GB 3200MHz', gia: 600000, loai: 'LINH_KIEN' },
+  { id: 5, ten: 'SSD Samsung 500GB', gia: 1200000, loai: 'LINH_KIEN' },
+  { id: 6, ten: 'Phí dịch vụ Cài Win & Phần mềm', gia: 150000, loai: 'DICH_VU' },
+  { id: 7, ten: 'Phí dịch vụ Vệ sinh máy', gia: 100000, loai: 'DICH_VU' },
+  { id: 8, ten: 'Cứu dữ liệu ổ cứng (Dưới 500GB)', gia: 800000, loai: 'DICH_VU' }
+];
 
 function Pricing() {
-  const [parts, setParts] = useState([]);
   const [search, setSearch] = useState('');
-
-  useEffect(() => {
-    // Để nhanh, chúng ta tạm fetch qua 1 API hoặc mảng cứng nếu chưa có API public
-    // Tôi sẽ mock dữ liệu trước mắt để Giao diện hiển thị ngay lập tức
-    setParts([
-      { id: 1, ten: 'Màn hình LCD Dell 15.6 inch', gia: 1500000, loai: 'LAPTOP' },
-      { id: 2, ten: 'Bàn phím cơ DareU', gia: 500000, loai: 'PHU_KIEN' },
-      { id: 3, ten: 'Pin Laptop Asus 3 Cell', gia: 800000, loai: 'LAPTOP' },
-      { id: 4, ten: 'Ram DDR4 8GB 3200MHz', gia: 600000, loai: 'LINH_KIEN' },
-      { id: 5, ten: 'SSD Samsung 500GB', gia: 1200000, loai: 'LINH_KIEN' },
-      { id: 6, ten: 'Phí dịch vụ Cài Win & Phần mềm', gia: 150000, loai: 'DICH_VU' },
-      { id: 7, ten: 'Phí dịch vụ Vệ sinh máy', gia: 100000, loai: 'DICH_VU' },
-      { id: 8, ten: 'Cứu dữ liệu ổ cứng (Dưới 500GB)', gia: 800000, loai: 'DICH_VU' }
-    ]);
-  }, []);
 
   const filteredParts = parts.filter(p => p.ten.toLowerCase().includes(search.toLowerCase()));
 

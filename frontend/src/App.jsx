@@ -1,21 +1,22 @@
+import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
-import IntakeForm from './pages/public/IntakeForm';
-import Tracking from './pages/public/Tracking';
-import HomeLanding from './pages/public/HomeLanding';
-import BookingForm from './pages/public/BookingForm';
-import Pricing from './pages/public/Pricing';
-import PhoneTracking from './pages/public/PhoneTracking';
-import OnlineIntakeForm from './pages/public/OnlineIntakeForm';
-import Login from './pages/admin/Login';
-import Dashboard from './pages/admin/Dashboard';
-import ProtectedRoute from './components/ProtectedRoute';
 
-// Dummy HomeAdmin for now
-function HomeAdmin() { return <div className="p-10 text-center">Admin Page</div>; }
+const IntakeForm = lazy(() => import('./pages/public/IntakeForm'));
+const Tracking = lazy(() => import('./pages/public/Tracking'));
+const HomeLanding = lazy(() => import('./pages/public/HomeLanding'));
+const BookingForm = lazy(() => import('./pages/public/BookingForm'));
+const Pricing = lazy(() => import('./pages/public/Pricing'));
+const PhoneTracking = lazy(() => import('./pages/public/PhoneTracking'));
+const OnlineIntakeForm = lazy(() => import('./pages/public/OnlineIntakeForm'));
+const Login = lazy(() => import('./pages/admin/Login'));
+const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
+const ProtectedRoute = lazy(() => import('./components/ProtectedRoute'));
+
+const CURRENT_YEAR = new Date().getFullYear();
 
 function ScrollToTop() {
   const { pathname } = useLocation();
-  React.useEffect(() => {
+  useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
   return null;
@@ -24,6 +25,7 @@ function ScrollToTop() {
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <div className="min-h-screen font-sans text-slate-800 bg-white flex flex-col">
         {/* SECTION 01: HEADER & NAVBAR */}
         <header className="bg-white sticky top-0 z-50 shadow-sm border-b border-slate-200">
@@ -118,26 +120,28 @@ function App() {
 
         {/* MAIN CONTENT AREA */}
         <main className="flex-1">
-          <Routes>
-            {/* Landing Page */}
-            <Route path="/" element={<HomeLanding />} />
-            
-            {/* Public Pages */}
-            <Route path="/dat-lich" element={<BookingForm />} />
-            <Route path="/pricing" element={<Pricing />} />
-            
-            {/* Các trang chạy API thật */}
-            <Route path="/tra-cuu" element={<PhoneTracking />} />
-            <Route path="/intake" element={<IntakeForm />} />
-            <Route path="/track/:ticketCode" element={<Tracking />} />
-            <Route path="/online-intake" element={<OnlineIntakeForm />} />
-            
-            {/* Admin Pages */}
-            <Route path="/login" element={<Login />} />
-            <Route element={<ProtectedRoute />}>
-              <Route path="/admin" element={<Dashboard />} />
-            </Route>
-          </Routes>
+          <Suspense fallback={<div className="py-20 text-center">Đang tải trang...</div>}>
+            <Routes>
+              {/* Landing Page */}
+              <Route path="/" element={<HomeLanding />} />
+
+              {/* Public Pages */}
+              <Route path="/dat-lich" element={<BookingForm />} />
+              <Route path="/pricing" element={<Pricing />} />
+
+              {/* Các trang chạy API thật */}
+              <Route path="/tra-cuu" element={<PhoneTracking />} />
+              <Route path="/intake" element={<IntakeForm />} />
+              <Route path="/track/:ticketCode" element={<Tracking />} />
+              <Route path="/online-intake" element={<OnlineIntakeForm />} />
+
+              {/* Admin Pages */}
+              <Route path="/login" element={<Login />} />
+              <Route element={<ProtectedRoute />}>
+                <Route path="/admin" element={<Dashboard />} />
+              </Route>
+            </Routes>
+          </Suspense>
         </main>
 
         
@@ -189,7 +193,7 @@ function App() {
             </div>
             
             <div className="mt-12 pt-8 border-t border-blue-800 text-center text-blue-300 text-xs">
-              <p>© {new Date().getFullYear()} Bản quyền thuộc về Công ty Cổ phần Lục Giác - Hệ sinh thái HungHau Holdings.</p>
+              <p>© {CURRENT_YEAR} Bản quyền thuộc về Công ty Cổ phần Lục Giác - Hệ sinh thái HungHau Holdings.</p>
               <p className="mt-1">Thiết kế chuẩn luồng UX/UI Mobile-first QR System.</p>
             </div>
           </div>
