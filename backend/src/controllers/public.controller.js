@@ -1,4 +1,5 @@
 const publicService = require('../services/public.service');
+const ticketService = require('../services/ticket.service');
 const { getIo } = require('../config/socket.config');
 
 const trackTicket = async (req, res, next) => {
@@ -92,10 +93,20 @@ const getTopReviews = async (req, res, next) => {
     }
 };
 
+const getPublicPricing = async (req, res, next) => {
+    try {
+        const data = await ticketService.getPublicParts();
+        res.status(200).json({ success: true, data });
+    } catch (err) {
+        next(err);
+    }
+};
+
 module.exports = {
     submitReview,
     getTopReviews,
     trackByPhone,
     trackTicket,
-    approveQuote
+    approveQuote,
+    getPublicPricing
 };

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+import SoftwarePackageSelector from '../../components/SoftwarePackageSelector';
 
 function IntakeForm() {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ function IntakeForm() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [softwarePackage, setSoftwarePackage] = useState('');
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -25,7 +27,12 @@ function IntakeForm() {
     
     try {
       // Gọi API Tiếp nhận máy
-      const response = await api.post('/tickets/intake', formData);
+      const response = await api.post('/tickets/intake', {
+        ...formData,
+        issueDescription: softwarePackage
+          ? `${formData.issueDescription}\nGói phần mềm yêu cầu: ${softwarePackage}`
+          : formData.issueDescription
+      });
       if (response.data.success) {
         // Chuyển sang trang Tra cứu tiến độ ngay lập tức với mã phiếu
         navigate(`/track/${response.data.data.ticketCode}`);
@@ -77,6 +84,8 @@ function IntakeForm() {
             <label className="block text-sm font-semibold text-slate-700 mb-1">Mô tả tình trạng lỗi *</label>
             <textarea required name="issueDescription" onChange={handleChange} rows="3" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/50" placeholder="Máy sạc không vào pin, bể màn hình..."></textarea>
           </div>
+
+          <SoftwarePackageSelector value={softwarePackage} onChange={setSoftwarePackage} />
 
           <button disabled={loading} type="submit" className="w-full py-4 bg-brand-orange hover:bg-orange-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-orange-500/30 flex justify-center items-center gap-2">
             {loading ? 'Đang gửi...' : 'GỬI YÊU CẦU NGAY'}

@@ -1,0 +1,17 @@
+{
+  "name": "HungHau IT Support",
+  "short_name": "HH IT Support",
+  "description": "Tiếp nhận và theo dõi phiếu sửa chữa thiết bị.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0b5b9c",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

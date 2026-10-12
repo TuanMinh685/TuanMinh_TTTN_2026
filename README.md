@@ -84,3 +84,8 @@ Backend hiện chưa có bộ test tự động được cấu hình. `npm test`
 - Tra cứu tiến độ theo mã phiếu hoặc số điện thoại
 - Cập nhật phiếu và quản lý từ cổng nhân viên
 - Duyệt báo giá và gửi đánh giá
+- Quản lý tồn kho linh kiện, tìm kiếm/lọc tồn thấp và cập nhật giá bán (vai trò Quản lý/Admin)
+- In phiếu tiếp nhận khổ nhiệt 80 mm kèm QR tra cứu
+- Chọn gói phần mềm trong form tiếp nhận/đặt lịch
+- Thông báo khi trạng thái phiếu đổi; dashboard có báo cáo doanh thu theo tuần/tháng
+- PWA app shell và metadata SEO cơ bản

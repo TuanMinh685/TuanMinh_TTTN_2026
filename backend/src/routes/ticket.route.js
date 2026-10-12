@@ -31,7 +31,9 @@ router.patch('/booking/:id/status', verifyToken, ticketController.updateBookingS
 
 
 // Inventory routes
-router.get('/parts', verifyToken, requireRole('KY_THUAT_VIEN', 'LE_TAN', 'QUAN_LY'), ticketController.getParts);
+router.get('/parts', verifyToken, requireRole('KY_THUAT_VIEN', 'LE_TAN', 'QUAN_LY', 'ADMIN'), ticketController.getParts);
+router.post('/parts', verifyToken, requireRole('QUAN_LY', 'ADMIN'), ticketController.createPart);
+router.patch('/parts/:id', verifyToken, requireRole('QUAN_LY', 'ADMIN'), ticketController.updatePart);
 router.get('/:id/parts', verifyToken, requireRole('KY_THUAT_VIEN', 'LE_TAN', 'QUAN_LY'), ticketController.getTicketParts);
 router.post('/:id/parts', verifyToken, requireRole('KY_THUAT_VIEN'), ticketController.addPartToTicket);
 

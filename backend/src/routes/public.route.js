@@ -10,6 +10,7 @@ const trackLimiter = rateLimit({
 });
 
 router.get('/track/phone/:phone', trackLimiter, publicController.trackByPhone);
+router.get('/pricing', publicController.getPublicPricing);
 router.get('/track/:ticketCode', trackLimiter, publicController.trackTicket);
 router.post('/track/:ticketCode/approve-quote', publicController.approveQuote);
 

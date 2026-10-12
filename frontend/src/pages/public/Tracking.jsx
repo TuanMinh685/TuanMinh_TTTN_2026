@@ -12,6 +12,7 @@ function Tracking() {
   const [reviewLoading, setReviewLoading] = useState(false);
   const [reviewMessage, setReviewMessage] = useState('');
   const [reviewError, setReviewError] = useState('');
+  const [statusNotice, setStatusNotice] = useState('');
 
   const fetchTicket = useCallback(
     () => api.get(`/public/track/${ticketCode}`),
@@ -34,6 +35,31 @@ function Tracking() {
 
     return () => {
       active = false;
+    };
+  }, [fetchTicket]);
+
+  useEffect(() => {
+    let active = true;
+    const refreshTicketStatus = async () => {
+      try {
+        const response = await fetchTicket();
+        const updatedTicket = response.data.data;
+        if (!active || !response.data.success || !updatedTicket) return;
+        setTicket(currentTicket => {
+          if (currentTicket && currentTicket.trang_thai !== updatedTicket.trang_thai) {
+            setStatusNotice(`Phiếu của bạn vừa chuyển sang trạng thái: ${updatedTicket.trang_thai}`);
+          }
+          return updatedTicket;
+        });
+      } catch (refreshError) {
+        if (active) console.error('Không thể kiểm tra cập nhật phiếu:', refreshError);
+      }
+    };
+
+    const intervalId = window.setInterval(refreshTicketStatus, 30000);
+    return () => {
+      active = false;
+      window.clearInterval(intervalId);
     };
   }, [fetchTicket]);
 
@@ -85,6 +111,12 @@ function Tracking() {
   // Render theo phong cách Điện Thoại Vui x Lục Giác
   return (
     <div className="max-w-4xl mx-auto mt-10 p-4">
+      {statusNotice && (
+        <div role="status" className="mb-5 flex items-center justify-between gap-3 rounded-xl bg-green-50 p-4 font-semibold text-green-800">
+          <span>{statusNotice}</span>
+          <button type="button" onClick={() => setStatusNotice('')} aria-label="Đóng thông báo" className="text-lg">×</button>
+        </div>
+      )}
       {/* Breadcrumb */}
       <div className="text-sm text-slate-500 mb-6 flex gap-2 items-center">
         <span>Trang chủ</span> <span className="text-xs">▶</span> 

@@ -19,3 +19,30 @@ body {
 .animate-fade-in-up {
   animation: fadeInUp 0.4s ease-out forwards;
 }
+
+@media print {
+  @page {
+    size: 80mm auto;
+    margin: 4mm;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  #thermal-receipt,
+  #thermal-receipt * {
+    visibility: visible !important;
+  }
+
+  #thermal-receipt {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 72mm;
+    max-width: 72mm;
+    border: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    font-size: 10pt;
+  }
+}

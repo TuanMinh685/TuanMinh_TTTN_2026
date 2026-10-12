@@ -104,6 +104,68 @@ const getParts = async (req, res, next) => {
     }
 };
 
+const validatePartInput = ({ ten_linh_kien, gia_ban, so_luong }) => {
+    if (typeof ten_linh_kien !== 'string' || ten_linh_kien.trim().length === 0 || ten_linh_kien.trim().length > 150) {
+        return 'Tên linh kiện phải có từ 1 đến 150 ký tự.';
+    }
+    if (!Number.isFinite(gia_ban) || gia_ban < 0) {
+        return 'Giá bán phải là số không âm.';
+    }
+    if (!Number.isSafeInteger(so_luong) || so_luong < 0) {
+        return 'Số lượng tồn phải là số nguyên không âm.';
+    }
+    return null;
+};
+
+const createPart = async (req, res, next) => {
+    try {
+        const name = req.body.ten_linh_kien;
+        const part = {
+            ten_linh_kien: typeof name === 'string' ? name.trim() : name,
+            gia_ban: req.body.gia_ban,
+            so_luong: req.body.so_luong
+        };
+        const validationMessage = validatePartInput(part);
+        if (validationMessage) {
+            return res.status(400).json({ success: false, message: validationMessage });
+        }
+
+        const data = await ticketService.createPart(part);
+        res.status(201).json({ success: true, message: 'Đã thêm linh kiện vào kho.', data });
+    } catch (err) {
+        next(err);
+    }
+};
+
+const updatePart = async (req, res, next) => {
+    try {
+        const id = Number(req.params.id);
+        if (!Number.isSafeInteger(id) || id < 1) {
+            return res.status(400).json({ success: false, message: 'Mã linh kiện không hợp lệ.' });
+        }
+
+        const name = req.body.ten_linh_kien;
+        const part = {
+            ten_linh_kien: typeof name === 'string' ? name.trim() : name,
+            gia_ban: req.body.gia_ban,
+            so_luong: req.body.so_luong
+        };
+        const validationMessage = validatePartInput(part);
+        if (validationMessage) {
+            return res.status(400).json({ success: false, message: validationMessage });
+        }
+
+        const data = await ticketService.updatePart(id, part);
+        if (!data) {
+            return res.status(404).json({ success: false, message: 'Không tìm thấy linh kiện.' });
+        }
+
+        res.status(200).json({ success: true, message: 'Đã cập nhật kho và bảng giá.', data });
+    } catch (err) {
+        next(err);
+    }
+};
+
 const getTicketParts = async (req, res, next) => {
     try {
         const { id } = req.params;
@@ -118,7 +180,10 @@ const addPartToTicket = async (req, res, next) => {
     try {
         const { id } = req.params;
         const { partId, quantity } = req.body;
-        await ticketService.addPartToTicket(id, partId, quantity);
+        if (!Number.isSafeInteger(Number(partId)) || Number(partId) < 1 || !Number.isSafeInteger(quantity) || quantity < 1) {
+            return res.status(400).json({ success: false, message: 'Linh kiện và số lượng phải hợp lệ.' });
+        }
+        await ticketService.addPartToTicket(id, Number(partId), quantity);
         res.status(200).json({ success: true, message: 'Đã thêm linh kiện thành công' });
     } catch (err) {
         next(err);
@@ -127,6 +192,8 @@ const addPartToTicket = async (req, res, next) => {
 
 module.exports = {
     getParts,
+    createPart,
+    updatePart,
     getTicketParts,
     addPartToTicket,
     submitIntake,

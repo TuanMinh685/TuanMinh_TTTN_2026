@@ -127,6 +127,7 @@ function App() {
 
               {/* Public Pages */}
               <Route path="/dat-lich" element={<BookingForm />} />
+              <Route path="/bang-gia" element={<Pricing />} />
               <Route path="/pricing" element={<Pricing />} />
 
               {/* Các trang chạy API thật */}

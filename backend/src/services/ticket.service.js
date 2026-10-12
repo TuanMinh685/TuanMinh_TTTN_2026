@@ -83,7 +83,9 @@ const submitIntake = async (customerData) => {
 
 const getAllTickets = async () => {
     const query = `
-        SELECT p.id, p.ma_tra_cuu as ma_phieu, p.trang_thai, p.tong_tien, k.ho_ten as ho_ten_khach, k.so_dien_thoai, t.tinh_trang_may as mo_ta_loi
+        SELECT p.id, p.ma_tra_cuu as ma_phieu, p.trang_thai, p.tong_tien, p.ngay_tao,
+            k.ho_ten as ho_ten_khach, k.so_dien_thoai,
+            t.ten_may as ten_thiet_bi, t.tinh_trang_may as mo_ta_loi
         FROM phieu_sua_chua p
         JOIN thiet_bi t ON p.thiet_bi_id = t.id
         JOIN khach_hang k ON t.khach_hang_id = k.id
@@ -234,6 +236,34 @@ const getParts = async () => {
     return rows;
 };
 
+const getPublicParts = async () => {
+    const { rows } = await pool.query(`
+        SELECT id, ten_linh_kien, gia_ban
+        FROM linh_kien
+        ORDER BY ten_linh_kien ASC
+    `);
+    return rows;
+};
+
+const createPart = async ({ ten_linh_kien, gia_ban, so_luong }) => {
+    const { rows } = await pool.query(`
+        INSERT INTO linh_kien (ten_linh_kien, gia_ban, so_luong)
+        VALUES ($1, $2, $3)
+        RETURNING id, ten_linh_kien, gia_ban, so_luong
+    `, [ten_linh_kien, gia_ban, so_luong]);
+    return rows[0];
+};
+
+const updatePart = async (id, { ten_linh_kien, gia_ban, so_luong }) => {
+    const { rows } = await pool.query(`
+        UPDATE linh_kien
+        SET ten_linh_kien = $1, gia_ban = $2, so_luong = $3
+        WHERE id = $4
+        RETURNING id, ten_linh_kien, gia_ban, so_luong
+    `, [ten_linh_kien, gia_ban, so_luong, id]);
+    return rows[0] || null;
+};
+
 const getTicketParts = async (ticketId) => {
     const query = `
         SELECT p.*, l.ten_linh_kien 
@@ -251,7 +281,7 @@ const addPartToTicket = async (ticketId, partId, quantity) => {
         await client.query('BEGIN');
         
         // Kiểm tra tồn kho và lấy giá bán
-        const partResult = await client.query('SELECT gia_ban, so_luong FROM linh_kien WHERE id = $1', [partId]);
+        const partResult = await client.query('SELECT gia_ban, so_luong FROM linh_kien WHERE id = $1 FOR UPDATE', [partId]);
         if (partResult.rows.length === 0) throw new Error('Không tìm thấy linh kiện');
         
         const part = partResult.rows[0];
@@ -282,6 +312,9 @@ const addPartToTicket = async (ticketId, partId, quantity) => {
 
 module.exports = {
     getParts,
+    getPublicParts,
+    createPart,
+    updatePart,
     getTicketParts,
     addPartToTicket,
     submitIntake,

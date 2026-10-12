@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
+import SoftwarePackageSelector from '../../components/SoftwarePackageSelector';
 
 function BookingForm() {
   const [formData, setFormData] = useState({
@@ -8,12 +9,18 @@ function BookingForm() {
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [softwarePackage, setSoftwarePackage] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await api.post('/tickets/booking', formData);
+      await api.post('/tickets/booking', {
+        ...formData,
+        moTaLoi: softwarePackage
+          ? `${formData.moTaLoi}\nGói phần mềm yêu cầu: ${softwarePackage}`
+          : formData.moTaLoi
+      });
       setSuccess(true);
     } catch (err) {
       alert(err.response?.data?.message || 'Có lỗi xảy ra!');
@@ -95,6 +102,8 @@ function BookingForm() {
                     value={formData.gioHen} onChange={e => setFormData({...formData, gioHen: e.target.value})} />
                 </div>
               </div>
+
+              <SoftwarePackageSelector value={softwarePackage} onChange={setSoftwarePackage} />
 
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-1">Mô tả chi tiết lỗi *</label>
