@@ -26,16 +26,6 @@ function PhoneTracking() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
-      <header className="bg-white shadow-sm py-4">
-        <div className="container mx-auto px-4 flex justify-between items-center">
-          <Link to="/" className="flex flex-col items-center">
-             <img src="/img/logo-HHH-26.png" alt="HungHau Logo" className="h-10 object-contain" />
-             <span className="text-[10px] text-brand-orange font-bold tracking-widest leading-none mt-1">IT SUPPORT</span>
-          </Link>
-          <Link to="/" className="text-brand-blue font-bold hover:underline">Về trang chủ</Link>
-        </div>
-      </header>
-
       <main className="flex-1 container mx-auto px-4 py-12 max-w-3xl">
         <div className="text-center mb-10">
           <h1 className="text-3xl font-bold text-brand-blue mb-4">Tra Cứu Tiến Độ Sửa Chữa</h1>
