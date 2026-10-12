@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import api from '../../services/api';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import QRCode from 'qrcode';
-import { SOFTWARE_PACKAGES } from '../../components/softwarePackages';
+import { SOFTWARE_PACKAGE_GROUPS, SOFTWARE_PACKAGE_OPTIONS } from '../../components/softwarePackages';
 
 function Dashboard() {
   const role = localStorage.getItem('role');
@@ -10,7 +10,8 @@ function Dashboard() {
   const [tickets, setTickets] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [activeTab, setActiveTab] = useState('TICKETS');
-  const [stats, setStats] = useState({ revenueData: [], statusData: [] }); // TICKETS or BOOKINGS
+  const [stats, setStats] = useState({ revenueData: [], statusData: [], totalRevenue: 0, completedTickets: 0, totalPartsRevenue: 0 });
+  const [ticketSearch, setTicketSearch] = useState('');
   const [parts, setParts] = useState([]);
   const [showPartModal, setShowPartModal] = useState(false);
   const [selectedTicketId, setSelectedTicketId] = useState(null);
@@ -26,11 +27,31 @@ function Dashboard() {
   const [showInventoryForm, setShowInventoryForm] = useState(false);
   const [receiptTicket, setReceiptTicket] = useState(null);
   const [receiptQr, setReceiptQr] = useState('');
+  const [receiptParts, setReceiptParts] = useState([]);
+  const [receiptPartsLoading, setReceiptPartsLoading] = useState(false);
+  const [receiptPartsError, setReceiptPartsError] = useState('');
   const [reportPeriod, setReportPeriod] = useState('week');
-  const [notifications, setNotifications] = useState([]);
+  const [notifications, setNotifications] = useState(() => {
+    try {
+      const saved = localStorage.getItem('ticketNotifications');
+      const parsed = saved ? JSON.parse(saved) : [];
+      return Array.isArray(parsed) ? parsed.slice(0, 50).map(item => ({ ...item, read: item.read ?? true })) : [];
+    } catch (error) {
+      console.error('Không đọc được thông báo đã lưu:', error);
+      return [];
+    }
+  });
   const [showNotifications, setShowNotifications] = useState(false);
+  const [notificationFilter, setNotificationFilter] = useState('ALL');
   const [latestNotice, setLatestNotice] = useState(null);
+  const [selectedSoftwareTicketId, setSelectedSoftwareTicketId] = useState('');
+  const [selectedSoftwareGroup, setSelectedSoftwareGroup] = useState('ALL');
+  const [selectedSoftwarePackages, setSelectedSoftwarePackages] = useState([]);
+  const [savingSoftwarePackages, setSavingSoftwarePackages] = useState(false);
+  const [softwarePackageError, setSoftwarePackageError] = useState('');
   const knownStatuses = useRef(null);
+  const knownBookingStatuses = useRef(null);
+  const knownStock = useRef(null);
 
   const fetchStats = useCallback(async () => {
     const res = await api.get(`/admin/dashboard-stats?period=${reportPeriod}`);
@@ -92,60 +113,110 @@ function Dashboard() {
   }, [role, fetchTickets, fetchBookings, fetchStats, fetchParts]);
 
   useEffect(() => {
-    const saved = localStorage.getItem('ticketNotifications');
-    if (!saved) return;
-    const timeoutId = window.setTimeout(() => {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) setNotifications(parsed.slice(0, 20));
-      } catch (error) {
-        console.error('Không đọc được thông báo đã lưu:', error);
-      }
-    }, 0);
-    return () => window.clearTimeout(timeoutId);
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('ticketNotifications', JSON.stringify(notifications.slice(0, 20)));
+    try {
+      localStorage.setItem('ticketNotifications', JSON.stringify(notifications.slice(0, 50)));
+    } catch (error) {
+      console.error('Không lưu được lịch sử thông báo:', error);
+    }
   }, [notifications]);
 
   useEffect(() => {
     let active = true;
-    const pollTicketStatuses = async () => {
+    const pushNotifications = (updates) => {
+      if (updates.length === 0) return;
+      setNotifications(previous => [...updates, ...previous].slice(0, 50));
+      setLatestNotice(updates[0]);
+    };
+    const pollDashboardEvents = async () => {
       try {
-        const latestTickets = await fetchTickets();
+        const [latestTickets, latestBookings, latestParts] = await Promise.all([
+          fetchTickets(),
+          role === 'LE_TAN' || role === 'QUAN_LY' || role === 'ADMIN' ? fetchBookings() : Promise.resolve(null),
+          role === 'KY_THUAT_VIEN' || role === 'QUAN_LY' || role === 'ADMIN' ? fetchParts() : Promise.resolve(null)
+        ]);
         if (!active) return;
         setTickets(latestTickets);
+
+        const now = new Date().toLocaleString('vi-VN');
+        const updates = [];
         const currentStatuses = new Map(latestTickets.map(ticket => [ticket.id, ticket.trang_thai]));
         if (knownStatuses.current) {
-          const changedTickets = latestTickets.filter(ticket =>
-            knownStatuses.current.has(ticket.id) &&
-            knownStatuses.current.get(ticket.id) !== ticket.trang_thai
-          );
-          if (changedTickets.length) {
-            const updates = changedTickets.map(ticket => ({
-              id: `${ticket.id}-${Date.now()}`,
-              ticketCode: ticket.ma_phieu,
-              status: ticket.trang_thai,
-              createdAt: new Date().toLocaleString('vi-VN')
-            }));
-            setNotifications(previous => [...updates, ...previous].slice(0, 20));
-            setLatestNotice(updates[0]);
-          }
+          latestTickets.forEach(ticket => {
+            const previousStatus = knownStatuses.current.get(ticket.id);
+            const isNewTicket = !knownStatuses.current.has(ticket.id);
+            if (isNewTicket || previousStatus !== ticket.trang_thai) {
+              updates.push({
+                id: `ticket-${ticket.id}-${Date.now()}-${updates.length}`,
+                type: 'ticket',
+                ticketCode: ticket.ma_phieu,
+                status: ticket.trang_thai,
+                title: isNewTicket ? 'Phiếu sửa chữa mới' : 'Phiếu đã cập nhật trạng thái',
+                description: `Phiếu ${ticket.ma_phieu} — ${ticket.trang_thai.replace(/_/g, ' ')}`,
+                createdAt: now,
+                read: false
+              });
+            }
+          });
         }
         knownStatuses.current = currentStatuses;
+
+        if (latestBookings) {
+          setBookings(latestBookings);
+          const currentBookingStatuses = new Map(latestBookings.map(booking => [booking.id, booking.trang_thai]));
+          if (knownBookingStatuses.current) {
+            latestBookings.forEach(booking => {
+              const previousStatus = knownBookingStatuses.current.get(booking.id);
+              const isNewBooking = !knownBookingStatuses.current.has(booking.id);
+              if (isNewBooking || previousStatus !== booking.trang_thai) {
+                updates.push({
+                  id: `booking-${booking.id}-${Date.now()}-${updates.length}`,
+                  type: 'booking',
+                  title: isNewBooking ? 'Lịch hẹn mới được tiếp nhận' : 'Lịch hẹn được cập nhật',
+                  description: `${booking.ho_ten_khach} — ${booking.trang_thai.replace(/_/g, ' ')}`,
+                  createdAt: now,
+                  read: false
+                });
+              }
+            });
+          }
+          knownBookingStatuses.current = currentBookingStatuses;
+        }
+
+        if (latestParts) {
+          setParts(latestParts);
+          const currentStock = new Map(latestParts.map(part => [part.id, Number(part.so_luong)]));
+          if (knownStock.current) {
+            latestParts.forEach(part => {
+              const quantity = Number(part.so_luong);
+              const previousQuantity = knownStock.current.get(part.id);
+              if (previousQuantity !== undefined && previousQuantity >= Number(lowStockThreshold || 5) &&
+                  quantity < Number(lowStockThreshold || 5)) {
+                updates.push({
+                  id: `stock-${part.id}-${Date.now()}-${updates.length}`,
+                  type: 'stock',
+                  title: quantity <= 0 ? 'Linh kiện đã hết hàng' : 'Cảnh báo linh kiện sắp hết',
+                  description: `${part.ten_linh_kien} — còn ${quantity} chiếc`,
+                  createdAt: now,
+                  read: false
+                });
+              }
+            });
+          }
+          knownStock.current = currentStock;
+        }
+        pushNotifications(updates);
       } catch (error) {
-        if (active) console.error('Không kiểm tra được cập nhật trạng thái phiếu:', error);
+        if (active) console.error('Không kiểm tra được cập nhật phiếu, lịch hẹn và tồn kho:', error);
       }
     };
 
-    pollTicketStatuses();
-    const intervalId = window.setInterval(pollTicketStatuses, 30000);
+    pollDashboardEvents();
+    const intervalId = window.setInterval(pollDashboardEvents, 30000);
     return () => {
       active = false;
       window.clearInterval(intervalId);
     };
-  }, [fetchTickets]);
+  }, [fetchTickets, fetchBookings, fetchParts, lowStockThreshold, role]);
 
   useEffect(() => {
     if (!receiptTicket) {
@@ -161,6 +232,17 @@ function Dashboard() {
     }).catch(error => {
       console.error('Không tạo được mã QR trên phiếu in:', error);
     });
+    api.get(`/tickets/${receiptTicket.id}/parts`)
+      .then(response => {
+        if (active) setReceiptParts(response.data.data || []);
+      })
+      .catch(error => {
+        console.error('Không tải được chi tiết linh kiện trên phiếu in:', error);
+        if (active) setReceiptPartsError('Không tải được chi tiết linh kiện. Vui lòng đóng phiếu và thử lại.');
+      })
+      .finally(() => {
+        if (active) setReceiptPartsLoading(false);
+      });
 
     return () => {
       active = false;
@@ -181,6 +263,60 @@ function Dashboard() {
     } catch (error) {
       console.error('Không tải lại được danh sách lịch hẹn:', error);
     }
+  };
+
+  const selectSoftwareTicket = (ticketId) => {
+    setSelectedSoftwareTicketId(ticketId);
+    const ticket = tickets.find(item => String(item.id) === ticketId);
+    setSelectedSoftwarePackages(ticket?.software_packages || []);
+    setSoftwarePackageError('');
+  };
+
+  const toggleSoftwarePackage = (packageName) => {
+    setSelectedSoftwarePackages(previous => previous.includes(packageName)
+      ? previous.filter(item => item !== packageName)
+      : [...previous, packageName]);
+  };
+
+  const saveSoftwarePackages = async () => {
+    if (!selectedSoftwareTicketId) {
+      setSoftwarePackageError('Vui lòng chọn phiếu sửa chữa.');
+      return;
+    }
+
+    setSavingSoftwarePackages(true);
+    setSoftwarePackageError('');
+    try {
+      const response = await api.patch(`/tickets/${selectedSoftwareTicketId}/software-packages`, {
+        packages: selectedSoftwarePackages
+      });
+      const savedPackages = response.data.data.softwarePackages || [];
+      setTickets(previous => previous.map(ticket => String(ticket.id) === selectedSoftwareTicketId
+        ? { ...ticket, software_packages: savedPackages }
+        : ticket));
+      setSelectedSoftwarePackages(savedPackages);
+      setNotifications(previous => [{
+        id: `software-${selectedSoftwareTicketId}-${Date.now()}`,
+        type: 'software',
+        title: 'Đã cập nhật gói phần mềm',
+        description: `Phiếu ${tickets.find(ticket => String(ticket.id) === selectedSoftwareTicketId)?.ma_phieu || ''} — ${savedPackages.length ? savedPackages.join(', ') : 'đã xóa lựa chọn gói'}`,
+        createdAt: new Date().toLocaleString('vi-VN'),
+        read: false
+      }, ...previous].slice(0, 50));
+    } catch (error) {
+      setSoftwarePackageError(error.response?.data?.message || 'Không lưu được các gói phần mềm. Vui lòng thử lại.');
+    } finally {
+      setSavingSoftwarePackages(false);
+    }
+  };
+
+  const markAllNotificationsRead = () => {
+    setNotifications(previous => previous.map(notification => ({ ...notification, read: true })));
+  };
+
+  const clearNotifications = () => {
+    setNotifications([]);
+    setLatestNotice(null);
   };
 
   const resetPartForm = () => {
@@ -266,6 +402,18 @@ function Dashboard() {
     window.location.href = '/login';
   };
 
+  const unreadNotificationCount = notifications.filter(notification => !notification.read).length;
+  const filteredTickets = tickets.filter(ticket => [
+    ticket.ma_phieu,
+    ticket.ho_ten_khach,
+    ticket.so_dien_thoai,
+    ticket.ten_thiet_bi,
+    ticket.trang_thai
+  ].some(value => String(value || '').toLocaleLowerCase('vi').includes(ticketSearch.trim().toLocaleLowerCase('vi'))));
+  const receiptTotal = Number(receiptTicket?.tong_tien || 0);
+  const receiptPartsTotal = receiptParts.reduce((total, item) => total + Number(item.so_luong) * Number(item.don_gia), 0);
+  const receiptServiceTotal = Math.max(receiptTotal - receiptPartsTotal, 0);
+
   return (
     <div className="p-8 bg-slate-50 min-h-screen">
       <div className="flex justify-between items-center mb-8">
@@ -280,12 +428,12 @@ function Dashboard() {
             type="button"
             onClick={() => setShowNotifications(open => !open)}
             aria-expanded={showNotifications}
-            aria-label={`Thông báo (${notifications.length})`}
+            aria-label={`Thông báo (${unreadNotificationCount})`}
             className="relative rounded-lg border border-slate-200 bg-white px-4 py-2 font-bold text-brand-blue hover:bg-slate-50"
           >
             Thông báo
-            {notifications.length > 0 && (
-              <span className="ml-2 rounded-full bg-red-500 px-2 py-0.5 text-xs text-white">{notifications.length}</span>
+            {unreadNotificationCount > 0 && (
+              <span className="ml-2 rounded-full bg-red-500 px-2 py-0.5 text-xs text-white">{unreadNotificationCount}</span>
             )}
           </button>
           <button onClick={logout} className="rounded bg-red-500 px-4 py-2 font-bold text-white hover:bg-red-600">Đăng Xuất</button>
@@ -293,14 +441,18 @@ function Dashboard() {
             <div className="absolute right-0 top-full z-40 mt-2 w-80 max-w-[90vw] rounded-xl border border-slate-200 bg-white p-3 shadow-xl">
               <div className="mb-2 flex items-center justify-between">
                 <h3 className="font-bold text-slate-800">Trung tâm thông báo</h3>
-                <button type="button" onClick={() => setNotifications([])} className="text-xs font-semibold text-brand-blue hover:underline">
+                <button type="button" onClick={clearNotifications} className="text-xs font-semibold text-brand-blue hover:underline">
                   Xóa tất cả
                 </button>
               </div>
+              <button type="button" onClick={markAllNotificationsRead} className="mb-2 text-xs font-semibold text-brand-blue hover:underline">
+                Đánh dấu tất cả đã đọc
+              </button>
               <div className="max-h-80 space-y-2 overflow-y-auto">
                 {notifications.map(notification => (
-                  <div key={notification.id} className="rounded-lg bg-slate-50 p-3 text-sm">
-                    <p className="font-semibold">Phiếu {notification.ticketCode}: {notification.status}</p>
+                  <div key={notification.id} className={`rounded-lg p-3 text-sm ${notification.read ? 'bg-slate-50' : 'bg-blue-50'}`}>
+                    <p className="font-semibold">{notification.title || `Phiếu ${notification.ticketCode}: ${notification.status}`}</p>
+                    {notification.description && <p className="mt-1 text-slate-700">{notification.description}</p>}
                     <p className="mt-1 text-xs text-slate-500">{notification.createdAt}</p>
                   </div>
                 ))}
@@ -313,7 +465,7 @@ function Dashboard() {
 
       {latestNotice && (
         <div role="status" className="fixed right-5 top-5 z-50 flex max-w-sm items-start gap-3 rounded-xl bg-green-700 p-4 text-white shadow-xl">
-          <p className="flex-1">Phiếu {latestNotice.ticketCode} vừa đổi trạng thái: {latestNotice.status}</p>
+          <p className="flex-1">{latestNotice.description || latestNotice.title}</p>
           <button type="button" onClick={() => setLatestNotice(null)} aria-label="Đóng thông báo" className="font-bold">×</button>
         </div>
       )}
@@ -360,9 +512,20 @@ function Dashboard() {
       )}
 
       {activeTab === 'TICKETS' && (
-        <div className="bg-white p-6 rounded-xl shadow border-t-4 border-brand-green">
-          <h3 className="text-xl font-bold mb-4">Danh sách phiếu yêu cầu</h3>
-          <table className="w-full text-left border-collapse">
+        <div className="rounded-xl border-t-4 border-brand-green bg-white p-5 shadow sm:p-6">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <h3 className="text-xl font-bold">Danh sách phiếu sửa chữa</h3>
+            <input
+              type="search"
+              value={ticketSearch}
+              onChange={event => setTicketSearch(event.target.value)}
+              placeholder="Tìm mã phiếu, khách hàng, số điện thoại..."
+              aria-label="Tìm mã phiếu, khách hàng hoặc số điện thoại"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm sm:max-w-sm"
+            />
+          </div>
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[900px] text-left border-collapse">
             <thead>
               <tr className="border-b-2 border-slate-200">
                 <th className="py-3 px-4">Mã Phiếu</th>
@@ -374,7 +537,7 @@ function Dashboard() {
               </tr>
             </thead>
             <tbody>
-              {tickets.map(ticket => (
+              {filteredTickets.map(ticket => (
                 <tr key={ticket.id} className="border-b hover:bg-slate-50">
                   <td className="py-3 px-4 font-bold text-brand-blue">{ticket.ma_phieu}</td>
                   <td className="py-3 px-4">{ticket.ho_ten_khach} <br/><span className="text-xs text-slate-400">{ticket.so_dien_thoai}</span></td>
@@ -410,7 +573,13 @@ function Dashboard() {
                     )}
                     <button
                       type="button"
-                      onClick={() => { setReceiptQr(''); setReceiptTicket(ticket); }}
+                      onClick={() => {
+                        setReceiptQr('');
+                        setReceiptParts([]);
+                        setReceiptPartsLoading(true);
+                        setReceiptPartsError('');
+                        setReceiptTicket(ticket);
+                      }}
                       className="w-full rounded bg-slate-700 px-3 py-1 text-sm font-bold text-white hover:bg-slate-800"
                     >
                       In phiếu 80mm
@@ -418,23 +587,30 @@ function Dashboard() {
                   </td>
                 </tr>
               ))}
-              {tickets.length === 0 && (
-                <tr><td colSpan="5" className="text-center py-8 text-slate-400">Không có phiếu nào.</td></tr>
+              {filteredTickets.length === 0 && (
+                <tr><td colSpan="6" className="text-center py-8 text-slate-400">
+                  {tickets.length === 0 ? 'Không có phiếu nào.' : 'Không tìm thấy phiếu phù hợp.'}
+                </td></tr>
               )}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 
       {activeTab === 'STATS' && (
-        <div className="bg-white p-6 rounded-xl shadow border-t-4 border-purple-500">
+        <div className="rounded-xl border-t-4 border-purple-500 bg-white p-5 shadow sm:p-6">
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-            <h3 className="text-xl font-bold text-brand-blue">Báo cáo doanh thu & hiệu suất</h3>
+            <div>
+              <h3 className="text-xl font-bold text-brand-blue">Báo cáo doanh thu &amp; hiệu suất</h3>
+              <p className="mt-1 text-sm text-slate-500">Doanh thu chỉ tính các phiếu đã giao khách và thu tiền.</p>
+            </div>
             <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
               Khoảng thời gian
               <select
                 value={reportPeriod}
-                onChange={event => setReportPeriod(Number(event.target.value))}
+                onChange={event => setReportPeriod(event.target.value)}
+                aria-label="Khoảng thời gian báo cáo"
                 className="rounded-lg border border-slate-300 px-3 py-2"
               >
                 <option value="week">7 ngày gần nhất</option>
@@ -442,74 +618,195 @@ function Dashboard() {
               </select>
             </label>
           </div>
-          <div className="mb-6 rounded-lg bg-blue-50 p-4">
+          <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <article className="rounded-xl bg-blue-50 p-5">
+              <p className="text-sm font-semibold text-slate-600">Doanh thu trong kỳ</p>
+              <p className="mt-2 text-2xl font-extrabold text-brand-blue">{Number(stats.totalRevenue || 0).toLocaleString('vi-VN')} đ</p>
+              <p className="mt-1 text-xs text-slate-500">{reportPeriod === 'week' ? '7 ngày gần nhất' : 'Từ đầu tháng đến hiện tại'}</p>
+            </article>
+            <article className="rounded-xl bg-green-50 p-5">
+              <p className="text-sm font-semibold text-slate-600">Phiếu đã hoàn tất</p>
+              <p className="mt-2 text-2xl font-extrabold text-green-800">{Number(stats.completedTickets || 0)} phiếu</p>
+              <p className="mt-1 text-xs text-slate-500">Đã giao khách và thu tiền trong kỳ</p>
+            </article>
+          </div>
+          <div className="mb-5 rounded-lg bg-slate-50 px-4 py-3">
             <span className="text-sm text-slate-600">Doanh thu linh kiện trong kỳ: </span>
-            <strong className="text-lg text-brand-blue">{Number(stats.totalPartsRevenue || 0).toLocaleString('vi-VN')} đ</strong>
+            <strong className="text-brand-blue">{Number(stats.totalPartsRevenue || 0).toLocaleString('vi-VN')} đ</strong>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="p-4 border rounded-xl">
-              <h4 className="font-bold mb-4 text-slate-600">{reportPeriod === 'week' ? 'Doanh thu 7 ngày gần nhất' : 'Doanh thu tháng này'}</h4>
-              <BarChart width={500} height={300} data={stats.revenueData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" tickFormatter={(tick) => new Date(tick).toLocaleDateString('vi-VN')} />
-                <YAxis />
-                <Tooltip formatter={(value) => Number(value).toLocaleString('vi-VN') + ' đ'} />
-                <Bar dataKey="total_revenue" fill="#1a7f45" />
-              </BarChart>
+          <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+            <div className="min-w-0 rounded-xl border border-slate-200 p-4">
+              <h4 className="mb-4 font-bold text-slate-700">{reportPeriod === 'week' ? 'Doanh thu từng ngày — 7 ngày qua' : 'Doanh thu từng ngày — tháng này'}</h4>
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={stats.revenueData} margin={{ top: 8, right: 12, left: 8, bottom: 8 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" tickFormatter={tick => new Date(`${tick}T12:00:00`).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })} />
+                    <YAxis tickFormatter={value => Number(value).toLocaleString('vi-VN')} width={72} />
+                    <Tooltip labelFormatter={label => new Date(`${label}T12:00:00`).toLocaleDateString('vi-VN')} formatter={value => `${Number(value).toLocaleString('vi-VN')} đ`} />
+                    <Bar dataKey="total_revenue" name="Doanh thu" fill="#1a7f45" radius={[5, 5, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
-            <div className="p-4 border rounded-xl flex flex-col items-center">
-              <h4 className="font-bold mb-4 text-slate-600">Tỷ lệ Trạng thái (Phiếu)</h4>
-              <PieChart width={400} height={300}>
-                <Pie data={stats.statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} fill="#8884d8" label>
-                  {stats.statusData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#a855f7', '#64748b'][index % 6]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
+            <div className="min-w-0 rounded-xl border border-slate-200 p-4">
+              <h4 className="mb-4 font-bold text-slate-700">Phân bổ trạng thái phiếu</h4>
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={stats.statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={98} fill="#8884d8" label>
+                      {stats.statusData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#a855f7', '#64748b'][index % 6]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
             </div>
           </div>
+          <p className="mt-4 rounded-lg bg-amber-50 p-3 text-xs text-amber-900">
+            Báo cáo tính doanh thu từ các phiếu đã thanh toán và phân loại số lượng phiếu theo trạng thái hiện tại.
+          </p>
         </div>
       )}
 
       {activeTab === 'SOFTWARE' && (role === 'QUAN_LY' || role === 'ADMIN') && (
         <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-          <h3 className="text-xl font-bold text-brand-blue">Gói phần mềm</h3>
-          <p className="mt-1 text-sm text-slate-500">Các gói khách hàng có thể chọn khi gửi yêu cầu sửa chữa hoặc đặt lịch.</p>
-          <ul className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {SOFTWARE_PACKAGES.map(packageName => (
-              <li key={packageName} className="rounded-lg border border-slate-200 bg-slate-50 p-4 font-semibold text-slate-700">
-                {packageName}
-              </li>
-            ))}
-          </ul>
+          <h3 className="text-xl font-bold text-brand-blue">Gói phần mềm &amp; cài đặt</h3>
+          <p className="mt-1 text-sm text-slate-500">Chọn nhiều gói phần mềm cho cùng một phiếu sửa chữa.</p>
+          <p className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+            Lựa chọn các gói khách yêu cầu; kỹ thuật viên xác nhận khả năng cài đặt và chi phí trước khi thực hiện.
+          </p>
+
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            <label className="block text-sm font-semibold text-slate-700">
+              Phiếu sửa chữa
+              <select
+                value={selectedSoftwareTicketId}
+                onChange={event => selectSoftwareTicket(event.target.value)}
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-normal"
+              >
+                <option value="">Chọn phiếu sửa chữa</option>
+                {tickets.map(ticket => (
+                  <option key={ticket.id} value={ticket.id}>
+                    {ticket.ma_phieu} — {ticket.ho_ten_khach} ({ticket.trang_thai.replace(/_/g, ' ')})
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block text-sm font-semibold text-slate-700">
+              Nhóm phần mềm
+              <select
+                value={selectedSoftwareGroup}
+                onChange={event => setSelectedSoftwareGroup(event.target.value)}
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-normal"
+              >
+                <option value="ALL">Tất cả nhóm</option>
+                {Object.entries(SOFTWARE_PACKAGE_GROUPS).map(([key, groupName]) => (
+                  <option key={key} value={key}>{groupName}</option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          {softwarePackageError && <p role="alert" className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{softwarePackageError}</p>}
+
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            {SOFTWARE_PACKAGE_OPTIONS
+              .filter(option => selectedSoftwareGroup === 'ALL' || option.group === selectedSoftwareGroup)
+              .map(option => {
+                const checked = selectedSoftwarePackages.includes(option.name);
+                return (
+                  <label
+                    key={option.name}
+                    className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-colors ${
+                      checked ? 'border-brand-blue bg-blue-50' : 'border-slate-200 hover:border-blue-300 hover:bg-slate-50'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => toggleSoftwarePackage(option.name)}
+                      disabled={!selectedSoftwareTicketId}
+                      className="mt-1 h-4 w-4 accent-[#0b5b9c]"
+                    />
+                    <span>
+                      <span className="block font-semibold text-slate-800">{option.name}</span>
+                      <span className="mt-1 block text-xs text-slate-500">{option.description}</span>
+                    </span>
+                  </label>
+                );
+              })}
+          </div>
+
+          <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
+            <p className="text-sm text-slate-600">Đã chọn {selectedSoftwarePackages.length} gói phần mềm.</p>
+            <button
+              type="button"
+              onClick={saveSoftwarePackages}
+              disabled={!selectedSoftwareTicketId || savingSoftwarePackages}
+              className="rounded-lg bg-brand-blue px-5 py-2.5 font-bold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {savingSoftwarePackages ? 'Đang lưu...' : 'Lưu gói cho phiếu'}
+            </button>
+          </div>
         </section>
       )}
 
       {activeTab === 'NOTIFICATIONS' && (
         <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-          <div className="mb-4 flex items-center justify-between gap-3">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div>
               <h3 className="text-xl font-bold text-brand-blue">Trung tâm thông báo</h3>
-              <p className="mt-1 text-sm text-slate-500">Cập nhật khi trạng thái phiếu sửa chữa thay đổi.</p>
+              <p className="mt-1 text-sm text-slate-500">Theo dõi phiếu sửa chữa, lịch hẹn và cảnh báo kho.</p>
             </div>
-            <button
-              type="button"
-              onClick={() => setNotifications([])}
-              disabled={notifications.length === 0}
-              className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Xóa tất cả
-            </button>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={markAllNotificationsRead}
+                disabled={unreadNotificationCount === 0}
+                className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Đánh dấu đã đọc
+              </button>
+              <button
+                type="button"
+                onClick={clearNotifications}
+                disabled={notifications.length === 0}
+                className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Xóa tất cả
+              </button>
+            </div>
           </div>
+          <label className="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-600">
+            Hiển thị
+            <select
+              value={notificationFilter}
+              onChange={event => setNotificationFilter(event.target.value)}
+              className="rounded-lg border border-slate-300 px-3 py-2"
+            >
+              <option value="ALL">Tất cả thông báo</option>
+              <option value="UNREAD">Chưa đọc</option>
+            </select>
+            <span className="ml-auto text-xs font-normal">{unreadNotificationCount} chưa đọc</span>
+          </label>
           <div className="space-y-2">
-            {notifications.map(notification => (
-              <article key={notification.id} className="rounded-lg border border-slate-100 bg-slate-50 p-4">
-                <p className="font-semibold text-slate-800">Phiếu {notification.ticketCode}: {notification.status}</p>
+            {notifications
+              .filter(notification => notificationFilter !== 'UNREAD' || !notification.read)
+              .map(notification => (
+              <article key={notification.id} className={`rounded-lg border p-4 ${notification.read ? 'border-slate-100 bg-white' : 'border-blue-100 bg-blue-50'}`}>
+                <p className="font-semibold text-slate-800">{notification.title || `Phiếu ${notification.ticketCode}: ${notification.status}`}</p>
+                {notification.description && <p className="mt-1 text-sm text-slate-600">{notification.description}</p>}
                 <p className="mt-1 text-xs text-slate-500">{notification.createdAt}</p>
               </article>
             ))}
-            {notifications.length === 0 && <p className="py-8 text-center text-sm text-slate-500">Chưa có thông báo mới.</p>}
+            {notifications.filter(notification => notificationFilter !== 'UNREAD' || !notification.read).length === 0 && (
+              <p className="py-8 text-center text-sm text-slate-500">
+                {notificationFilter === 'UNREAD' ? 'Không có thông báo chưa đọc.' : 'Chưa có thông báo mới.'}
+              </p>
+            )}
           </div>
         </section>
       )}
@@ -641,54 +938,6 @@ function Dashboard() {
                     <tr><td colSpan="5" className="py-10 text-center text-sm text-slate-400">Không tìm thấy linh kiện phù hợp.</td></tr>
                   )}
 
-                  {receiptTicket && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 p-4">
-                      <div className="max-h-[95vh] w-full max-w-md overflow-y-auto rounded-xl bg-white p-5 shadow-2xl">
-                        <div className="mb-4 flex items-center justify-between print:hidden">
-                          <h3 className="text-lg font-bold text-brand-blue">Phiếu tiếp nhận / hóa đơn</h3>
-                          <button type="button" onClick={() => setReceiptTicket(null)} className="rounded px-3 py-1 text-slate-600 hover:bg-slate-100">
-                            Đóng
-                          </button>
-                        </div>
-                        <div id="thermal-receipt" className="mx-auto w-full max-w-[72mm] border border-dashed border-slate-300 p-4 text-sm text-slate-900">
-                          <div className="text-center">
-                            <h1 className="text-base font-extrabold">HUNGHAU IT SUPPORT</h1>
-                            <p className="mt-1 text-xs">PHIẾU TIẾP NHẬN / THANH TOÁN</p>
-                            <p className="mt-2 text-lg font-bold">{receiptTicket.ma_phieu}</p>
-                          </div>
-                          <hr className="my-3 border-dashed border-slate-400" />
-                          <p><strong>Ngày nhận:</strong> {receiptTicket.ngay_tao ? new Date(receiptTicket.ngay_tao).toLocaleString('vi-VN') : 'Chưa cập nhật'}</p>
-                          <p className="mt-1"><strong>Khách hàng:</strong> {receiptTicket.ho_ten_khach}</p>
-                          <p className="mt-1"><strong>Điện thoại:</strong> {receiptTicket.so_dien_thoai}</p>
-                          <p className="mt-1"><strong>Thiết bị:</strong> {receiptTicket.ten_thiet_bi || 'Không có thông tin'}</p>
-                          <p className="mt-1"><strong>Mô tả lỗi:</strong> {receiptTicket.mo_ta_loi}</p>
-                          <p className="mt-1"><strong>Trạng thái:</strong> {receiptTicket.trang_thai}</p>
-                          <hr className="my-3 border-dashed border-slate-400" />
-                          <div className="flex justify-between gap-2 text-base font-extrabold">
-                            <span>Tổng tiền</span>
-                            <span>{Number(receiptTicket.tong_tien || 0).toLocaleString('vi-VN')} đ</span>
-                          </div>
-                          {receiptQr && (
-                            <div className="mt-4 text-center">
-                              <img src={receiptQr} alt={`QR tra cứu phiếu ${receiptTicket.ma_phieu}`} className="mx-auto h-32 w-32" />
-                              <p className="mt-1 break-all text-[10px]">{window.location.origin}/track/{receiptTicket.ma_phieu}</p>
-                            </div>
-                          )}
-                          <p className="mt-4 text-center text-xs">Cảm ơn quý khách đã sử dụng dịch vụ!</p>
-                        </div>
-                        <div className="mt-4 flex justify-end print:hidden">
-                          <button
-                            type="button"
-                            onClick={() => window.print()}
-                            disabled={!receiptQr}
-                            className="rounded-lg bg-brand-blue px-5 py-2 font-bold text-white hover:bg-blue-800 disabled:opacity-50"
-                          >
-                            In hóa đơn (80mm)
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </tbody>
               </table>
             </div>
@@ -827,6 +1076,84 @@ function Dashboard() {
         </div>
       )}
     
+      {receiptTicket && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 p-4">
+          <div className="max-h-[95vh] w-full max-w-md overflow-y-auto rounded-xl bg-white p-5 shadow-2xl">
+            <div className="mb-4 flex items-center justify-between print:hidden">
+              <h3 className="text-lg font-bold text-brand-blue">Phiếu tiếp nhận / hóa đơn</h3>
+              <button type="button" onClick={() => setReceiptTicket(null)} className="rounded px-3 py-1 text-slate-600 hover:bg-slate-100">
+                Đóng
+              </button>
+            </div>
+            <div id="thermal-receipt" className="mx-auto w-full max-w-[72mm] border border-dashed border-slate-300 p-4 text-sm text-slate-900">
+              <div className="text-center">
+                <h1 className="text-base font-extrabold">HUNGHAU IT SUPPORT</h1>
+                <p className="mt-1 text-xs">PHIẾU TIẾP NHẬN / THANH TOÁN</p>
+                <p className="mt-2 text-lg font-bold">{receiptTicket.ma_phieu}</p>
+              </div>
+              <hr className="my-3 border-dashed border-slate-400" />
+              <p><strong>Ngày nhận:</strong> {receiptTicket.ngay_tao ? new Date(receiptTicket.ngay_tao).toLocaleString('vi-VN') : 'Chưa cập nhật'}</p>
+              <p className="mt-1"><strong>Khách hàng:</strong> {receiptTicket.ho_ten_khach}</p>
+              <p className="mt-1"><strong>Điện thoại:</strong> {receiptTicket.so_dien_thoai}</p>
+              <p className="mt-1"><strong>Thiết bị:</strong> {receiptTicket.ten_thiet_bi || 'Không có thông tin'}</p>
+              <p className="mt-1"><strong>Mô tả lỗi:</strong> {receiptTicket.mo_ta_loi}</p>
+              {receiptTicket.software_packages?.length > 0 && (
+                <p className="mt-1"><strong>Gói phần mềm:</strong> {receiptTicket.software_packages.join(', ')}</p>
+              )}
+              <p className="mt-1"><strong>Trạng thái:</strong> {receiptTicket.trang_thai.replace(/_/g, ' ')}</p>
+              <hr className="my-3 border-dashed border-slate-400" />
+              <p className="mb-2 text-xs font-bold uppercase">Chi tiết thanh toán</p>
+              {receiptPartsLoading && <p className="text-xs">Đang tải chi tiết linh kiện...</p>}
+              {receiptPartsError && <p className="text-xs font-semibold">{receiptPartsError}</p>}
+              {!receiptPartsLoading && !receiptPartsError && (
+                <>
+                  {receiptServiceTotal > 0 && (
+                    <div className="mb-2 flex justify-between gap-2">
+                      <span>Phí sửa chữa / dịch vụ</span>
+                      <span className="whitespace-nowrap">{receiptServiceTotal.toLocaleString('vi-VN')} đ</span>
+                    </div>
+                  )}
+                  {receiptParts.map((item, index) => (
+                    <div key={`${item.id}-${index}`} className="mb-2">
+                      <div className="flex justify-between gap-2">
+                        <span>{item.ten_linh_kien}</span>
+                        <span className="whitespace-nowrap">{(Number(item.so_luong) * Number(item.don_gia)).toLocaleString('vi-VN')} đ</span>
+                      </div>
+                      <p className="text-[10px] text-slate-600">{item.so_luong} x {Number(item.don_gia).toLocaleString('vi-VN')} đ</p>
+                    </div>
+                  ))}
+                  {receiptParts.length === 0 && receiptServiceTotal === 0 && (
+                    <p className="mb-2 text-xs">Chưa có chi tiết thanh toán.</p>
+                  )}
+                </>
+              )}
+              <hr className="my-3 border-dashed border-slate-400" />
+              <div className="flex justify-between gap-2 text-base font-extrabold">
+                <span>Tổng tiền</span>
+                <span className="whitespace-nowrap">{receiptTotal.toLocaleString('vi-VN')} đ</span>
+              </div>
+              {receiptQr && (
+                <div className="mt-4 text-center">
+                  <img src={receiptQr} alt={`QR tra cứu phiếu ${receiptTicket.ma_phieu}`} className="mx-auto h-32 w-32" />
+                  <p className="mt-1 break-all text-[10px]">{window.location.origin}/track/{receiptTicket.ma_phieu}</p>
+                </div>
+              )}
+              <p className="mt-4 text-center text-xs">Cảm ơn quý khách đã sử dụng dịch vụ!</p>
+            </div>
+            <div className="mt-4 flex justify-end print:hidden">
+              <button
+                type="button"
+                onClick={() => window.print()}
+                disabled={!receiptQr || receiptPartsLoading || Boolean(receiptPartsError)}
+                className="rounded-lg bg-brand-blue px-5 py-2 font-bold text-white hover:bg-blue-800 disabled:opacity-50"
+              >
+                In hóa đơn (80mm)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Modal Thêm Linh Kiện */}
       {showPartModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">

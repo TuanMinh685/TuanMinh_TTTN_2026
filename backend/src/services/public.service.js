@@ -1,4 +1,5 @@
 const { pool } = require('../config/db.config');
+const { readSoftwarePackageRequest } = require('./ticket.service');
 
 const trackTicket = async (ticketCode) => {
     // Lấy thông tin cơ bản
@@ -21,6 +22,9 @@ const trackTicket = async (ticketCode) => {
     if (result.rows.length === 0) return null;
 
     const ticket = result.rows[0];
+    const softwareRequest = readSoftwarePackageRequest(ticket.tinh_trang_may);
+    ticket.tinh_trang_may = softwareRequest.issueDescription;
+    ticket.goi_phan_mem = softwareRequest.packages;
 
     // Che giấu dữ liệu (Masking)
     const maskName = (name) => {

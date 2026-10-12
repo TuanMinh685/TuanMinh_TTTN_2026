@@ -1,5 +1,10 @@
-const CACHE_NAME = 'hunghau-it-support-v1';
-const APP_SHELL = ['/', '/manifest.webmanifest'];
+const CACHE_NAME = 'hunghau-it-support-v2';
+const APP_SHELL = [
+  '/',
+  '/manifest.webmanifest',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png'
+];
 
 self.addEventListener('install', event => {
   event.waitUntil(

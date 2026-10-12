@@ -20,15 +20,23 @@ router.get('/dashboard-stats', async (req, res, next) => {
         }
         
         const revenueQ = await pool.query(`
-            SELECT DATE(ngay_tao) as date, SUM(tong_tien) as total_revenue
-            FROM phieu_sua_chua
-            WHERE trang_thai = 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN'
-              AND ngay_tao >= CASE
-                WHEN $1 = 'month' THEN DATE_TRUNC('month', CURRENT_DATE)
-                ELSE CURRENT_DATE - 6
-              END
-            GROUP BY DATE(ngay_tao)
-            ORDER BY DATE(ngay_tao) ASC
+            WITH report_days AS (
+                SELECT generate_series(
+                    CASE
+                        WHEN $1 = 'month' THEN DATE_TRUNC('month', CURRENT_DATE)::date
+                        ELSE CURRENT_DATE - 6
+                    END,
+                    CURRENT_DATE,
+                    INTERVAL '1 day'
+                )::date AS date
+            )
+            SELECT TO_CHAR(d.date, 'YYYY-MM-DD') AS date, COALESCE(SUM(p.tong_tien), 0) AS total_revenue
+            FROM report_days d
+            LEFT JOIN phieu_sua_chua p
+              ON DATE(p.ngay_tao) = d.date
+             AND p.trang_thai = 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN'
+            GROUP BY d.date
+            ORDER BY d.date ASC
         `, [period]);
         
         // Status distribution
@@ -49,13 +57,28 @@ router.get('/dashboard-stats', async (req, res, next) => {
               END
         `, [period]);
 
+        const summaryQ = await pool.query(`
+            SELECT
+                COALESCE(SUM(tong_tien), 0) AS total_revenue,
+                COUNT(*)::integer AS completed_tickets
+            FROM phieu_sua_chua
+            WHERE trang_thai = 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN'
+              AND ngay_tao >= CASE
+                WHEN $1 = 'month' THEN DATE_TRUNC('month', CURRENT_DATE)
+                ELSE CURRENT_DATE - 6
+              END
+              AND ngay_tao < CURRENT_DATE + INTERVAL '1 day'
+        `, [period]);
+
         res.status(200).json({
             success: true,
             data: {
                 period,
                 revenueData: revenueQ.rows,
                 statusData: statusQ.rows,
-                totalPartsRevenue: Number(partsRevenueQ.rows[0]?.total_parts_revenue || 0)
+                totalPartsRevenue: Number(partsRevenueQ.rows[0]?.total_parts_revenue || 0),
+                totalRevenue: Number(summaryQ.rows[0]?.total_revenue || 0),
+                completedTickets: Number(summaryQ.rows[0]?.completed_tickets || 0)
             }
         });
     } catch(err) {

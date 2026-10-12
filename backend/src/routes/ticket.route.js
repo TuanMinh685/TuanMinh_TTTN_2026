@@ -23,6 +23,7 @@ router.post('/intake', submitLimiter, validateSubmit, ticketController.submitInt
 // API cho Lễ tân và Kỹ thuật viên (Yêu cầu đăng nhập)
 router.get('/', verifyToken, ticketController.getTickets);
 router.patch('/:id/status', verifyToken, ticketController.updateTicketStatus);
+router.patch('/:id/software-packages', verifyToken, requireRole('QUAN_LY', 'ADMIN'), ticketController.updateTicketSoftwarePackages);
 
 // API Booking
 router.post('/booking', submitLimiter, ticketController.submitBooking);
@@ -34,7 +35,7 @@ router.patch('/booking/:id/status', verifyToken, ticketController.updateBookingS
 router.get('/parts', verifyToken, requireRole('KY_THUAT_VIEN', 'LE_TAN', 'QUAN_LY', 'ADMIN'), ticketController.getParts);
 router.post('/parts', verifyToken, requireRole('QUAN_LY', 'ADMIN'), ticketController.createPart);
 router.patch('/parts/:id', verifyToken, requireRole('QUAN_LY', 'ADMIN'), ticketController.updatePart);
-router.get('/:id/parts', verifyToken, requireRole('KY_THUAT_VIEN', 'LE_TAN', 'QUAN_LY'), ticketController.getTicketParts);
+router.get('/:id/parts', verifyToken, requireRole('KY_THUAT_VIEN', 'LE_TAN', 'QUAN_LY', 'ADMIN'), ticketController.getTicketParts);
 router.post('/:id/parts', verifyToken, requireRole('KY_THUAT_VIEN'), ticketController.addPartToTicket);
 
 module.exports = router;

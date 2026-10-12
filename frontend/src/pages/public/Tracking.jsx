@@ -152,6 +152,11 @@ function Tracking() {
             </div>
             
             <p className="text-slate-600 mb-1">Mô tả bệnh: <span className="font-semibold text-slate-800">{ticket.mo_ta_loi}</span></p>
+            {ticket.goi_phan_mem?.length > 0 && (
+              <p className="mt-2 text-slate-600">
+                Gói phần mềm: <span className="font-semibold text-slate-800">{ticket.goi_phan_mem.join(', ')}</span>
+              </p>
+            )}
             
             {ticket.trang_thai !== 'CHỜ_TIẾP_NHẬN' && ticket.trang_thai !== 'CHỜ_KHÁM' && ticket.bao_gia && (
               <div className="mt-4">

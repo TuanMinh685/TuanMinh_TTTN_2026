@@ -1,6 +1,38 @@
 const { pool } = require('../config/db.config');
 const { getIo } = require('../config/socket.config');
 
+const readSoftwarePackageRequest = (description) => {
+    const text = typeof description === 'string' ? description : '';
+    const marker = text.match(/\n\[SOFTWARE_PACKAGES:(\[[^\n]*\])\]$/);
+    let packages = [];
+    let issueDescription = text;
+
+    if (marker) {
+        try {
+            const parsed = JSON.parse(marker[1]);
+            if (Array.isArray(parsed)) packages = parsed;
+        } catch (error) {
+            console.error('Không đọc được danh sách gói phần mềm của phiếu:', error);
+        }
+        issueDescription = issueDescription.slice(0, marker.index);
+    } else {
+        const legacyPackageLines = [...text.matchAll(/^Gói phần mềm yêu cầu:\s*(.+)$/gm)];
+        packages = legacyPackageLines.map(match => match[1].trim()).filter(Boolean);
+    }
+
+    issueDescription = issueDescription
+        .replace(/^Gói phần mềm yêu cầu:\s*.+$/gm, '')
+        .trim();
+
+    return { issueDescription, packages };
+};
+
+const writeSoftwarePackageRequest = (description, packages) => {
+    const { issueDescription } = readSoftwarePackageRequest(description);
+    if (packages.length === 0) return issueDescription;
+    return `${issueDescription}\n[SOFTWARE_PACKAGES:${JSON.stringify(packages)}]`;
+};
+
 const submitIntake = async (customerData) => {
     const client = await pool.connect();
     
@@ -92,7 +124,46 @@ const getAllTickets = async () => {
         ORDER BY p.ngay_tao DESC
     `;
     const { rows } = await pool.query(query);
-    return rows;
+    return rows.map((ticket) => {
+        const { issueDescription, packages } = readSoftwarePackageRequest(ticket.mo_ta_loi);
+        return { ...ticket, mo_ta_loi: issueDescription, software_packages: packages };
+    });
+};
+
+const updateTicketSoftwarePackages = async (ticketId, packages) => {
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+        const ticketResult = await client.query(`
+            SELECT p.id, t.id AS device_id, t.tinh_trang_may
+            FROM phieu_sua_chua p
+            JOIN thiet_bi t ON p.thiet_bi_id = t.id
+            WHERE p.id = $1
+            FOR UPDATE OF t
+        `, [ticketId]);
+
+        if (ticketResult.rows.length === 0) {
+            await client.query('ROLLBACK');
+            return null;
+        }
+
+        const ticket = ticketResult.rows[0];
+        const description = writeSoftwarePackageRequest(ticket.tinh_trang_may, packages);
+        await client.query(
+            'UPDATE thiet_bi SET tinh_trang_may = $1 WHERE id = $2',
+            [description || null, ticket.device_id]
+        );
+        await client.query('COMMIT');
+        return {
+            issueDescription: readSoftwarePackageRequest(description).issueDescription,
+            softwarePackages: packages
+        };
+    } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+    } finally {
+        client.release();
+    }
 };
 
 const updateTicketStatus = async (id, status) => {
@@ -270,6 +341,7 @@ const getTicketParts = async (ticketId) => {
         FROM phieu_linh_kien p
         JOIN linh_kien l ON p.linh_kien_id = l.id
         WHERE p.phieu_sua_chua_id = $1
+        ORDER BY p.id ASC
     `;
     const { rows } = await pool.query(query, [ticketId]);
     return rows;
@@ -319,6 +391,8 @@ module.exports = {
     addPartToTicket,
     submitIntake,
     getAllTickets,
+    updateTicketSoftwarePackages,
+    readSoftwarePackageRequest,
     updateTicketStatus,
     submitBooking,
     getAllBookings,
