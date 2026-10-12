@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import api from '../../services/api';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell } from 'recharts';
 import QRCode from 'qrcode';
+import { SOFTWARE_PACKAGES } from '../../components/softwarePackages';
 
 function Dashboard() {
   const role = localStorage.getItem('role');
@@ -21,6 +22,8 @@ function Dashboard() {
   const [savingPart, setSavingPart] = useState(false);
   const [partSearch, setPartSearch] = useState('');
   const [stockFilter, setStockFilter] = useState('ALL');
+  const [lowStockThreshold, setLowStockThreshold] = useState('5');
+  const [showInventoryForm, setShowInventoryForm] = useState(false);
   const [receiptTicket, setReceiptTicket] = useState(null);
   const [receiptQr, setReceiptQr] = useState('');
   const [reportPeriod, setReportPeriod] = useState('week');
@@ -184,6 +187,7 @@ function Dashboard() {
     setPartForm({ ten_linh_kien: '', gia_ban: '', so_luong: '0' });
     setEditingPartId(null);
     setPartFormError('');
+    setShowInventoryForm(false);
   };
 
   const editPart = (part) => {
@@ -194,6 +198,7 @@ function Dashboard() {
       so_luong: String(part.so_luong)
     });
     setPartFormError('');
+    setShowInventoryForm(true);
   };
 
   const savePart = async (event) => {
@@ -314,31 +319,43 @@ function Dashboard() {
       )}
 
       {(role === 'LE_TAN' || role === 'QUAN_LY' || role === 'ADMIN') && (
-        <div className="flex gap-4 mb-6">
+        <div className="mb-6 flex flex-wrap gap-2 border-b border-slate-200">
           <button 
             onClick={() => setActiveTab('TICKETS')}
-            className={`px-6 py-2 rounded font-bold ${activeTab === 'TICKETS' ? 'bg-brand-blue text-white' : 'bg-slate-200 text-slate-600'}`}>
-            Phiếu Yêu Cầu
+            className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'TICKETS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
+            Phiếu sửa chữa
           </button>
           <button 
             onClick={() => setActiveTab('BOOKINGS')}
-            className={`px-6 py-2 rounded font-bold ${activeTab === 'BOOKINGS' ? 'bg-brand-blue text-white' : 'bg-slate-200 text-slate-600'}`}>
-            Lịch Hẹn Khách Hàng
+            className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'BOOKINGS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
+            Lịch hẹn
           </button>
           {(role === 'QUAN_LY' || role === 'ADMIN') && (
-            <button 
-              onClick={() => setActiveTab('STATS')}
-              className={`px-6 py-2 rounded font-bold ${activeTab === 'STATS' ? 'bg-brand-blue text-white' : 'bg-slate-200 text-slate-600'}`}>
-              Thống Kê Doanh Thu
+            <button
+              onClick={() => setActiveTab('INVENTORY')}
+              className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'INVENTORY' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
+              Kho linh kiện
             </button>
           )}
           {(role === 'QUAN_LY' || role === 'ADMIN') && (
             <button
-              onClick={() => setActiveTab('INVENTORY')}
-              className={`px-6 py-2 rounded font-bold ${activeTab === 'INVENTORY' ? 'bg-brand-blue text-white' : 'bg-slate-200 text-slate-600'}`}>
-              Kho & Bảng Giá
+              onClick={() => setActiveTab('SOFTWARE')}
+              className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'SOFTWARE' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
+              Gói phần mềm
             </button>
           )}
+          {(role === 'QUAN_LY' || role === 'ADMIN') && (
+            <button
+              onClick={() => setActiveTab('STATS')}
+              className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'STATS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
+              Báo cáo
+            </button>
+          )}
+          <button
+            onClick={() => setActiveTab('NOTIFICATIONS')}
+            className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'NOTIFICATIONS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
+            Thông báo{notifications.length > 0 ? ` (${notifications.length})` : ''}
+          </button>
         </div>
       )}
 
@@ -455,91 +472,173 @@ function Dashboard() {
         </div>
       )}
 
+      {activeTab === 'SOFTWARE' && (role === 'QUAN_LY' || role === 'ADMIN') && (
+        <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+          <h3 className="text-xl font-bold text-brand-blue">Gói phần mềm</h3>
+          <p className="mt-1 text-sm text-slate-500">Các gói khách hàng có thể chọn khi gửi yêu cầu sửa chữa hoặc đặt lịch.</p>
+          <ul className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {SOFTWARE_PACKAGES.map(packageName => (
+              <li key={packageName} className="rounded-lg border border-slate-200 bg-slate-50 p-4 font-semibold text-slate-700">
+                {packageName}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {activeTab === 'NOTIFICATIONS' && (
+        <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <h3 className="text-xl font-bold text-brand-blue">Trung tâm thông báo</h3>
+              <p className="mt-1 text-sm text-slate-500">Cập nhật khi trạng thái phiếu sửa chữa thay đổi.</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setNotifications([])}
+              disabled={notifications.length === 0}
+              className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Xóa tất cả
+            </button>
+          </div>
+          <div className="space-y-2">
+            {notifications.map(notification => (
+              <article key={notification.id} className="rounded-lg border border-slate-100 bg-slate-50 p-4">
+                <p className="font-semibold text-slate-800">Phiếu {notification.ticketCode}: {notification.status}</p>
+                <p className="mt-1 text-xs text-slate-500">{notification.createdAt}</p>
+              </article>
+            ))}
+            {notifications.length === 0 && <p className="py-8 text-center text-sm text-slate-500">Chưa có thông báo mới.</p>}
+          </div>
+        </section>
+      )}
+
       {activeTab === 'INVENTORY' && (role === 'QUAN_LY' || role === 'ADMIN') && (
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)]">
-          <section className="rounded-xl border-t-4 border-brand-blue bg-white p-6 shadow">
-            <div className="mb-5 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+        <div className="space-y-5">
+          <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+            <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
               <div>
-                <h3 className="text-xl font-bold text-brand-blue">Kho linh kiện</h3>
-                <p className="mt-1 text-sm text-slate-500">Cảnh báo tồn thấp khi số lượng còn dưới 5.</p>
+                <h3 className="text-xl font-bold text-brand-blue">Kho linh kiện &amp; vật tư</h3>
+                <p className="mt-1 text-sm text-slate-500">Theo dõi số lượng tồn kho và giá bán linh kiện.</p>
               </div>
-              <div className="flex flex-col gap-2 sm:flex-row">
-                <input
-                  type="search"
-                  value={partSearch}
-                  onChange={event => setPartSearch(event.target.value)}
-                  placeholder="Tìm tên linh kiện"
-                  aria-label="Tìm tên linh kiện"
-                  className="rounded-lg border border-slate-300 px-3 py-2"
-                />
-                <select
-                  value={stockFilter}
-                  onChange={event => setStockFilter(event.target.value)}
-                  aria-label="Lọc tình trạng tồn kho"
-                  className="rounded-lg border border-slate-300 px-3 py-2"
+              <div className="flex flex-wrap items-center gap-3">
+                <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-800">
+                  Cảnh báo: {parts.filter(part => Number(part.so_luong) < Number(lowStockThreshold || 5)).length} linh kiện cần nhập hàng
+                </p>
+                <button
+                  type="button"
+                  onClick={() => { resetPartForm(); setShowInventoryForm(true); }}
+                  className="rounded-lg bg-brand-blue px-4 py-2 text-sm font-bold text-white hover:bg-blue-800"
                 >
-                  <option value="ALL">Tất cả tồn kho</option>
-                  <option value="LOW">Sắp hết (0-4)</option>
-                  <option value="AVAILABLE">Còn hàng (5+)</option>
-                </select>
+                  + Thêm linh kiện
+                </button>
               </div>
             </div>
 
-            <div className="mb-4 grid grid-cols-2 gap-3">
-              <div className="rounded-lg bg-slate-50 p-4">
-                <p className="text-sm text-slate-500">Mã hàng</p>
-                <p className="mt-1 text-2xl font-bold text-brand-blue">{parts.length}</p>
-              </div>
-              <div className="rounded-lg bg-amber-50 p-4">
-                <p className="text-sm text-amber-800">Mã hàng sắp hết</p>
-                <p className="mt-1 text-2xl font-bold text-amber-700">
-                  {parts.filter(part => Number(part.so_luong) < 5).length}
-                </p>
-              </div>
+            <div className="mb-5 grid grid-cols-1 gap-3 md:grid-cols-[minmax(220px,1fr)_auto_auto]">
+              <input
+                type="search"
+                value={partSearch}
+                onChange={event => setPartSearch(event.target.value)}
+                placeholder="Tìm theo tên linh kiện..."
+                aria-label="Tìm theo tên linh kiện"
+                className="min-w-0 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-blue-100"
+              />
+              <label className="flex items-center gap-2 whitespace-nowrap text-sm text-slate-600">
+                Cảnh báo dưới
+                <input
+                  type="number"
+                  min="1"
+                  max="9999"
+                  value={lowStockThreshold}
+                  onChange={event => {
+                    const value = event.target.value;
+                    if (value === '' || Number(value) >= 1) setLowStockThreshold(value);
+                  }}
+                  aria-label="Ngưỡng cảnh báo tồn kho thấp"
+                  className="w-20 rounded-lg border border-slate-300 px-3 py-2"
+                />
+                chiếc
+              </label>
+              <select
+                value={stockFilter}
+                onChange={event => setStockFilter(event.target.value)}
+                aria-label="Lọc tình trạng linh kiện"
+                className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              >
+                <option value="ALL">Tất cả linh kiện</option>
+                <option value="LOW">Sắp hết</option>
+                <option value="OUT">Hết hàng</option>
+                <option value="AVAILABLE">Còn hàng</option>
+              </select>
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[600px] text-left">
+              <table className="w-full min-w-[680px] text-left">
                 <thead>
-                  <tr className="border-b-2 border-slate-200 text-sm text-slate-600">
+                  <tr className="border-b border-slate-200 text-xs font-bold uppercase tracking-wide text-slate-500">
                     <th className="px-3 py-3">Tên linh kiện</th>
                     <th className="px-3 py-3 text-right">Giá bán</th>
                     <th className="px-3 py-3 text-center">Tồn kho</th>
-                    <th className="px-3 py-3 text-center">Thao tác</th>
+                    <th className="px-3 py-3 text-center">Tình trạng</th>
+                    <th className="px-3 py-3 text-right">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody>
                   {parts
                     .filter(part => part.ten_linh_kien.toLowerCase().includes(partSearch.toLowerCase()))
-                    .filter(part => stockFilter === 'LOW'
-                      ? Number(part.so_luong) < 5
-                      : stockFilter === 'AVAILABLE'
-                        ? Number(part.so_luong) >= 5
-                        : true)
-                    .map(part => (
-                      <tr key={part.id} className="border-b border-slate-100">
-                        <td className="px-3 py-3 font-semibold text-slate-700">{part.ten_linh_kien}</td>
-                        <td className="px-3 py-3 text-right">{Number(part.gia_ban).toLocaleString('vi-VN')} đ</td>
-                        <td className="px-3 py-3 text-center">
-                          <span className={`rounded-full px-3 py-1 text-xs font-bold ${
-                            Number(part.so_luong) < 5 ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'
-                          }`}>
-                            {Number(part.so_luong) < 5 ? 'Sắp hết: ' : ''}{part.so_luong}
-                          </span>
-                        </td>
-                        <td className="px-3 py-3 text-center">
-                          <button
-                            type="button"
-                            onClick={() => editPart(part)}
-                            className="rounded-lg bg-blue-50 px-3 py-2 text-sm font-bold text-brand-blue hover:bg-blue-100"
-                          >
-                            Sửa giá / tồn
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                    .filter(part => {
+                      const quantity = Number(part.so_luong);
+                      const threshold = Number(lowStockThreshold || 5);
+                      if (stockFilter === 'LOW') return quantity > 0 && quantity < threshold;
+                      if (stockFilter === 'OUT') return quantity <= 0;
+                      if (stockFilter === 'AVAILABLE') return quantity >= threshold;
+                      return true;
+                    })
+                    .map(part => {
+                      const quantity = Number(part.so_luong);
+                      const threshold = Number(lowStockThreshold || 5);
+                      const outOfStock = quantity <= 0;
+                      const lowStock = !outOfStock && quantity < threshold;
+                      return (
+                        <tr key={part.id} className="border-b border-slate-100 text-sm last:border-0 hover:bg-slate-50">
+                          <td className="px-3 py-3 font-semibold text-slate-700">{part.ten_linh_kien}</td>
+                          <td className="px-3 py-3 text-right tabular-nums">{Number(part.gia_ban).toLocaleString('vi-VN')} đ</td>
+                          <td className="px-3 py-3 text-center font-semibold tabular-nums">{quantity}</td>
+                          <td className="px-3 py-3 text-center">
+                            <span className={`inline-block rounded-full px-3 py-1 text-xs font-bold ${
+                              outOfStock ? 'bg-red-50 text-red-700' : lowStock ? 'bg-amber-50 text-amber-800' : 'bg-green-50 text-green-700'
+                            }`}>
+                              {outOfStock ? 'Hết hàng' : lowStock ? 'Sắp hết' : 'Còn hàng'}
+                            </span>
+                          </td>
+                          <td className="px-3 py-3 text-right">
+                            <button
+                              type="button"
+                              onClick={() => editPart(part)}
+                              className="rounded-md px-3 py-1.5 text-sm font-semibold text-brand-blue hover:bg-blue-50"
+                            >
+                              Sửa
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   {parts.length === 0 && (
-                    <tr><td colSpan="4" className="py-8 text-center text-slate-400">Chưa có linh kiện trong kho.</td></tr>
+                    <tr><td colSpan="5" className="py-10 text-center text-sm text-slate-400">Chưa có linh kiện trong kho.</td></tr>
+                  )}
+                  {parts.length > 0 && parts.filter(part =>
+                    part.ten_linh_kien.toLowerCase().includes(partSearch.toLowerCase())
+                  ).filter(part => {
+                    const quantity = Number(part.so_luong);
+                    const threshold = Number(lowStockThreshold || 5);
+                    if (stockFilter === 'LOW') return quantity > 0 && quantity < threshold;
+                    if (stockFilter === 'OUT') return quantity <= 0;
+                    if (stockFilter === 'AVAILABLE') return quantity >= threshold;
+                    return true;
+                  }).length === 0 && (
+                    <tr><td colSpan="5" className="py-10 text-center text-sm text-slate-400">Không tìm thấy linh kiện phù hợp.</td></tr>
                   )}
 
                   {receiptTicket && (
@@ -595,11 +694,18 @@ function Dashboard() {
             </div>
           </section>
 
-          <section className="h-fit rounded-xl border-t-4 border-brand-orange bg-white p-6 shadow">
-            <h3 className="text-xl font-bold text-brand-blue">
-              {editingPartId ? 'Cập nhật linh kiện' : 'Thêm linh kiện'}
-            </h3>
-            <p className="mt-1 text-sm text-slate-500">Thông tin giá và số lượng dùng chung cho kho và bảng giá công khai.</p>
+          {showInventoryForm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">
+          <section role="dialog" aria-modal="true" aria-labelledby="inventory-form-title" className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white p-6 shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 id="inventory-form-title" className="text-xl font-bold text-brand-blue">
+                  {editingPartId ? 'Cập nhật linh kiện' : 'Thêm linh kiện'}
+                </h3>
+                <p className="mt-1 text-sm text-slate-500">Giá và số lượng được dùng cho kho và bảng giá công khai.</p>
+              </div>
+              <button type="button" onClick={resetPartForm} aria-label="Đóng" className="rounded px-2 py-1 text-xl text-slate-500 hover:bg-slate-100">×</button>
+            </div>
 
             {partFormError && (
               <p role="alert" className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{partFormError}</p>
@@ -651,18 +757,18 @@ function Dashboard() {
                 >
                   {savingPart ? 'Đang lưu...' : editingPartId ? 'Lưu thay đổi' : 'Thêm vào kho'}
                 </button>
-                {editingPartId && (
-                  <button
-                    type="button"
-                    onClick={resetPartForm}
-                    className="rounded-lg bg-slate-100 px-4 py-3 font-bold text-slate-700 hover:bg-slate-200"
-                  >
-                    Hủy sửa
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={resetPartForm}
+                  className="rounded-lg bg-slate-100 px-4 py-3 font-bold text-slate-700 hover:bg-slate-200"
+                >
+                  Hủy
+                </button>
               </div>
             </form>
           </section>
+          </div>
+          )}
         </div>
       )}
       
