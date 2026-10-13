@@ -19,7 +19,7 @@ Tài liệu này tổng hợp toàn bộ các tính năng, kỹ thuật và tài
 - **Mã nguồn (GitHub):** `https://github.com/LEHAOK5/TTTN-Backend-QR.git`
 - **Tài khoản test hệ thống:** 
   - Lễ tân: `letan` / Mật khẩu: `123456`
-  - Kỹ thuật viên: `ktv` / Mật khẩu: `123456`
+  - Kỹ thuật viên: `kythuat` / Mật khẩu: `123456`
   - Admin: `admin` / Mật khẩu: `123456`
 
 ---
