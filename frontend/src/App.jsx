@@ -115,9 +115,9 @@ function AppContent() {
                   🔧 Cổng Kỹ thuật viên / Quản lý
                 </Link>
                 <div className="flex justify-between items-center text-xs text-slate-500 px-1 pt-1">
-                  <span>📞 Hotline: 1900 xxxx</span>
-                  <a href="https://zalo.me/0123456789" target="_blank" rel="noreferrer" className="text-blue-600 font-bold hover:underline">
-                    Chat Zalo hỗ trợ
+                  <span>📞 Hotline: (028) 3860 4999</span>
+                  <a href="tel:02838604999" className="text-blue-600 font-bold hover:underline">
+                    Gọi hỗ trợ
                   </a>
                 </div>
               </div>
@@ -153,25 +153,17 @@ function AppContent() {
         </Suspense>
       </main>
 
-      {/* Floating Zalo/Messenger Widget */}
+      {/* Floating Hotline & Contact Widget */}
       <div className="fixed bottom-6 right-6 z-40 flex flex-col gap-4">
         <a 
-          href="https://zalo.me/0123456789" 
-          target="_blank" 
-          rel="noreferrer" 
-          className="w-14 h-14 bg-blue-500 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform animate-bounce relative group cursor-pointer"
-          aria-label="Chat Zalo"
+          href="tel:02838604999" 
+          className="w-14 h-14 bg-gradient-to-r from-orange-500 to-amber-500 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform relative group cursor-pointer animate-bounce"
+          aria-label="Gọi Hotline Hùng Hậu"
         >
-          <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8 text-white"><path d="M21.544 11.045c.395-4.498-2.227-8.445-6.282-9.306-3.998-.847-8.151.785-10.237 4.14-1.921 3.093-1.636 7.159.624 9.946 1.134 1.397 2.766 2.302 4.549 2.533-.311 1.096-1.121 2.378-2.036 3.064-.265.197-.04.606.275.524 2.825-.742 4.708-2.589 5.867-4.321 4.58.583 8.326-2.122 8.789-5.918-.282-1.229 1.488-2.316.488-3.085.344-.645.068-1.503-.038-2.106zm-6.19 2.536c-.461.109-.941-.098-1.157-.514l-2.007-3.793v3.743c0 .351-.253.645-.589.682-.369.041-.692-.239-.692-.596V8.756c0-.361.277-.665.632-.693.385-.03.71.248.71.616v3.766l2.035-3.834c.23-.424.737-.584 1.168-.363.388.199.515.688.27 1.054l-2.035 3.195 2.059 3.238c.277.433.098 1.026-.401 1.196zM13.203 9.4c0 .341-.247.625-.572.661-.365.04-.678-.239-.678-.593v-1.18c0-.341.248-.625.572-.662.366-.041.678.239.678.594v1.18z"/></svg>
-          <span className="absolute -top-10 right-0 bg-white text-brand-blue font-bold px-3 py-1 rounded shadow opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap text-xs">Chat Zalo ngay</span>
-        </a>
-        <a 
-          href="tel:19001234" 
-          className="w-14 h-14 bg-orange-500 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform relative group cursor-pointer"
-          aria-label="Gọi Hotline"
-        >
-          <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-white"><path d="M6.62 10.79c1.44 2.83 3.76 5.15 6.59 6.59l2.2-2.2c.28-.28.67-.36 1.02-.25 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
-          <span className="absolute -top-10 right-0 bg-white text-orange-500 font-bold px-3 py-1 rounded shadow opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap text-xs">Gọi Hotline</span>
+          <svg viewBox="0 0 24 24" fill="currentColor" className="w-7 h-7 text-white"><path d="M6.62 10.79c1.44 2.83 3.76 5.15 6.59 6.59l2.2-2.2c.28-.28.67-.36 1.02-.25 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+          <span className="absolute -top-10 right-0 bg-white text-brand-orange font-bold px-3 py-1 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap text-xs border border-orange-200">
+            Gọi ngay: (028) 3860 4999
+          </span>
         </a>
       </div>
 
@@ -184,34 +176,52 @@ function AppContent() {
                 <div className="w-6 h-6 bg-white text-[#0d457b] flex items-center justify-center rounded text-xs font-bold" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}>
                   HH
                 </div>
-                Hệ sinh thái HungHau Holdings
+                CÔNG TY CỔ PHẦN PHÁT TRIỂN HÙNG HẬU
               </h3>
               <p className="text-blue-200 text-sm leading-relaxed mb-4">
-                Cổng tiếp nhận và chăm sóc khách hàng nội bộ sửa chữa máy tính, điện thoại, thiết bị công nghệ. Hoạt động trên nền tảng số hóa QR thông minh.
+                Cổng tiếp nhận và chăm sóc khách hàng nội bộ sửa chữa máy tính, thiết bị công nghệ. Hoạt động trên nền tảng số hóa QR thông minh thuộc Hệ sinh thái HungHau Holdings.
               </p>
             </div>
             
             <div>
-              <h3 className="text-lg font-bold mb-4 text-brand-orange">Địa chỉ bảo hành</h3>
-              <ul className="text-blue-200 text-sm space-y-2">
-                <li>📍 Tòa nhà Lục Giác, Quận 3, TP.HCM</li>
-                <li>📍 Cơ sở Đại học Văn Hiến</li>
-                <li>📍 Chi nhánh phân phối HungHau</li>
+              <h3 className="text-lg font-bold mb-4 text-brand-orange">Địa chỉ liên hệ</h3>
+              <ul className="text-blue-200 text-sm space-y-2.5">
+                <li className="flex items-start gap-2">
+                  <span>📍</span>
+                  <span><strong>Trụ sở chính:</strong> 615 Âu Cơ, Phường Phú Trung, Quận Tân Phú, TP. Hồ Chí Minh.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span>📍</span>
+                  <span><strong>Cơ sở đào tạo:</strong> Trường Đại học Văn Hiến (VHU)</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span>📍</span>
+                  <span><strong>Trung tâm bảo hành:</strong> Chi nhánh Lục Giác HungHau</span>
+                </li>
               </ul>
             </div>
             
             <div>
-              <h3 className="text-lg font-bold mb-4 text-brand-orange">Liên hệ & Hỗ trợ</h3>
-              <ul className="text-blue-200 text-sm space-y-2">
-                <li>📞 Hotline CSKH: 1900 xxxx</li>
-                <li>✉ Email: support@hunghau.vn</li>
-                <li>🌐 Website: hunghau.vn</li>
+              <h3 className="text-lg font-bold mb-4 text-brand-orange">Thông tin hỗ trợ</h3>
+              <ul className="text-blue-200 text-sm space-y-2.5">
+                <li className="flex items-center gap-2">
+                  <span>📞</span>
+                  <span><strong>Điện thoại:</strong> (+84) 28 3860 4999</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <span>✉</span>
+                  <span><strong>Email:</strong> info@hunghau.vn</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <span>🌐</span>
+                  <span><strong>Website:</strong> <a href="https://hunghau.vn" target="_blank" rel="noreferrer" className="underline hover:text-white">hunghau.vn</a></span>
+                </li>
               </ul>
             </div>
           </div>
           
           <div className="mt-12 pt-8 border-t border-blue-800 text-center text-blue-300 text-xs">
-            <p>© {CURRENT_YEAR} Bản quyền thuộc về Công ty Cổ phần Lục Giác - Hệ sinh thái HungHau Holdings.</p>
+            <p>© {CURRENT_YEAR} Bản quyền thuộc về Công ty Cổ phần Phát triển Hùng Hậu - Hệ sinh thái HungHau Holdings.</p>
             <p className="mt-1">Thiết kế chuẩn luồng UX/UI Mobile-first QR System.</p>
           </div>
         </div>

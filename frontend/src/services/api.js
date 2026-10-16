@@ -9,7 +9,7 @@ const api = axios.create({
   }
 });
 
-// Middleware tự động gắn Token vào Header nếu có (dành cho Lễ tân)
+// Middleware request: tự động gắn JWT Token vào Header nếu có
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -17,5 +17,22 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+// Middleware response: xử lý đăng xuất và xóa phiên đăng nhập khi token hết hạn (401/403)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+      const isAuthApi = error.config?.url?.includes('/auth/login');
+      if (!isAuthApi && localStorage.getItem('token')) {
+        localStorage.clear();
+        if (window.location.pathname.startsWith('/admin')) {
+          window.location.href = '/login';
+        }
+      }
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default api;

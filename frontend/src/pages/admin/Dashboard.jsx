@@ -1088,7 +1088,9 @@ function Dashboard() {
             <div id="thermal-receipt" className="mx-auto w-full max-w-[72mm] border border-dashed border-slate-300 p-4 text-sm text-slate-900">
               <div className="text-center">
                 <h1 className="text-base font-extrabold">HUNGHAU IT SUPPORT</h1>
-                <p className="mt-1 text-xs">PHIẾU TIẾP NHẬN / THANH TOÁN</p>
+                <p className="text-[10px] text-slate-600">615 Âu Cơ, P. Phú Trung, Q. Tân Phú, TP.HCM</p>
+                <p className="text-[10px] text-slate-600">Hotline: (028) 3860 4999</p>
+                <p className="mt-1 text-xs font-bold uppercase tracking-wider">PHIẾU TIẾP NHẬN / THANH TOÁN</p>
                 <p className="mt-2 text-lg font-bold">{receiptTicket.ma_phieu}</p>
               </div>
               <hr className="my-3 border-dashed border-slate-400" />

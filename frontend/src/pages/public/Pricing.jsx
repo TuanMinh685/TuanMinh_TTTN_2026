@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 
 function Pricing() {
+  const navigate = useNavigate();
   const [parts, setParts] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -28,6 +30,10 @@ function Pricing() {
   const filteredParts = parts.filter(part =>
     part.ten_linh_kien.toLowerCase().includes(search.toLowerCase())
   );
+
+  const handleBookService = (serviceName) => {
+    navigate('/dat-lich', { state: { serviceName } });
+  };
 
   return (
     <div className="bg-slate-50 min-h-screen py-16 font-sans">
@@ -56,7 +62,7 @@ function Pricing() {
           </div>
         )}
 
-        {loading && <p className="py-10 text-center text-slate-500">Đang tải bảng giá...</p>}
+        {loading && <p className="py-10 text-center text-slate-500 font-semibold">Đang tải bảng giá dịch vụ...</p>}
 
         {/* Bảng giá */}
         {!loading && !error && (
@@ -65,20 +71,30 @@ function Pricing() {
             <thead>
               <tr className="bg-brand-blue text-white">
                 <th className="py-4 px-6 text-lg">Tên Dịch Vụ / Linh Kiện</th>
-                <th className="py-4 px-6 text-lg text-right w-48">Giá Tham Khảo</th>
+                <th className="py-4 px-6 text-lg text-right w-44">Giá Niêm Yết</th>
+                <th className="py-4 px-6 text-lg text-center w-36">Thao Tác</th>
               </tr>
             </thead>
             <tbody>
               {filteredParts.length > 0 ? filteredParts.map((item, idx) => (
                 <tr key={item.id} className={`border-b border-slate-100 hover:bg-blue-50 transition-colors ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'}`}>
                   <td className="py-4 px-6 font-semibold text-slate-700">{item.ten_linh_kien}</td>
-                  <td className="py-4 px-6 text-right font-bold text-brand-orange text-lg">
+                  <td className="py-4 px-6 text-right font-bold text-brand-orange text-lg whitespace-nowrap">
                     {Number(item.gia_ban).toLocaleString('vi-VN')} đ
+                  </td>
+                  <td className="py-4 px-6 text-center whitespace-nowrap">
+                    <button
+                      type="button"
+                      onClick={() => handleBookService(item.ten_linh_kien)}
+                      className="px-4 py-2 bg-brand-green/10 text-brand-green font-bold text-sm rounded-lg hover:bg-brand-green hover:text-white transition-colors"
+                    >
+                      Đặt lịch →
+                    </button>
                   </td>
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan="2" className="py-12 text-center text-slate-400 text-lg">
+                  <td colSpan="3" className="py-12 text-center text-slate-400 text-lg">
                     {parts.length === 0
                       ? 'Chưa có dịch vụ hoặc linh kiện trong bảng giá.'
                       : 'Không tìm thấy dịch vụ hoặc linh kiện phù hợp.'}

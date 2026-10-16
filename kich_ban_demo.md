@@ -1,48 +1,81 @@
-# KỊCH BẢN DEMO LUỒNG LÀM VIỆC (QUÉT MÃ QR)
+# KỊCH BẢN DEMO LUỒNG LÀM VIỆC & NGHIỆM THU (UAT)
 
-Dưới đây là kịch bản demo cách hệ thống vận hành trơn tru giữa 3 nhân vật: **Khách hàng**, **Lễ tân** và **Kỹ thuật viên**.
-
-## 🔹 TÀI KHOẢN DEMO ĐÃ TẠO
-Bạn có thể sử dụng các tài khoản này để đăng nhập vào **Cổng KTV** (http://localhost:5173/login) để test luồng:
-1. **Lễ tân:** Tên đăng nhập: `letan` | Mật khẩu: `123456`
-2. **Kỹ thuật viên:** Tên đăng nhập: `kythuat` | Mật khẩu: `123456`
-3. **Quản lý (đã có):** Tên đăng nhập: `admin` | Mật khẩu: `123456`
+Tài liệu hướng dẫn kịch bản chạy demo thực tế hệ thống **HungHau IT Support - 615 Âu Cơ, Phường Phú Trung, Quận Tân Phú, TP. Hồ Chí Minh** với sự phối hợp nhịp nhàng giữa **Khách hàng**, **Lễ tân**, **Kỹ thuật viên** và **Quản lý**.
 
 ---
 
-## 🔹 KỊCH BẢN VẬN HÀNH THỰC TẾ
+## 🔹 TÀI KHOẢN TRẢI NGHIỆM (DEMO ACCOUNTS)
 
-### 1. Góc độ KHÁCH HÀNG (Anh Khang - Sinh viên)
-* **Bối cảnh:** Laptop của Khang bị hư bàn phím, Khang mang máy đến Tòa nhà Lục Giác.
-* **Hành động:** 
-  1. Khang bước vào, thấy mã QR to đùng đặt trên quầy Lễ tân.
-  2. Khang lấy điện thoại ra quét mã QR bằng Zalo/Camera (Mã QR này sẽ dẫn tới link `http://localhost:5173/intake`).
-  3. Khang tự nhập thông tin vào form trên điện thoại: "Nguyễn Văn Khang", "0901234567", mô tả "Bàn phím bị liệt nút Space". 
-  4. Bấm "GỬI YÊU CẦU". Hệ thống hiển thị: *"Đã tạo phiếu thành công! Mã phiếu của bạn là: HD-12345"*.
+Đăng nhập vào Cổng nhân viên tại địa chỉ: `http://localhost:5173/login`
 
-### 2. Góc độ LỄ TÂN (Chị Tân)
-* **Bối cảnh:** Lễ tân đang ngồi trực máy tính tại quầy, đã đăng nhập sẵn tài khoản `letan`.
-* **Hành động:**
-  1. Ngay khi Khang vừa bấm "Gửi" trên điện thoại, màn hình máy tính của chị Tân phát ra âm thanh "Ting!" báo hiệu có khách mới.
-  2. Bảng điều khiển (Dashboard) của Lễ tân hiển thị phiếu **HD-12345** với trạng thái **MỚI TIẾP NHẬN**.
-  3. Chị Tân mỉm cười nói: *"Chào em Khang, chị đã nhận được thông tin sửa bàn phím của em. Em cho chị mượn máy nhé!"*.
-  4. Lễ tân nhận máy, dán một miếng sticker nhỏ ghi "HD-12345" lên máy.
-  5. Trên phần mềm, Lễ tân bấm nút **"CHUYỂN KỸ THUẬT"** và gán máy này cho anh Kỹ thuật viên tên Trần Kỹ Thuật.
-
-### 3. Góc độ KỸ THUẬT VIÊN (Anh Thuật)
-* **Bối cảnh:** Kỹ thuật viên đang ở trong phòng kỹ thuật (bên trong), đã đăng nhập tài khoản `kythuat`.
-* **Hành động:**
-  1. Màn hình của anh Thuật thông báo: *"Có 1 máy mới được chuyển đến từ Lễ tân"*.
-  2. Anh Thuật cầm cái laptop có dán sticker HD-12345 mà Lễ tân vừa đưa vào phòng.
-  3. Anh mở phiếu HD-12345 trên phần mềm, bấm nút **"ĐANG KIỂM TRA"** để bắt đầu tháo máy ra xem.
-  4. *(Khách hàng Khang lúc này ngồi ngoài sảnh lấy điện thoại ra xem link Tracking, thấy trạng thái máy mình đang là "Đang kiểm tra" nên rất yên tâm).*
-  5. Sau khi thay bàn phím xong, anh Thuật bấm nút **"ĐÃ HOÀN THÀNH"**.
-  6. Hệ thống tự động đẩy thông báo ra màn hình của Lễ tân. Lễ tân gọi Khang ra nhận lại máy.
+| Vai trò | Tên đăng nhập | Mật khẩu | Phạm vi tác vụ chính |
+| :--- | :--- | :--- | :--- |
+| **Lễ tân** | `letan` | `123456` | Tiếp nhận máy quầy, duyệt lịch hẹn, in phiếu nhiệt 80mm có QR. |
+| **Kỹ thuật viên** | `kythuat` | `123456` | Tiếp nhận sửa, thêm linh kiện báo giá, hoàn tất sửa chữa. |
+| **Quản lý / Admin**| `admin` | `123456` | Xem kho linh kiện cảnh báo tồn, gói phần mềm, thống kê doanh thu. |
 
 ---
 
-### 💡 Ưu điểm của luồng này:
-* **Khách hàng** không phải đứng khai báo rườm rà hay đọc số điện thoại thành tiếng ở nơi đông người (rất bảo mật).
-* **Lễ tân** không phải gõ máy tính nhập liệu thay khách, chỉ việc nhận máy và điều phối -> Rút ngắn thời gian phục vụ mỗi khách từ 3 phút xuống còn 10 giây.
-* **Kỹ thuật viên** biết chính xác mình cần sửa máy nào, máy đó bị lỗi gì ngay trên màn hình.
-* Toàn bộ quá trình diễn ra **thời gian thực (Real-time)** nhờ công nghệ Socket.io mà chúng ta đã tích hợp!
+## 🔹 KỊCH BẢN THỰC CHIẾN TỪNG BƯỚC
+
+### Giai đoạn 1: Khách hàng tìm hiểu & Đặt lịch trước
+1. Khách hàng truy cập trang chủ `http://localhost:5173/`:
+   - Xem thông tin địa chỉ tiếp nhận: **615 Âu Cơ, P. Phú Trung, Q. Tân Phú, TP.HCM**.
+   - Xem khối **Khách hàng nói gì** hiển thị top đánh giá 5 sao uy tín.
+2. Khách mở trang **Bảng giá** (`/bang-gia`):
+   - Nhập tìm kiếm "SSD" hoặc "Vệ sinh tra keo tản nhiệt".
+   - Bấm nút **Đặt lịch →** trên dòng dịch vụ mong muốn.
+3. Form Đặt lịch (`/dat-lich`):
+   - Hệ thống tự động điền sẵn tên dịch vụ vừa chọn.
+   - Khách nhập Tên: "Nguyễn Văn Khang", SĐT: "0901234567", Số Zalo: "0901234567", chọn ngày giờ hẹn và hình thức "Tại cửa hàng: 615 Âu Cơ".
+   - Bấm **Xác nhận đặt lịch**.
+
+---
+
+### Giai đoạn 2: Khách mang máy đến quầy & Lễ tân tiếp nhận
+1. Khách đến sảnh hỗ trợ tại **615 Âu Cơ**, có thể quét mã QR tiếp nhận tại quầy (`/intake`).
+2. **Lễ tân** đăng nhập tài khoản `letan`:
+   - Mở tab **Lịch hẹn**: Thấy lịch hẹn của anh Khang vừa gửi. Bấm **Xác nhận lịch** để chuyển thành phiếu chính thức.
+   - Tại danh sách phiếu, Lễ tân bấm nút **In biên nhận**:
+     - Phiếu in nhiệt 80mm xuất hiện chuẩn format hóa đơn nhiệt, có logo HungHau, địa chỉ 615 Âu Cơ, thông tin lỗi và **mã QR tra cứu trực tiếp**.
+   - Lễ tân dán sticker mã phiếu lên lưng laptop và bấm **Chuyển Kỹ thuật viên**.
+
+---
+
+### Giai đoạn 3: Kỹ thuật viên kiểm tra & Báo giá trực tuyến
+1. **Kỹ thuật viên** đăng nhập tài khoản `kythuat`:
+   - Dashboard hiển thị máy vừa nhận từ Lễ tân.
+   - KTV bấm **Bắt đầu kiểm tra** để cập nhật trạng thái phiếu sang `ĐANG KIỂM TRA`.
+   - Sau khi kiểm tra, KTV phát hiện cần thay bàn phím và tra keo:
+     - Chọn linh kiện "Bàn phím Laptop" từ kho và thêm công dịch vụ.
+     - Hệ thống tự động tính tổng tiền.
+     - KTV bấm **Gửi báo giá cho khách** -> Trạng thái phiếu thành `CHỜ BÁO GIÁ`.
+
+---
+
+### Giai đoạn 4: Khách tra cứu tiến độ & Xác nhận báo giá
+1. Khách hàng mở trang tra cứu `http://localhost:5173/tra-cuu`:
+   - Khách có thể **Quét mã QR trên phiếu in nhiệt bằng camera điện thoại/laptop**, hoặc nhập mã phiếu, hoặc nhập số điện thoại `0901234567` để xem toàn bộ lịch sử máy.
+2. Trang chi tiết phiếu (`/track/:ticketCode`):
+   - Nhờ cơ chế **Polling 30 giây tối ưu Serverless**, màn hình tự động hiển thị banner thông báo: *"Đã có báo giá mới cho thiết bị của bạn"*.
+   - Khách xem bảng chi tiết linh kiện và chi phí.
+   - Khách bấm nút **Đồng ý sửa chữa**:
+     - Hệ thống gửi request `POST /api/tickets/approve-quote`.
+     - Nút duyệt tự động khóa để tránh click đúp, trang thái lập tức chuyển sang đã xác nhận.
+
+---
+
+### Giai đoạn 5: Hoàn tất sửa chữa & Đánh giá chất lượng
+1. Kỹ thuật viên tiến hành thay thế và bấm **Đã sửa xong**.
+2. Lễ tân gọi khách kiểm tra máy và bàn giao.
+3. Trên trang Tracking của khách:
+   - Trạng thái cập nhật `ĐÃ HOÀN THÀNH`.
+   - Form **Đánh giá dịch vụ** mở ra: Khách chọn 5 sao (hỗ trợ điều hướng bàn phím / trợ năng chuẩn), nhập lời khen: *"Dịch vụ rất nhanh, minh bạch báo giá rõ ràng!"* và bấm **Gửi đánh giá**.
+   - Đánh giá được lưu vào cơ sở dữ liệu Supabase và sẽ xuất hiện trên mục "Khách hàng nói gì" của trang chủ.
+
+---
+
+### Giai đoạn 6: Quản lý tổng hợp & Xem báo cáo doanh thu
+1. Quản trị viên đăng nhập tài khoản `admin`:
+   - Vào tab **Kho linh kiện**: Kiểm tra số lượng tồn kho tự động trừ đi sau khi KTV xuất linh kiện sửa máy; các mặt hàng dưới ngưỡng tối thiểu sẽ nổi bật cảnh báo đỏ.
+   - Vào tab **Thống kê**: Xem biểu đồ Recharts phân tích doanh thu tăng trưởng và số lượng phiếu hoàn thành trong tuần.
