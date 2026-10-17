@@ -19,16 +19,25 @@ function BookingForm() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [softwarePackage, setSoftwarePackage] = useState('');
+  const [isStudent, setIsStudent] = useState(false);
+  const [schoolName, setSchoolName] = useState('');
+  const [studentId, setStudentId] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
+      const studentNote = isStudent 
+        ? `\n[ƯU ĐÃI SINH VIÊN -15%]: Trường ${schoolName || 'Chưa rõ'} - MSSV: ${studentId || 'Chưa cung cấp'}` 
+        : '';
       await api.post('/tickets/booking', {
         ...formData,
-        moTaLoi: softwarePackage
+        isStudent,
+        schoolName,
+        studentId,
+        moTaLoi: (softwarePackage
           ? `${formData.moTaLoi}\nGói phần mềm yêu cầu: ${softwarePackage}`
-          : formData.moTaLoi
+          : formData.moTaLoi) + studentNote
       });
       setSuccess(true);
     } catch (err) {
@@ -93,6 +102,68 @@ function BookingForm() {
                 <input type="text" placeholder="Nhập số Zalo để nhận cập nhật nhanh"
                   className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:border-brand-blue focus:ring focus:ring-blue-200 outline-none"
                   value={formData.zaloId} onChange={e => setFormData({...formData, zaloId: e.target.value})} />
+              </div>
+
+              {/* Khối Ưu đãi Học sinh - Sinh viên toàn quốc */}
+              <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    checked={isStudent} 
+                    onChange={e => setIsStudent(e.target.checked)}
+                    className="w-5 h-5 text-brand-blue rounded focus:ring-brand-blue"
+                  />
+                  <div>
+                    <span className="font-bold text-blue-900 text-sm md:text-base">🎓 Bạn là Học sinh / Sinh viên?</span>
+                    <span className="ml-2 text-xs bg-amber-400 text-slate-900 font-black px-2 py-0.5 rounded-full uppercase">Giảm ngay 15%</span>
+                    <p className="text-xs text-slate-500 mt-0.5">Áp dụng cho học sinh, sinh viên tất cả các trường ĐH/CĐ trên toàn quốc</p>
+                  </div>
+                </label>
+
+                {isStudent && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-3 border-t border-blue-200/60">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Trường ĐH / CĐ / Trường học *</label>
+                      <input 
+                        type="text" 
+                        required={isStudent}
+                        list="vn-schools"
+                        placeholder="VD: ĐH Văn Hiến, Bách Khoa, KHTN, UEH..."
+                        value={schoolName}
+                        onChange={e => setSchoolName(e.target.value)}
+                        className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:border-brand-blue outline-none bg-white"
+                      />
+                      <datalist id="vn-schools">
+                        <option value="Trường Đại học Văn Hiến (VHU)" />
+                        <option value="Trường Đại học Bách Khoa - ĐHQG TP.HCM" />
+                        <option value="Trường Đại học Khoa học Tự nhiên - ĐHQG TP.HCM" />
+                        <option value="Trường Đại học Công nghệ Thông tin - ĐHQG TP.HCM" />
+                        <option value="Trường Đại học Sư phạm Kỹ thuật TP.HCM" />
+                        <option value="Trường Đại học Kinh tế TP.HCM (UEH)" />
+                        <option value="Trường Đại học Công nghệ TP.HCM (HUTECH)" />
+                        <option value="Trường Đại học Văn Lang" />
+                        <option value="Trường Đại học Tôn Đức Thắng" />
+                        <option value="Trường Đại học Công nghiệp TP.HCM (IUH)" />
+                        <option value="Trường Đại học Tài chính - Marketing (UFM)" />
+                        <option value="Trường Đại học Sài Gòn" />
+                        <option value="Trường Đại học Mở TP.HCM" />
+                        <option value="Trường Đại học FPT TP.HCM" />
+                        <option value="Học sinh / Sinh viên trường khác trên toàn quốc" />
+                      </datalist>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Mã số sinh viên (MSSV) *</label>
+                      <input 
+                        type="text" 
+                        required={isStudent}
+                        placeholder="VD: 221A010123"
+                        value={studentId}
+                        onChange={e => setStudentId(e.target.value)}
+                        className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:border-brand-blue outline-none bg-white"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">

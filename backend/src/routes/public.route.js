@@ -15,6 +15,7 @@ router.get('/track/:ticketCode', trackLimiter, publicController.trackTicket);
 router.post('/track/:ticketCode/approve-quote', publicController.approveQuote);
 
 router.post('/track/:ticketCode/review', publicController.submitReview);
+router.post('/track/:ticketCode/warranty-claim', publicController.claimWarranty);
 router.get('/reviews/top', publicController.getTopReviews);
 
 module.exports = router;

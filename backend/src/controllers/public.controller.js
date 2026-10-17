@@ -102,11 +102,26 @@ const getPublicPricing = async (req, res, next) => {
     }
 };
 
+const claimWarranty = async (req, res, next) => {
+    try {
+        const { ticketCode } = req.params;
+        const { issueDescription } = req.body;
+        if (!issueDescription || typeof issueDescription !== 'string' || !issueDescription.trim()) {
+            return res.status(400).json({ success: false, message: 'Vui lòng nhập mô tả lỗi tái phát cần bảo hành.' });
+        }
+        const result = await publicService.claimWarranty(ticketCode, issueDescription.trim());
+        res.status(200).json({ success: true, message: 'Đã gửi yêu cầu bảo hành thành công! KTV sẽ liên hệ hỗ trợ bạn sớm nhất.', data: result });
+    } catch (err) {
+        res.status(400).json({ success: false, message: err.message });
+    }
+};
+
 module.exports = {
     submitReview,
     getTopReviews,
     trackByPhone,
     trackTicket,
     approveQuote,
-    getPublicPricing
+    getPublicPricing,
+    claimWarranty
 };

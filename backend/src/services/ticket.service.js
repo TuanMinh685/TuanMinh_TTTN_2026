@@ -39,21 +39,25 @@ const submitIntake = async (customerData) => {
     try {
         await client.query('BEGIN');
 
-        const { fullName, phone, zaloId, issueDescription, deviceName, serialImei, loaiDichVu = 'OFFLINE', ultraviewerCode = null } = customerData;
+        const { 
+            fullName, phone, zaloId, issueDescription, deviceName, serialImei, 
+            loaiDichVu = 'OFFLINE', ultraviewerCode = null,
+            isStudent = false, schoolName = '', studentId = '', photos = []
+        } = customerData;
         let customerId = null;
         let deviceId = null;
 
-        // 1. Tìm hoặc tạo Khách hàng
+        // 1. Tìm hoặc tạo Khách hàng (kèm thông tin Học sinh - Sinh viên)
         const userResult = await client.query(`SELECT id FROM khach_hang WHERE so_dien_thoai = $1`, [phone]);
             
         if (userResult.rows.length > 0) {
             customerId = userResult.rows[0].id;
         } else {
             const newUser = await client.query(`
-                INSERT INTO khach_hang (ho_ten, so_dien_thoai, zalo_id)
-                VALUES ($1, $2, $3)
+                INSERT INTO khach_hang (ho_ten, so_dien_thoai, zalo_id, la_sinh_vien, truong_hoc, ma_sinh_vien)
+                VALUES ($1, $2, $3, $4, $5, $6)
                 RETURNING id
-            `, [fullName, phone, zaloId || null]);
+            `, [fullName, phone, zaloId || null, isStudent, schoolName || '', studentId || '']);
             customerId = newUser.rows[0].id;
         }
         
@@ -77,6 +81,21 @@ const submitIntake = async (customerData) => {
         `, [deviceId, ticketCode, loaiDichVu, ultraviewerCode]);
 
         const ticket = newTicket.rows[0];
+
+        // 3b. Lưu ảnh ngoại quan nếu có gửi kèm lúc tiếp nhận
+        if (Array.isArray(photos) && photos.length > 0) {
+            for (const img of photos) {
+                if (img && (img.duong_dan_anh || typeof img === 'string')) {
+                    const url = typeof img === 'string' ? img : img.duong_dan_anh;
+                    const loai = img.loai_anh || 'NGOAI_QUAN';
+                    const ghiChu = img.ghi_chu || 'Ảnh chụp lúc tiếp nhận máy';
+                    await client.query(`
+                        INSERT INTO hinh_anh_phieu (phieu_sua_chua_id, duong_dan_anh, loai_anh, ghi_chu)
+                        VALUES ($1, $2, $3, $4)
+                    `, [ticket.id, url, loai, ghiChu]);
+                }
+            }
+        }
 
         // 4. Lưu nhật ký sửa chữa
         await client.query(`
@@ -347,7 +366,7 @@ const getTicketParts = async (ticketId) => {
     return rows;
 };
 
-const addPartToTicket = async (ticketId, partId, quantity) => {
+const addPartToTicket = async (ticketId, partId, quantity, soSerial = null) => {
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
@@ -359,10 +378,13 @@ const addPartToTicket = async (ticketId, partId, quantity) => {
         const part = partResult.rows[0];
         if (part.so_luong < quantity) throw new Error('Số lượng linh kiện trong kho không đủ');
         
+        // Số Serial / IMEI (Serial Tracking)
+        const serial = soSerial?.trim() || `SN-${partId}-${Math.floor(100000 + Math.random() * 900000)}`;
+
         // Thêm vào phieu_linh_kien
         await client.query(
-            'INSERT INTO phieu_linh_kien (phieu_sua_chua_id, linh_kien_id, so_luong, don_gia) VALUES ($1, $2, $3, $4)',
-            [ticketId, partId, quantity, part.gia_ban]
+            'INSERT INTO phieu_linh_kien (phieu_sua_chua_id, linh_kien_id, so_luong, don_gia, so_serial) VALUES ($1, $2, $3, $4, $5)',
+            [ticketId, partId, quantity, part.gia_ban, serial]
         );
         
         // Trừ tồn kho
@@ -373,13 +395,32 @@ const addPartToTicket = async (ticketId, partId, quantity) => {
         await client.query('UPDATE phieu_sua_chua SET tong_tien = tong_tien + $1 WHERE id = $2', [addAmount, ticketId]);
         
         await client.query('COMMIT');
-        return true;
+        return { success: true, serial };
     } catch (error) {
         await client.query('ROLLBACK');
         throw error;
     } finally {
         client.release();
     }
+};
+
+const getTicketPhotos = async (ticketId) => {
+    const { rows } = await pool.query(`
+        SELECT id, phieu_sua_chua_id, duong_dan_anh, loai_anh, ghi_chu, ngay_tao
+        FROM hinh_anh_phieu
+        WHERE phieu_sua_chua_id = $1
+        ORDER BY ngay_tao ASC
+    `, [ticketId]);
+    return rows;
+};
+
+const addTicketPhoto = async (ticketId, { duong_dan_anh, loai_anh, ghi_chu }) => {
+    const { rows } = await pool.query(`
+        INSERT INTO hinh_anh_phieu (phieu_sua_chua_id, duong_dan_anh, loai_anh, ghi_chu)
+        VALUES ($1, $2, $3, $4)
+        RETURNING *
+    `, [ticketId, duong_dan_anh, loai_anh || 'NGOAI_QUAN', ghi_chu || '']);
+    return rows[0];
 };
 
 module.exports = {
@@ -389,6 +430,8 @@ module.exports = {
     updatePart,
     getTicketParts,
     addPartToTicket,
+    getTicketPhotos,
+    addTicketPhoto,
     submitIntake,
     getAllTickets,
     updateTicketSoftwarePackages,

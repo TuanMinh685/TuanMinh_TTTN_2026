@@ -17,6 +17,12 @@ function Dashboard() {
   const [selectedTicketId, setSelectedTicketId] = useState(null);
   const [selectedPartId, setSelectedPartId] = useState('');
   const [partQuantity, setPartQuantity] = useState(1);
+  const [partSerial, setPartSerial] = useState('');
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
+  const [photoTicket, setPhotoTicket] = useState(null);
+  const [ticketPhotos, setTicketPhotos] = useState([]);
+  const [newPhotoNote, setNewPhotoNote] = useState('');
+  const [savingPhoto, setSavingPhoto] = useState(false);
   const [partForm, setPartForm] = useState({ ten_linh_kien: '', gia_ban: '', so_luong: '0' });
   const [editingPartId, setEditingPartId] = useState(null);
   const [partFormError, setPartFormError] = useState('');
@@ -66,13 +72,55 @@ function Dashboard() {
   const addPartToTicket = async () => {
     if (!selectedPartId || partQuantity < 1) return alert('Vui lòng chọn linh kiện và số lượng hợp lệ');
     try {
-      await api.post(`/tickets/${selectedTicketId}/parts`, { partId: selectedPartId, quantity: partQuantity });
-      alert('Thêm linh kiện thành công!');
+      await api.post(`/tickets/${selectedTicketId}/parts`, { 
+        partId: selectedPartId, 
+        quantity: partQuantity,
+        so_serial: partSerial.trim() || undefined
+      });
+      alert('Thêm linh kiện và lưu mã Serial thành công!');
       setShowPartModal(false);
+      setPartSerial('');
       await refreshTickets();
     } catch (err) {
       alert(err.response?.data?.message || 'Lỗi thêm linh kiện');
     }
+  };
+
+  const openPhotoModal = async (ticket) => {
+    setPhotoTicket(ticket);
+    setShowPhotoModal(true);
+    setNewPhotoNote('');
+    try {
+      const res = await api.get(`/tickets/${ticket.id}/photos`);
+      setTicketPhotos(res.data.data || []);
+    } catch {
+      setTicketPhotos([]);
+    }
+  };
+
+  const handleUploadPhoto = (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !photoTicket) return;
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      const base64 = evt.target.result;
+      setSavingPhoto(true);
+      try {
+        const res = await api.post(`/tickets/${photoTicket.id}/photos`, {
+          duong_dan_anh: base64,
+          loai_anh: 'NGOAI_QUAN',
+          ghi_chu: newPhotoNote.trim() || file.name
+        });
+        setTicketPhotos(prev => [...prev, res.data.data]);
+        setNewPhotoNote('');
+        alert('Đã lưu ảnh ngoại quan máy thành công!');
+      } catch (err) {
+        alert(err.response?.data?.message || 'Lỗi lưu ảnh');
+      } finally {
+        setSavingPhoto(false);
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   const fetchTickets = useCallback(async () => {
@@ -540,7 +588,17 @@ function Dashboard() {
               {filteredTickets.map(ticket => (
                 <tr key={ticket.id} className="border-b hover:bg-slate-50">
                   <td className="py-3 px-4 font-bold text-brand-blue">{ticket.ma_phieu}</td>
-                  <td className="py-3 px-4">{ticket.ho_ten_khach} <br/><span className="text-xs text-slate-400">{ticket.so_dien_thoai}</span></td>
+                  <td className="py-3 px-4">
+                    <div className="font-semibold text-slate-800">{ticket.ho_ten_khach}</div>
+                    <div className="text-xs text-slate-400">{ticket.so_dien_thoai}</div>
+                    {ticket.la_sinh_vien && (
+                      <div className="mt-1">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                          🎓 {ticket.truong_hoc || 'Sinh viên'} (-15%)
+                        </span>
+                      </div>
+                    )}
+                  </td>
                   <td className="py-3 px-4">{ticket.mo_ta_loi}</td>
                   <td className="py-3 px-4">
                     <span className={`px-2 py-1 rounded text-xs font-bold ${
@@ -549,28 +607,43 @@ function Dashboard() {
                       ticket.trang_thai === 'ĐANG_SỬA' ? 'bg-blue-100 text-blue-700' :
                       ticket.trang_thai === 'ĐÃ_SỬA_XONG' ? 'bg-green-100 text-green-700' : 
                       ticket.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' ? 'bg-purple-100 text-purple-700' :
+                      ticket.trang_thai === 'YÊU_CẦU_BẢO_HÀNH' ? 'bg-red-100 text-red-700' :
                       'bg-slate-100 text-slate-700'
                     }`}>
                       {ticket.trang_thai.replace(/_/g, ' ')}
                     </span>
+                    {ticket.han_bao_hanh && (
+                      <div className="mt-1">
+                        <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          🛡️ Đã cấp BH điện tử
+                        </span>
+                      </div>
+                    )}
                   </td>
                   <td className="py-3 px-4 font-bold text-red-500 text-right">{Number(ticket.tong_tien || 0).toLocaleString('vi-VN')} đ</td>
-                  <td className="py-3 px-4 text-center space-y-2 flex flex-col items-center">
+                  <td className="py-3 px-4 text-center space-y-1.5 flex flex-col items-center">
                     {role === 'LE_TAN' && ticket.trang_thai === 'CHỜ_KHÁM' && (
-                      <button onClick={() => updateStatus(ticket.id, 'ĐANG_CHUẨN_ĐOÁN')} className="bg-brand-orange text-white px-3 py-1 rounded font-bold text-sm w-full">Chuyển Kỹ Thuật</button>
+                      <button onClick={() => updateStatus(ticket.id, 'ĐANG_CHUẨN_ĐOÁN')} className="bg-brand-orange text-white px-3 py-1 rounded font-bold text-xs w-full">Chuyển Kỹ Thuật</button>
                     )}
                     {role === 'LE_TAN' && ticket.trang_thai === 'ĐÃ_SỬA_XONG' && (
-                      <button onClick={() => updateStatus(ticket.id, 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN')} className="bg-purple-500 text-white px-3 py-1 rounded font-bold text-sm w-full">Giao Khách</button>
+                      <button onClick={() => updateStatus(ticket.id, 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN')} className="bg-purple-500 text-white px-3 py-1 rounded font-bold text-xs w-full">Giao Khách</button>
                     )}
                     {role === 'KY_THUAT_VIEN' && ticket.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' && (
-                      <button onClick={() => updateStatus(ticket.id, 'ĐANG_SỬA')} className="bg-blue-500 text-white px-3 py-1 rounded font-bold text-sm w-full">Tiến hành Sửa</button>
+                      <button onClick={() => updateStatus(ticket.id, 'ĐANG_SỬA')} className="bg-blue-500 text-white px-3 py-1 rounded font-bold text-xs w-full">Tiến hành Sửa</button>
                     )}
                     {role === 'KY_THUAT_VIEN' && ticket.trang_thai === 'ĐANG_SỬA' && (
                       <>
-                        <button onClick={() => { setSelectedTicketId(ticket.id); setShowPartModal(true); }} className="bg-yellow-500 text-white px-3 py-1 rounded font-bold text-sm w-full mb-2">Thêm Linh Kiện</button>
-                        <button onClick={() => updateStatus(ticket.id, 'ĐÃ_SỬA_XONG')} className="bg-brand-green text-white px-3 py-1 rounded font-bold text-sm w-full">Sửa Xong</button>
+                        <button onClick={() => { setSelectedTicketId(ticket.id); setShowPartModal(true); }} className="bg-yellow-500 text-white px-3 py-1 rounded font-bold text-xs w-full mb-1">Thêm Linh Kiện</button>
+                        <button onClick={() => updateStatus(ticket.id, 'ĐÃ_SỬA_XONG')} className="bg-brand-green text-white px-3 py-1 rounded font-bold text-xs w-full">Sửa Xong</button>
                       </>
                     )}
+                    <button
+                      type="button"
+                      onClick={() => openPhotoModal(ticket)}
+                      className="w-full rounded bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800 border border-amber-300 hover:bg-amber-100"
+                    >
+                      📸 Ảnh ngoại quan
+                    </button>
                     <button
                       type="button"
                       onClick={() => {
@@ -580,7 +653,7 @@ function Dashboard() {
                         setReceiptPartsError('');
                         setReceiptTicket(ticket);
                       }}
-                      className="w-full rounded bg-slate-700 px-3 py-1 text-sm font-bold text-white hover:bg-slate-800"
+                      className="w-full rounded bg-slate-700 px-3 py-1 text-xs font-bold text-white hover:bg-slate-800"
                     >
                       In phiếu 80mm
                     </button>
@@ -1102,6 +1175,12 @@ function Dashboard() {
               {receiptTicket.software_packages?.length > 0 && (
                 <p className="mt-1"><strong>Gói phần mềm:</strong> {receiptTicket.software_packages.join(', ')}</p>
               )}
+              {receiptTicket.la_sinh_vien && (
+                <div className="mt-1 rounded bg-emerald-50 p-1.5 text-xs text-emerald-800">
+                  <p><strong>🎓 Sinh viên:</strong> {receiptTicket.truong_hoc}</p>
+                  <p><strong>MSSV:</strong> {receiptTicket.mssv || 'Đã xác thực'}</p>
+                </div>
+              )}
               <p className="mt-1"><strong>Trạng thái:</strong> {receiptTicket.trang_thai.replace(/_/g, ' ')}</p>
               <hr className="my-3 border-dashed border-slate-400" />
               <p className="mb-2 text-xs font-bold uppercase">Chi tiết thanh toán</p>
@@ -1121,7 +1200,10 @@ function Dashboard() {
                         <span>{item.ten_linh_kien}</span>
                         <span className="whitespace-nowrap">{(Number(item.so_luong) * Number(item.don_gia)).toLocaleString('vi-VN')} đ</span>
                       </div>
-                      <p className="text-[10px] text-slate-600">{item.so_luong} x {Number(item.don_gia).toLocaleString('vi-VN')} đ</p>
+                      <div className="flex justify-between text-[10px] text-slate-600">
+                        <span>{item.so_luong} x {Number(item.don_gia).toLocaleString('vi-VN')} đ</span>
+                        {item.so_serial && <span className="font-mono text-blue-700">S/N: {item.so_serial}</span>}
+                      </div>
                     </div>
                   ))}
                   {receiptParts.length === 0 && receiptServiceTotal === 0 && (
@@ -1130,10 +1212,30 @@ function Dashboard() {
                 </>
               )}
               <hr className="my-3 border-dashed border-slate-400" />
-              <div className="flex justify-between gap-2 text-base font-extrabold">
-                <span>Tổng tiền</span>
-                <span className="whitespace-nowrap">{receiptTotal.toLocaleString('vi-VN')} đ</span>
-              </div>
+              {receiptTicket.la_sinh_vien ? (
+                <>
+                  <div className="flex justify-between gap-2 text-xs text-slate-600">
+                    <span>Tổng chi phí gốc</span>
+                    <span className="line-through">{receiptTotal.toLocaleString('vi-VN')} đ</span>
+                  </div>
+                  <div className="flex justify-between gap-2 text-xs font-semibold text-emerald-700">
+                    <span>Trợ giá Sinh viên toàn quốc (-15%)</span>
+                    <span>-{Math.round(receiptTotal * 0.15).toLocaleString('vi-VN')} đ</span>
+                  </div>
+                  <div className="flex justify-between gap-2 text-base font-extrabold text-brand-orange mt-1">
+                    <span>Tổng thanh toán</span>
+                    <span className="whitespace-nowrap">{Math.round(receiptTotal * 0.85).toLocaleString('vi-VN')} đ</span>
+                  </div>
+                </>
+              ) : (
+                <div className="flex justify-between gap-2 text-base font-extrabold">
+                  <span>Tổng tiền</span>
+                  <span className="whitespace-nowrap">{receiptTotal.toLocaleString('vi-VN')} đ</span>
+                </div>
+              )}
+              <p className="mt-2 text-[10px] text-slate-600 border border-slate-200 p-1.5 rounded text-center">
+                🛡️ Sổ bảo hành điện tử (e-Warranty): Kích hoạt 90 ngày. Quét QR bên dưới để tra cứu hoặc yêu cầu bảo hành.
+              </p>
               {receiptQr && (
                 <div className="mt-4 text-center">
                   <img src={receiptQr} alt={`QR tra cứu phiếu ${receiptTicket.ma_phieu}`} className="mx-auto h-32 w-32" />
@@ -1176,6 +1278,25 @@ function Dashboard() {
                 ))}
               </select>
             </div>
+            <div className="mb-4">
+              <div className="flex justify-between items-center mb-1">
+                <label className="block text-sm font-bold text-slate-700">Mã Serial / IMEI linh kiện:</label>
+                <button
+                  type="button"
+                  onClick={() => setPartSerial(`SN-${Date.now().toString().slice(-6)}`)}
+                  className="text-xs text-brand-blue hover:underline font-semibold"
+                >
+                  + Tạo mã nhanh
+                </button>
+              </div>
+              <input 
+                type="text" 
+                value={partSerial} 
+                onChange={(e) => setPartSerial(e.target.value)}
+                placeholder="VD: SN-SAM-980PRO-2026..."
+                className="w-full px-4 py-2 border border-slate-300 rounded focus:border-brand-blue outline-none font-mono text-sm"
+              />
+            </div>
             <div className="mb-6">
               <label className="block text-sm font-bold text-slate-700 mb-2">Số lượng:</label>
               <input 
@@ -1189,6 +1310,102 @@ function Dashboard() {
             <div className="flex gap-4">
               <button onClick={() => setShowPartModal(false)} className="flex-1 py-2 bg-slate-200 text-slate-700 font-bold rounded hover:bg-slate-300">Hủy</button>
               <button onClick={addPartToTicket} className="flex-1 py-2 bg-brand-blue text-white font-bold rounded hover:bg-blue-700">Xác Nhận</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Quản lý Ảnh Ngoại Quan Lúc Nhận Máy */}
+      {showPhotoModal && photoTicket && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div className="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+              <div>
+                <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                  <span>📸</span> Ảnh Ngoại Quan Tiếp Nhận - Phiếu {photoTicket.ma_phieu}
+                </h3>
+                <p className="text-xs text-slate-500">{photoTicket.ten_thiet_bi} • Khách hàng: {photoTicket.ho_ten_khach}</p>
+              </div>
+              <button 
+                type="button" 
+                onClick={() => setShowPhotoModal(false)}
+                className="text-slate-400 hover:text-slate-700 text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-200"
+              >
+                &times;
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto flex-1 space-y-6">
+              {/* Form tải ảnh mới */}
+              <div className="p-4 bg-blue-50/60 rounded-xl border border-blue-200">
+                <h4 className="text-sm font-bold text-brand-blue mb-2">Chụp hoặc Tải Thêm Ảnh Ngoại Quan:</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-semibold text-slate-600 mb-1">Ghi chú (vết trầy, cấn móp, tem...):</label>
+                    <input
+                      type="text"
+                      value={newPhotoNote}
+                      onChange={(e) => setNewPhotoNote(e.target.value)}
+                      placeholder="VD: Cấn góc trái màn hình, rách tem ốc đáy..."
+                      className="w-full px-3 py-1.5 text-sm border border-slate-300 rounded focus:border-brand-blue outline-none bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className={`w-full flex items-center justify-center px-4 py-2 bg-brand-blue hover:bg-blue-700 text-white font-bold rounded cursor-pointer text-sm shadow-sm transition-colors ${savingPhoto ? 'opacity-50 pointer-events-none' : ''}`}>
+                      <span>{savingPhoto ? 'Đang lưu...' : '+ Chọn ảnh'}</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        onChange={handleUploadPhoto}
+                        disabled={savingPhoto}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Danh sách ảnh */}
+              <div>
+                <h4 className="text-sm font-bold text-slate-700 mb-3">Hình ảnh ngoại quan đã lưu ({ticketPhotos.length}):</h4>
+                {ticketPhotos.length === 0 ? (
+                  <div className="text-center py-10 bg-slate-50 border border-dashed border-slate-300 rounded-xl text-slate-500 text-sm">
+                    Chưa có ảnh ngoại quan nào được tải lên cho phiếu này.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    {ticketPhotos.map((img, i) => (
+                      <div key={img.id || i} className="group border border-slate-200 rounded-xl overflow-hidden bg-slate-50 shadow-sm flex flex-col">
+                        <div className="h-36 overflow-hidden bg-black flex items-center justify-center">
+                          <img
+                            src={img.duong_dan_anh}
+                            alt={img.ghi_chu || `Ảnh ${i + 1}`}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform cursor-pointer"
+                            onClick={() => window.open(img.duong_dan_anh, '_blank')}
+                          />
+                        </div>
+                        <div className="p-2.5 text-xs flex-1 flex flex-col justify-between">
+                          <p className="font-semibold text-slate-800 line-clamp-2">{img.ghi_chu || 'Ảnh ngoại quan'}</p>
+                          <p className="text-[10px] text-slate-400 mt-1">
+                            {img.thoi_gian_tao ? new Date(img.thoi_gian_tao).toLocaleString('vi-VN') : 'Lúc tiếp nhận'}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-slate-200 bg-slate-50 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowPhotoModal(false)}
+                className="px-5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg text-sm"
+              >
+                Đóng
+              </button>
             </div>
           </div>
         </div>

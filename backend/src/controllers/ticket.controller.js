@@ -207,12 +207,36 @@ const getTicketParts = async (req, res, next) => {
 const addPartToTicket = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { partId, quantity } = req.body;
+        const { partId, quantity, so_serial } = req.body;
         if (!Number.isSafeInteger(Number(partId)) || Number(partId) < 1 || !Number.isSafeInteger(quantity) || quantity < 1) {
             return res.status(400).json({ success: false, message: 'Linh kiện và số lượng phải hợp lệ.' });
         }
-        await ticketService.addPartToTicket(id, Number(partId), quantity);
-        res.status(200).json({ success: true, message: 'Đã thêm linh kiện thành công' });
+        const result = await ticketService.addPartToTicket(id, Number(partId), quantity, so_serial);
+        res.status(200).json({ success: true, message: 'Đã thêm linh kiện và lưu mã Serial thành công', data: result });
+    } catch (err) {
+        next(err);
+    }
+};
+
+const getTicketPhotos = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const data = await ticketService.getTicketPhotos(id);
+        res.status(200).json({ success: true, data });
+    } catch (err) {
+        next(err);
+    }
+};
+
+const addTicketPhoto = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { duong_dan_anh, loai_anh, ghi_chu } = req.body;
+        if (!duong_dan_anh || typeof duong_dan_anh !== 'string') {
+            return res.status(400).json({ success: false, message: 'Vui lòng cung cấp đường dẫn hoặc dữ liệu ảnh.' });
+        }
+        const data = await ticketService.addTicketPhoto(id, { duong_dan_anh, loai_anh, ghi_chu });
+        res.status(201).json({ success: true, message: 'Đã lưu ảnh ngoại quan thành công', data });
     } catch (err) {
         next(err);
     }
@@ -224,6 +248,8 @@ module.exports = {
     updatePart,
     getTicketParts,
     addPartToTicket,
+    getTicketPhotos,
+    addTicketPhoto,
     submitIntake,
     getTickets,
     updateTicketStatus,

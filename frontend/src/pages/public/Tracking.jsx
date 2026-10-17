@@ -11,8 +11,12 @@ function Tracking() {
   const [reviewText, setReviewText] = useState('');
   const [reviewLoading, setReviewLoading] = useState(false);
   const [reviewMessage, setReviewMessage] = useState('');
-  const [reviewError, setReviewError] = useState('');
   const [statusNotice, setStatusNotice] = useState('');
+  const [showWarrantyModal, setShowWarrantyModal] = useState(false);
+  const [warrantyReason, setWarrantyReason] = useState('');
+  const [warrantyLoading, setWarrantyLoading] = useState(false);
+  const [warrantyNotice, setWarrantyNotice] = useState('');
+  const [selectedPreviewImage, setSelectedPreviewImage] = useState(null);
 
   const fetchTicket = useCallback(
     () => api.get(`/public/track/${ticketCode}`),
@@ -104,6 +108,27 @@ function Tracking() {
     }
   };
 
+  const handleClaimWarranty = async (e) => {
+    e.preventDefault();
+    if (!warrantyReason.trim()) return;
+    setWarrantyLoading(true);
+    setWarrantyNotice('');
+    try {
+      const res = await api.post(`/public/track/${ticketCode}/warranty-claim`, {
+        issueDescription: warrantyReason.trim()
+      });
+      setWarrantyNotice(res.data.message || 'Đã gửi yêu cầu bảo hành lại thành công!');
+      setShowWarrantyModal(false);
+      setWarrantyReason('');
+      const updated = await fetchTicket();
+      if (updated.data?.success) setTicket(updated.data.data);
+    } catch (err) {
+      alert(err.response?.data?.message || 'Có lỗi xảy ra khi gửi yêu cầu bảo hành.');
+    } finally {
+      setWarrantyLoading(false);
+    }
+  };
+
   if (loading && !ticket) return <div className="text-center mt-20">Đang tải thông tin...</div>;
   if (error) return <div className="text-center mt-20 text-red-500 font-bold">{error}</div>;
   if (!ticket) return null;
@@ -117,6 +142,12 @@ function Tracking() {
           <button type="button" onClick={() => setStatusNotice('')} aria-label="Đóng thông báo" className="text-lg">×</button>
         </div>
       )}
+      {warrantyNotice && (
+        <div role="status" className="mb-5 flex items-center justify-between gap-3 rounded-xl bg-emerald-50 p-4 font-semibold text-emerald-800 border border-emerald-200">
+          <span>🛡️ {warrantyNotice}</span>
+          <button type="button" onClick={() => setWarrantyNotice('')} aria-label="Đóng" className="text-lg">×</button>
+        </div>
+      )}
       {/* Breadcrumb */}
       <div className="text-sm text-slate-500 mb-6 flex gap-2 items-center">
         <span>Trang chủ</span> <span className="text-xs">▶</span> 
@@ -125,70 +156,199 @@ function Tracking() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Hình ảnh mô phỏng Lục Giác */}
-        <div className="bg-slate-100 rounded-2xl flex items-center justify-center p-12 relative overflow-hidden h-96">
-          <div className="w-64 h-64 bg-brand-blue/10 flex items-center justify-center" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}>
-            <span className="text-6xl text-brand-blue font-bold opacity-30">LG</span>
+        {/* Cột trái: Thiết bị & Ảnh ngoại quan lúc tiếp nhận */}
+        <div>
+          <div className="bg-slate-100 rounded-2xl flex items-center justify-center p-12 relative overflow-hidden h-80">
+            <div className="w-56 h-56 bg-brand-blue/10 flex items-center justify-center" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}>
+              <span className="text-6xl text-brand-blue font-bold opacity-30">VHU</span>
+            </div>
+            <div className="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-sm p-4 rounded-xl text-center shadow-sm border border-white">
+              <h3 className="font-bold text-slate-800 text-lg">{ticket.ten_thiet_bi}</h3>
+              <p className="text-xs text-slate-500">Mã tra cứu: <strong className="text-brand-blue font-mono">{ticketCode}</strong></p>
+            </div>
           </div>
-          <div className="absolute bottom-4 left-4 right-4 bg-white/80 backdrop-blur-sm p-4 rounded-xl text-center shadow-sm border border-white">
-            <h3 className="font-bold text-slate-800">{ticket.ten_thiet_bi}</h3>
-            <p className="text-sm text-slate-500">Mã: {ticket.so_imei || 'Không có'}</p>
+
+          {/* 📸 Mục 4: Biên bản ảnh chụp ngoại quan lúc tiếp nhận (Chống khiếu nại) */}
+          <div className="mt-6 p-5 bg-white rounded-2xl border border-slate-200 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+                <span>📸</span> Biên Bản Ảnh Ngoại Quan Lúc Nhận
+              </h3>
+              <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-semibold">
+                {ticket.hinh_anh_ngoai_quan?.length || 0} ảnh
+              </span>
+            </div>
+            {ticket.hinh_anh_ngoai_quan && ticket.hinh_anh_ngoai_quan.length > 0 ? (
+              <div className="grid grid-cols-2 gap-3">
+                {ticket.hinh_anh_ngoai_quan.map((img, idx) => (
+                  <div 
+                    key={idx} 
+                    onClick={() => setSelectedPreviewImage(img.duong_dan_anh)}
+                    className="group relative rounded-xl overflow-hidden border border-slate-200 aspect-video bg-slate-100 cursor-pointer shadow-sm hover:shadow-md transition-shadow"
+                  >
+                    <img src={img.duong_dan_anh} alt={img.ghi_chu || 'Ảnh ngoại quan'} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                    <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-2 text-center">
+                      <span className="text-[11px] text-white font-medium">{img.ghi_chu || 'Xem phóng to'}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-slate-400 italic text-center py-4 bg-slate-50 rounded-xl">
+                Chưa có ảnh chụp ngoại quan đính kèm cho phiếu này.
+              </p>
+            )}
           </div>
+
+          {/* Lịch sử xử lý */}
+          {ticket.nhat_ky && ticket.nhat_ky.length > 0 && (
+            <div className="mt-6 p-5 bg-white rounded-2xl border border-slate-200 shadow-sm">
+              <h3 className="font-bold text-slate-800 text-sm mb-3">🕒 Tiến độ thực tế</h3>
+              <div className="space-y-3">
+                {ticket.nhat_ky.map((log, idx) => (
+                  <div key={idx} className="flex items-start gap-3 text-xs">
+                    <div className="w-2 h-2 rounded-full bg-brand-blue mt-1 shrink-0"></div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-slate-700">{log.trang_thai_moi.replace(/_/g, ' ')}</p>
+                      {log.ghi_chu && <p className="text-slate-500 mt-0.5">{log.ghi_chu}</p>}
+                      <p className="text-[10px] text-slate-400 mt-0.5">{new Date(log.ngay_tao).toLocaleString('vi-VN')}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Thông tin Báo giá (Phong cách Điện Thoại Vui) */}
+        {/* Cột phải: Báo giá, Ưu đãi sinh viên, e-Warranty, Serial linh kiện */}
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-slate-800 mb-2">
             Sửa chữa {ticket.ten_thiet_bi}
           </h1>
-          <div className="flex items-center gap-2 mb-6">
-            <span className="text-yellow-400 text-xl">★★★★★</span>
-            <span className="text-sm text-brand-blue underline cursor-pointer">15 đánh giá</span>
-          </div>
 
+          {/* 🎓 Mục 2: Khối thông tin Ưu đãi Sinh viên toàn quốc (-15%) */}
+          {ticket.uu_dai_sinh_vien?.la_sinh_vien && (
+            <div className="mb-4 p-4 bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-200 rounded-2xl shadow-sm">
+              <div className="flex items-center justify-between">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-indigo-600 text-white rounded-full text-xs font-bold uppercase tracking-wider">
+                  🎓 Ưu đãi Học sinh - Sinh viên (-15%)
+                </span>
+                <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-md">
+                  Đã áp dụng chiết khấu
+                </span>
+              </div>
+              <p className="text-sm font-bold text-slate-800 mt-2">{ticket.uu_dai_sinh_vien.truong_hoc}</p>
+              <p className="text-xs text-slate-500">Mã sinh viên (MSSV): <strong>{ticket.uu_dai_sinh_vien.ma_sinh_vien || 'Đã xác thực'}</strong></p>
+            </div>
+          )}
+
+          {/* Khối Báo giá & Chi phí */}
           <div className="bg-orange-50/50 p-6 rounded-2xl border border-orange-100 mb-6 relative">
             <div className="absolute top-0 right-0 bg-brand-orange text-white text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-xl">
-              TRẠNG THÁI: {ticket.trang_thai}
+              TRẠNG THÁI: {ticket.trang_thai.replace(/_/g, ' ')}
             </div>
             
-            <p className="text-slate-600 mb-1">Mô tả bệnh: <span className="font-semibold text-slate-800">{ticket.mo_ta_loi}</span></p>
+            <p className="text-slate-600 text-sm mb-1">Mô tả ban đầu: <span className="font-semibold text-slate-800">{ticket.mo_ta_loi}</span></p>
             {ticket.goi_phan_mem?.length > 0 && (
-              <p className="mt-2 text-slate-600">
+              <p className="mt-1 text-slate-600 text-sm">
                 Gói phần mềm: <span className="font-semibold text-slate-800">{ticket.goi_phan_mem.join(', ')}</span>
               </p>
             )}
             
-            {ticket.trang_thai !== 'CHỜ_TIẾP_NHẬN' && ticket.trang_thai !== 'CHỜ_KHÁM' && ticket.bao_gia && (
-              <div className="mt-4">
-                <p className="text-slate-500 text-sm mb-1">KTV báo lỗi: {ticket.loi_thuc_te}</p>
-                <div className="flex items-baseline gap-4 mt-2">
-                  <span className="text-4xl font-bold text-brand-orange">
-                    {Number(ticket.bao_gia).toLocaleString('vi-VN')} ₫
-                  </span>
-                  <span className="text-slate-400 line-through text-lg">
-                    {(Number(ticket.bao_gia) + 500000).toLocaleString('vi-VN')} ₫
+            {Number(ticket.tong_tien || 0) > 0 && (
+              <div className="mt-4 pt-3 border-t border-orange-200/70">
+                <div className="flex justify-between text-sm text-slate-600 mb-1">
+                  <span>Chi phí ban đầu:</span>
+                  <span className={ticket.uu_dai_sinh_vien?.la_sinh_vien ? 'line-through text-slate-400' : 'font-semibold text-slate-700'}>
+                    {Number(ticket.tong_tien).toLocaleString('vi-VN')} ₫
                   </span>
                 </div>
-                <p className="text-green-600 text-sm font-semibold mt-1 flex items-center gap-1">
-                  ✓ Cam kết giá rẻ nhất thị trường
+
+                {ticket.uu_dai_sinh_vien?.la_sinh_vien && (
+                  <div className="flex justify-between text-sm font-semibold text-emerald-700 mb-1">
+                    <span>🎓 Trợ giá Sinh viên (-15%):</span>
+                    <span>-{Number(ticket.uu_dai_sinh_vien.so_tien_giam).toLocaleString('vi-VN')} ₫</span>
+                  </div>
+                )}
+
+                <div className="flex justify-between items-baseline mt-2">
+                  <span className="font-bold text-slate-800 text-base">Tổng thanh toán:</span>
+                  <span className="text-3xl font-extrabold text-brand-orange">
+                    {Number(ticket.uu_dai_sinh_vien?.tien_sau_giam || ticket.tong_tien).toLocaleString('vi-VN')} ₫
+                  </span>
+                </div>
+                <p className="text-emerald-700 text-xs font-semibold mt-1 flex items-center gap-1">
+                  ✓ Tích lũy +{Math.floor(Number(ticket.uu_dai_sinh_vien?.tien_sau_giam || ticket.tong_tien) / 10000)} điểm thành viên
                 </p>
               </div>
             )}
           </div>
 
-          {/* Trust Badges */}
-          <div className="grid grid-cols-2 gap-4 mb-8">
-            <div className="flex gap-3 items-center p-3 border border-slate-100 rounded-xl bg-white shadow-sm">
-              <div className="w-10 h-10 bg-brand-blue/10 flex items-center justify-center text-brand-blue" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}>🛡️</div>
-              <span className="text-sm font-medium text-slate-700">Bảo hành 6 tháng</span>
+          {/* 🔧 Mục 6: Quản lý linh kiện theo Số Serial / IMEI (Serial Tracking) */}
+          {ticket.linh_kien && ticket.linh_kien.length > 0 && (
+            <div className="mb-6 p-5 bg-white border border-slate-200 rounded-2xl shadow-sm">
+              <h3 className="font-bold text-slate-800 text-sm mb-3 flex items-center gap-2">
+                <span>🔧</span> Linh Kiện Thay Thế Chính Hãng (Serial Tracking)
+              </h3>
+              <div className="divide-y divide-slate-100 text-sm">
+                {ticket.linh_kien.map((item, idx) => (
+                  <div key={idx} className="py-2.5 flex justify-between items-center">
+                    <div>
+                      <div className="font-semibold text-slate-800">{item.ten_linh_kien} (x{item.so_luong})</div>
+                      {item.so_serial && (
+                        <div className="text-xs text-blue-700 font-mono mt-1 flex items-center gap-1">
+                          <span className="text-slate-400">S/N:</span>
+                          <span className="bg-blue-50 text-brand-blue px-2 py-0.5 rounded font-bold border border-blue-200">
+                            {item.so_serial}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="font-bold text-slate-700">
+                      {(Number(item.don_gia) * Number(item.so_luong)).toLocaleString('vi-VN')} ₫
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="flex gap-3 items-center p-3 border border-slate-100 rounded-xl bg-white shadow-sm">
-              <div className="w-10 h-10 bg-brand-blue/10 flex items-center justify-center text-brand-blue" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}>⚡</div>
-              <span className="text-sm font-medium text-slate-700">Sửa siêu tốc 1h</span>
-            </div>
-          </div>
+          )}
 
-          {/* Call to Action */}
+          {/* 🛡️ Mục 1: Sổ bảo hành điện tử (e-Warranty) */}
+          {ticket.bao_hanh && (
+            <div className="mb-6 p-5 bg-gradient-to-br from-emerald-50 via-teal-50 to-white border border-emerald-200 rounded-2xl shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">🛡️</span>
+                  <div>
+                    <h3 className="font-bold text-slate-800 text-base">Sổ Bảo Hành Điện Tử (e-Warranty)</h3>
+                    <p className="text-xs text-slate-500">Hạn bảo hành đến: {new Date(ticket.bao_hanh.han_bao_hanh).toLocaleDateString('vi-VN')}</p>
+                  </div>
+                </div>
+                <span className={`px-3 py-1 rounded-full text-xs font-bold ${ticket.bao_hanh.con_han ? 'bg-emerald-600 text-white' : 'bg-slate-300 text-slate-700'}`}>
+                  {ticket.bao_hanh.trang_thai_text}
+                </span>
+              </div>
+              <div className="w-full bg-emerald-100 rounded-full h-2 mb-2 overflow-hidden">
+                <div className="bg-emerald-500 h-2 rounded-full transition-all duration-500" style={{ width: `${ticket.bao_hanh.ti_le_con_lai}%` }}></div>
+              </div>
+              <p className="text-xs text-slate-600 mb-3">
+                {ticket.bao_hanh.con_han 
+                  ? `Thiết bị đang trong thời gian bảo hành kỹ thuật tiêu chuẩn tại 615 Âu Cơ (còn ${ticket.bao_hanh.so_ngay_con_lai} ngày).` 
+                  : 'Thiết bị đã kết thúc thời hạn bảo hành tiêu chuẩn.'}
+              </p>
+              {ticket.bao_hanh.con_han && (
+                <button
+                  type="button"
+                  onClick={() => setShowWarrantyModal(true)}
+                  className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition-colors shadow-sm"
+                >
+                  Yêu Cầu Bảo Hành Lại (Nếu Tái Phát Lỗi) →
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Nút Phê duyệt Báo giá */}
           {ticket.trang_thai === 'CHỜ_KHÁCH_CHỐT_GIÁ' ? (
             <div className="flex gap-4">
               <button 
@@ -207,17 +367,18 @@ function Tracking() {
               </button>
             </div>
           ) : (
-            <div className="w-full py-4 bg-slate-100 text-slate-500 font-semibold rounded-xl text-center">
-              Phiếu đang ở trạng thái: {ticket.trang_thai}
+            <div className="w-full py-3 bg-slate-100 text-slate-600 font-semibold rounded-xl text-center text-sm">
+              Trạng thái hiện tại: <strong>{ticket.trang_thai.replace(/_/g, ' ')}</strong>
             </div>
           )}
 
+          {/* Đánh giá dịch vụ */}
           {ticket.da_danh_gia ? (
-            <p role="status" className="mt-8 rounded-xl bg-green-50 p-4 text-center font-semibold text-green-700">
+            <p role="status" className="mt-6 rounded-xl bg-green-50 p-4 text-center font-semibold text-green-700">
               Cảm ơn bạn! Phiếu này đã được đánh giá.
             </p>
           ) : ticket.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' && (
-            <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
               <h2 className="text-xl font-bold text-brand-blue">Đánh giá dịch vụ</h2>
               <p className="mt-1 text-sm text-slate-500">Chia sẻ trải nghiệm của bạn về lần sửa chữa này.</p>
 
@@ -255,8 +416,8 @@ function Tracking() {
                       value={reviewText}
                       onChange={event => setReviewText(event.target.value)}
                       maxLength={1000}
-                      rows={4}
-                      className="w-full rounded-xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-blue/50"
+                      rows={3}
+                      className="w-full rounded-xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-blue/50 text-sm"
                       placeholder="Bạn hài lòng với dịch vụ ở điểm nào?"
                     />
                     <p className="mt-1 text-right text-xs text-slate-400">{reviewText.length}/1000</p>
@@ -269,7 +430,7 @@ function Tracking() {
                   <button
                     type="submit"
                     disabled={reviewLoading}
-                    className="w-full rounded-xl bg-brand-blue px-5 py-3 font-bold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="w-full rounded-xl bg-brand-blue px-5 py-3 font-bold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60 text-sm uppercase"
                   >
                     {reviewLoading ? 'Đang gửi đánh giá...' : 'GỬI ĐÁNH GIÁ'}
                   </button>
@@ -279,6 +440,67 @@ function Tracking() {
           )}
         </div>
       </div>
+
+      {/* Modal Yêu cầu bảo hành lại */}
+      {showWarrantyModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                <span>🛡️</span> Yêu Cầu Bảo Hành Lại
+              </h3>
+              <button onClick={() => setShowWarrantyModal(false)} className="text-slate-400 hover:text-slate-600 text-lg">×</button>
+            </div>
+            <p className="text-xs text-slate-500 mb-4">
+              Nếu thiết bị của bạn bị tái phát lỗi trong thời gian bảo hành, hãy mô tả tình trạng. Lễ tân & KTV tại <strong>615 Âu Cơ</strong> sẽ liên hệ xử lý ngay.
+            </p>
+            <form onSubmit={handleClaimWarranty} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Mô tả lỗi tái phát *</label>
+                <textarea 
+                  required
+                  rows="4"
+                  value={warrantyReason}
+                  onChange={e => setWarrantyReason(e.target.value)}
+                  placeholder="Ví dụ: Máy bị giật màn hình lại sau 3 ngày sử dụng..."
+                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-xl focus:border-emerald-600 outline-none"
+                />
+              </div>
+              <div className="flex gap-3">
+                <button 
+                  type="button" 
+                  onClick={() => setShowWarrantyModal(false)}
+                  className="flex-1 py-2.5 bg-slate-100 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-200"
+                >
+                  Đóng
+                </button>
+                <button 
+                  type="submit" 
+                  disabled={warrantyLoading}
+                  className="flex-1 py-2.5 bg-emerald-600 text-white rounded-xl font-bold text-sm hover:bg-emerald-700 disabled:opacity-60"
+                >
+                  {warrantyLoading ? 'Đang gửi...' : 'Gửi yêu cầu'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Phóng to ảnh ngoại quan */}
+      {selectedPreviewImage && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50" onClick={() => setSelectedPreviewImage(null)}>
+          <div className="relative max-w-3xl max-h-[90vh]">
+            <img src={selectedPreviewImage} alt="Ảnh phóng to" className="max-w-full max-h-[85vh] rounded-xl object-contain shadow-2xl" />
+            <button 
+              onClick={() => setSelectedPreviewImage(null)}
+              className="absolute top-2 right-2 bg-black/60 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold hover:bg-black"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -16,6 +16,9 @@ function OnlineIntakeForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [softwarePackage, setSoftwarePackage] = useState('');
+  const [isStudent, setIsStudent] = useState(false);
+  const [schoolName, setSchoolName] = useState('');
+  const [studentId, setStudentId] = useState('');
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -30,6 +33,9 @@ function OnlineIntakeForm() {
       // Gọi API Tiếp nhận máy
       const response = await api.post('/tickets/intake', {
         ...formData,
+        isStudent,
+        schoolName: isStudent ? schoolName.trim() : null,
+        studentId: isStudent ? studentId.trim() : null,
         issueDescription: softwarePackage
           ? `${formData.issueDescription}\nGói phần mềm yêu cầu: ${softwarePackage}`
           : formData.issueDescription
@@ -84,6 +90,63 @@ function OnlineIntakeForm() {
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-1">Mô tả tình trạng lỗi *</label>
             <textarea required name="issueDescription" onChange={handleChange} rows="3" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/50" placeholder="Máy sạc không vào pin, bể màn hình..."></textarea>
+          </div>
+
+          {/* Ưu đãi Sinh viên toàn quốc (-15%) */}
+          <div className="p-4 bg-emerald-50/80 rounded-xl border border-emerald-200">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input 
+                type="checkbox" 
+                checked={isStudent} 
+                onChange={e => setIsStudent(e.target.checked)}
+                className="w-5 h-5 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500" 
+              />
+              <span className="font-bold text-slate-800 text-sm">
+                🎓 Bạn là Học sinh / Sinh viên toàn quốc? <span className="text-emerald-700 font-extrabold">(Giảm ngay 15%)</span>
+              </span>
+            </label>
+
+            {isStudent && (
+              <div className="mt-3 pt-3 border-t border-emerald-200/60 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Trường ĐH / CĐ *</label>
+                  <input 
+                    type="text" 
+                    required={isStudent}
+                    list="vn-schools-online"
+                    placeholder="VD: ĐH Văn Hiến, Bách Khoa, UEH..."
+                    value={schoolName}
+                    onChange={e => setSchoolName(e.target.value)}
+                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:border-brand-blue outline-none bg-white"
+                  />
+                  <datalist id="vn-schools-online">
+                    <option value="Trường Đại học Văn Hiến (VHU)" />
+                    <option value="Trường Đại học Bách Khoa - ĐHQG TP.HCM" />
+                    <option value="Trường Đại học Khoa học Tự nhiên - ĐHQG TP.HCM" />
+                    <option value="Trường Đại học Công nghệ Thông tin - ĐHQG TP.HCM" />
+                    <option value="Trường Đại học Sư phạm Kỹ thuật TP.HCM" />
+                    <option value="Trường Đại học Kinh tế TP.HCM (UEH)" />
+                    <option value="Trường Đại học Công nghệ TP.HCM (HUTECH)" />
+                    <option value="Trường Đại học Văn Lang" />
+                    <option value="Trường Đại học Tôn Đức Thắng" />
+                    <option value="Trường Đại học Công nghiệp TP.HCM (IUH)" />
+                    <option value="Trường Đại học FPT TP.HCM" />
+                    <option value="Học sinh / Sinh viên trường khác trên toàn quốc" />
+                  </datalist>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Mã số sinh viên (MSSV) *</label>
+                  <input 
+                    type="text" 
+                    required={isStudent}
+                    placeholder="VD: 221A010123"
+                    value={studentId}
+                    onChange={e => setStudentId(e.target.value)}
+                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:border-brand-blue outline-none bg-white"
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           <SoftwarePackageSelector value={softwarePackage} onChange={setSoftwarePackage} />

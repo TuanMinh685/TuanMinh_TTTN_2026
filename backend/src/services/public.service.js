@@ -42,6 +42,63 @@ const trackTicket = async (ticketCode) => {
     ticket.ho_ten = maskName(ticket.ho_ten);
     ticket.so_dien_thoai = maskPhone(ticket.so_dien_thoai);
 
+    // Lấy ảnh ngoại quan
+    const photosRes = await pool.query(`
+        SELECT id, duong_dan_anh, loai_anh, ghi_chu, ngay_tao
+        FROM hinh_anh_phieu
+        WHERE phieu_sua_chua_id = $1
+        ORDER BY ngay_tao ASC
+    `, [ticket.id]);
+    ticket.hinh_anh_ngoai_quan = photosRes.rows || [];
+
+    // Lấy danh sách linh kiện đã thay kèm số Serial
+    const partsRes = await pool.query(`
+        SELECT p.id, p.so_luong, p.don_gia, p.so_serial, l.ten_linh_kien
+        FROM phieu_linh_kien p
+        JOIN linh_kien l ON p.linh_kien_id = l.id
+        WHERE p.phieu_sua_chua_id = $1
+        ORDER BY p.id ASC
+    `, [ticket.id]);
+    ticket.linh_kien = partsRes.rows || [];
+
+    // 1. Sổ bảo hành điện tử (e-Warranty)
+    if (ticket.han_bao_hanh) {
+        const hanDate = new Date(ticket.han_bao_hanh);
+        const now = new Date();
+        const diffTime = hanDate - now;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const totalDays = 90;
+        const remainPercent = Math.max(0, Math.min(100, Math.round((diffDays / totalDays) * 100)));
+        ticket.bao_hanh = {
+            han_bao_hanh: ticket.han_bao_hanh,
+            so_ngay_con_lai: Math.max(0, diffDays),
+            con_han: diffDays > 0,
+            ti_le_con_lai: remainPercent,
+            trang_thai_text: diffDays > 0 ? `Còn ${diffDays} ngày bảo hành` : 'Đã hết hạn bảo hành'
+        };
+    } else {
+        ticket.bao_hanh = null;
+    }
+
+    // 2. Chính sách ưu đãi Sinh viên toàn quốc (Giảm 15%)
+    if (ticket.la_sinh_vien) {
+        const discount = Math.round(Number(ticket.tong_tien || 0) * 0.15);
+        ticket.uu_dai_sinh_vien = {
+            la_sinh_vien: true,
+            truong_hoc: ticket.truong_hoc || 'Học sinh / Sinh viên',
+            ma_sinh_vien: ticket.ma_sinh_vien || '',
+            ty_le_giam: '15%',
+            so_tien_giam: discount,
+            tien_sau_giam: Math.max(0, Number(ticket.tong_tien || 0) - discount)
+        };
+    } else {
+        ticket.uu_dai_sinh_vien = {
+            la_sinh_vien: false,
+            so_tien_giam: 0,
+            tien_sau_giam: Number(ticket.tong_tien || 0)
+        };
+    }
+
     // Lấy lịch sử
     const historyResult = await pool.query(`
         SELECT trang_thai_moi, ghi_chu, ngay_tao
@@ -56,6 +113,30 @@ const trackTicket = async (ticketCode) => {
     delete ticket.id;
 
     return ticket;
+};
+
+const claimWarranty = async (ticketCode, issueDescription) => {
+    const res = await pool.query('SELECT id, thiet_bi_id, han_bao_hanh, trang_thai FROM phieu_sua_chua WHERE ma_tra_cuu = $1', [ticketCode]);
+    if (res.rows.length === 0) throw new Error('Không tìm thấy phiếu!');
+    const ticket = res.rows[0];
+
+    if (ticket.han_bao_hanh && new Date(ticket.han_bao_hanh) < new Date()) {
+        throw new Error('Thiết bị này đã hết thời hạn bảo hành tiêu chuẩn!');
+    }
+
+    const note = `Khách hàng yêu cầu bảo hành lại: ${issueDescription}`;
+    await pool.query(`
+        UPDATE phieu_sua_chua
+        SET trang_thai = $1, ngay_cap_nhat = CURRENT_TIMESTAMP
+        WHERE id = $2
+    `, ['YÊU_CẦU_BẢO_HÀNH', ticket.id]);
+
+    await pool.query(`
+        INSERT INTO nhat_ky_sua_chua (phieu_sua_chua_id, trang_thai_moi, ghi_chu)
+        VALUES ($1, 'YÊU_CẦU_BẢO_HÀNH', $2)
+    `, [ticket.id, note]);
+
+    return { ticketCode, status: 'YÊU_CẦU_BẢO_HÀNH' };
 };
 
 const approveQuote = async (ticketCode, isApproved) => {
@@ -145,5 +226,6 @@ module.exports = {
     getTopReviews,
     trackByPhone,
     trackTicket,
-    approveQuote
+    approveQuote,
+    claimWarranty
 };
