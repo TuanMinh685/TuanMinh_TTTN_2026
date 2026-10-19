@@ -9,22 +9,23 @@ function Pricing() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    let active = true;
+  const loadPricing = () => {
+    setLoading(true);
+    setError('');
     api.get('/public/pricing')
       .then(response => {
-        if (active) setParts(response.data.data || []);
+        setParts(response.data.data || []);
       })
       .catch(requestError => {
-        if (active) setError(requestError.response?.data?.message || 'Không tải được bảng giá.');
+        setError(requestError.response?.data?.message || 'Không tải được bảng giá. Vui lòng bấm Thử lại.');
       })
       .finally(() => {
-        if (active) setLoading(false);
+        setLoading(false);
       });
+  };
 
-    return () => {
-      active = false;
-    };
+  useEffect(() => {
+    loadPricing();
   }, []);
 
   const filteredParts = parts.filter(part =>
@@ -81,8 +82,15 @@ function Pricing() {
         </div>
 
         {error && (
-          <div role="alert" className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-center text-red-700">
-            {error}
+          <div role="alert" className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-center text-red-700 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <span>{error}</span>
+            <button
+              type="button"
+              onClick={loadPricing}
+              className="px-4 py-1.5 bg-brand-blue text-white text-xs font-bold rounded-lg hover:bg-blue-800"
+            >
+              🔄 Tải lại ngay
+            </button>
           </div>
         )}
 

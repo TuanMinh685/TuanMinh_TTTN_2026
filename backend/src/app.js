@@ -13,9 +13,10 @@ app.set('trust proxy', 1);
 // Kích hoạt Helmet để tự động thêm các HTTP Headers bảo mật (Chống XSS, Clickjacking...)
 app.use(helmet());
 
-// Cấu hình CORS chặt chẽ
+// Cấu hình CORS linh hoạt (hỗ trợ cả localhost, 127.0.0.1 và domain cấu hình)
 const corsOptions = {
-    origin: process.env.CORS_ORIGIN === '*' ? '*' : (process.env.CORS_ORIGIN || 'http://localhost:3000').split(','),
+    origin: true,
+    credentials: true,
     optionsSuccessStatus: 200
 };
 app.use(cors(corsOptions));
