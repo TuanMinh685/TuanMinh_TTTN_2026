@@ -20,6 +20,9 @@ CREATE TABLE IF NOT EXISTS khach_hang (
     so_dien_thoai VARCHAR(20) NOT NULL,
     ho_ten VARCHAR(100) NOT NULL,
     zalo_id VARCHAR(100),
+    la_sinh_vien BOOLEAN DEFAULT FALSE,
+    truong_hoc VARCHAR(150),
+    ma_sinh_vien VARCHAR(50),
     diem_thuong INT DEFAULT 0,
     diem_tich_luy INT DEFAULT 0,
     hang_thanh_vien VARCHAR(50) DEFAULT 'DONG',
@@ -46,6 +49,9 @@ CREATE TABLE IF NOT EXISTS phieu_sua_chua (
     trang_thai VARCHAR(50) DEFAULT 'CHỜ_KHÁM',
     tong_tien NUMERIC DEFAULT 0,
     han_bao_hanh TIMESTAMPTZ,
+    la_sinh_vien BOOLEAN DEFAULT FALSE,
+    truong_hoc VARCHAR(150),
+    ma_sinh_vien VARCHAR(50),
     ngay_tao TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     ngay_cap_nhat TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
@@ -86,6 +92,7 @@ CREATE TABLE IF NOT EXISTS phieu_linh_kien (
     linh_kien_id INT REFERENCES linh_kien(id) ON DELETE RESTRICT,
     so_luong INT DEFAULT 1 NOT NULL,
     don_gia NUMERIC NOT NULL,
+    so_serial VARCHAR(100),
     ngay_them TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -95,6 +102,7 @@ CREATE TABLE IF NOT EXISTS hinh_anh_phieu (
     phieu_sua_chua_id INT REFERENCES phieu_sua_chua(id) ON DELETE CASCADE,
     duong_dan_anh TEXT NOT NULL,
     loai_anh VARCHAR(50),
+    ghi_chu TEXT,
     ngay_tao TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 

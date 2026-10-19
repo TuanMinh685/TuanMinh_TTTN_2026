@@ -54,7 +54,7 @@ function executeMockQuery(sql, params = []) {
         return { rows: [] };
     }
 
-    // 8. linh_kien reduce stock
+    // 8. linh_kien reduce or restore stock
     if (/UPDATE linh_kien SET so_luong = so_luong - \$1 WHERE id = \$2/i.test(cleanSql)) {
         const item = s.linh_kien.find(x => x.id === Number(params[1]));
         if (item) {
@@ -63,8 +63,16 @@ function executeMockQuery(sql, params = []) {
         }
         return { rows: [] };
     }
+    if (/UPDATE linh_kien SET so_luong = so_luong \+ \$1 WHERE id = \$2/i.test(cleanSql)) {
+        const item = s.linh_kien.find(x => x.id === Number(params[1]));
+        if (item) {
+            item.so_luong = Number(item.so_luong) + Number(params[0]);
+            saveStore();
+        }
+        return { rows: [] };
+    }
 
-    // 9. phieu_linh_kien get for ticket
+    // 9. phieu_linh_kien get or delete for ticket
     if (/SELECT .* FROM phieu_linh_kien .* WHERE .*phieu_sua_chua_id = \$1/i.test(cleanSql)) {
         const ticketId = Number(params[0]);
         const parts = s.phieu_linh_kien.filter(p => p.phieu_sua_chua_id === ticketId).map(p => {
@@ -72,6 +80,12 @@ function executeMockQuery(sql, params = []) {
             return { ...p, ten_linh_kien: lk.ten_linh_kien || 'Linh kiện' };
         });
         return { rows: parts };
+    }
+    if (/DELETE FROM phieu_linh_kien WHERE phieu_sua_chua_id = \$1/i.test(cleanSql)) {
+        const ticketId = Number(params[0]);
+        s.phieu_linh_kien = s.phieu_linh_kien.filter(p => p.phieu_sua_chua_id !== ticketId);
+        saveStore();
+        return { rows: [] };
     }
 
     // 10. phieu_linh_kien insert (with so_serial)
@@ -114,10 +128,20 @@ function executeMockQuery(sql, params = []) {
         return { rows: [img] };
     }
 
-    // 13. khach_hang find by phone
+    // 13. khach_hang find by phone or update student info
     if (/SELECT .* FROM khach_hang WHERE so_dien_thoai = \$1/i.test(cleanSql)) {
         const k = s.khach_hang.find(x => x.so_dien_thoai === params[0]);
         return { rows: k ? [{ ...k }] : [] };
+    }
+    if (/UPDATE khach_hang SET la_sinh_vien = \$1, truong_hoc = \$2, ma_sinh_vien = \$3 WHERE id = \$4/i.test(cleanSql)) {
+        const k = s.khach_hang.find(x => x.id === Number(params[3]));
+        if (k) {
+            k.la_sinh_vien = Boolean(params[0]);
+            k.truong_hoc = params[1] || '';
+            k.ma_sinh_vien = params[2] || '';
+            saveStore();
+        }
+        return { rows: [] };
     }
 
     // 14. khach_hang insert (with la_sinh_vien, truong_hoc, ma_sinh_vien)
@@ -143,12 +167,13 @@ function executeMockQuery(sql, params = []) {
     // 15. thiet_bi insert
     if (/INSERT INTO thiet_bi/i.test(cleanSql)) {
         const newId = s.thiet_bi.length > 0 ? Math.max(...s.thiet_bi.map(x => x.id)) + 1 : 1;
+        const hasSerial = params.length >= 4;
         const tb = {
             id: newId,
             khach_hang_id: Number(params[0]),
             ten_may: params[1],
-            so_imei_serial: params[2] || null,
-            tinh_trang_may: params[3] || '',
+            so_imei_serial: hasSerial ? (params[2] || null) : null,
+            tinh_trang_may: hasSerial ? (params[3] || '') : (params[2] || ''),
             ngay_tao: new Date().toISOString()
         };
         s.thiet_bi.push(tb);
@@ -169,6 +194,8 @@ function executeMockQuery(sql, params = []) {
     // 17. phieu_sua_chua insert
     if (/INSERT INTO phieu_sua_chua/i.test(cleanSql)) {
         const newId = s.phieu_sua_chua.length > 0 ? Math.max(...s.phieu_sua_chua.map(x => x.id)) + 1 : 1;
+        const tb = s.thiet_bi.find(x => x.id === Number(params[0])) || {};
+        const kh = s.khach_hang.find(x => x.id === tb.khach_hang_id) || {};
         const p = {
             id: newId,
             thiet_bi_id: Number(params[0]),
@@ -179,9 +206,9 @@ function executeMockQuery(sql, params = []) {
             tong_tien: 0,
             giam_gia_sinh_vien: 0,
             tien_sau_giam: 0,
-            la_sinh_vien: false,
-            truong_hoc: '',
-            ma_sinh_vien: '',
+            la_sinh_vien: Boolean(kh.la_sinh_vien),
+            truong_hoc: kh.truong_hoc || '',
+            ma_sinh_vien: kh.ma_sinh_vien || '',
             han_bao_hanh: null,
             ngay_tao: new Date().toISOString(),
             ngay_cap_nhat: new Date().toISOString()
@@ -321,6 +348,16 @@ function executeMockQuery(sql, params = []) {
                 p.giam_gia_sinh_vien = 0;
                 p.tien_sau_giam = p.tong_tien;
             }
+            saveStore();
+        }
+        return { rows: [] };
+    }
+    if (/UPDATE phieu_sua_chua SET tong_tien = 0 WHERE id = \$1/i.test(cleanSql)) {
+        const p = s.phieu_sua_chua.find(x => x.id === Number(params[0]));
+        if (p) {
+            p.tong_tien = 0;
+            p.giam_gia_sinh_vien = 0;
+            p.tien_sau_giam = 0;
             saveStore();
         }
         return { rows: [] };

@@ -50,6 +50,8 @@ function Dashboard() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [notificationFilter, setNotificationFilter] = useState('ALL');
   const [latestNotice, setLatestNotice] = useState(null);
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [statusNote, setStatusNote] = useState('');
   const [selectedSoftwareTicketId, setSelectedSoftwareTicketId] = useState('');
   const [selectedSoftwareGroup, setSelectedSoftwareGroup] = useState('ALL');
   const [selectedSoftwarePackages, setSelectedSoftwarePackages] = useState([]);
@@ -58,6 +60,13 @@ function Dashboard() {
   const knownStatuses = useRef(null);
   const knownBookingStatuses = useRef(null);
   const knownStock = useRef(null);
+
+  const showToast = (message) => {
+    setLatestNotice({
+      title: message,
+      description: message
+    });
+  };
 
   const fetchStats = useCallback(async () => {
     const res = await api.get(`/admin/dashboard-stats?period=${reportPeriod}`);
@@ -70,19 +79,22 @@ function Dashboard() {
   }, []);
 
   const addPartToTicket = async () => {
-    if (!selectedPartId || partQuantity < 1) return alert('Vui lòng chọn linh kiện và số lượng hợp lệ');
+    if (!selectedPartId || partQuantity < 1) return showToast('⚠️ Vui lòng chọn linh kiện và số lượng hợp lệ');
     try {
       await api.post(`/tickets/${selectedTicketId}/parts`, { 
         partId: selectedPartId, 
         quantity: partQuantity,
         so_serial: partSerial.trim() || undefined
       });
-      alert('Thêm linh kiện và lưu mã Serial thành công!');
+      showToast('✅ Thêm linh kiện và lưu mã Serial thành công!');
       setShowPartModal(false);
       setPartSerial('');
       await refreshTickets();
+      if (role === 'KY_THUAT_VIEN' || role === 'QUAN_LY' || role === 'ADMIN') {
+        setParts(await fetchParts());
+      }
     } catch (err) {
-      alert(err.response?.data?.message || 'Lỗi thêm linh kiện');
+      showToast(`❌ ${err.response?.data?.message || 'Lỗi thêm linh kiện'}`);
     }
   };
 
@@ -113,9 +125,9 @@ function Dashboard() {
         });
         setTicketPhotos(prev => [...prev, res.data.data]);
         setNewPhotoNote('');
-        alert('Đã lưu ảnh ngoại quan máy thành công!');
+        showToast('📸 Đã lưu ảnh ngoại quan máy thành công!');
       } catch (err) {
-        alert(err.response?.data?.message || 'Lỗi lưu ảnh');
+        showToast(`❌ ${err.response?.data?.message || 'Lỗi lưu ảnh'}`);
       } finally {
         setSavingPhoto(false);
       }
@@ -427,21 +439,37 @@ function Dashboard() {
 
   const updateStatus = async (id, status) => {
     try {
-      await api.patch(`/tickets/${id}/status`, { trang_thai: status });
+      await api.patch(`/tickets/${id}/status`, {
+        trang_thai: status,
+        ghi_chu: statusNote.trim() || undefined
+      });
+      setStatusNote('');
+      showToast(`✅ Đã chuyển trạng thái sang: ${status.replace(/_/g, ' ')}`);
       await refreshTickets();
+      if (role === 'QUAN_LY' || role === 'ADMIN') {
+        setStats(await fetchStats());
+      }
     } catch (err) {
       console.error('Không cập nhật được trạng thái phiếu:', err);
-      alert('Lỗi cập nhật trạng thái');
+      showToast(`❌ ${err.response?.data?.message || 'Lỗi cập nhật trạng thái'}`);
     }
   };
 
   const updateBookingStatus = async (id, status) => {
     try {
-      await api.patch(`/tickets/booking/${id}/status`, { trang_thai: status });
+      const res = await api.patch(`/tickets/booking/${id}/status`, { trang_thai: status });
       await refreshBookings();
+      await refreshTickets();
+      if (status === 'KHACH_DA_DEN') {
+        const createdCode = res.data?.ticketCode;
+        showToast(`🎉 Đã tiếp nhận khách & tự động tạo phiếu sửa chữa ${createdCode ? `(${createdCode})` : ''}!`);
+        setActiveTab('TICKETS');
+      } else {
+        showToast(`✅ Đã cập nhật trạng thái lịch hẹn: ${status}`);
+      }
     } catch (err) {
       console.error('Không cập nhật được trạng thái lịch hẹn:', err);
-      alert('Lỗi cập nhật lịch hẹn');
+      showToast(`❌ ${err.response?.data?.message || 'Lỗi cập nhật lịch hẹn'}`);
     }
   };
 
@@ -450,8 +478,21 @@ function Dashboard() {
     window.location.href = '/login';
   };
 
+  const canReceptionAction = role === 'LE_TAN' || role === 'QUAN_LY' || role === 'ADMIN';
+  const canTechAction = role === 'KY_THUAT_VIEN' || role === 'QUAN_LY' || role === 'ADMIN';
+
+  const matchesStatusFilter = (ticket) => {
+    if (statusFilter === 'ALL') return true;
+    if (statusFilter === 'CHO_KHAM') return ticket.trang_thai === 'CHỜ_KHÁM';
+    if (statusFilter === 'DANG_XU_LY') return ticket.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' || ticket.trang_thai === 'ĐANG_SỬA';
+    if (statusFilter === 'CHO_CHOT_GIA') return ticket.trang_thai === 'CHỜ_KHÁCH_CHỐT_GIÁ';
+    if (statusFilter === 'BAO_HANH') return ticket.trang_thai === 'YÊU_CẦU_BẢO_HÀNH';
+    if (statusFilter === 'HOAN_TAT') return ticket.trang_thai === 'ĐÃ_SỬA_XONG' || ticket.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN';
+    return true;
+  };
+
   const unreadNotificationCount = notifications.filter(notification => !notification.read).length;
-  const filteredTickets = tickets.filter(ticket => [
+  const filteredTickets = tickets.filter(ticket => matchesStatusFilter(ticket) && [
     ticket.ma_phieu,
     ticket.ho_ten_khach,
     ticket.so_dien_thoai,
@@ -572,6 +613,44 @@ function Dashboard() {
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm sm:max-w-sm"
             />
           </div>
+
+          {/* Quick Status Filter Pills */}
+          <div className="mb-4 flex flex-wrap gap-2">
+            {[
+              { id: 'ALL', label: 'Tất cả', count: tickets.length },
+              { id: 'CHO_KHAM', label: 'Chờ khám', count: tickets.filter(t => t.trang_thai === 'CHỜ_KHÁM').length },
+              { id: 'DANG_XU_LY', label: 'Đang kiểm tra / sửa', count: tickets.filter(t => t.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' || t.trang_thai === 'ĐANG_SỬA').length },
+              { id: 'CHO_CHOT_GIA', label: 'Chờ khách chốt giá', count: tickets.filter(t => t.trang_thai === 'CHỜ_KHÁCH_CHỐT_GIÁ').length },
+              { id: 'BAO_HANH', label: 'Yêu cầu bảo hành', count: tickets.filter(t => t.trang_thai === 'YÊU_CẦU_BẢO_HÀNH').length },
+              { id: 'HOAN_TAT', label: 'Đã hoàn tất', count: tickets.filter(t => t.trang_thai === 'ĐÃ_SỬA_XONG' || t.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN').length },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setStatusFilter(tab.id)}
+                className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition ${
+                  statusFilter === tab.id
+                    ? 'bg-brand-blue text-white shadow-sm'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                {tab.label} ({tab.count})
+              </button>
+            ))}
+          </div>
+
+          {/* Optional Custom Technician Note for Timeline */}
+          <div className="mb-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 rounded-lg bg-slate-50 p-3 border border-slate-200">
+            <span className="text-xs font-bold text-slate-600 whitespace-nowrap">📝 Ghi chú nhật ký cho khách:</span>
+            <input
+              type="text"
+              value={statusNote}
+              onChange={e => setStatusNote(e.target.value)}
+              placeholder="Nhập ghi chú (VD: Đã vệ sinh keo tản nhiệt, đang test nhiệt độ GPU...) trước khi bấm nút đổi trạng thái"
+              className="flex-1 rounded border border-slate-300 bg-white px-3 py-1.5 text-xs focus:border-brand-blue focus:outline-none"
+            />
+          </div>
+
           <div className="overflow-x-auto">
           <table className="w-full min-w-[900px] text-left border-collapse">
             <thead>
@@ -585,7 +664,10 @@ function Dashboard() {
               </tr>
             </thead>
             <tbody>
-              {filteredTickets.map(ticket => (
+              {filteredTickets.map(ticket => {
+                const rawTotal = Number(ticket.tong_tien || 0);
+                const finalTotal = ticket.la_sinh_vien ? Math.round(rawTotal * 0.85) : rawTotal;
+                return (
                 <tr key={ticket.id} className="border-b hover:bg-slate-50">
                   <td className="py-3 px-4 font-bold text-brand-blue">{ticket.ma_phieu}</td>
                   <td className="py-3 px-4">
@@ -604,6 +686,7 @@ function Dashboard() {
                     <span className={`px-2 py-1 rounded text-xs font-bold ${
                       ticket.trang_thai === 'CHỜ_KHÁM' ? 'bg-yellow-100 text-yellow-700' :
                       ticket.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' ? 'bg-orange-100 text-orange-700' :
+                      ticket.trang_thai === 'CHỜ_KHÁCH_CHỐT_GIÁ' ? 'bg-amber-100 text-amber-800 border border-amber-300' :
                       ticket.trang_thai === 'ĐANG_SỬA' ? 'bg-blue-100 text-blue-700' :
                       ticket.trang_thai === 'ĐÃ_SỬA_XONG' ? 'bg-green-100 text-green-700' : 
                       ticket.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' ? 'bg-purple-100 text-purple-700' :
@@ -620,22 +703,42 @@ function Dashboard() {
                       </div>
                     )}
                   </td>
-                  <td className="py-3 px-4 font-bold text-red-500 text-right">{Number(ticket.tong_tien || 0).toLocaleString('vi-VN')} đ</td>
+                  <td className="py-3 px-4 text-right">
+                    {ticket.la_sinh_vien && rawTotal > 0 ? (
+                      <div>
+                        <div className="text-xs text-slate-400 line-through">{rawTotal.toLocaleString('vi-VN')} đ</div>
+                        <div className="font-bold text-red-600">{finalTotal.toLocaleString('vi-VN')} đ</div>
+                      </div>
+                    ) : (
+                      <span className="font-bold text-red-500">{rawTotal.toLocaleString('vi-VN')} đ</span>
+                    )}
+                  </td>
                   <td className="py-3 px-4 text-center space-y-1.5 flex flex-col items-center">
-                    {role === 'LE_TAN' && ticket.trang_thai === 'CHỜ_KHÁM' && (
+                    {canReceptionAction && ticket.trang_thai === 'CHỜ_KHÁM' && (
                       <button onClick={() => updateStatus(ticket.id, 'ĐANG_CHUẨN_ĐOÁN')} className="bg-brand-orange text-white px-3 py-1 rounded font-bold text-xs w-full">Chuyển Kỹ Thuật</button>
                     )}
-                    {role === 'LE_TAN' && ticket.trang_thai === 'ĐÃ_SỬA_XONG' && (
-                      <button onClick={() => updateStatus(ticket.id, 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN')} className="bg-purple-500 text-white px-3 py-1 rounded font-bold text-xs w-full">Giao Khách</button>
+                    {(canReceptionAction || canTechAction) && ticket.trang_thai === 'YÊU_CẦU_BẢO_HÀNH' && (
+                      <button onClick={() => updateStatus(ticket.id, 'ĐANG_SỬA')} className="bg-red-600 text-white px-3 py-1 rounded font-bold text-xs w-full">Tiếp Nhận Bảo Hành</button>
                     )}
-                    {role === 'KY_THUAT_VIEN' && ticket.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' && (
-                      <button onClick={() => updateStatus(ticket.id, 'ĐANG_SỬA')} className="bg-blue-500 text-white px-3 py-1 rounded font-bold text-xs w-full">Tiến hành Sửa</button>
+                    {canTechAction && ticket.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' && (
+                      <>
+                        <button onClick={() => { setSelectedTicketId(ticket.id); setShowPartModal(true); }} className="bg-yellow-500 text-white px-3 py-1 rounded font-bold text-xs w-full">Thêm Linh Kiện</button>
+                        <button onClick={() => updateStatus(ticket.id, 'CHỜ_KHÁCH_CHỐT_GIÁ')} className="bg-amber-600 text-white px-3 py-1 rounded font-bold text-xs w-full">Gửi Báo Giá</button>
+                        <button onClick={() => updateStatus(ticket.id, 'ĐANG_SỬA')} className="bg-blue-500 text-white px-3 py-1 rounded font-bold text-xs w-full">Tiến hành Sửa</button>
+                      </>
                     )}
-                    {role === 'KY_THUAT_VIEN' && ticket.trang_thai === 'ĐANG_SỬA' && (
+                    {(canReceptionAction || canTechAction) && ticket.trang_thai === 'CHỜ_KHÁCH_CHỐT_GIÁ' && (
+                      <button onClick={() => updateStatus(ticket.id, 'ĐANG_SỬA')} className="bg-blue-600 text-white px-3 py-1 rounded font-bold text-xs w-full">Khách Chốt (Sửa)</button>
+                    )}
+                    {canTechAction && ticket.trang_thai === 'ĐANG_SỬA' && (
                       <>
                         <button onClick={() => { setSelectedTicketId(ticket.id); setShowPartModal(true); }} className="bg-yellow-500 text-white px-3 py-1 rounded font-bold text-xs w-full mb-1">Thêm Linh Kiện</button>
+                        <button onClick={() => updateStatus(ticket.id, 'CHỜ_KHÁCH_CHỐT_GIÁ')} className="bg-amber-600 text-white px-3 py-1 rounded font-bold text-xs w-full">Gửi Báo Giá</button>
                         <button onClick={() => updateStatus(ticket.id, 'ĐÃ_SỬA_XONG')} className="bg-brand-green text-white px-3 py-1 rounded font-bold text-xs w-full">Sửa Xong</button>
                       </>
+                    )}
+                    {canReceptionAction && ticket.trang_thai === 'ĐÃ_SỬA_XONG' && (
+                      <button onClick={() => updateStatus(ticket.id, 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN')} className="bg-purple-500 text-white px-3 py-1 rounded font-bold text-xs w-full">Giao Khách</button>
                     )}
                     <button
                       type="button"
@@ -659,7 +762,8 @@ function Dashboard() {
                     </button>
                   </td>
                 </tr>
-              ))}
+              );
+              })}
               {filteredTickets.length === 0 && (
                 <tr><td colSpan="6" className="text-center py-8 text-slate-400">
                   {tickets.length === 0 ? 'Không có phiếu nào.' : 'Không tìm thấy phiếu phù hợp.'}
@@ -1096,7 +1200,12 @@ function Dashboard() {
       
       {activeTab === 'BOOKINGS' && (
         <div className="bg-white p-6 rounded-xl shadow border-t-4 border-brand-orange">
-          <h3 className="text-xl font-bold mb-4">Lịch hẹn chưa xử lý / Sắp tới</h3>
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+            <h3 className="text-xl font-bold">Lịch hẹn chưa xử lý / Sắp tới</h3>
+            <span className="text-xs font-medium text-slate-500">
+              💡 Khi bấm <b>Khách Đã Đến</b>, hệ thống sẽ tự động khởi tạo Phiếu sửa chữa QR &amp; đồng bộ ưu đãi sinh viên.
+            </span>
+          </div>
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b-2 border-slate-200">
@@ -1114,7 +1223,17 @@ function Dashboard() {
                     {new Date(bk.ngay_hen).toLocaleDateString('vi-VN')} <br/>
                     <span className="text-red-500">{bk.gio_hen}</span>
                   </td>
-                  <td className="py-3 px-4">{bk.ho_ten_khach} <br/><span className="text-xs text-slate-400">{bk.so_dien_thoai}</span></td>
+                  <td className="py-3 px-4">
+                    <div className="font-semibold text-slate-800">{bk.ho_ten_khach}</div>
+                    <div className="text-xs text-slate-400">{bk.so_dien_thoai}</div>
+                    {bk.la_sinh_vien && (
+                      <div className="mt-1">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                          🎓 {bk.truong_hoc || 'Sinh viên'} (-15%)
+                        </span>
+                      </div>
+                    )}
+                  </td>
                   <td className="py-3 px-4">{bk.mo_ta_loi}</td>
                   <td className="py-3 px-4">
                     <span className={`px-2 py-1 rounded text-xs font-bold ${
@@ -1136,7 +1255,7 @@ function Dashboard() {
                       </>
                     )}
                     {bk.trang_thai === 'DA_XAC_NHAN' && (
-                      <button onClick={() => updateBookingStatus(bk.id, 'KHACH_DA_DEN')} className="bg-brand-green text-white px-3 py-1 rounded font-bold text-sm w-full">Khách Đã Đến</button>
+                      <button onClick={() => updateBookingStatus(bk.id, 'KHACH_DA_DEN')} className="bg-brand-green text-white px-3 py-1 rounded font-bold text-sm w-full">Khách Đã Đến (Tạo Phiếu QR)</button>
                     )}
                   </td>
                 </tr>

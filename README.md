@@ -73,6 +73,27 @@ Hệ thống tiếp nhận, quản lý và theo dõi phiếu sửa chữa thiế
 
 ---
 
+## 🌟 Tính năng Nâng cao & Tối ưu Nghiệp vụ (Cập nhật Mới)
+
+1. **🛡️ Sổ bảo hành điện tử (e-Warranty) & Yêu cầu bảo hành lại bằng QR:**
+   - Tự động kích hoạt hạn bảo hành điện tử 6 tháng kể từ lúc phiếu chuyển sang `ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN`.
+   - Hiển thị huy hiệu đếm ngược số ngày bảo hành còn lại trên trang Tracking và cho phép khách bấm gửi **Yêu cầu bảo hành lại** trực tuyến (`POST /api/public/warranty-claim`).
+2. **🎓 Chương trình Ưu đãi Sinh viên Toàn quốc (-15%):**
+   - Công tắc bật/tắt chế độ xem bảng giá Sinh viên (-15%) trực tiếp trên trang `/bang-gia`.
+   - Tích hợp xác thực thông tin Sinh viên (Trường học + MSSV) trên cả 3 kênh: Đặt lịch hẹn (`/dat-lich`), Tiếp nhận QR tại quầy (`/intake`), và Cấp cứu phần mềm từ xa (`/cap-cuu-online`).
+   - Tự động khấu trừ ưu đãi -15% trên trang Tracking, bảng quản lý phiếu Dashboard và hóa đơn in nhiệt 80mm.
+3. **📸 Biên bản Ảnh ngoại quan thiết bị lúc nhận máy (Chống khiếu nại):**
+   - Đính kèm hình ảnh ngoại quan máy ngay trên form tiếp nhận `/intake` hoặc cập nhật bổ sung từ Dashboard của nhân viên.
+   - Khách hàng xem trực tiếp thư viện ảnh tình trạng ban đầu kèm modal phóng to rõ nét trên trang Tracking.
+4. **🔢 Quản lý Mã Serial / IMEI linh kiện thay thế:**
+   - Lưu vết mã `so_serial` của từng linh kiện (RAM, SSD, Pin, Màn hình...) gắn vào phiếu sửa chữa, hiển thị minh bạch trên trang Tracking và hóa đơn in nhiệt 80mm.
+5. **⚙️ Tối ưu Logic vận hành khép kín:**
+   - **Tự động hoàn kho linh kiện:** Khi khách hàng **Từ chối báo giá**, hệ thống tự động cộng trả số lượng linh kiện về kho (`linh_kien`), xóa danh mục tạm và đưa tổng tiền về `0 đ`.
+   - **Chuyển đổi Lịch hẹn sang Phiếu sửa chữa 1-Click:** Khi bấm `Khách Đã Đến (Tạo Phiếu QR)`, hệ thống tự động tạo thiết bị, sinh mã phiếu `RP-xxxxxx`, kế thừa thông tin sinh viên và chuyển sang tab quản lý phiếu.
+   - **Ghi chú nhật ký kỹ thuật tùy chỉnh & Bộ lọc trạng thái nhanh:** Cho phép KTV/Quản lý nhập ghi chú chi tiết vào Timeline sửa chữa mỗi lần đổi trạng thái và lọc nhanh phiếu theo các tab trạng thái có đếm số lượng.
+
+---
+
 ## 📁 Sơ đồ Route & Cấu trúc đường dẫn
 
 ### 1. Phía Khách hàng (Public Routes)

@@ -153,7 +153,29 @@ const approveQuote = async (ticketCode, isApproved) => {
         }
 
         const newStatus = isApproved ? 'ĐANG_SỬA' : 'HỦY';
-        const note = isApproved ? 'Khách hàng ĐÃ ĐỒNG Ý báo giá.' : 'Khách hàng TỪ CHỐI báo giá.';
+        let note = isApproved ? 'Khách hàng ĐÃ ĐỒNG Ý báo giá.' : 'Khách hàng TỪ CHỐI báo giá.';
+
+        if (!isApproved) {
+            // Hoàn kho tự động cho các linh kiện đã tạm gắn vào phiếu báo giá
+            const attachedParts = await client.query(
+                'SELECT id, linh_kien_id, so_luong FROM phieu_linh_kien WHERE phieu_sua_chua_id = $1',
+                [ticket.id]
+            );
+            if (attachedParts.rows.length > 0) {
+                for (const item of attachedParts.rows) {
+                    await client.query(
+                        'UPDATE linh_kien SET so_luong = so_luong + $1 WHERE id = $2',
+                        [item.so_luong, item.linh_kien_id]
+                    );
+                }
+                await client.query('DELETE FROM phieu_linh_kien WHERE phieu_sua_chua_id = $1', [ticket.id]);
+                await client.query(
+                    'UPDATE phieu_sua_chua SET tong_tien = 0 WHERE id = $1',
+                    [ticket.id]
+                );
+                note = 'Khách hàng TỪ CHỐI báo giá. Hệ thống đã tự động hoàn trả linh kiện về kho.';
+            }
+        }
 
         await client.query(`
             UPDATE phieu_sua_chua 

@@ -53,9 +53,9 @@ const getTickets = async (req, res, next) => {
 const updateTicketStatus = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { trang_thai } = req.body;
-        await ticketService.updateTicketStatus(id, trang_thai);
-        res.status(200).json({ success: true, message: 'Cập nhật thành công' });
+        const { trang_thai, ghi_chu } = req.body;
+        const data = await ticketService.updateTicketStatus(id, trang_thai, ghi_chu);
+        res.status(200).json({ success: true, message: 'Cập nhật trạng thái thành công', data });
     } catch (error) {
         next(error);
     }
@@ -114,9 +114,15 @@ const getBookings = async (req, res, next) => {
 const updateBookingStatus = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { trang_thai } = req.body;
-        await ticketService.updateBookingStatus(id, trang_thai);
-        res.status(200).json({ success: true, message: 'Cập nhật lịch hẹn thành công' });
+        const { trang_thai, ten_thiet_bi } = req.body;
+        const result = await ticketService.updateBookingStatus(id, trang_thai, ten_thiet_bi);
+        res.status(200).json({
+            success: true,
+            message: result?.ticketCode
+                ? `Đã tiếp nhận khách đến và tự động tạo phiếu ${result.ticketCode}!`
+                : 'Cập nhật lịch hẹn thành công',
+            data: result
+        });
     } catch (error) {
         next(error);
     }

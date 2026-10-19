@@ -52,6 +52,12 @@ const submitIntake = async (customerData) => {
             
         if (userResult.rows.length > 0) {
             customerId = userResult.rows[0].id;
+            if (isStudent) {
+                await client.query(
+                    'UPDATE khach_hang SET la_sinh_vien = $1, truong_hoc = $2, ma_sinh_vien = $3 WHERE id = $4',
+                    [true, schoolName || '', studentId || '', customerId]
+                );
+            }
         } else {
             const newUser = await client.query(`
                 INSERT INTO khach_hang (ho_ten, so_dien_thoai, zalo_id, la_sinh_vien, truong_hoc, ma_sinh_vien)
@@ -185,7 +191,7 @@ const updateTicketSoftwarePackages = async (ticketId, packages) => {
     }
 };
 
-const updateTicketStatus = async (id, status) => {
+const updateTicketStatus = async (id, status, ghiChu = '') => {
     const query = `
         UPDATE phieu_sua_chua 
         SET trang_thai = $1 
@@ -195,6 +201,22 @@ const updateTicketStatus = async (id, status) => {
     const { rows } = await pool.query(query, [status, id]);
     
     if (rows.length > 0) {
+        const defaultNoteMap = {
+            'ĐANG_CHUẨN_ĐOÁN': 'Lễ tân đã chuyển thiết bị cho Kỹ thuật viên kiểm tra chuyên sâu.',
+            'CHỜ_KHÁCH_CHỐT_GIÁ': 'Kỹ thuật viên đã lên phương án sửa chữa và gửi báo giá chờ khách xác nhận.',
+            'ĐANG_SỬA': 'Kỹ thuật viên đang tiến hành sửa chữa / thay thế linh kiện.',
+            'ĐÃ_SỬA_XONG': 'Kỹ thuật viên đã hoàn tất sửa chữa và kiểm tra chất lượng (QC).',
+            'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN': 'Đã bàn giao thiết bị cho khách hàng, thu tiền và kích hoạt bảo hành điện tử 90 ngày.'
+        };
+        const noteText = (typeof ghiChu === 'string' && ghiChu.trim())
+            ? ghiChu.trim()
+            : (defaultNoteMap[status] || `Cập nhật trạng thái sang ${status.replace(/_/g, ' ')}`);
+
+        await pool.query(
+            `INSERT INTO nhat_ky_sua_chua (phieu_sua_chua_id, trang_thai_moi, ghi_chu) VALUES ($1, $2, $3)`,
+            [id, status, noteText]
+        );
+
         // Emit event to update frontend
         try {
             const io = getIo();
@@ -209,17 +231,26 @@ const submitBooking = async (bookingData) => {
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
-        const { fullName, phone, zaloId, ngayHen, gioHen, moTaLoi, loaiDichVu } = bookingData;
+        const {
+            fullName, phone, zaloId, ngayHen, gioHen, moTaLoi, loaiDichVu,
+            isStudent = false, schoolName = '', studentId = ''
+        } = bookingData;
         
         // Find or create customer
         let customerId = null;
         const userResult = await client.query('SELECT id FROM khach_hang WHERE so_dien_thoai = $1', [phone]);
         if (userResult.rows.length > 0) {
             customerId = userResult.rows[0].id;
+            if (isStudent) {
+                await client.query(
+                    'UPDATE khach_hang SET la_sinh_vien = $1, truong_hoc = $2, ma_sinh_vien = $3 WHERE id = $4',
+                    [true, schoolName || '', studentId || '', customerId]
+                );
+            }
         } else {
             const newUser = await client.query(
-                'INSERT INTO khach_hang (ho_ten, so_dien_thoai, zalo_id) VALUES ($1, $2, $3) RETURNING id',
-                [fullName, phone, zaloId || null]
+                'INSERT INTO khach_hang (ho_ten, so_dien_thoai, zalo_id, la_sinh_vien, truong_hoc, ma_sinh_vien) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
+                [fullName, phone, zaloId || null, Boolean(isStudent), schoolName || '', studentId || '']
             );
             customerId = newUser.rows[0].id;
         }
@@ -263,7 +294,7 @@ const getAllBookings = async () => {
     return rows;
 };
 
-const updateBookingStatus = async (id, status) => {
+const updateBookingStatus = async (id, status, deviceName = '') => {
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
@@ -276,26 +307,40 @@ const updateBookingStatus = async (id, status) => {
             RETURNING khach_hang_id, mo_ta_loi, loai_dich_vu
         `;
         const result = await client.query(updateQuery, [status, id]);
+        let createdTicketCode = null;
         
         // Nếu khách đã đến, tự động chuyển đổi thành Phiếu Yêu Cầu
         if (status === 'KHACH_DA_DEN' && result.rows.length > 0) {
             const booking = result.rows[0];
             
-            // 1. Thêm thiết bị mới (tạm dùng tên mặc định)
+            // 1. Thêm thiết bị mới
+            const tenMay = (typeof deviceName === 'string' && deviceName.trim())
+                ? deviceName.trim()
+                : 'Thiết bị tiếp nhận theo lịch hẹn';
             const deviceResult = await client.query(
                 'INSERT INTO thiet_bi (khach_hang_id, ten_may, tinh_trang_may) VALUES ($1, $2, $3) RETURNING id',
-                [booking.khach_hang_id, 'Thiết bị (Từ lịch hẹn)', booking.mo_ta_loi]
+                [booking.khach_hang_id, tenMay, booking.mo_ta_loi]
             );
             const deviceId = deviceResult.rows[0].id;
             
             // 2. Tạo mã tra cứu ngẫu nhiên
             const maTraCuu = 'RP-' + Math.floor(100000 + Math.random() * 900000);
+            createdTicketCode = maTraCuu;
             
             // 3. Tạo phiếu sửa chữa
-            await client.query(`
+            const createdTicket = await client.query(`
                 INSERT INTO phieu_sua_chua (thiet_bi_id, ma_tra_cuu, loai_dich_vu, trang_thai)
                 VALUES ($1, $2, $3, 'CHỜ_KHÁM')
+                RETURNING id
             `, [deviceId, maTraCuu, booking.loai_dich_vu === 'ONLINE_TUXA' ? 'ONLINE' : 'OFFLINE']);
+
+            const newTicketId = createdTicket.rows[0]?.id;
+            if (newTicketId) {
+                await client.query(
+                    `INSERT INTO nhat_ky_sua_chua (phieu_sua_chua_id, trang_thai_moi, ghi_chu) VALUES ($1, 'CHỜ_KHÁM', 'Tiếp nhận máy trực tiếp từ lịch hẹn đã đặt trước tại 615 Âu Cơ')`,
+                    [newTicketId]
+                );
+            }
             
             // Emit sự kiện có phiếu mới
             try {
@@ -311,7 +356,7 @@ const updateBookingStatus = async (id, status) => {
             io.emit('booking_status_changed', { bookingId: id, status });
         } catch (err) {}
         
-        return true;
+        return { success: true, ticketCode: createdTicketCode };
     } catch (err) {
         await client.query('ROLLBACK');
         throw err;
