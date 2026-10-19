@@ -81,7 +81,7 @@ function PhoneTracking() {
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <span>📱</span> Theo Số điện thoại
+            <span>📱</span> SĐT / IMEI / Serial
           </button>
         </div>
 
@@ -91,7 +91,7 @@ function PhoneTracking() {
             <div className="text-center mb-6">
               <h2 className="text-xl font-bold text-slate-800 mb-1">Quét mã QR hoặc Nhập mã phiếu</h2>
               <p className="text-sm text-slate-500">
-                Mã tra cứu được in trên phiếu tiếp nhận (Ví dụ: <code className="bg-slate-100 px-2 py-0.5 rounded font-mono font-bold text-brand-blue">RP-272781</code>)
+                Mã tra cứu được in trên phiếu tiếp nhận (Ví dụ: <code className="bg-slate-100 px-2 py-0.5 rounded font-mono font-bold text-brand-blue">RP-839400</code>)
               </p>
             </div>
 
@@ -118,7 +118,7 @@ function PhoneTracking() {
               <input
                 type="text"
                 required
-                placeholder="Nhập mã phiếu (VD: RP-272781)"
+                placeholder="Nhập mã phiếu (VD: RP-839400)"
                 className="flex-1 px-4 py-3 rounded-lg border border-slate-300 focus:border-brand-orange focus:ring focus:ring-amber-200 outline-none text-lg font-mono uppercase"
                 value={ticketCodeInput}
                 onChange={(e) => setTicketCodeInput(e.target.value)}
@@ -133,19 +133,19 @@ function PhoneTracking() {
           </div>
         )}
 
-        {/* TAB 2: TRA CỨU THEO SỐ ĐIỆN THOẠI */}
+        {/* TAB 2: TRA CỨU THEO SỐ ĐIỆN THOẠI / IMEI / SERIAL */}
         {activeTab === 'PHONE' && (
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden border-t-8 border-brand-green p-6 sm:p-8 mb-8 animate-in fade-in duration-200">
             <div className="text-center mb-6">
-              <h2 className="text-xl font-bold text-slate-800 mb-1">Tra cứu theo Số điện thoại</h2>
-              <p className="text-sm text-slate-500">Xem danh sách tất cả các thiết bị đã từng gửi bảo hành/sửa chữa tại trung tâm.</p>
+              <h2 className="text-xl font-bold text-slate-800 mb-1">Tra cứu theo Số điện thoại, IMEI hoặc Serial linh kiện</h2>
+              <p className="text-sm text-slate-500">Nhập SĐT khách hàng, Số Serial/IMEI máy hoặc Mã Serial linh kiện bảo hành (VD: <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-xs">0901234567</code>, <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-xs">C02X9082JG5H</code>, <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-xs">SN-SSD-982341</code>).</p>
             </div>
 
             <form onSubmit={handlePhoneSearch} className="flex flex-col sm:flex-row gap-4">
               <input
-                type="tel"
+                type="text"
                 required
-                placeholder="Nhập số điện thoại (VD: 0901234567)"
+                placeholder="Nhập SĐT, Số IMEI/Serial máy hoặc Serial linh kiện..."
                 className="flex-1 px-4 py-3 rounded-lg border border-slate-300 focus:border-brand-green focus:ring focus:ring-green-200 outline-none text-lg"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
@@ -161,15 +161,15 @@ function PhoneTracking() {
           </div>
         )}
 
-        {/* KẾT QUẢ KHI TÌM THEO SĐT */}
+        {/* KẾT QUẢ KHI TÌM THEO SĐT / IMEI / SERIAL */}
         {activeTab === 'PHONE' && hasSearched && !loading && (
           <div className="space-y-4">
-            <h3 className="font-bold text-lg text-slate-700 mb-4">Kết quả tìm kiếm cho SĐT: {phone}</h3>
+            <h3 className="font-bold text-lg text-slate-700 mb-4">Kết quả tìm kiếm cho từ khóa: {phone}</h3>
 
             {tickets.length === 0 ? (
               <div className="bg-white p-8 rounded-xl shadow text-center border border-slate-100">
                 <div className="text-4xl mb-4">🔍</div>
-                <p className="text-slate-500">Không tìm thấy thiết bị nào đang sửa chữa với số điện thoại này.</p>
+                <p className="text-slate-500">Không tìm thấy thiết bị nào khớp với Số điện thoại / IMEI / Serial này.</p>
               </div>
             ) : (
               tickets.map((ticket, idx) => (
@@ -178,31 +178,47 @@ function PhoneTracking() {
                   className="bg-white p-6 rounded-xl shadow-md border border-slate-100 hover:shadow-lg transition-all flex flex-col sm:flex-row justify-between items-center gap-4"
                 >
                   <div>
-                    <div className="flex items-center gap-3 mb-2">
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
                       <h4 className="font-bold text-lg text-brand-blue">{ticket.ten_may}</h4>
-                      <span className="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded font-bold font-mono">
+                      <span className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded font-bold font-mono">
                         Mã: {ticket.ma_tra_cuu}
                       </span>
+                      {ticket.so_imei_serial && (
+                        <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded font-mono">
+                          S/N: {ticket.so_imei_serial}
+                        </span>
+                      )}
                     </div>
                     <p className="text-sm text-slate-500 mb-3">Lỗi báo: {ticket.tinh_trang_may}</p>
 
-                    <span
-                      className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${
-                        ticket.trang_thai === 'CHỜ_KHÁM'
-                          ? 'bg-yellow-100 text-yellow-700'
-                          : ticket.trang_thai === 'ĐANG_CHUẨN_ĐOÁN'
-                          ? 'bg-orange-100 text-orange-700'
-                          : ticket.trang_thai === 'ĐANG_SỬA'
-                          ? 'bg-blue-100 text-blue-700'
-                          : ticket.trang_thai === 'ĐÃ_SỬA_XONG'
-                          ? 'bg-green-100 text-green-700'
-                          : ticket.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN'
-                          ? 'bg-purple-100 text-purple-700'
-                          : 'bg-slate-100 text-slate-700'
-                      }`}
-                    >
-                      {ticket.trang_thai.replace(/_/g, ' ')}
-                    </span>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span
+                        className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${
+                          ticket.trang_thai === 'CHỜ_KHÁM'
+                            ? 'bg-yellow-100 text-yellow-700'
+                            : ticket.trang_thai === 'ĐANG_CHUẨN_ĐOÁN'
+                            ? 'bg-orange-100 text-orange-700'
+                            : ticket.trang_thai === 'CHỜ_KHÁCH_CHỐT_GIÁ'
+                            ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                            : ticket.trang_thai === 'ĐANG_SỬA'
+                            ? 'bg-blue-100 text-blue-700'
+                            : ticket.trang_thai === 'ĐÃ_SỬA_XONG'
+                            ? 'bg-green-100 text-green-700'
+                            : ticket.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN'
+                            ? 'bg-purple-100 text-purple-700'
+                            : ticket.trang_thai === 'YÊU_CẦU_BẢO_HÀNH'
+                            ? 'bg-red-100 text-red-700'
+                            : 'bg-slate-100 text-slate-700'
+                        }`}
+                      >
+                        {ticket.trang_thai.replace(/_/g, ' ')}
+                      </span>
+                      {ticket.han_bao_hanh && (
+                        <span className="inline-block px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          🛡️ BH đến {new Date(ticket.han_bao_hanh).toLocaleDateString('vi-VN')}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <Link

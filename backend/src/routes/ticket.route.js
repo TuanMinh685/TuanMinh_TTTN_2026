@@ -23,7 +23,7 @@ router.post('/intake', submitLimiter, validateSubmit, ticketController.submitInt
 // API cho Lễ tân và Kỹ thuật viên (Yêu cầu đăng nhập)
 router.get('/', verifyToken, ticketController.getTickets);
 router.patch('/:id/status', verifyToken, ticketController.updateTicketStatus);
-router.patch('/:id/software-packages', verifyToken, requireRole('QUAN_LY', 'ADMIN'), ticketController.updateTicketSoftwarePackages);
+router.patch('/:id/software-packages', verifyToken, requireRole('KY_THUAT_VIEN', 'QUAN_LY', 'ADMIN'), ticketController.updateTicketSoftwarePackages);
 
 // API Booking
 router.post('/booking', submitLimiter, ticketController.submitBooking);

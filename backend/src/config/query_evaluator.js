@@ -251,6 +251,14 @@ function executeMockQuery(sql, params = []) {
         return { rows: list };
     }
 
+    // 19b. get ticket & device for updateTicketSoftwarePackages
+    if (/SELECT p\.id, t\.id AS device_id, t\.tinh_trang_may FROM phieu_sua_chua p JOIN thiet_bi t ON p\.thiet_bi_id = t\.id WHERE p\.id = \$1/i.test(cleanSql)) {
+        const p = s.phieu_sua_chua.find(x => x.id === Number(params[0]));
+        if (!p) return { rows: [] };
+        const tb = s.thiet_bi.find(x => x.id === p.thiet_bi_id) || {};
+        return { rows: [{ id: p.id, device_id: tb.id, tinh_trang_may: tb.tinh_trang_may || '' }] };
+    }
+
     // 20. trackTicket by ma_tra_cuu
     if (/SELECT .* FROM phieu_sua_chua p .* WHERE p\.ma_tra_cuu = \$1/i.test(cleanSql)) {
         const code = params[0];
@@ -263,6 +271,8 @@ function executeMockQuery(sql, params = []) {
             id: p.id,
             ma_tra_cuu: p.ma_tra_cuu,
             trang_thai: p.trang_thai,
+            loai_dich_vu: p.loai_dich_vu || 'OFFLINE',
+            ma_ultraviewer: p.ma_ultraviewer || null,
             tong_tien: p.tong_tien,
             giam_gia_sinh_vien: p.giam_gia_sinh_vien || 0,
             tien_sau_giam: p.tien_sau_giam || p.tong_tien,
@@ -275,30 +285,42 @@ function executeMockQuery(sql, params = []) {
             ho_ten: kh.ho_ten || 'Khách hàng',
             so_dien_thoai: kh.so_dien_thoai || '',
             ten_may: tb.ten_may || 'Thiết bị',
+            ten_thiet_bi: tb.ten_may || 'Thiết bị',
+            so_imei_serial: tb.so_imei_serial || null,
             tinh_trang_may: tb.tinh_trang_may || '',
+            mo_ta_loi: tb.tinh_trang_may || '',
             da_danh_gia
         };
         return { rows: [row] };
     }
 
-    // 21. track by phone
+    // 21. track by phone / IMEI / Serial / Ticket Code
     if (/SELECT .* FROM phieu_sua_chua p .* WHERE k\.so_dien_thoai = \$1/i.test(cleanSql)) {
-        const phone = params[0];
-        const kh = s.khach_hang.find(x => x.so_dien_thoai === phone);
-        if (!kh) return { rows: [] };
-        const tbIds = s.thiet_bi.filter(x => x.khach_hang_id === kh.id).map(x => x.id);
-        const tickets = s.phieu_sua_chua.filter(x => tbIds.includes(x.thiet_bi_id)).map(p => {
+        const keyword = String(params[0] || '').trim();
+        const kwUpper = keyword.toUpperCase();
+        const matchedTickets = s.phieu_sua_chua.filter(p => {
+            const tb = s.thiet_bi.find(x => x.id === p.thiet_bi_id) || {};
+            const kh = s.khach_hang.find(x => x.id === tb.khach_hang_id) || {};
+            const parts = s.phieu_linh_kien.filter(pl => pl.phieu_sua_chua_id === p.id);
+            const matchPhone = kh.so_dien_thoai === keyword;
+            const matchImei = tb.so_imei_serial && String(tb.so_imei_serial).toUpperCase() === kwUpper;
+            const matchCode = p.ma_tra_cuu && String(p.ma_tra_cuu).toUpperCase() === kwUpper;
+            const matchPartSerial = parts.some(pl => pl.so_serial && String(pl.so_serial).toUpperCase() === kwUpper);
+            return matchPhone || matchImei || matchCode || matchPartSerial;
+        }).map(p => {
             const tb = s.thiet_bi.find(x => x.id === p.thiet_bi_id) || {};
             return {
                 ma_tra_cuu: p.ma_tra_cuu,
                 trang_thai: p.trang_thai,
                 loai_dich_vu: p.loai_dich_vu,
                 ten_may: tb.ten_may,
+                so_imei_serial: tb.so_imei_serial || null,
                 tinh_trang_may: tb.tinh_trang_may,
+                han_bao_hanh: p.han_bao_hanh,
                 ngay_cap_nhat: p.ngay_cap_nhat
             };
         });
-        return { rows: tickets };
+        return { rows: matchedTickets };
     }
 
     // 22. getAllTickets
@@ -310,17 +332,21 @@ function executeMockQuery(sql, params = []) {
                 id: p.id,
                 ma_phieu: p.ma_tra_cuu,
                 trang_thai: p.trang_thai,
+                loai_dich_vu: p.loai_dich_vu || 'OFFLINE',
+                ma_ultraviewer: p.ma_ultraviewer || null,
                 tong_tien: p.tong_tien,
                 giam_gia_sinh_vien: p.giam_gia_sinh_vien || 0,
                 tien_sau_giam: p.tien_sau_giam || p.tong_tien,
                 la_sinh_vien: kh.la_sinh_vien || p.la_sinh_vien || false,
                 truong_hoc: kh.truong_hoc || p.truong_hoc || '',
                 ma_sinh_vien: kh.ma_sinh_vien || p.ma_sinh_vien || '',
+                mssv: kh.ma_sinh_vien || p.ma_sinh_vien || '',
                 han_bao_hanh: p.han_bao_hanh,
                 ngay_tao: p.ngay_tao,
                 ho_ten_khach: kh.ho_ten,
                 so_dien_thoai: kh.so_dien_thoai,
                 ten_thiet_bi: tb.ten_may,
+                so_imei_serial: tb.so_imei_serial || null,
                 mo_ta_loi: tb.tinh_trang_may
             };
         });
@@ -328,7 +354,7 @@ function executeMockQuery(sql, params = []) {
     }
 
     // 23. updateTicketStatus
-    if (/UPDATE phieu_sua_chua SET trang_thai = \$1 WHERE id = \$2/i.test(cleanSql)) {
+    if (/UPDATE phieu_sua_chua SET trang_thai = \$1.*WHERE id = \$2/i.test(cleanSql)) {
         const p = s.phieu_sua_chua.find(x => x.id === Number(params[1]));
         if (p) {
             p.trang_thai = params[0];
@@ -437,7 +463,8 @@ function executeMockQuery(sql, params = []) {
                 trang_thai: l.trang_thai,
                 la_sinh_vien: kh.la_sinh_vien || false,
                 truong_hoc: kh.truong_hoc || '',
-                ma_sinh_vien: kh.ma_sinh_vien || ''
+                ma_sinh_vien: kh.ma_sinh_vien || '',
+                mssv: kh.ma_sinh_vien || ''
             };
         });
         return { rows: list };
@@ -454,15 +481,60 @@ function executeMockQuery(sql, params = []) {
         return { rows: [] };
     }
 
-    // 30. stats: revenue
-    if (/SELECT COALESCE\(SUM\(tong_tien\), 0\) as total_revenue/i.test(cleanSql)) {
-        const rev = s.phieu_sua_chua
-            .filter(x => x.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN')
-            .reduce((acc, cur) => acc + Number(cur.tien_sau_giam || cur.tong_tien || 0), 0);
-        return { rows: [{ total_revenue: rev }] };
+    // 30a. stats: daily revenue series (WITH report_days AS)
+    if (/WITH report_days AS/i.test(cleanSql)) {
+        const period = params[0] || 'week';
+        const today = new Date();
+        const startDate = new Date(today);
+        if (period === 'month') {
+            startDate.setDate(1);
+        } else {
+            startDate.setDate(today.getDate() - 6);
+        }
+        const rows = [];
+        const cur = new Date(startDate);
+        while (cur <= today) {
+            const dateStr = cur.toISOString().slice(0, 10);
+            const dayRev = s.phieu_sua_chua
+                .filter(p => p.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' && String(p.ngay_tao || '').slice(0, 10) === dateStr)
+                .reduce((sum, p) => sum + Number(p.tien_sau_giam || p.tong_tien || 0), 0);
+            rows.push({ date: dateStr, total_revenue: dayRev });
+            cur.setDate(cur.getDate() + 1);
+        }
+        return { rows };
     }
 
-    // 31. stats: tickets count by status
+    // 30b. stats: parts revenue in period
+    if (/SELECT COALESCE\(SUM\(pl\.so_luong \* pl\.don_gia\), 0\) AS total_parts_revenue/i.test(cleanSql)) {
+        const completedIds = new Set(
+            s.phieu_sua_chua
+                .filter(p => p.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN')
+                .map(p => p.id)
+        );
+        const totalPartsRev = s.phieu_linh_kien
+            .filter(pl => completedIds.has(pl.phieu_sua_chua_id))
+            .reduce((sum, pl) => sum + Number(pl.so_luong) * Number(pl.don_gia), 0);
+        return { rows: [{ total_parts_revenue: totalPartsRev }] };
+    }
+
+    // 30c. stats: revenue & completed_tickets
+    if (/SELECT COALESCE\(SUM\(tong_tien\), 0\) as total_revenue/i.test(cleanSql)) {
+        const completed = s.phieu_sua_chua.filter(x => x.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN');
+        const rev = completed.reduce((acc, cur) => acc + Number(cur.tien_sau_giam || cur.tong_tien || 0), 0);
+        return { rows: [{ total_revenue: rev, completed_tickets: completed.length }] };
+    }
+
+    // 31a. stats: status distribution for pie chart (name, value)
+    if (/SELECT trang_thai as name, CAST\(COUNT\(\*\) AS INTEGER\) as value FROM phieu_sua_chua/i.test(cleanSql)) {
+        const map = {};
+        for (const p of s.phieu_sua_chua) {
+            map[p.trang_thai] = (map[p.trang_thai] || 0) + 1;
+        }
+        const rows = Object.keys(map).map(k => ({ name: k, value: Number(map[k]) }));
+        return { rows };
+    }
+
+    // 31b. stats: tickets count by status
     if (/SELECT trang_thai, COUNT\(\*\) as count FROM phieu_sua_chua/i.test(cleanSql)) {
         const map = {};
         for (const p of s.phieu_sua_chua) {

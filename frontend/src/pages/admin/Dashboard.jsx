@@ -679,53 +679,53 @@ function Dashboard() {
         </div>
       )}
 
-      {(role === 'LE_TAN' || role === 'QUAN_LY' || role === 'ADMIN') && (
-        <div className="mb-6 flex flex-wrap gap-2 border-b border-slate-200">
-          <button 
-            onClick={() => setActiveTab('TICKETS')}
-            className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'TICKETS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
-            Phiếu sửa chữa
-          </button>
+      <div className="mb-6 flex flex-wrap gap-2 border-b border-slate-200">
+        <button 
+          onClick={() => setActiveTab('TICKETS')}
+          className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'TICKETS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
+          Phiếu sửa chữa
+        </button>
+        {canReceptionAction && (
           <button 
             onClick={() => setActiveTab('BOOKINGS')}
             className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'BOOKINGS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
             Lịch hẹn
           </button>
-          {(role === 'QUAN_LY' || role === 'ADMIN') && (
-            <button
-              onClick={() => setActiveTab('INVENTORY')}
-              className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'INVENTORY' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
-              Kho linh kiện
-            </button>
-          )}
-          {(role === 'QUAN_LY' || role === 'ADMIN') && (
-            <button
-              onClick={() => setActiveTab('SOFTWARE')}
-              className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'SOFTWARE' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
-              Gói phần mềm
-            </button>
-          )}
-          {(role === 'QUAN_LY' || role === 'ADMIN') && (
-            <button
-              onClick={() => setActiveTab('STATS')}
-              className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'STATS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
-              Báo cáo
-            </button>
-          )}
-          {(role === 'QUAN_LY' || role === 'ADMIN') && (
-            <button
-              onClick={() => setActiveTab('EMPLOYEES')}
-              className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'EMPLOYEES' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
-              Nhân sự ({employees.length})
-            </button>
-          )}
+        )}
+        {canTechAction && (
           <button
-            onClick={() => setActiveTab('NOTIFICATIONS')}
-            className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'NOTIFICATIONS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
-            Thông báo{notifications.length > 0 ? ` (${notifications.length})` : ''}
+            onClick={() => setActiveTab('INVENTORY')}
+            className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'INVENTORY' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
+            Kho linh kiện
           </button>
-        </div>
-      )}
+        )}
+        {canTechAction && (
+          <button
+            onClick={() => setActiveTab('SOFTWARE')}
+            className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'SOFTWARE' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
+            Gói phần mềm
+          </button>
+        )}
+        {(role === 'QUAN_LY' || role === 'ADMIN') && (
+          <button
+            onClick={() => setActiveTab('STATS')}
+            className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'STATS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
+            Báo cáo
+          </button>
+        )}
+        {(role === 'QUAN_LY' || role === 'ADMIN') && (
+          <button
+            onClick={() => setActiveTab('EMPLOYEES')}
+            className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'EMPLOYEES' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
+            Nhân sự ({employees.length})
+          </button>
+        )}
+        <button
+          onClick={() => setActiveTab('NOTIFICATIONS')}
+          className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'NOTIFICATIONS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
+          Thông báo{notifications.length > 0 ? ` (${notifications.length})` : ''}
+        </button>
+      </div>
 
       {activeTab === 'TICKETS' && (
         <div className="rounded-xl border-t-4 border-brand-green bg-white p-5 shadow sm:p-6">
@@ -835,7 +835,22 @@ function Dashboard() {
                 const finalTotal = ticket.la_sinh_vien ? Math.round(rawTotal * 0.85) : rawTotal;
                 return (
                 <tr key={ticket.id} className="border-b hover:bg-slate-50">
-                  <td className="py-3 px-4 font-bold text-brand-blue">{ticket.ma_phieu}</td>
+                  <td className="py-3 px-4">
+                    <div className="font-bold text-brand-blue">{ticket.ma_phieu}</div>
+                    {ticket.ten_thiet_bi && (
+                      <div className="text-xs font-semibold text-slate-600 mt-0.5">{ticket.ten_thiet_bi}</div>
+                    )}
+                    {ticket.so_imei_serial && (
+                      <div className="text-[10px] font-mono text-slate-400">S/N: {ticket.so_imei_serial}</div>
+                    )}
+                    {(ticket.loai_dich_vu === 'ONLINE' || ticket.ma_ultraviewer) && (
+                      <div className="mt-1">
+                        <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-200 font-mono">
+                          💻 Remote: {ticket.ma_ultraviewer || 'Online'}
+                        </span>
+                      </div>
+                    )}
+                  </td>
                   <td className="py-3 px-4">
                     <div className="font-semibold text-slate-800">{ticket.ho_ten_khach}</div>
                     <div className="text-xs text-slate-400">{ticket.so_dien_thoai}</div>
@@ -1033,7 +1048,7 @@ function Dashboard() {
         </div>
       )}
 
-      {activeTab === 'SOFTWARE' && (role === 'QUAN_LY' || role === 'ADMIN') && (
+      {activeTab === 'SOFTWARE' && canTechAction && (
         <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
           <h3 className="text-xl font-bold text-brand-blue">Gói phần mềm &amp; cài đặt</h3>
           <p className="mt-1 text-sm text-slate-500">Chọn nhiều gói phần mềm cho cùng một phiếu sửa chữa.</p>
@@ -1173,7 +1188,7 @@ function Dashboard() {
         </section>
       )}
 
-      {activeTab === 'INVENTORY' && (role === 'QUAN_LY' || role === 'ADMIN') && (
+      {activeTab === 'INVENTORY' && canTechAction && (
         <div className="space-y-5">
           <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
             <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
@@ -1200,13 +1215,15 @@ function Dashboard() {
                 >
                   📥 Xuất Kho (CSV)
                 </button>
-                <button
-                  type="button"
-                  onClick={() => { resetPartForm(); setShowInventoryForm(true); }}
-                  className="rounded-lg bg-brand-blue px-4 py-2 text-sm font-bold text-white hover:bg-blue-800"
-                >
-                  + Thêm linh kiện
-                </button>
+                {(role === 'QUAN_LY' || role === 'ADMIN') && (
+                  <button
+                    type="button"
+                    onClick={() => { resetPartForm(); setShowInventoryForm(true); }}
+                    className="rounded-lg bg-brand-blue px-4 py-2 text-sm font-bold text-white hover:bg-blue-800"
+                  >
+                    + Thêm linh kiện
+                  </button>
+                )}
               </div>
             </div>
 
@@ -1288,13 +1305,17 @@ function Dashboard() {
                             </span>
                           </td>
                           <td className="px-3 py-3 text-right">
-                            <button
-                              type="button"
-                              onClick={() => editPart(part)}
-                              className="rounded-md px-3 py-1.5 text-sm font-semibold text-brand-blue hover:bg-blue-50"
-                            >
-                              Sửa
-                            </button>
+                            {(role === 'QUAN_LY' || role === 'ADMIN') ? (
+                              <button
+                                type="button"
+                                onClick={() => editPart(part)}
+                                className="rounded-md px-3 py-1.5 text-sm font-semibold text-brand-blue hover:bg-blue-50"
+                              >
+                                Sửa
+                              </button>
+                            ) : (
+                              <span className="text-xs text-slate-400">Xem tồn kho</span>
+                            )}
                           </td>
                         </tr>
                       );

@@ -140,9 +140,9 @@ const submitIntake = async (customerData) => {
 
 const getAllTickets = async () => {
     const query = `
-        SELECT p.id, p.ma_tra_cuu as ma_phieu, p.trang_thai, p.tong_tien, p.han_bao_hanh, p.ngay_tao,
+        SELECT p.id, p.ma_tra_cuu as ma_phieu, p.trang_thai, p.loai_dich_vu, p.ma_ultraviewer, p.tong_tien, p.han_bao_hanh, p.ngay_tao,
             k.ho_ten as ho_ten_khach, k.so_dien_thoai, k.la_sinh_vien, k.truong_hoc, k.ma_sinh_vien as mssv,
-            t.ten_may as ten_thiet_bi, t.tinh_trang_may as mo_ta_loi
+            t.ten_may as ten_thiet_bi, t.so_imei_serial, t.tinh_trang_may as mo_ta_loi
         FROM phieu_sua_chua p
         JOIN thiet_bi t ON p.thiet_bi_id = t.id
         JOIN khach_hang k ON t.khach_hang_id = k.id
@@ -194,7 +194,12 @@ const updateTicketSoftwarePackages = async (ticketId, packages) => {
 const updateTicketStatus = async (id, status, ghiChu = '') => {
     const query = `
         UPDATE phieu_sua_chua 
-        SET trang_thai = $1 
+        SET trang_thai = $1,
+            ngay_cap_nhat = CURRENT_TIMESTAMP,
+            han_bao_hanh = CASE
+                WHEN $1 = 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' AND han_bao_hanh IS NULL THEN CURRENT_TIMESTAMP + INTERVAL '180 days'
+                ELSE han_bao_hanh
+            END
         WHERE id = $2 
         RETURNING ma_tra_cuu
     `;

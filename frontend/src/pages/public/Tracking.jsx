@@ -165,8 +165,11 @@ function Tracking() {
               <span className="text-6xl text-brand-blue font-bold opacity-30">VHU</span>
             </div>
             <div className="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-sm p-4 rounded-xl text-center shadow-sm border border-white">
-              <h3 className="font-bold text-slate-800 text-lg">{ticket.ten_thiet_bi}</h3>
+              <h3 className="font-bold text-slate-800 text-lg">{ticket.ten_thiet_bi || ticket.ten_may}</h3>
               <p className="text-xs text-slate-500">Mã tra cứu: <strong className="text-brand-blue font-mono">{ticketCode}</strong></p>
+              {ticket.so_imei_serial && (
+                <p className="text-[11px] text-slate-500 mt-0.5">S/N / IMEI: <strong className="font-mono text-slate-700">{ticket.so_imei_serial}</strong></p>
+              )}
             </div>
           </div>
 
@@ -225,8 +228,13 @@ function Tracking() {
         {/* Cột phải: Báo giá, Ưu đãi sinh viên, e-Warranty, Serial linh kiện */}
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-slate-800 mb-2">
-            Sửa chữa {ticket.ten_thiet_bi}
+            Sửa chữa {ticket.ten_thiet_bi || ticket.ten_may}
           </h1>
+          {(ticket.ho_ten || ticket.so_dien_thoai) && (
+            <p className="text-xs text-slate-500 mb-3">
+              Khách hàng: <strong className="text-slate-700">{ticket.ho_ten}</strong> ({ticket.so_dien_thoai})
+            </p>
+          )}
 
           {/* 🎓 Mục 2: Khối thông tin Ưu đãi Sinh viên toàn quốc (-15%) */}
           {ticket.uu_dai_sinh_vien?.la_sinh_vien && (
@@ -250,7 +258,7 @@ function Tracking() {
               TRẠNG THÁI: {ticket.trang_thai.replace(/_/g, ' ')}
             </div>
             
-            <p className="text-slate-600 text-sm mb-1">Mô tả ban đầu: <span className="font-semibold text-slate-800">{ticket.mo_ta_loi}</span></p>
+            <p className="text-slate-600 text-sm mb-1">Mô tả ban đầu: <span className="font-semibold text-slate-800">{ticket.mo_ta_loi || ticket.tinh_trang_may}</span></p>
             {ticket.goi_phan_mem?.length > 0 && (
               <p className="mt-1 text-slate-600 text-sm">
                 Gói phần mềm: <span className="font-semibold text-slate-800">{ticket.goi_phan_mem.join(', ')}</span>

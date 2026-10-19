@@ -5,9 +5,9 @@ const trackTicket = async (ticketCode) => {
     // Lấy thông tin cơ bản
     const result = await pool.query(`
         SELECT 
-            p.id, p.ma_tra_cuu, p.trang_thai, p.tong_tien, p.han_bao_hanh, p.ngay_tao, p.ngay_cap_nhat,
-            k.ho_ten, k.so_dien_thoai,
-            t.ten_may, t.tinh_trang_may,
+            p.id, p.ma_tra_cuu, p.trang_thai, p.loai_dich_vu, p.ma_ultraviewer, p.tong_tien, p.han_bao_hanh, p.ngay_tao, p.ngay_cap_nhat,
+            k.ho_ten, k.so_dien_thoai, k.la_sinh_vien, k.truong_hoc, k.ma_sinh_vien,
+            t.ten_may, t.so_imei_serial, t.tinh_trang_may,
             EXISTS (
                 SELECT 1
                 FROM danh_gia d
@@ -24,6 +24,8 @@ const trackTicket = async (ticketCode) => {
     const ticket = result.rows[0];
     const softwareRequest = readSoftwarePackageRequest(ticket.tinh_trang_may);
     ticket.tinh_trang_may = softwareRequest.issueDescription;
+    ticket.mo_ta_loi = softwareRequest.issueDescription;
+    ticket.ten_thiet_bi = ticket.ten_may;
     ticket.goi_phan_mem = softwareRequest.packages;
 
     // Che giấu dữ liệu (Masking)
@@ -201,15 +203,24 @@ const approveQuote = async (ticketCode, isApproved) => {
 
 const trackByPhone = async (phone) => {
     const query = `
-        SELECT p.ma_tra_cuu, p.trang_thai, p.loai_dich_vu, t.ten_may, t.tinh_trang_may, p.ngay_cap_nhat
+        SELECT p.ma_tra_cuu, p.trang_thai, p.loai_dich_vu, p.han_bao_hanh, t.ten_may, t.so_imei_serial, t.tinh_trang_may, p.ngay_cap_nhat
         FROM phieu_sua_chua p
         JOIN thiet_bi t ON p.thiet_bi_id = t.id
         JOIN khach_hang k ON t.khach_hang_id = k.id
         WHERE k.so_dien_thoai = $1
+           OR UPPER(COALESCE(t.so_imei_serial, '')) = UPPER($1)
+           OR UPPER(p.ma_tra_cuu) = UPPER($1)
+           OR EXISTS (
+               SELECT 1 FROM phieu_linh_kien pl
+               WHERE pl.phieu_sua_chua_id = p.id AND UPPER(COALESCE(pl.so_serial, '')) = UPPER($1)
+           )
         ORDER BY p.ngay_tao DESC
     `;
     const { rows } = await pool.query(query, [phone]);
-    return rows;
+    return rows.map(row => {
+        const { issueDescription } = readSoftwarePackageRequest(row.tinh_trang_may);
+        return { ...row, tinh_trang_may: issueDescription };
+    });
 };
 
 const submitReview = async (ticketCode, so_sao, nhan_xet) => {
