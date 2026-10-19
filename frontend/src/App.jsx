@@ -143,12 +143,37 @@ function AppContent() {
             <Route path="/intake" element={<IntakeForm />} />
             <Route path="/track/:ticketCode" element={<Tracking />} />
             <Route path="/online-intake" element={<OnlineIntakeForm />} />
+            <Route path="/cap-cuu-online" element={<OnlineIntakeForm />} />
 
             {/* Admin Pages */}
             <Route path="/login" element={<Login />} />
             <Route element={<ProtectedRoute />}>
               <Route path="/admin" element={<Dashboard />} />
             </Route>
+
+            {/* 404 Page Not Found */}
+            <Route
+              path="*"
+              element={
+                <div className="container mx-auto px-4 py-20 text-center">
+                  <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-orange-50 text-4xl font-extrabold text-brand-orange mb-4">
+                    404
+                  </div>
+                  <h1 className="text-2xl font-extrabold text-slate-800 mb-2">Không tìm thấy trang yêu cầu</h1>
+                  <p className="text-slate-500 text-sm max-w-md mx-auto mb-6">
+                    Đường dẫn bạn truy cập không tồn tại hoặc đã được thay đổi. Vui lòng quay lại trang chủ hoặc tra cứu phiếu sửa chữa.
+                  </p>
+                  <div className="flex justify-center gap-3">
+                    <Link to="/" className="rounded-xl bg-brand-blue px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-800">
+                      Về Trang Chủ
+                    </Link>
+                    <Link to="/tra-cuu" className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50">
+                      Tra Cứu Phiếu QR
+                    </Link>
+                  </div>
+                </div>
+              }
+            />
           </Routes>
         </Suspense>
       </main>

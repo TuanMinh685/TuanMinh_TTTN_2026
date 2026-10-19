@@ -10,6 +10,7 @@ function Tracking() {
   const [rating, setRating] = useState(5);
   const [reviewText, setReviewText] = useState('');
   const [reviewLoading, setReviewLoading] = useState(false);
+  const [reviewError, setReviewError] = useState('');
   const [reviewMessage, setReviewMessage] = useState('');
   const [statusNotice, setStatusNotice] = useState('');
   const [showWarrantyModal, setShowWarrantyModal] = useState(false);
@@ -72,7 +73,7 @@ function Tracking() {
       setLoading(true);
       const response = await api.post(`/public/track/${ticketCode}/approve-quote`, { isApproved });
       if (response.data.success) {
-        alert(isApproved ? 'Cảm ơn bạn đã đồng ý sửa chữa!' : 'Bạn đã từ chối báo giá.');
+        setStatusNotice(isApproved ? '✅ Cảm ơn bạn đã đồng ý báo giá! Kỹ thuật viên đang tiến hành sửa chữa.' : 'ℹ️ Bạn đã từ chối báo giá. Hệ thống đã hoàn trả linh kiện và hủy sửa chữa.');
         try {
           const ticketResponse = await fetchTicket();
           if (ticketResponse.data.success) setTicket(ticketResponse.data.data);
@@ -81,7 +82,7 @@ function Tracking() {
         }
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Có lỗi xảy ra.');
+      setStatusNotice(`❌ ${err.response?.data?.message || 'Có lỗi xảy ra.'}`);
     } finally {
       setLoading(false);
     }
@@ -123,7 +124,7 @@ function Tracking() {
       const updated = await fetchTicket();
       if (updated.data?.success) setTicket(updated.data.data);
     } catch (err) {
-      alert(err.response?.data?.message || 'Có lỗi xảy ra khi gửi yêu cầu bảo hành.');
+      setWarrantyNotice(err.response?.data?.message || 'Có lỗi xảy ra khi gửi yêu cầu bảo hành.');
     } finally {
       setWarrantyLoading(false);
     }

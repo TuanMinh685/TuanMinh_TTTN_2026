@@ -20,13 +20,13 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
-// Giới hạn chung cho toàn hệ thống
+// Giới hạn chung cho toàn hệ thống (Hỗ trợ polling 30s và tác nghiệp liên tục)
 const globalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 phút
-    max: 100, // Tối đa 100 request
+    max: 1000, // Tối đa 1000 request / 15 phút / IP
     message: { success: false, message: 'Quá nhiều yêu cầu. Vui lòng thử lại sau!' }
 });
 app.use('/api', globalLimiter);
