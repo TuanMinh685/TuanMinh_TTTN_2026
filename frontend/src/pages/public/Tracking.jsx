@@ -1,6 +1,23 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
+import QRCode from 'qrcode';
 import api from '../../services/api';
+
+const PROGRESS_STEPS = [
+  { id: 'TIEP_NHAN', label: 'Tiếp nhận', icon: '📝' },
+  { id: 'CHAN_DOAN', label: 'Chẩn đoán', icon: '🔍' },
+  { id: 'BAO_GIA', label: 'Báo giá', icon: '💬' },
+  { id: 'DANG_SUA', label: 'Đang sửa', icon: '🔧' },
+  { id: 'HOAN_TAT', label: 'Hoàn tất', icon: '✅' }
+];
+
+function getStepIndex(status) {
+  if (status === 'ĐÃ_SỬA_XONG' || status === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN') return 4;
+  if (status === 'ĐANG_SỬA') return 3;
+  if (status === 'CHỜ_KHÁCH_CHỐT_GIÁ') return 2;
+  if (status === 'ĐANG_CHUẨN_ĐOÁN' || status === 'ĐANG_KIỂM_TRA') return 1;
+  return 0;
+}
 
 function Tracking() {
   const { ticketCode } = useParams();
@@ -19,11 +36,23 @@ function Tracking() {
   const [warrantyNotice, setWarrantyNotice] = useState('');
   const [selectedPreviewImage, setSelectedPreviewImage] = useState(null);
   const [showVietQr, setShowVietQr] = useState(false);
+  const [ticketQr, setTicketQr] = useState('');
+  const [copiedCode, setCopiedCode] = useState(false);
 
   const fetchTicket = useCallback(
     () => api.get(`/public/track/${ticketCode}`),
     [ticketCode]
   );
+
+  useEffect(() => {
+    if (!ticketCode) return;
+    QRCode.toDataURL(`${window.location.origin}/track/${ticketCode}`, {
+      width: 140,
+      margin: 1
+    })
+      .then(url => setTicketQr(url))
+      .catch(() => {});
+  }, [ticketCode]);
 
   useEffect(() => {
     let active = true;
@@ -131,9 +160,20 @@ function Tracking() {
     }
   };
 
+  const handleCopyTicketCode = () => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(ticketCode);
+      setCopiedCode(true);
+      setTimeout(() => setCopiedCode(false), 2000);
+    }
+  };
+
   if (loading && !ticket) return <div className="text-center mt-20">Đang tải thông tin...</div>;
   if (error) return <div className="text-center mt-20 text-red-500 font-bold">{error}</div>;
   if (!ticket) return null;
+
+  const deviceTitle = ticket.ten_thiet_bi || ticket.ten_may || 'Thiết bị công nghệ';
+  const currentStep = getStepIndex(ticket.trang_thai);
 
   // Render theo phong cách Điện Thoại Vui x Lục Giác
   return (
@@ -150,26 +190,108 @@ function Tracking() {
           <button type="button" onClick={() => setWarrantyNotice('')} aria-label="Đóng" className="text-lg">×</button>
         </div>
       )}
-      {/* Breadcrumb */}
+      {/* Breadcrumb tương tác */}
       <div className="text-sm text-slate-500 mb-6 flex gap-2 items-center">
-        <span>Trang chủ</span> <span className="text-xs">▶</span> 
-        <span>Tra cứu phiếu</span> <span className="text-xs">▶</span> 
-        <span className="text-brand-blue font-semibold">{ticketCode}</span>
+        <Link to="/" className="hover:text-brand-blue hover:underline">Trang chủ</Link>
+        <span className="text-xs">▶</span> 
+        <Link to="/tra-cuu" className="hover:text-brand-blue hover:underline">Tra cứu phiếu</Link>
+        <span className="text-xs">▶</span> 
+        <span className="text-brand-blue font-bold font-mono">{ticketCode}</span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Cột trái: Thiết bị & Ảnh ngoại quan lúc tiếp nhận */}
+        {/* Cột trái: Thẻ Hồ Sơ Thiết Bị Điện Tử & Ảnh ngoại quan lúc tiếp nhận */}
         <div>
-          <div className="bg-slate-100 rounded-2xl flex items-center justify-center p-12 relative overflow-hidden h-80">
-            <div className="w-56 h-56 bg-brand-blue/10 flex items-center justify-center" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}>
-              <span className="text-6xl text-brand-blue font-bold opacity-30">VHU</span>
+          {/* Thẻ Hồ Sơ Thiết Bị Điện Tử (Digital Service Pass) */}
+          <div className="rounded-2xl bg-gradient-to-br from-[#0b4b88] via-[#0d579d] to-[#136f47] text-white p-5 shadow-xl relative overflow-hidden border border-blue-800/40">
+            <div className="absolute -right-10 -top-10 w-36 h-36 rounded-full bg-white/10 blur-2xl pointer-events-none"></div>
+
+            {/* Header Thẻ */}
+            <div className="flex items-center justify-between gap-2 pb-3 mb-4 border-b border-white/15 text-xs">
+              <div className="flex items-center gap-1.5 font-bold tracking-wider uppercase text-blue-100">
+                <span>🛡️</span>
+                <span>HUNGHAU IT SUPPORT • 615 ÂU CƠ</span>
+              </div>
+              <span className="px-2.5 py-0.5 rounded-full bg-white/15 text-white font-semibold text-[11px] backdrop-blur-sm">
+                {ticket.loai_dich_vu === 'ONLINE' ? '💻 Cứu hộ Online' : '🏢 Tiếp nhận tại quầy'}
+              </span>
             </div>
-            <div className="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-sm p-4 rounded-xl text-center shadow-sm border border-white">
-              <h3 className="font-bold text-slate-800 text-lg">{ticket.ten_thiet_bi || ticket.ten_may}</h3>
-              <p className="text-xs text-slate-500">Mã tra cứu: <strong className="text-brand-blue font-mono">{ticketCode}</strong></p>
-              {ticket.so_imei_serial && (
-                <p className="text-[11px] text-slate-500 mt-0.5">S/N / IMEI: <strong className="font-mono text-slate-700">{ticket.so_imei_serial}</strong></p>
+
+            {/* Nội dung chính: Thông tin thiết bị + Mã QR Phiếu */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex-1 space-y-2 text-left w-full">
+                <div className="inline-flex items-center gap-2 bg-amber-400/20 border border-amber-300/40 text-amber-200 px-2.5 py-0.5 rounded-lg text-xs font-bold">
+                  <span>💻 Hồ sơ thiết bị</span>
+                </div>
+                <h3 className="text-xl font-extrabold text-white leading-snug">
+                  {deviceTitle}
+                </h3>
+
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <span className="bg-white/15 px-2.5 py-1 rounded-lg text-xs font-mono font-bold text-white border border-white/20">
+                    Mã: {ticketCode}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleCopyTicketCode}
+                    className="bg-white/10 hover:bg-white/25 text-white text-[11px] font-semibold px-2.5 py-1 rounded-lg transition"
+                  >
+                    {copiedCode ? '✓ Đã sao chép' : '📋 Sao chép mã'}
+                  </button>
+                </div>
+
+                <div className="pt-2 space-y-1 text-xs text-blue-100">
+                  {ticket.so_imei_serial && (
+                    <p>🔢 <strong>S/N / IMEI:</strong> <span className="font-mono text-white">{ticket.so_imei_serial}</span></p>
+                  )}
+                  {ticket.ho_ten && (
+                    <p>👤 <strong>Khách hàng:</strong> <span className="text-white">{ticket.ho_ten}</span> ({ticket.so_dien_thoai})</p>
+                  )}
+                  {ticket.ngay_tao && (
+                    <p>📅 <strong>Tiếp nhận:</strong> <span className="text-white">{new Date(ticket.ngay_tao).toLocaleString('vi-VN')}</span></p>
+                  )}
+                </div>
+              </div>
+
+              {/* Mã QR Nhận Máy */}
+              {ticketQr && (
+                <div className="bg-white p-2.5 rounded-xl shadow-lg text-center shrink-0">
+                  <img src={ticketQr} alt={`QR phiếu ${ticketCode}`} className="w-24 h-24 mx-auto" />
+                  <p className="text-[10px] font-bold text-slate-700 mt-1">QR Nhận Máy</p>
+                </div>
               )}
+            </div>
+
+            {/* Thanh Lộ Trình 5 Bước Trực Quan (5-Step Live Stepper) */}
+            <div className="mt-5 pt-4 border-t border-white/15">
+              <div className="flex items-center justify-between text-[11px] font-bold text-blue-100 mb-2">
+                <span>Lộ trình xử lý tiêu chuẩn</span>
+                <span className="text-amber-300">Bước {currentStep + 1}/5</span>
+              </div>
+              <div className="grid grid-cols-5 gap-1 text-center">
+                {PROGRESS_STEPS.map((step, idx) => {
+                  const isDone = idx <= currentStep;
+                  const isCurrent = idx === currentStep;
+                  return (
+                    <div key={step.id} className="flex flex-col items-center">
+                      <div
+                        className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold mb-1 transition-all ${
+                          isCurrent
+                            ? 'bg-amber-400 text-slate-900 ring-4 ring-amber-300/40 scale-110'
+                            : isDone
+                            ? 'bg-emerald-400 text-slate-900'
+                            : 'bg-white/15 text-white/60'
+                        }`}
+                      >
+                        {isDone && !isCurrent ? '✓' : step.icon}
+                      </div>
+                      <span className={`text-[10px] leading-tight ${isCurrent ? 'font-extrabold text-amber-300' : isDone ? 'font-semibold text-white' : 'text-white/50'}`}>
+                        {step.label}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
