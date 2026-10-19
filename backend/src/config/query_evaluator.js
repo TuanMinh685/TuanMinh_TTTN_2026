@@ -73,6 +73,10 @@ function executeMockQuery(sql, params = []) {
     }
 
     // 9. phieu_linh_kien get or delete for ticket
+    if (/SELECT id, linh_kien_id, so_luong, don_gia FROM phieu_linh_kien WHERE id = \$1 AND phieu_sua_chua_id = \$2/i.test(cleanSql)) {
+        const rec = s.phieu_linh_kien.find(p => p.id === Number(params[0]) && p.phieu_sua_chua_id === Number(params[1]));
+        return { rows: rec ? [{ ...rec }] : [] };
+    }
     if (/SELECT .* FROM phieu_linh_kien .* WHERE .*phieu_sua_chua_id = \$1/i.test(cleanSql)) {
         const ticketId = Number(params[0]);
         const parts = s.phieu_linh_kien.filter(p => p.phieu_sua_chua_id === ticketId).map(p => {
@@ -80,6 +84,11 @@ function executeMockQuery(sql, params = []) {
             return { ...p, ten_linh_kien: lk.ten_linh_kien || 'Linh kiện' };
         });
         return { rows: parts };
+    }
+    if (/DELETE FROM phieu_linh_kien WHERE id = \$1 AND phieu_sua_chua_id = \$2/i.test(cleanSql)) {
+        s.phieu_linh_kien = s.phieu_linh_kien.filter(p => !(p.id === Number(params[0]) && p.phieu_sua_chua_id === Number(params[1])));
+        saveStore();
+        return { rows: [] };
     }
     if (/DELETE FROM phieu_linh_kien WHERE phieu_sua_chua_id = \$1/i.test(cleanSql)) {
         const ticketId = Number(params[0]);
@@ -325,9 +334,9 @@ function executeMockQuery(sql, params = []) {
             p.trang_thai = params[0];
             p.ngay_cap_nhat = new Date().toISOString();
             if (params[0] === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' && !p.han_bao_hanh) {
-                // Kích hoạt bảo hành điện tử 90 ngày
+                // Kích hoạt bảo hành điện tử 06 tháng (180 ngày)
                 const d = new Date();
-                d.setDate(d.getDate() + 90);
+                d.setDate(d.getDate() + 180);
                 p.han_bao_hanh = d.toISOString();
             }
             saveStore();
@@ -341,6 +350,21 @@ function executeMockQuery(sql, params = []) {
         const p = s.phieu_sua_chua.find(x => x.id === Number(params[1]));
         if (p) {
             p.tong_tien = Number(p.tong_tien) + Number(params[0]);
+            if (p.la_sinh_vien) {
+                p.giam_gia_sinh_vien = Math.round(p.tong_tien * 0.15);
+                p.tien_sau_giam = p.tong_tien - p.giam_gia_sinh_vien;
+            } else {
+                p.giam_gia_sinh_vien = 0;
+                p.tien_sau_giam = p.tong_tien;
+            }
+            saveStore();
+        }
+        return { rows: [] };
+    }
+    if (/UPDATE phieu_sua_chua SET tong_tien = GREATEST\(tong_tien - \$1, 0\) WHERE id = \$2/i.test(cleanSql)) {
+        const p = s.phieu_sua_chua.find(x => x.id === Number(params[1]));
+        if (p) {
+            p.tong_tien = Math.max(0, Number(p.tong_tien) - Number(params[0]));
             if (p.la_sinh_vien) {
                 p.giam_gia_sinh_vien = Math.round(p.tong_tien * 0.15);
                 p.tien_sau_giam = p.tong_tien - p.giam_gia_sinh_vien;

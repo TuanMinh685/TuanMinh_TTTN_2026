@@ -37,6 +37,7 @@ router.post('/parts', verifyToken, requireRole('QUAN_LY', 'ADMIN'), ticketContro
 router.patch('/parts/:id', verifyToken, requireRole('QUAN_LY', 'ADMIN'), ticketController.updatePart);
 router.get('/:id/parts', verifyToken, requireRole('KY_THUAT_VIEN', 'LE_TAN', 'QUAN_LY', 'ADMIN'), ticketController.getTicketParts);
 router.post('/:id/parts', verifyToken, requireRole('KY_THUAT_VIEN', 'QUAN_LY', 'ADMIN'), ticketController.addPartToTicket);
+router.delete('/:id/parts/:partRecordId', verifyToken, requireRole('KY_THUAT_VIEN', 'QUAN_LY', 'ADMIN'), ticketController.removePartFromTicket);
 router.get('/:id/photos', verifyToken, requireRole('KY_THUAT_VIEN', 'LE_TAN', 'QUAN_LY', 'ADMIN'), ticketController.getTicketPhotos);
 router.post('/:id/photos', verifyToken, requireRole('KY_THUAT_VIEN', 'LE_TAN', 'QUAN_LY', 'ADMIN'), ticketController.addTicketPhoto);
 

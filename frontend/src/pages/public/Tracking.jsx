@@ -18,6 +18,7 @@ function Tracking() {
   const [warrantyLoading, setWarrantyLoading] = useState(false);
   const [warrantyNotice, setWarrantyNotice] = useState('');
   const [selectedPreviewImage, setSelectedPreviewImage] = useState(null);
+  const [showVietQr, setShowVietQr] = useState(false);
 
   const fetchTicket = useCallback(
     () => api.get(`/public/track/${ticketCode}`),
@@ -281,6 +282,38 @@ function Tracking() {
                 <p className="text-emerald-700 text-xs font-semibold mt-1 flex items-center gap-1">
                   ✓ Tích lũy +{Math.floor(Number(ticket.uu_dai_sinh_vien?.tien_sau_giam || ticket.tong_tien) / 10000)} điểm thành viên
                 </p>
+
+                <div className="mt-4 pt-3 border-t border-orange-200/70">
+                  <button
+                    type="button"
+                    onClick={() => setShowVietQr(prev => !prev)}
+                    className="w-full py-2.5 px-4 bg-white hover:bg-blue-50 text-brand-blue border border-blue-200 font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-sm"
+                  >
+                    <span>💳</span>
+                    {showVietQr ? 'Ẩn mã QR chuyển khoản ngân hàng (VietQR)' : 'Hiển thị QR Chuyển khoản Ngân hàng tự động (VietQR)'}
+                  </button>
+
+                  {showVietQr && (
+                    <div className="mt-3 p-4 bg-white rounded-xl border border-blue-200 text-center shadow-sm">
+                      <p className="text-xs font-bold text-brand-blue uppercase tracking-wider mb-1">
+                        Quét mã VietQR bằng mọi App Ngân hàng / MoMo
+                      </p>
+                      <p className="text-[11px] text-slate-500 mb-3">
+                        Tự động điền sẵn số tiền <strong>{Number(ticket.uu_dai_sinh_vien?.tien_sau_giam || ticket.tong_tien).toLocaleString('vi-VN')} ₫</strong> &amp; nội dung chuyển khoản
+                      </p>
+                      <img
+                        src={`https://img.vietqr.io/image/MB-02838604999-compact2.png?amount=${Number(ticket.uu_dai_sinh_vien?.tien_sau_giam || ticket.tong_tien)}&addInfo=${encodeURIComponent(`TT ${ticketCode}`)}&accountName=${encodeURIComponent('HUNGHAU IT SUPPORT')}`}
+                        alt="Mã thanh toán VietQR"
+                        className="mx-auto w-52 h-auto rounded-lg border border-slate-200 p-1"
+                      />
+                      <div className="mt-2 text-[11px] text-slate-600 bg-slate-50 rounded-lg p-2 text-left space-y-0.5">
+                        <div><strong>Ngân hàng:</strong> MB Bank (Quân Đội)</div>
+                        <div><strong>Chủ TK:</strong> HUNGHAU IT SUPPORT</div>
+                        <div><strong>Nội dung CK:</strong> <code className="font-bold text-brand-blue">TT {ticketCode}</code></div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>

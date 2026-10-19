@@ -140,8 +140,8 @@ const submitIntake = async (customerData) => {
 
 const getAllTickets = async () => {
     const query = `
-        SELECT p.id, p.ma_tra_cuu as ma_phieu, p.trang_thai, p.tong_tien, p.ngay_tao,
-            k.ho_ten as ho_ten_khach, k.so_dien_thoai,
+        SELECT p.id, p.ma_tra_cuu as ma_phieu, p.trang_thai, p.tong_tien, p.han_bao_hanh, p.ngay_tao,
+            k.ho_ten as ho_ten_khach, k.so_dien_thoai, k.la_sinh_vien, k.truong_hoc, k.ma_sinh_vien as mssv,
             t.ten_may as ten_thiet_bi, t.tinh_trang_may as mo_ta_loi
         FROM phieu_sua_chua p
         JOIN thiet_bi t ON p.thiet_bi_id = t.id
@@ -206,7 +206,7 @@ const updateTicketStatus = async (id, status, ghiChu = '') => {
             'CHỜ_KHÁCH_CHỐT_GIÁ': 'Kỹ thuật viên đã lên phương án sửa chữa và gửi báo giá chờ khách xác nhận.',
             'ĐANG_SỬA': 'Kỹ thuật viên đang tiến hành sửa chữa / thay thế linh kiện.',
             'ĐÃ_SỬA_XONG': 'Kỹ thuật viên đã hoàn tất sửa chữa và kiểm tra chất lượng (QC).',
-            'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN': 'Đã bàn giao thiết bị cho khách hàng, thu tiền và kích hoạt bảo hành điện tử 90 ngày.'
+            'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN': 'Đã bàn giao thiết bị cho khách hàng, thu tiền và kích hoạt bảo hành điện tử 06 tháng (180 ngày).'
         };
         const noteText = (typeof ghiChu === 'string' && ghiChu.trim())
             ? ghiChu.trim()
@@ -285,7 +285,8 @@ const submitBooking = async (bookingData) => {
 
 const getAllBookings = async () => {
     const query = `
-        SELECT l.id, k.ho_ten as ho_ten_khach, k.so_dien_thoai, l.ngay_hen, l.gio_hen, l.mo_ta_loi, l.loai_dich_vu, l.trang_thai
+        SELECT l.id, k.ho_ten as ho_ten_khach, k.so_dien_thoai, k.la_sinh_vien, k.truong_hoc, k.ma_sinh_vien as mssv,
+               l.ngay_hen, l.gio_hen, l.mo_ta_loi, l.loai_dich_vu, l.trang_thai
         FROM lich_hen l
         JOIN khach_hang k ON l.khach_hang_id = k.id
         ORDER BY l.ngay_hen ASC, l.gio_hen ASC
@@ -449,6 +450,34 @@ const addPartToTicket = async (ticketId, partId, quantity, soSerial = null) => {
     }
 };
 
+const removePartFromTicket = async (ticketId, partRecordId) => {
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+        const recResult = await client.query(
+            'SELECT id, linh_kien_id, so_luong, don_gia FROM phieu_linh_kien WHERE id = $1 AND phieu_sua_chua_id = $2',
+            [Number(partRecordId), Number(ticketId)]
+        );
+        if (recResult.rows.length === 0) {
+            throw new Error('Không tìm thấy linh kiện cần gỡ trên phiếu này.');
+        }
+        const rec = recResult.rows[0];
+        const refundAmount = Number(rec.so_luong) * Number(rec.don_gia);
+
+        await client.query('UPDATE linh_kien SET so_luong = so_luong + $1 WHERE id = $2', [rec.so_luong, rec.linh_kien_id]);
+        await client.query('DELETE FROM phieu_linh_kien WHERE id = $1 AND phieu_sua_chua_id = $2', [Number(partRecordId), Number(ticketId)]);
+        await client.query('UPDATE phieu_sua_chua SET tong_tien = GREATEST(tong_tien - $1, 0) WHERE id = $2', [refundAmount, Number(ticketId)]);
+
+        await client.query('COMMIT');
+        return { success: true };
+    } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+    } finally {
+        client.release();
+    }
+};
+
 const getTicketPhotos = async (ticketId) => {
     const { rows } = await pool.query(`
         SELECT id, phieu_sua_chua_id, duong_dan_anh, loai_anh, ghi_chu, ngay_tao
@@ -475,6 +504,7 @@ module.exports = {
     updatePart,
     getTicketParts,
     addPartToTicket,
+    removePartFromTicket,
     getTicketPhotos,
     addTicketPhoto,
     submitIntake,

@@ -224,6 +224,16 @@ const addPartToTicket = async (req, res, next) => {
     }
 };
 
+const removePartFromTicket = async (req, res, next) => {
+    try {
+        const { id, partRecordId } = req.params;
+        const result = await ticketService.removePartFromTicket(id, partRecordId);
+        res.status(200).json({ success: true, message: 'Đã gỡ linh kiện khỏi phiếu và hoàn trả kho.', data: result });
+    } catch (err) {
+        next(err);
+    }
+};
+
 const getTicketPhotos = async (req, res, next) => {
     try {
         const { id } = req.params;
@@ -254,6 +264,7 @@ module.exports = {
     updatePart,
     getTicketParts,
     addPartToTicket,
+    removePartFromTicket,
     getTicketPhotos,
     addTicketPhoto,
     submitIntake,

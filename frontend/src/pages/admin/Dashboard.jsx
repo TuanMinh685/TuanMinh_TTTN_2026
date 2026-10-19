@@ -52,6 +52,22 @@ function Dashboard() {
   const [latestNotice, setLatestNotice] = useState(null);
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [statusNote, setStatusNote] = useState('');
+  const [modalTicketParts, setModalTicketParts] = useState([]);
+  const [employees, setEmployees] = useState([]);
+  const [showPosModal, setShowPosModal] = useState(false);
+  const [savingPos, setSavingPos] = useState(false);
+  const [posForm, setPosForm] = useState({
+    fullName: '',
+    phone: '',
+    deviceName: '',
+    serialImei: '',
+    issueDescription: '',
+    isStudent: false,
+    schoolName: '',
+    studentId: '',
+    photoBase64: '',
+    photoNote: ''
+  });
   const [selectedSoftwareTicketId, setSelectedSoftwareTicketId] = useState('');
   const [selectedSoftwareGroup, setSelectedSoftwareGroup] = useState('ALL');
   const [selectedSoftwarePackages, setSelectedSoftwarePackages] = useState([]);
@@ -68,6 +84,24 @@ function Dashboard() {
     });
   };
 
+  const exportToCsv = (filename, headers, rows) => {
+    const escapeCsv = (val) => `"${String(val ?? '').replace(/"/g, '""')}"`;
+    const csvContent = '\uFEFF' + [
+      headers.map(escapeCsv).join(','),
+      ...rows.map(row => row.map(escapeCsv).join(','))
+    ].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    showToast(`📥 Đã xuất file báo cáo Excel/CSV: ${filename}`);
+  };
+
   const fetchStats = useCallback(async () => {
     const res = await api.get(`/admin/dashboard-stats?period=${reportPeriod}`);
     return res.data.data;
@@ -78,6 +112,23 @@ function Dashboard() {
     return res.data.data || [];
   }, []);
 
+  const fetchEmployees = useCallback(async () => {
+    const res = await api.get('/admin/employees');
+    return res.data.data || [];
+  }, []);
+
+  const openPartModal = async (ticketId) => {
+    setSelectedTicketId(ticketId);
+    setShowPartModal(true);
+    setPartSerial('');
+    try {
+      const res = await api.get(`/tickets/${ticketId}/parts`);
+      setModalTicketParts(res.data.data || []);
+    } catch {
+      setModalTicketParts([]);
+    }
+  };
+
   const addPartToTicket = async () => {
     if (!selectedPartId || partQuantity < 1) return showToast('⚠️ Vui lòng chọn linh kiện và số lượng hợp lệ');
     try {
@@ -87,14 +138,82 @@ function Dashboard() {
         so_serial: partSerial.trim() || undefined
       });
       showToast('✅ Thêm linh kiện và lưu mã Serial thành công!');
-      setShowPartModal(false);
       setPartSerial('');
+      const res = await api.get(`/tickets/${selectedTicketId}/parts`);
+      setModalTicketParts(res.data.data || []);
       await refreshTickets();
       if (role === 'KY_THUAT_VIEN' || role === 'QUAN_LY' || role === 'ADMIN') {
         setParts(await fetchParts());
       }
     } catch (err) {
       showToast(`❌ ${err.response?.data?.message || 'Lỗi thêm linh kiện'}`);
+    }
+  };
+
+  const removePartFromTicket = async (partRecordId) => {
+    try {
+      await api.delete(`/tickets/${selectedTicketId}/parts/${partRecordId}`);
+      showToast('🔄 Đã gỡ linh kiện khỏi phiếu và hoàn trả tồn kho!');
+      const res = await api.get(`/tickets/${selectedTicketId}/parts`);
+      setModalTicketParts(res.data.data || []);
+      await refreshTickets();
+      if (role === 'KY_THUAT_VIEN' || role === 'QUAN_LY' || role === 'ADMIN') {
+        setParts(await fetchParts());
+      }
+    } catch (err) {
+      showToast(`❌ ${err.response?.data?.message || 'Lỗi gỡ linh kiện'}`);
+    }
+  };
+
+  const handlePosPhotoChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      setPosForm(prev => ({ ...prev, photoBase64: evt.target.result }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const submitPosWalkIn = async (e) => {
+    e.preventDefault();
+    setSavingPos(true);
+    try {
+      const payload = {
+        fullName: posForm.fullName.trim(),
+        phone: posForm.phone.trim(),
+        deviceName: posForm.deviceName.trim(),
+        serialImei: posForm.serialImei.trim() || undefined,
+        issueDescription: posForm.issueDescription.trim(),
+        isStudent: posForm.isStudent,
+        schoolName: posForm.isStudent ? posForm.schoolName.trim() : '',
+        studentId: posForm.isStudent ? posForm.studentId.trim() : '',
+        photos: posForm.photoBase64
+          ? [{ duong_dan_anh: posForm.photoBase64, loai_anh: 'NGOAI_QUAN', ghi_chu: posForm.photoNote.trim() || 'Ảnh chụp tại quầy POS' }]
+          : []
+      };
+      const res = await api.post('/tickets/intake', payload);
+      const newCode = res.data?.data?.ticketCode;
+      const latestList = await fetchTickets();
+      setTickets(latestList);
+      setShowPosModal(false);
+      setPosForm({
+        fullName: '', phone: '', deviceName: '', serialImei: '', issueDescription: '',
+        isStudent: false, schoolName: '', studentId: '', photoBase64: '', photoNote: ''
+      });
+      showToast(`🎉 Đã tạo phiếu tại quầy ${newCode || ''} thành công! Mở cửa sổ in phiếu 80mm...`);
+      const createdTicket = latestList.find(t => t.ma_phieu === newCode);
+      if (createdTicket) {
+        setReceiptQr('');
+        setReceiptParts([]);
+        setReceiptPartsLoading(true);
+        setReceiptPartsError('');
+        setReceiptTicket(createdTicket);
+      }
+    } catch (err) {
+      showToast(`❌ ${err.response?.data?.message || 'Không tạo được phiếu tại quầy'}`);
+    } finally {
+      setSavingPos(false);
     }
   };
 
@@ -161,6 +280,7 @@ function Dashboard() {
     }
     if (role === 'QUAN_LY' || role === 'ADMIN') {
       load(fetchStats, setStats, 'thống kê dashboard');
+      load(fetchEmployees, setEmployees, 'danh sách nhân sự');
     }
     if (role === 'KY_THUAT_VIEN' || role === 'QUAN_LY' || role === 'ADMIN') {
       load(fetchParts, setParts, 'danh sách linh kiện');
@@ -170,7 +290,7 @@ function Dashboard() {
     return () => {
       active = false;
     };
-  }, [role, fetchTickets, fetchBookings, fetchStats, fetchParts]);
+  }, [role, fetchTickets, fetchBookings, fetchStats, fetchParts, fetchEmployees]);
 
   useEffect(() => {
     try {
@@ -592,6 +712,13 @@ function Dashboard() {
               Báo cáo
             </button>
           )}
+          {(role === 'QUAN_LY' || role === 'ADMIN') && (
+            <button
+              onClick={() => setActiveTab('EMPLOYEES')}
+              className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'EMPLOYEES' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
+              Nhân sự ({employees.length})
+            </button>
+          )}
           <button
             onClick={() => setActiveTab('NOTIFICATIONS')}
             className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'NOTIFICATIONS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
@@ -604,14 +731,53 @@ function Dashboard() {
         <div className="rounded-xl border-t-4 border-brand-green bg-white p-5 shadow sm:p-6">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <h3 className="text-xl font-bold">Danh sách phiếu sửa chữa</h3>
-            <input
-              type="search"
-              value={ticketSearch}
-              onChange={event => setTicketSearch(event.target.value)}
-              placeholder="Tìm mã phiếu, khách hàng, số điện thoại..."
-              aria-label="Tìm mã phiếu, khách hàng hoặc số điện thoại"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm sm:max-w-sm"
-            />
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+              <input
+                type="search"
+                value={ticketSearch}
+                onChange={event => setTicketSearch(event.target.value)}
+                placeholder="Tìm mã phiếu, khách hàng, số điện thoại..."
+                aria-label="Tìm mã phiếu, khách hàng hoặc số điện thoại"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm sm:w-64"
+              />
+              {canReceptionAction && (
+                <button
+                  type="button"
+                  onClick={() => setShowPosModal(true)}
+                  className="rounded-lg bg-brand-orange px-3.5 py-2 text-xs font-bold text-white hover:bg-orange-600 shadow-sm whitespace-nowrap"
+                >
+                  + Tiếp Nhận Tại Quầy (POS)
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => exportToCsv(
+                  'Bao_Cao_Phieu_Sua_Chua.csv',
+                  ['Mã Phiếu', 'Khách Hàng', 'Số Điện Thoại', 'Thiết Bị', 'Lỗi Mô Tả', 'Đối Tượng', 'Trường Học', 'Trạng Thái', 'Chi Phí Gốc (VNĐ)', 'Thực Thu (VNĐ)', 'Hạn Bảo Hành', 'Ngày Tạo'],
+                  filteredTickets.map(t => {
+                    const raw = Number(t.tong_tien || 0);
+                    const finalAmt = t.la_sinh_vien ? Math.round(raw * 0.85) : raw;
+                    return [
+                      t.ma_phieu,
+                      t.ho_ten_khach,
+                      t.so_dien_thoai,
+                      t.ten_thiet_bi || '',
+                      t.mo_ta_loi || '',
+                      t.la_sinh_vien ? 'Sinh viên (-15%)' : 'Khách thường',
+                      t.truong_hoc || '',
+                      t.trang_thai,
+                      raw,
+                      finalAmt,
+                      t.han_bao_hanh ? new Date(t.han_bao_hanh).toLocaleDateString('vi-VN') : '',
+                      t.ngay_tao ? new Date(t.ngay_tao).toLocaleString('vi-VN') : ''
+                    ];
+                  })
+                )}
+                className="rounded-lg bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white hover:bg-emerald-700 shadow-sm whitespace-nowrap"
+              >
+                📥 Xuất Excel (CSV)
+              </button>
+            </div>
           </div>
 
           {/* Quick Status Filter Pills */}
@@ -722,7 +888,7 @@ function Dashboard() {
                     )}
                     {canTechAction && ticket.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' && (
                       <>
-                        <button onClick={() => { setSelectedTicketId(ticket.id); setShowPartModal(true); }} className="bg-yellow-500 text-white px-3 py-1 rounded font-bold text-xs w-full">Thêm Linh Kiện</button>
+                        <button onClick={() => openPartModal(ticket.id)} className="bg-yellow-500 text-white px-3 py-1 rounded font-bold text-xs w-full">Thêm Linh Kiện</button>
                         <button onClick={() => updateStatus(ticket.id, 'CHỜ_KHÁCH_CHỐT_GIÁ')} className="bg-amber-600 text-white px-3 py-1 rounded font-bold text-xs w-full">Gửi Báo Giá</button>
                         <button onClick={() => updateStatus(ticket.id, 'ĐANG_SỬA')} className="bg-blue-500 text-white px-3 py-1 rounded font-bold text-xs w-full">Tiến hành Sửa</button>
                       </>
@@ -732,7 +898,7 @@ function Dashboard() {
                     )}
                     {canTechAction && ticket.trang_thai === 'ĐANG_SỬA' && (
                       <>
-                        <button onClick={() => { setSelectedTicketId(ticket.id); setShowPartModal(true); }} className="bg-yellow-500 text-white px-3 py-1 rounded font-bold text-xs w-full mb-1">Thêm Linh Kiện</button>
+                        <button onClick={() => openPartModal(ticket.id)} className="bg-yellow-500 text-white px-3 py-1 rounded font-bold text-xs w-full mb-1">Thêm Linh Kiện</button>
                         <button onClick={() => updateStatus(ticket.id, 'CHỜ_KHÁCH_CHỐT_GIÁ')} className="bg-amber-600 text-white px-3 py-1 rounded font-bold text-xs w-full">Gửi Báo Giá</button>
                         <button onClick={() => updateStatus(ticket.id, 'ĐÃ_SỬA_XONG')} className="bg-brand-green text-white px-3 py-1 rounded font-bold text-xs w-full">Sửa Xong</button>
                       </>
@@ -782,18 +948,37 @@ function Dashboard() {
               <h3 className="text-xl font-bold text-brand-blue">Báo cáo doanh thu &amp; hiệu suất</h3>
               <p className="mt-1 text-sm text-slate-500">Doanh thu chỉ tính các phiếu đã giao khách và thu tiền.</p>
             </div>
-            <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-              Khoảng thời gian
-              <select
-                value={reportPeriod}
-                onChange={event => setReportPeriod(event.target.value)}
-                aria-label="Khoảng thời gian báo cáo"
-                className="rounded-lg border border-slate-300 px-3 py-2"
+            <div className="flex flex-wrap items-center gap-3">
+              <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                Khoảng thời gian
+                <select
+                  value={reportPeriod}
+                  onChange={event => setReportPeriod(event.target.value)}
+                  aria-label="Khoảng thời gian báo cáo"
+                  className="rounded-lg border border-slate-300 px-3 py-2"
+                >
+                  <option value="week">7 ngày gần nhất</option>
+                  <option value="month">Tháng này</option>
+                </select>
+              </label>
+              <button
+                type="button"
+                onClick={() => exportToCsv(
+                  'Bao_Cao_Doanh_Thu_Kinh_Doanh.csv',
+                  ['Ngày', 'Doanh Thu Ngày (VNĐ)', 'Tổng Doanh Thu Kỳ (VNĐ)', 'Doanh Thu Linh Kiện Kỳ (VNĐ)', 'Số Phiếu Hoàn Tất Kỳ'],
+                  (stats.revenueData || []).map(row => [
+                    row.date,
+                    row.total_revenue,
+                    stats.totalRevenue || 0,
+                    stats.totalPartsRevenue || 0,
+                    stats.completedTickets || 0
+                  ])
+                )}
+                className="rounded-lg bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white hover:bg-emerald-700 shadow-sm"
               >
-                <option value="week">7 ngày gần nhất</option>
-                <option value="month">Tháng này</option>
-              </select>
-            </label>
+                📥 Xuất Báo Cáo Kế Toán (CSV)
+              </button>
+            </div>
           </div>
           <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <article className="rounded-xl bg-blue-50 p-5">
@@ -1000,6 +1185,21 @@ function Dashboard() {
                 <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-800">
                   Cảnh báo: {parts.filter(part => Number(part.so_luong) < Number(lowStockThreshold || 5)).length} linh kiện cần nhập hàng
                 </p>
+                <button
+                  type="button"
+                  onClick={() => exportToCsv(
+                    'Bao_Cao_Ton_Kho_Linh_Kien.csv',
+                    ['Mã Linh Kiện', 'Tên Linh Kiện', 'Giá Bán (VNĐ)', 'Số Lượng Tồn', 'Tình Trạng'],
+                    parts.map(p => {
+                      const qty = Number(p.so_luong);
+                      const status = qty <= 0 ? 'Hết hàng' : qty < Number(lowStockThreshold || 5) ? 'Sắp hết' : 'Còn hàng';
+                      return [p.id, p.ten_linh_kien, p.gia_ban, qty, status];
+                    })
+                  )}
+                  className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700"
+                >
+                  📥 Xuất Kho (CSV)
+                </button>
                 <button
                   type="button"
                   onClick={() => { resetPartForm(); setShowInventoryForm(true); }}
@@ -1267,6 +1467,66 @@ function Dashboard() {
           </table>
         </div>
       )}
+
+      {activeTab === 'EMPLOYEES' && (role === 'QUAN_LY' || role === 'ADMIN') && (
+        <div className="bg-white p-6 rounded-xl shadow border-t-4 border-brand-blue">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 className="text-xl font-bold text-brand-blue">Danh sách Nhân sự &amp; Phân quyền Hệ thống</h3>
+              <p className="text-xs text-slate-500 mt-1">Quản lý đội ngũ Lễ tân, Kỹ thuật viên và Quản lý tại trung tâm 615 Âu Cơ.</p>
+            </div>
+            <div className="flex gap-2">
+              <span className="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-bold text-brand-blue border border-blue-200">
+                👨‍🔧 Đang xử lý: {tickets.filter(t => t.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' || t.trang_thai === 'ĐANG_SỬA').length} máy
+              </span>
+              <span className="rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 border border-emerald-200">
+                ✅ Đã hoàn tất: {tickets.filter(t => t.trang_thai === 'ĐÃ_SỬA_XONG' || t.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN').length} máy
+              </span>
+            </div>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b-2 border-slate-200 text-xs font-bold uppercase text-slate-500">
+                  <th className="py-3 px-4">Mã NV</th>
+                  <th className="py-3 px-4">Họ và Tên</th>
+                  <th className="py-3 px-4">Tài khoản đăng nhập</th>
+                  <th className="py-3 px-4">Vai trò / Chức vụ</th>
+                  <th className="py-3 px-4 text-center">Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody>
+                {employees.map(emp => (
+                  <tr key={emp.id} className="border-b hover:bg-slate-50 text-sm">
+                    <td className="py-3 px-4 font-bold text-slate-600">NV-{String(emp.id).padStart(3, '0')}</td>
+                    <td className="py-3 px-4 font-semibold text-slate-800">{emp.ho_ten}</td>
+                    <td className="py-3 px-4 font-mono text-brand-blue">{emp.ten_dang_nhap}</td>
+                    <td className="py-3 px-4">
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+                        emp.vai_tro === 'QUAN_LY' || emp.vai_tro === 'ADMIN'
+                          ? 'bg-purple-100 text-purple-800'
+                          : emp.vai_tro === 'KY_THUAT_VIEN'
+                            ? 'bg-blue-100 text-blue-800'
+                            : 'bg-orange-100 text-orange-800'
+                      }`}>
+                        {emp.vai_tro === 'QUAN_LY' || emp.vai_tro === 'ADMIN' ? '🛡️ Quản Lý / Admin' : emp.vai_tro === 'KY_THUAT_VIEN' ? '🔧 Kỹ Thuật Viên' : '💁 Lễ Tân'}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">
+                        ● Đang hoạt động
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+                {employees.length === 0 && (
+                  <tr><td colSpan="5" className="text-center py-8 text-slate-400">Chưa có dữ liệu nhân sự.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     
       {receiptTicket && (
         <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 p-4">
@@ -1353,12 +1613,23 @@ function Dashboard() {
                 </div>
               )}
               <p className="mt-2 text-[10px] text-slate-600 border border-slate-200 p-1.5 rounded text-center">
-                🛡️ Sổ bảo hành điện tử (e-Warranty): Kích hoạt 90 ngày. Quét QR bên dưới để tra cứu hoặc yêu cầu bảo hành.
+                🛡️ Sổ bảo hành điện tử (e-Warranty): Kích hoạt 06 tháng (180 ngày). Quét QR bên dưới để tra cứu hoặc yêu cầu bảo hành.
               </p>
               {receiptQr && (
                 <div className="mt-4 text-center">
                   <img src={receiptQr} alt={`QR tra cứu phiếu ${receiptTicket.ma_phieu}`} className="mx-auto h-32 w-32" />
                   <p className="mt-1 break-all text-[10px]">{window.location.origin}/track/{receiptTicket.ma_phieu}</p>
+                </div>
+              )}
+              {receiptTotal > 0 && (
+                <div className="mt-3 pt-3 border-t border-dashed border-slate-300 text-center">
+                  <p className="text-[10px] font-bold uppercase text-brand-blue mb-1">💳 Quét VietQR Chuyển khoản Ngân hàng</p>
+                  <img
+                    src={`https://img.vietqr.io/image/MB-02838604999-compact2.png?amount=${receiptTicket.la_sinh_vien ? Math.round(receiptTotal * 0.85) : receiptTotal}&addInfo=${encodeURIComponent(`TT ${receiptTicket.ma_phieu}`)}&accountName=${encodeURIComponent('HUNGHAU IT SUPPORT')}`}
+                    alt="VietQR Thanh toán"
+                    className="mx-auto w-36 h-auto rounded border border-slate-200"
+                  />
+                  <p className="text-[10px] text-slate-600 mt-1">Nội dung CK: <strong>TT {receiptTicket.ma_phieu}</strong></p>
                 </div>
               )}
               <p className="mt-4 text-center text-xs">Cảm ơn quý khách đã sử dụng dịch vụ!</p>
@@ -1377,13 +1648,44 @@ function Dashboard() {
         </div>
       )}
 
-      {/* Modal Thêm Linh Kiện */}
+      {/* Modal Thêm & Quản Lý Linh Kiện Trên Phiếu */}
       {showPartModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-xl w-96 max-w-[90%] shadow-2xl">
-            <h3 className="text-xl font-bold text-brand-blue mb-4">Thêm Linh Kiện / Dịch Vụ</h3>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white p-6 rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-brand-blue">Linh Kiện &amp; Dịch Vụ Của Phiếu</h3>
+              <button type="button" onClick={() => setShowPartModal(false)} className="text-slate-400 hover:text-slate-600 text-xl font-bold">×</button>
+            </div>
+
+            {/* Danh sách linh kiện đã gắn trên phiếu (Cho phép gỡ nếu nhập nhầm) */}
+            {modalTicketParts.length > 0 && (
+              <div className="mb-4 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                <p className="text-xs font-bold text-slate-700 mb-2">🔧 Linh kiện đã gắn ({modalTicketParts.length}):</p>
+                <div className="space-y-2 max-h-40 overflow-y-auto">
+                  {modalTicketParts.map(item => (
+                    <div key={item.id} className="flex items-center justify-between gap-2 bg-white p-2 rounded-lg border border-slate-200 text-xs">
+                      <div>
+                        <p className="font-bold text-slate-800">{item.ten_linh_kien} (x{item.so_luong})</p>
+                        <p className="text-[10px] text-slate-500">
+                          {(Number(item.don_gia) * Number(item.so_luong)).toLocaleString('vi-VN')} đ
+                          {item.so_serial ? ` • S/N: ${item.so_serial}` : ''}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removePartFromTicket(item.id)}
+                        className="rounded bg-red-50 px-2 py-1 text-[11px] font-bold text-red-600 border border-red-200 hover:bg-red-100 whitespace-nowrap"
+                      >
+                        Gỡ &amp; Hoàn kho
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="mb-4">
-              <label className="block text-sm font-bold text-slate-700 mb-2">Chọn linh kiện:</label>
+              <label className="block text-sm font-bold text-slate-700 mb-2">Chọn linh kiện thêm mới:</label>
               <select 
                 value={selectedPartId} 
                 onChange={(e) => setSelectedPartId(e.target.value)}
@@ -1391,8 +1693,8 @@ function Dashboard() {
               >
                 <option value="">-- Chọn --</option>
                 {parts.map(p => (
-                  <option key={p.id} value={p.id}>
-                    {p.ten_linh_kien} - {Number(p.gia_ban).toLocaleString('vi-VN')}đ (Tồn: {p.so_luong})
+                  <option key={p.id} value={p.id} disabled={Number(p.so_luong) <= 0}>
+                    {p.ten_linh_kien} - {Number(p.gia_ban).toLocaleString('vi-VN')}đ ({Number(p.so_luong) <= 0 ? 'HẾT HÀNG' : `Tồn: ${p.so_luong}`})
                   </option>
                 ))}
               </select>
@@ -1427,9 +1729,157 @@ function Dashboard() {
               />
             </div>
             <div className="flex gap-4">
-              <button onClick={() => setShowPartModal(false)} className="flex-1 py-2 bg-slate-200 text-slate-700 font-bold rounded hover:bg-slate-300">Hủy</button>
-              <button onClick={addPartToTicket} className="flex-1 py-2 bg-brand-blue text-white font-bold rounded hover:bg-blue-700">Xác Nhận</button>
+              <button onClick={() => setShowPartModal(false)} className="flex-1 py-2 bg-slate-200 text-slate-700 font-bold rounded hover:bg-slate-300">Đóng</button>
+              <button onClick={addPartToTicket} className="flex-1 py-2 bg-brand-blue text-white font-bold rounded hover:bg-blue-700">Xác Nhận Thêm</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Tiếp Nhận Nhanh Tại Quầy (POS Walk-in) */}
+      {showPosModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-xl max-h-[92vh] overflow-y-auto shadow-2xl p-6">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-200">
+              <div>
+                <h3 className="text-lg font-extrabold text-brand-blue">🖥️ Tiếp Nhận Máy Trực Tiếp Tại Quầy (POS)</h3>
+                <p className="text-xs text-slate-500">Tạo phiếu nhanh cho khách vãng lai &amp; tự động bật cửa sổ in phiếu nhiệt 80mm.</p>
+              </div>
+              <button type="button" onClick={() => setShowPosModal(false)} className="text-slate-400 hover:text-slate-700 text-2xl font-bold">×</button>
+            </div>
+
+            <form onSubmit={submitPosWalkIn} className="space-y-4 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Họ và tên khách hàng *</label>
+                  <input
+                    type="text"
+                    required
+                    value={posForm.fullName}
+                    onChange={e => setPosForm({ ...posForm, fullName: e.target.value })}
+                    placeholder="VD: Nguyễn Văn An"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-brand-blue outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Số điện thoại *</label>
+                  <input
+                    type="tel"
+                    required
+                    value={posForm.phone}
+                    onChange={e => setPosForm({ ...posForm, phone: e.target.value })}
+                    placeholder="VD: 0909123456"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-brand-blue outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Tên máy / Model thiết bị *</label>
+                  <input
+                    type="text"
+                    required
+                    value={posForm.deviceName}
+                    onChange={e => setPosForm({ ...posForm, deviceName: e.target.value })}
+                    placeholder="VD: Laptop Dell Inspiron 15 / MacBook Air M2"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-brand-blue outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Số Serial / Service Tag máy</label>
+                  <input
+                    type="text"
+                    value={posForm.serialImei}
+                    onChange={e => setPosForm({ ...posForm, serialImei: e.target.value })}
+                    placeholder="VD: ST-89234X"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-brand-blue outline-none font-mono"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Mô tả tình trạng lỗi &amp; yêu cầu của khách *</label>
+                <textarea
+                  required
+                  rows={2}
+                  value={posForm.issueDescription}
+                  onChange={e => setPosForm({ ...posForm, issueDescription: e.target.value })}
+                  placeholder="VD: Máy bật không lên nguồn, khách yêu cầu kiểm tra IC nguồn và vệ sinh máy..."
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-brand-blue outline-none"
+                />
+              </div>
+
+              {/* Ưu đãi Sinh viên */}
+              <div className="rounded-xl bg-indigo-50/70 p-3.5 border border-indigo-200">
+                <label className="flex items-center gap-2 cursor-pointer font-bold text-indigo-900 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={posForm.isStudent}
+                    onChange={e => setPosForm({ ...posForm, isStudent: e.target.checked })}
+                    className="h-4 w-4 rounded text-indigo-600"
+                  />
+                  🎓 Khách hàng là Học sinh / Sinh viên Toàn quốc (Áp dụng giảm 15% tổng hóa đơn)
+                </label>
+                {posForm.isStudent && (
+                  <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <input
+                      type="text"
+                      required
+                      value={posForm.schoolName}
+                      onChange={e => setPosForm({ ...posForm, schoolName: e.target.value })}
+                      placeholder="Tên trường Đại học / Cao đẳng / THPT *"
+                      className="rounded-lg border border-indigo-300 bg-white px-3 py-1.5 text-xs"
+                    />
+                    <input
+                      type="text"
+                      required
+                      value={posForm.studentId}
+                      onChange={e => setPosForm({ ...posForm, studentId: e.target.value })}
+                      placeholder="Mã số sinh viên (MSSV) *"
+                      className="rounded-lg border border-indigo-300 bg-white px-3 py-1.5 text-xs"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Ảnh ngoại quan tại quầy */}
+              <div className="rounded-xl bg-amber-50/70 p-3.5 border border-amber-200">
+                <label className="block text-xs font-bold text-amber-900 mb-2">📸 Đính kèm ảnh ngoại quan lúc nhận máy (Tùy chọn):</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    value={posForm.photoNote}
+                    onChange={e => setPosForm({ ...posForm, photoNote: e.target.value })}
+                    placeholder="Ghi chú ngoại quan (VD: Trầy nắp lưng...)"
+                    className="rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs"
+                  />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePosPhotoChange}
+                    className="text-xs text-slate-600"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowPosModal(false)}
+                  className="rounded-xl bg-slate-100 px-4 py-2.5 font-bold text-slate-700 hover:bg-slate-200"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingPos}
+                  className="rounded-xl bg-brand-orange px-5 py-2.5 font-bold text-white hover:bg-orange-600 shadow-md disabled:opacity-60"
+                >
+                  {savingPos ? 'Đang tạo phiếu...' : 'Tạo Phiếu & In Hóa Đơn 80mm →'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
