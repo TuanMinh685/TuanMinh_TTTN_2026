@@ -3,12 +3,14 @@
 -- DỰ ÁN: HỆ THỐNG CSKH SỬA CHỮA MÁY TÍNH BẰNG QR CODE
 -- ====================================================================
 
--- 1. Bảng Nhân viên & Phân quyền nội bộ
+SET TIME ZONE 'Asia/Ho_Chi_Minh';
+
+-- 1. Bảng Nhân viên & Phân quyền nội bộ (6 cấp bậc từ trên xuống)
 CREATE TABLE IF NOT EXISTS nhan_vien (
     id SERIAL PRIMARY KEY,
     ten_dang_nhap VARCHAR(50) UNIQUE NOT NULL,
     ho_ten VARCHAR(100) NOT NULL,
-    vai_tro VARCHAR(50) NOT NULL, -- 'QUAN_LY', 'LE_TAN', 'KY_THUAT_VIEN'
+    vai_tro VARCHAR(50) NOT NULL, -- 'GIAM_DOC', 'ADMIN', 'QUAN_LY', 'KE_TOAN', 'THU_KHO', 'KY_THUAT_VIEN', 'LE_TAN'
     mat_khau VARCHAR(255) NOT NULL,
     trang_thai VARCHAR(20) DEFAULT 'HOAT_DONG',
     ngay_tao TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
@@ -56,7 +58,20 @@ CREATE TABLE IF NOT EXISTS phieu_sua_chua (
     ngay_cap_nhat TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
--- 5. Bảng Nhật ký sửa chữa
+-- 5. Bảng Phiên tiếp nhận QR động (init-session -> submit)
+CREATE TABLE IF NOT EXISTS ticket_sessions (
+    id SERIAL PRIMARY KEY,
+    session_token UUID UNIQUE NOT NULL,
+    ticket_id INT REFERENCES phieu_sua_chua(id) ON DELETE SET NULL,
+    qr_image_base64 TEXT,
+    status VARCHAR(20) DEFAULT 'ACTIVE',
+    created_by INT REFERENCES nhan_vien(id) ON DELETE SET NULL,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMPTZ NOT NULL,
+    submitted_at TIMESTAMPTZ
+);
+
+-- 6. Bảng Nhật ký sửa chữa
 CREATE TABLE IF NOT EXISTS nhat_ky_sua_chua (
     id SERIAL PRIMARY KEY,
     phieu_sua_chua_id INT REFERENCES phieu_sua_chua(id) ON DELETE CASCADE,
@@ -67,25 +82,29 @@ CREATE TABLE IF NOT EXISTS nhat_ky_sua_chua (
     ngay_tao TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
--- 6. Bảng Lịch hẹn
+-- 7. Bảng Lịch hẹn
 CREATE TABLE IF NOT EXISTS lich_hen (
     id SERIAL PRIMARY KEY,
     khach_hang_id INT REFERENCES khach_hang(id) ON DELETE CASCADE,
-    thoi_gian_hen TIMESTAMPTZ NOT NULL,
-    loai_dich_vu VARCHAR(50) CHECK (loai_dich_vu IN ('TAI_CUA_HANG', 'ONLINE_TUXA')),
-    trang_thai VARCHAR(50) DEFAULT 'CHO_XAC_NHAN'
+    ngay_hen VARCHAR(20),
+    gio_hen VARCHAR(20),
+    mo_ta_loi TEXT,
+    thoi_gian_hen TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    loai_dich_vu VARCHAR(50) DEFAULT 'TAI_CUA_HANG',
+    trang_thai VARCHAR(50) DEFAULT 'CHO_XAC_NHAN',
+    ngay_tao TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
--- 7. Bảng Kho linh kiện
+-- 8. Bảng Kho linh kiện
 CREATE TABLE IF NOT EXISTS linh_kien (
     id SERIAL PRIMARY KEY,
     ten_linh_kien VARCHAR(150) NOT NULL,
     so_luong INT DEFAULT 0 NOT NULL,
     gia_ban NUMERIC NOT NULL,
-    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ngay_tao TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
--- 8. Bảng Linh kiện gắn vào Phiếu sửa chữa
+-- 9. Bảng Linh kiện gắn vào Phiếu sửa chữa
 CREATE TABLE IF NOT EXISTS phieu_linh_kien (
     id SERIAL PRIMARY KEY,
     phieu_sua_chua_id INT REFERENCES phieu_sua_chua(id) ON DELETE CASCADE,
@@ -93,10 +112,10 @@ CREATE TABLE IF NOT EXISTS phieu_linh_kien (
     so_luong INT DEFAULT 1 NOT NULL,
     don_gia NUMERIC NOT NULL,
     so_serial VARCHAR(100),
-    ngay_them TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ngay_them TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
--- 9. Bảng Hình ảnh đính kèm phiếu sửa chữa
+-- 10. Bảng Hình ảnh đính kèm phiếu sửa chữa
 CREATE TABLE IF NOT EXISTS hinh_anh_phieu (
     id SERIAL PRIMARY KEY,
     phieu_sua_chua_id INT REFERENCES phieu_sua_chua(id) ON DELETE CASCADE,
@@ -106,11 +125,11 @@ CREATE TABLE IF NOT EXISTS hinh_anh_phieu (
     ngay_tao TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
--- 10. Bảng Đánh giá dịch vụ từ khách hàng
+-- 11. Bảng Đánh giá dịch vụ từ khách hàng
 CREATE TABLE IF NOT EXISTS danh_gia (
     id SERIAL PRIMARY KEY,
     phieu_sua_chua_id INT REFERENCES phieu_sua_chua(id) ON DELETE CASCADE,
     so_sao INT NOT NULL CHECK (so_sao >= 1 AND so_sao <= 5),
     nhan_xet TEXT,
-    ngay_danh_gia TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ngay_danh_gia TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );

@@ -1,6 +1,7 @@
 require('dotenv').config();
 const http = require('http');
 const app = require('./src/app');
+const { pool } = require('./src/config/db.config');
 
 // Khởi chạy server test nội bộ trên port ngẫu nhiên
 const server = http.createServer(app);
@@ -10,7 +11,7 @@ async function runTests() {
     const port = server.address().port;
     const baseUrl = `http://127.0.0.1:${port}/api`;
     console.log(`\n======================================================`);
-    console.log(`BẮT ĐẦU KIỂM THỬ TẤT CẢ CÁC TÍNH NĂNG CỦA HỆ THỐNG`);
+    console.log(`BẮT ĐẦU KIỂM THỬ TOÀN DIỆN BACKEND <-> SUPABASE CLOUD`);
     console.log(`Server test đang chạy tại: ${baseUrl}`);
     console.log(`======================================================\n`);
 
@@ -32,10 +33,24 @@ async function runTests() {
     let adminToken = '';
     let receptionistToken = '';
     let technicianToken = '';
-    let sampleTicketCode = '';
+    let qrSessionToken = '';
+    let createdTicketId = null;
+    let createdTicketCode = '';
 
-    // 1. Kiểm tra Đăng nhập Admin (QUAN_LY)
-    await testCase('Đăng nhập tài khoản Admin (QUAN_LY)', async () => {
+    // 0. Kiểm tra kết nối trực tiếp Supabase PostgreSQL & Múi giờ Asia/Ho_Chi_Minh
+    await testCase('Kết nối Supabase Pooler (6543) & Múi giờ Việt Nam (Asia/Ho_Chi_Minh)', async () => {
+        const res = await pool.query("SELECT current_database() AS db, current_setting('TIMEZONE') AS tz, NOW()::text AS db_now");
+        if (!pool.isCloudConnected()) {
+            throw new Error('Chưa kết nối được trực tiếp tới Supabase Cloud (đang ở chế độ Fallback)');
+        }
+        const row = res.rows[0];
+        if (!row.tz.includes('Ho_Chi_Minh') && !row.db_now.endsWith('+07')) {
+            throw new Error(`Múi giờ chưa chuẩn Việt Nam: ${row.tz} (${row.db_now})`);
+        }
+    });
+
+    // 1. Kiểm tra Đăng nhập Admin (ADMIN)
+    await testCase('Đăng nhập tài khoản Admin (ADMIN)', async () => {
         const res = await fetch(`${baseUrl}/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -81,42 +96,163 @@ async function runTests() {
         }
     });
 
-    // 5. Kiểm tra Xem danh mục linh kiện & bảng giá công khai (/public/pricing)
-    await testCase('Khách hàng xem bảng giá linh kiện công khai (/public/pricing)', async () => {
-        const res = await fetch(`${baseUrl}/public/pricing`);
-        const data = await res.json();
-        if (!data.success || !Array.isArray(data.data)) throw new Error('Không lấy được bảng giá');
-    });
-
-    // 6. Kiểm tra Danh sách phiếu sửa chữa (Lễ tân/Admin) (/tickets)
-    await testCase('Lễ tân/Kỹ thuật viên tải danh sách phiếu (/tickets)', async () => {
-        const res = await fetch(`${baseUrl}/tickets`, {
+    // 5. LUỒNG 1: Lễ tân tạo phiên tiếp nhận mã QR (POST /tickets/init-session)
+    await testCase('Lễ tân tạo phiên tiếp nhận mã QR (POST /tickets/init-session)', async () => {
+        const res = await fetch(`${baseUrl}/tickets/init-session`, {
+            method: 'POST',
             headers: { Authorization: `Bearer ${receptionistToken}` }
         });
         const data = await res.json();
-        if (!data.success || !Array.isArray(data.data)) throw new Error('Lỗi lấy danh sách phiếu');
-        if (data.data.length > 0) {
-            sampleTicketCode = data.data[0].ma_phieu || data.data[0].ma_tra_cuu;
+        if (!data.success || !data.data?.sessionToken || !data.data?.qrImageBase64) {
+            throw new Error(data.message || 'Không tạo được phiên QR');
+        }
+        qrSessionToken = data.data.sessionToken;
+
+        // Kiểm tra phiên hợp lệ qua GET /tickets/session/:token
+        const checkRes = await fetch(`${baseUrl}/tickets/session/${qrSessionToken}`);
+        const checkData = await checkRes.json();
+        if (!checkData.success || checkData.data?.status !== 'ACTIVE') {
+            throw new Error('Phiên QR mới tạo không ở trạng thái ACTIVE');
         }
     });
 
-    // 7. Kiểm tra Tra cứu phiếu theo Mã tra cứu (/public/track/:ticketCode)
-    await testCase(`Khách tra cứu tiến độ theo mã phiếu (${sampleTicketCode || 'Mẫu'})`, async () => {
-        if (!sampleTicketCode) throw new Error('Không có mã phiếu mẫu để test');
-        const res = await fetch(`${baseUrl}/public/track/${sampleTicketCode}`);
+    // 6. LUỒNG 2: Khách hàng quét mã gửi thông tin sự cố (POST /tickets/session/:token/submit)
+    const testPayload = {
+        fullName: 'Trần Minh Quân (Test Supabase)',
+        phone: '0909123456',
+        deviceName: 'MacBook Pro M2 14 inch 2023',
+        serialNumber: 'SN-MAC-M2-9999',
+        issueDescription: 'Sạc không vào điện, cổng Type-C chập chờn và máy nóng bất thường',
+        serviceType: 'OFFLINE',
+        isStudent: true,
+        schoolName: 'Đại học Văn Hiến (VHU)',
+        studentId: '221A010888'
+    };
+
+    await testCase('Khách hàng quét mã QR gửi thông tin sự cố (POST /tickets/session/:token/submit)', async () => {
+        const res = await fetch(`${baseUrl}/tickets/session/${qrSessionToken}/submit`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(testPayload)
+        });
         const data = await res.json();
-        if (!data.success || !data.data?.ma_tra_cuu) throw new Error('Không tìm thấy thông tin phiếu');
+        if (!data.success || !data.data?.ticketCode) {
+            throw new Error(data.message || 'Lỗi gửi phiếu qua phiên QR');
+        }
+        createdTicketId = data.data.ticketId;
+        createdTicketCode = data.data.ticketCode;
+
+        // Rà soát dữ liệu trả về ngay khi submit
+        if (data.data.fullName !== testPayload.fullName ||
+            data.data.phone !== testPayload.phone ||
+            data.data.deviceName !== testPayload.deviceName ||
+            data.data.serialImei !== testPayload.serialNumber ||
+            data.data.issueDescription !== testPayload.issueDescription) {
+            throw new Error('Dữ liệu trả về từ submit bị lệch hoặc thiếu trường!');
+        }
+        if (!String(data.data.submittedAt).endsWith('+07:00')) {
+            throw new Error(`Múi giờ submittedAt không chuẩn +07:00: ${data.data.submittedAt}`);
+        }
     });
 
-    // 8. Kiểm tra Khách hàng đặt lịch hẹn online (/tickets/booking)
+    // 7. RÀ SOÁT DỮ LIỆU MẪU TRÊN SUPABASE (Kiểm tra fullName, phone, issueDescription, serialImei, timezone)
+    await testCase('Rà soát dữ liệu mẫu ghi mới trên Supabase (Không mất trường, đúng múi giờ +07:00)', async () => {
+        const res = await fetch(`${baseUrl}/tickets`, {
+            headers: { Authorization: `Bearer ${technicianToken}` }
+        });
+        const data = await res.json();
+        if (!data.success || !Array.isArray(data.data)) throw new Error('Không lấy được danh sách phiếu');
+        const found = data.data.find(t => t.ticketCode === createdTicketCode || t.ma_tra_cuu === createdTicketCode);
+        if (!found) throw new Error(`Không tìm thấy phiếu ${createdTicketCode} trên Supabase`);
+        if (found.fullName !== testPayload.fullName ||
+            found.phone !== testPayload.phone ||
+            found.deviceName !== testPayload.deviceName ||
+            found.serialImei !== testPayload.serialNumber ||
+            found.issueDescription !== testPayload.issueDescription) {
+            throw new Error(`Dữ liệu đọc từ Supabase bị mất trường: ${JSON.stringify(found)}`);
+        }
+        if (!String(found.createdAt).endsWith('+07:00')) {
+            throw new Error(`Múi giờ createdAt trên DB không chuẩn +07:00: ${found.createdAt}`);
+        }
+    });
+
+    // 8. LUỒNG 3: Kỹ thuật viên tra cứu và cập nhật trạng thái thiết bị (PATCH /tickets/:id/status - updateTicketStatus)
+    await testCase('Kỹ thuật viên cập nhật trạng thái thiết bị (updateTicketStatus -> ĐANG_CHUẨN_ĐOÁN -> ĐANG_SỬA)', async () => {
+        const res1 = await fetch(`${baseUrl}/tickets/${createdTicketId}/status`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${technicianToken}`
+            },
+            body: JSON.stringify({
+                trang_thai: 'ĐANG_CHUẨN_ĐOÁN',
+                ghi_chu: 'KTV đã tháo máy đo nguồn IC sạc U2800 trên mainboard'
+            })
+        });
+        const data1 = await res1.json();
+        if (!data1.success || data1.data?.trang_thai !== 'ĐANG_CHUẨN_ĐOÁN') {
+            throw new Error(data1.message || 'Lỗi chuyển trạng thái ĐANG_CHUẨN_ĐOÁN');
+        }
+
+        const res2 = await fetch(`${baseUrl}/tickets/${createdTicketCode}/status`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${technicianToken}`
+            },
+            body: JSON.stringify({
+                status: 'ĐANG_SỬA',
+                note: 'Đang tiến hành thay IC nguồn Type-C và vệ sinh keo tản nhiệt'
+            })
+        });
+        const data2 = await res2.json();
+        if (!data2.success || data2.data?.status !== 'ĐANG_SỬA') {
+            throw new Error(data2.message || 'Lỗi chuyển trạng thái ĐANG_SỬA');
+        }
+    });
+
+    // 9. Kiểm tra Tra cứu phiếu theo Mã tra cứu (/public/track/:ticketCode)
+    await testCase(`Khách hàng tra cứu tiến độ & nhật ký theo mã phiếu (${createdTicketCode})`, async () => {
+        const res = await fetch(`${baseUrl}/public/track/${createdTicketCode}`);
+        const data = await res.json();
+        if (!data.success || data.data?.ma_tra_cuu !== createdTicketCode) {
+            throw new Error('Không tìm thấy thông tin phiếu');
+        }
+        if (data.data.trang_thai !== 'ĐANG_SỬA') {
+            throw new Error(`Trạng thái tra cứu công khai chưa cập nhật: ${data.data.trang_thai}`);
+        }
+        if (!Array.isArray(data.data.nhat_ky) || data.data.nhat_ky.length < 3) {
+            throw new Error('Nhật ký sửa chữa không lưu đủ các bước chuyển trạng thái');
+        }
+    });
+
+    // 10. Kiểm tra Tra cứu phiếu theo Số điện thoại (/public/track/phone/:phone)
+    await testCase('Khách hàng tra cứu tất cả phiếu bằng Số điện thoại (/public/track/phone/...)', async () => {
+        const res = await fetch(`${baseUrl}/public/track/phone/${testPayload.phone}`);
+        const data = await res.json();
+        if (!data.success || !Array.isArray(data.data) || data.data.length === 0) {
+            throw new Error(data.message || 'Lỗi tra cứu SĐT');
+        }
+    });
+
+    // 11. Kiểm tra Xem danh mục linh kiện & bảng giá công khai (/public/pricing)
+    await testCase('Khách hàng xem bảng giá linh kiện công khai (/public/pricing)', async () => {
+        const res = await fetch(`${baseUrl}/public/pricing`);
+        const data = await res.json();
+        if (!data.success || !Array.isArray(data.data) || data.data.length === 0) {
+            throw new Error('Không lấy được bảng giá từ Supabase');
+        }
+    });
+
+    // 12. Kiểm tra Khách hàng đặt lịch hẹn online (/tickets/booking)
     await testCase('Khách hàng gửi form Đặt lịch hẹn sửa chữa (/tickets/booking)', async () => {
         const res = await fetch(`${baseUrl}/tickets/booking`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                fullName: 'Khách Test Tự Động',
+                fullName: 'Khách Đặt Lịch Supabase',
                 phone: '0988776655',
-                ngayHen: '2026-10-20',
+                ngayHen: '2026-10-22',
                 gioHen: '09:30',
                 moTaLoi: 'Cần vệ sinh tra keo tản nhiệt và cài lại win',
                 loaiDichVu: 'TAI_CUA_HANG'
@@ -126,50 +262,29 @@ async function runTests() {
         if (!data.success) throw new Error(data.message || 'Đặt lịch thất bại');
     });
 
-    // 9. Kiểm tra Xem danh sách lịch hẹn đặt trước (/tickets/booking)
+    // 13. Kiểm tra Xem danh sách lịch hẹn đặt trước (/tickets/booking)
     await testCase('Nhân viên xem danh sách lịch hẹn (/tickets/booking)', async () => {
         const res = await fetch(`${baseUrl}/tickets/booking`, {
             headers: { Authorization: `Bearer ${adminToken}` }
         });
         const data = await res.json();
-        if (!data.success || !Array.isArray(data.data)) throw new Error('Không tải được lịch hẹn');
+        if (!data.success || !Array.isArray(data.data) || data.data.length === 0) {
+            throw new Error('Không tải được lịch hẹn từ Supabase');
+        }
     });
 
-    // 10. Kiểm tra Khách hàng tiếp nhận báo hỏng qua QR (QR Intake) (/tickets/intake)
-    await testCase('Khách quét QR gửi phiếu tiếp nhận máy (/tickets/intake)', async () => {
-        const res = await fetch(`${baseUrl}/tickets/intake`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                fullName: 'Nguyễn Văn Test QR',
-                phone: '0912345678',
-                deviceName: 'Laptop Dell Inspiron 15',
-                serialNumber: 'SN-TEST-888',
-                issueDescription: 'Máy không lên nguồn, quạt kêu to',
-                serviceType: 'OFFLINE'
-            })
-        });
-        const data = await res.json();
-        if (!data.success || !data.data?.ticketCode) throw new Error(data.message || 'Lỗi tạo phiếu QR');
-    });
-
-    // 11. Kiểm tra Tra cứu phiếu theo Số điện thoại (/public/track/phone/:phone)
-    await testCase('Khách hàng tra cứu tất cả phiếu bằng Số điện thoại (/public/track/phone/...)', async () => {
-        const res = await fetch(`${baseUrl}/public/track/phone/0912345678`);
-        const data = await res.json();
-        if (!data.success || !Array.isArray(data.data)) throw new Error(data.message || 'Lỗi tra cứu SĐT');
-    });
-
-    // 12. Kiểm tra Quản lý kho linh kiện (/tickets/parts)
+    // 14. Kiểm tra Quản lý kho linh kiện (/tickets/parts)
     await testCase('Kỹ thuật viên / Quản lý kiểm tra tồn kho linh kiện (/tickets/parts)', async () => {
         const res = await fetch(`${baseUrl}/tickets/parts`, {
             headers: { Authorization: `Bearer ${technicianToken}` }
         });
         const data = await res.json();
-        if (!data.success || !Array.isArray(data.data)) throw new Error('Lỗi lấy tồn kho');
+        if (!data.success || !Array.isArray(data.data) || data.data.length === 0) {
+            throw new Error('Lỗi lấy tồn kho');
+        }
     });
 
-    // 13. Kiểm tra Thống kê & Báo cáo doanh thu Admin (/admin/dashboard-stats)
+    // 15. Kiểm tra Thống kê & Báo cáo doanh thu Admin (/admin/dashboard-stats)
     await testCase('Admin tải biểu đồ doanh thu và phân bố trạng thái (/admin/dashboard-stats)', async () => {
         const res = await fetch(`${baseUrl}/admin/dashboard-stats?period=week`, {
             headers: { Authorization: `Bearer ${adminToken}` }
@@ -178,20 +293,23 @@ async function runTests() {
         if (!data.success || !data.data?.revenueData) throw new Error('Lỗi tải thống kê doanh thu');
     });
 
-    // 14. Kiểm tra Danh sách nhân viên (/admin/employees)
-    await testCase('Admin xem danh sách nhân sự (/admin/employees)', async () => {
+    // 16. Kiểm tra Danh sách nhân viên 6 cấp bậc (/admin/employees)
+    await testCase('Admin xem danh sách nhân sự 6 cấp bậc (/admin/employees)', async () => {
         const res = await fetch(`${baseUrl}/admin/employees`, {
             headers: { Authorization: `Bearer ${adminToken}` }
         });
         const data = await res.json();
-        if (!data.success || !Array.isArray(data.data)) throw new Error('Lỗi tải nhân sự');
+        if (!data.success || !Array.isArray(data.data) || data.data.length < 7) {
+            throw new Error('Lỗi tải nhân sự trên Supabase');
+        }
     });
 
     console.log(`\n======================================================`);
-    console.log(`KẾT QUẢ KIỂM THỬ: ${passedCount} THÀNH CÔNG, ${failedCount} THẤT BẠI`);
+    console.log(`KẾT QUẢ KIỂM THỬ SUPABASE: ${passedCount} THÀNH CÔNG, ${failedCount} THẤT BẠI`);
     console.log(`======================================================\n`);
 
     server.close();
+    await pool.end();
     process.exit(failedCount > 0 ? 1 : 0);
 }
 

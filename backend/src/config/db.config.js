@@ -8,7 +8,9 @@ try {
   realPool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false },
-    connectionTimeoutMillis: 3000
+    max: 10,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 10000
   });
 
   realPool.on('error', (err) => {
@@ -29,7 +31,8 @@ const isConnectionFailure = (err) => {
     err.message.includes('ECONNREFUSED') ||
     err.message.includes('ETIMEDOUT') ||
     err.message.includes('tenant') ||
-    err.message.includes('Connection terminated')
+    err.message.includes('Connection terminated') ||
+    err.message.includes('timeout expired')
   )) return true;
   return false;
 };
@@ -60,9 +63,15 @@ const smartConnect = async () => {
   if (isPgAvailable !== false && realPool) {
     try {
       const client = await realPool.connect();
+      await client.query("SET TIME ZONE 'Asia/Ho_Chi_Minh'").catch(() => {});
+      isPgAvailable = true;
       return client;
     } catch (err) {
-      isPgAvailable = false;
+      if (isConnectionFailure(err)) {
+        isPgAvailable = false;
+      } else {
+        throw err;
+      }
     }
   }
 
@@ -76,6 +85,7 @@ const smartConnect = async () => {
 const pool = {
   query: smartQuery,
   connect: smartConnect,
+  isCloudConnected: () => isPgAvailable === true,
   end: async () => {
     if (realPool) await realPool.end().catch(() => {});
   }
@@ -83,8 +93,13 @@ const pool = {
 
 const connectDB = async () => {
   try {
-    const res = await smartQuery('SELECT 1');
-    console.log('✅ Hệ thống dữ liệu đã sẵn sàng phục vụ (PostgreSQL / Resilience Store)!');
+    await smartQuery("SET TIME ZONE 'Asia/Ho_Chi_Minh'");
+    const res = await smartQuery("SELECT current_database() AS db, current_setting('TIMEZONE') AS tz, NOW() AS now");
+    if (isPgAvailable) {
+      console.log(`✅ Đã kết nối trực tiếp Supabase PostgreSQL Cloud (DB: ${res.rows[0]?.db} | Timezone: ${res.rows[0]?.tz})!`);
+    } else {
+      console.log('✅ Hệ thống dữ liệu đã sẵn sàng phục vụ (Local Resilience Store)!');
+    }
   } catch (err) {
     console.error('Lỗi khởi tạo DB:', err.message);
   }

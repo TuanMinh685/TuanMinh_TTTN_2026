@@ -14,9 +14,17 @@ const getDashboardStats = async () => {
         GROUP BY trang_thai
     `);
 
+    const tickets = ticketStats.rows || [];
+    const statusDistribution = tickets.map((r) => ({
+        name: r.trang_thai,
+        value: Number(r.count || 0)
+    }));
+
     return {
-        revenue: revenueResult.rows[0].total_revenue,
-        tickets: ticketStats.rows
+        revenue: Number(revenueResult.rows[0]?.total_revenue || 0),
+        tickets,
+        revenueData: tickets,
+        statusDistribution
     };
 };
 

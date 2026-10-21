@@ -1,10 +1,61 @@
 const ticketService = require('../services/ticket.service');
+const ticketSessionService = require('../services/ticket_session.service');
 const { validationResult } = require('express-validator');
 
-// Khách hàng điền Form (QR Intake) và Bấm gửi
+// Lễ tân / Quản lý khởi tạo phiên tiếp nhận mã QR động (init-session)
+const initSession = async (req, res, next) => {
+    try {
+        const createdBy = req.user?.AccountID || null;
+        const originUrl = req.headers.origin || process.env.CORS_ORIGIN || 'http://localhost:5173';
+        const sessionData = await ticketSessionService.initQrSession({ createdBy, originUrl });
+
+        res.status(201).json({
+            success: true,
+            message: 'Khởi tạo phiên tiếp nhận mã QR thành công!',
+            data: sessionData
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Khách hàng quét mã QR kiểm tra tính hợp lệ của phiên (session/:token)
+const checkSession = async (req, res, next) => {
+    try {
+        const { token } = req.params;
+        const session = await ticketSessionService.getQrSession(token);
+        if (!session) {
+            return res.status(404).json({
+                success: false,
+                errorCode: 'SESSION_NOT_FOUND',
+                message: 'Không tìm thấy phiên tiếp nhận mã QR này!'
+            });
+        }
+
+        if (session.status !== 'ACTIVE' || session.isExpired) {
+            return res.status(410).json({
+                success: false,
+                errorCode: 'SESSION_EXPIRED_OR_USED',
+                message: session.status === 'SUBMITTED'
+                    ? 'Mã QR này đã được sử dụng để gửi phiếu sửa chữa!'
+                    : 'Mã QR tiếp nhận đã hết hạn (quá 15 phút). Vui lòng nhờ Lễ tân cấp mã mới!',
+                data: session
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Phiên tiếp nhận mã QR hợp lệ!',
+            data: session
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Khách hàng điền Form (QR Intake hoặc qua Session QR) và Bấm gửi (submit / intake)
 const submitIntake = async (req, res, next) => {
     try {
-        // Kiểm tra lỗi Validation trước
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ 
@@ -15,25 +66,63 @@ const submitIntake = async (req, res, next) => {
             });
         }
 
-        const { fullName, phone, zaloId, issueDescription, deviceName, serialImei } = req.body;
-        
-        if (!fullName || !phone || !issueDescription || !deviceName) {
+        const sessionToken = req.params.token || req.body.sessionToken || null;
+        if (sessionToken) {
+            const session = await ticketSessionService.getQrSession(sessionToken);
+            if (!session) {
+                return res.status(404).json({
+                    success: false,
+                    errorCode: 'SESSION_NOT_FOUND',
+                    message: 'Phiên tiếp nhận mã QR không tồn tại!'
+                });
+            }
+            if (session.status !== 'ACTIVE' || session.isExpired) {
+                return res.status(410).json({
+                    success: false,
+                    errorCode: 'SESSION_EXPIRED_OR_USED',
+                    message: session.status === 'SUBMITTED'
+                        ? 'Phiên mã QR này đã được gửi thông tin trước đó!'
+                        : 'Phiên mã QR đã hết hạn!'
+                });
+            }
+        }
+
+        const fullName = req.body.fullName || req.body.ho_ten;
+        const phone = req.body.phone || req.body.so_dien_thoai;
+        const issueDescription = req.body.issueDescription || req.body.mo_ta_loi || req.body.tinh_trang_may;
+        const deviceName = req.body.deviceName || req.body.ten_may || req.body.ten_thiet_bi || 'Thiết bị tiếp nhận qua QR';
+
+        if (!fullName || !phone || !issueDescription) {
             return res.status(400).json({ 
                 success: false, 
                 errorCode: "VALIDATION_ERROR",
-                message: "Vui lòng nhập đầy đủ Tên, Số điện thoại, Tên máy và Mô tả lỗi!" 
+                message: "Vui lòng nhập đầy đủ Họ tên (fullName), Số điện thoại (phone) và Mô tả sự cố (issueDescription)!" 
             });
         }
 
-        const result = await ticketService.submitIntake(req.body);
+        const result = await ticketService.submitIntake({
+            ...req.body,
+            fullName,
+            phone,
+            issueDescription,
+            deviceName,
+            sessionToken
+        });
         
         res.status(201).json({
             success: true,
             message: "Gửi yêu cầu tiếp nhận sửa chữa thành công!",
             data: {
+                ticketId: result.ticketId,
                 ticketCode: result.ticketCode,
-                status: "CHỜ_KHÁM",
-                submittedAt: new Date().toISOString()
+                sessionToken: result.sessionToken,
+                fullName: result.fullName,
+                phone: result.phone,
+                deviceName: result.deviceName,
+                serialImei: result.serialImei,
+                issueDescription: result.issueDescription,
+                status: result.status || "CHỜ_KHÁM",
+                submittedAt: result.createdAt || ticketSessionService.formatVietnamISO(new Date())
             }
         });
     } catch (error) {
@@ -50,11 +139,22 @@ const getTickets = async (req, res, next) => {
     }
 };
 
+const STATUS_ALIAS_MAP = {
+    PENDING: 'CHỜ_KHÁM',
+    IN_PROGRESS: 'ĐANG_CHUẨN_ĐOÁN',
+    DIAGNOSING: 'ĐANG_CHUẨN_ĐOÁN',
+    WAITING_QUOTE: 'CHỜ_KHÁCH_CHỐT_GIÁ',
+    REPAIRING: 'ĐANG_SỬA',
+    COMPLETED: 'ĐÃ_SỬA_XONG',
+    DELIVERED: 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN',
+    CANCELLED: 'KHÁCH_TỪ_CHỐI_SỬA'
+};
+
 const ROLE_ALLOWED_STATUSES = {
     GIAM_DOC: null, // Toàn quyền mọi trạng thái
     ADMIN: null,    // Toàn quyền mọi trạng thái
     QUAN_LY: null,  // Toàn quyền mọi trạng thái
-    LE_TAN: ['ĐANG_CHUẨN_ĐOÁN', 'ĐANG_SỬA', 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN', 'KHÁCH_TỪ_CHỐI_SỬA'],
+    LE_TAN: ['CHỜ_KHÁM', 'ĐANG_CHUẨN_ĐOÁN', 'ĐANG_SỬA', 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN', 'KHÁCH_TỪ_CHỐI_SỬA'],
     KY_THUAT_VIEN: ['ĐANG_CHUẨN_ĐOÁN', 'CHỜ_KHÁCH_CHỐT_GIÁ', 'ĐANG_SỬA', 'ĐÃ_SỬA_XONG'],
     KE_TOAN: ['ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN']
 };
@@ -62,8 +162,19 @@ const ROLE_ALLOWED_STATUSES = {
 const updateTicketStatus = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { trang_thai, ghi_chu } = req.body;
+        const rawStatus = req.body.trang_thai || req.body.status;
+        const ghi_chu = req.body.ghi_chu || req.body.note || '';
         const userRole = req.user?.Role;
+        const employeeId = req.user?.AccountID || null;
+
+        if (!rawStatus) {
+            return res.status(400).json({
+                success: false,
+                message: 'Vui lòng cung cấp trạng thái mới (trang_thai hoặc status)!'
+            });
+        }
+
+        const trang_thai = STATUS_ALIAS_MAP[rawStatus] || rawStatus;
 
         const allowedStatuses = ROLE_ALLOWED_STATUSES[userRole];
         if (Array.isArray(allowedStatuses) && !allowedStatuses.includes(trang_thai)) {
@@ -73,8 +184,19 @@ const updateTicketStatus = async (req, res, next) => {
             });
         }
 
-        const data = await ticketService.updateTicketStatus(id, trang_thai, ghi_chu);
-        res.status(200).json({ success: true, message: 'Cập nhật trạng thái thành công', data });
+        const data = await ticketService.updateTicketStatus(id, trang_thai, ghi_chu, employeeId);
+        if (!data) {
+            return res.status(404).json({
+                success: false,
+                message: 'Không tìm thấy phiếu sửa chữa cần cập nhật!'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Cập nhật trạng thái thành công',
+            data
+        });
     } catch (error) {
         next(error);
     }
@@ -278,6 +400,8 @@ const addTicketPhoto = async (req, res, next) => {
 };
 
 module.exports = {
+    initSession,
+    checkSession,
     getParts,
     createPart,
     updatePart,
