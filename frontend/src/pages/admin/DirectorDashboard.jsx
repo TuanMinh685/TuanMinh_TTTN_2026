@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell } from 'recharts';
 import AdminNav from '../../components/AdminNav';
 import api from '../../services/api';
+import { exportEnterpriseExcel } from '../../utils/excelExport';
 
 const PIE_COLORS = ['#0d457b', '#f37021', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#ef4444'];
 
@@ -43,6 +44,29 @@ export default function DirectorDashboard() {
       ignore = true;
     };
   }, [period]);
+
+  
+  const handleExportDirectorExcel = () => {
+    if (!statsData) return;
+    const revRows = (statsData.revenueData || []).map((row, idx) => [
+      idx + 1,
+      row.date,
+      Number(row.total_revenue || 0),
+      statsData.totalRevenue || 0,
+      statsData.totalPartsRevenue || 0,
+      statsData.completedTickets || 0
+    ]);
+    const summaryRow = ['', 'TỔNG CỘNG DOANH THU', '', statsData.totalRevenue || 0, statsData.totalPartsRevenue || 0, statsData.completedTickets || 0];
+    exportEnterpriseExcel({
+      filename: `Bao_Cao_Giam_Doc_Dieu_Hanh_${period}.xlsx`,
+      sheetName: 'Báo Cáo Giám Đốc',
+      title: `BÁO CÁO ĐIỀU HÀNH CHIẾN LƯỢC TÀI CHÍNH & HIỆU SUẤT (${period === 'month' ? 'THÁNG HIỆN TẠI' : '7 NGÀY GẦN NHẤT'})`,
+      headers: ['STT', 'Ngày Ghi Nhận', 'Doanh Thu Trong Ngày (VNĐ)', 'Tổng Doanh Thu Lũy Kế (VNĐ)', 'Doanh Thu Linh Kiện (VNĐ)', 'Số Ca Đã Giao Thu Tiền'],
+      rows: revRows,
+      summaryRow,
+      signRole: 'KẾ TOÁN TRƯỞNG & THỦ KHO'
+    });
+  };
 
   const totalRevenue = statsData?.totalRevenue || 0;
   const partsRevenue = statsData?.totalPartsRevenue || 0;
@@ -90,7 +114,7 @@ export default function DirectorDashboard() {
             </div>
 
             {/* Time Filter Buttons */}
-            <div className="flex shrink-0 items-center gap-2 bg-white/10 p-1.5 rounded-2xl backdrop-blur-xs border border-white/10">
+            <div className="flex shrink-0 flex-wrap items-center gap-2 bg-white/10 p-1.5 rounded-2xl backdrop-blur-xs border border-white/10">
               <button
                 onClick={() => setPeriod('week')}
                 className={`rounded-xl px-4 py-2 text-xs font-extrabold transition ${
@@ -106,6 +130,12 @@ export default function DirectorDashboard() {
                 }`}
               >
                 📆 Tháng Này
+              </button>
+              <button
+                onClick={handleExportDirectorExcel}
+                className="rounded-xl bg-white px-4 py-2 text-xs font-extrabold text-brand-blue shadow-md transition hover:bg-slate-100"
+              >
+                📊 Xuất Báo Cáo Excel (.xlsx)
               </button>
             </div>
           </div>

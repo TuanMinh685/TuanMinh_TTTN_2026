@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
+import { exportEnterpriseExcel } from '../../utils/excelExport';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import QRCode from 'qrcode';
 import { SOFTWARE_PACKAGE_GROUPS, SOFTWARE_PACKAGE_OPTIONS } from '../../components/softwarePackages';
@@ -182,24 +183,7 @@ function Dashboard() {
     });
   };
 
-  const exportToCsv = (filename, headers, rows) => {
-    const escapeCsv = (val) => `"${String(val ?? '').replace(/"/g, '""')}"`;
-    const csvContent = '\uFEFF' + [
-      headers.map(escapeCsv).join(','),
-      ...rows.map(row => row.map(escapeCsv).join(','))
-    ].join('\r\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', filename);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    showToast(`📥 Đã xuất file báo cáo Excel/CSV: ${filename}`);
-  };
-
+  
   const fetchStats = useCallback(async () => {
     const res = await api.get(`/admin/dashboard-stats?period=${reportPeriod}`);
     return res.data.data;
@@ -1021,31 +1005,43 @@ function Dashboard() {
               )}
               <button
                 type="button"
-                onClick={() => exportToCsv(
-                  'Bao_Cao_Phieu_Sua_Chua.csv',
-                  ['Mã Phiếu', 'Khách Hàng', 'Số Điện Thoại', 'Thiết Bị', 'Lỗi Mô Tả', 'Đối Tượng', 'Trường Học', 'Trạng Thái', 'Chi Phí Gốc (VNĐ)', 'Thực Thu (VNĐ)', 'Hạn Bảo Hành', 'Ngày Tạo'],
-                  filteredTickets.map(t => {
+                onClick={() => {
+                  const rows = filteredTickets.map((t, idx) => {
                     const raw = Number(t.tong_tien || 0);
                     const finalAmt = t.la_sinh_vien ? Math.round(raw * 0.85) : raw;
                     return [
+                      idx + 1,
                       t.ma_phieu,
                       t.ho_ten_khach,
                       t.so_dien_thoai,
-                      t.ten_thiet_bi || '',
-                      t.mo_ta_loi || '',
-                      t.la_sinh_vien ? 'Sinh viên (-15%)' : 'Khách thường',
-                      t.truong_hoc || '',
-                      t.trang_thai,
+                      t.ten_thiet_bi || '—',
+                      t.mo_ta_loi || '—',
+                      t.la_sinh_vien ? 'Sinh viên (-15%)' : 'Khách vãng lai',
+                      t.truong_hoc || '—',
+                      STATUS_LABELS[t.trang_thai] || t.trang_thai,
                       raw,
                       finalAmt,
-                      t.han_bao_hanh ? new Date(t.han_bao_hanh).toLocaleDateString('vi-VN') : '',
+                      t.han_bao_hanh ? new Date(t.han_bao_hanh).toLocaleDateString('vi-VN') : 'Chưa cấp',
                       t.ngay_tao ? new Date(t.ngay_tao).toLocaleString('vi-VN') : ''
                     ];
-                  })
-                )}
+                  });
+                  const totalRaw = filteredTickets.reduce((acc, t) => acc + Number(t.tong_tien || 0), 0);
+                  const totalFinal = filteredTickets.reduce((acc, t) => acc + (t.la_sinh_vien ? Math.round(Number(t.tong_tien || 0) * 0.85) : Number(t.tong_tien || 0)), 0);
+                  const summaryRow = ['', 'TỔNG CỘNG', '', '', '', '', '', '', `${filteredTickets.length} phiếu`, totalRaw, totalFinal, '', ''];
+                  exportEnterpriseExcel({
+                    filename: `Bao_Cao_Phieu_Sua_Chua_${new Date().toISOString().slice(0, 10)}.xlsx`,
+                    sheetName: 'DS Phiếu Sửa Chữa',
+                    title: 'BÁO CÁO TỔNG HỢP PHIẾU TIẾP NHẬN & TIẾN ĐỘ SỬA CHỮA',
+                    headers: ['STT', 'Mã Phiếu', 'Khách Hàng', 'Số Điện Thoại', 'Tên Thiết Bị', 'Mô Tả Sự Cố', 'Đối Tượng', 'Trường Học', 'Trạng Thái', 'Chi Phí Gốc (VNĐ)', 'Thực Thu (VNĐ)', 'Hạn Bảo Hành', 'Thời Điểm Tiếp Nhận'],
+                    rows,
+                    summaryRow,
+                    signRole: 'KẾ TOÁN / THU NGÂN'
+                  });
+                  showToast('📥 Đã xuất Báo Cáo Phiếu Sửa Chữa (.xlsx) chuẩn doanh nghiệp!');
+                }}
                 className="rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-sm whitespace-nowrap"
               >
-                📥 Xuất Excel (CSV)
+                📊 Xuất Báo Cáo Excel (.xlsx)
               </button>
             </div>
           </div>
@@ -1270,20 +1266,30 @@ function Dashboard() {
               </label>
               <button
                 type="button"
-                onClick={() => exportToCsv(
-                  'Bao_Cao_Doanh_Thu_Kinh_Doanh.csv',
-                  ['Ngày', 'Doanh Thu Ngày (VNĐ)', 'Tổng Doanh Thu Kỳ (VNĐ)', 'Doanh Thu Linh Kiện Kỳ (VNĐ)', 'Số Phiếu Hoàn Tất Kỳ'],
-                  (stats.revenueData || []).map(row => [
+                onClick={() => {
+                  const revRows = (stats.revenueData || []).map((row, idx) => [
+                    idx + 1,
                     row.date,
-                    row.total_revenue,
+                    Number(row.total_revenue || 0),
                     stats.totalRevenue || 0,
                     stats.totalPartsRevenue || 0,
                     stats.completedTickets || 0
-                  ])
-                )}
+                  ]);
+                  const summaryRow = ['', 'TỔNG DOANH THU KỲ', '', stats.totalRevenue || 0, stats.totalPartsRevenue || 0, stats.completedTickets || 0];
+                  exportEnterpriseExcel({
+                    filename: `Bao_Cao_Doanh_Thu_Tai_Chinh_${reportPeriod}.xlsx`,
+                    sheetName: 'Doanh Thu Tài Chính',
+                    title: `BÁO CÁO TỔNG HỢP DOANH THU & HIỆU SUẤT TÀI CHÍNH KINH DOANH (${reportPeriod === 'month' ? 'THEO THÁNG' : 'THEO TUẦN'})`,
+                    headers: ['STT', 'Ngày Ghi Nhận', 'Doanh Thu Ngày (VNĐ)', 'Tổng Doanh Thu Lũy Kế (VNĐ)', 'Doanh Thu Linh Kiện (VNĐ)', 'Số Ca Hoàn Tất'],
+                    rows: revRows,
+                    summaryRow,
+                    signRole: 'KẾ TOÁN TRƯỞNG'
+                  });
+                  showToast('📥 Đã xuất Báo Cáo Doanh Thu (.xlsx) chuẩn doanh nghiệp!');
+                }}
                 className="rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-sm"
               >
-                📥 Xuất Báo Cáo Kế Toán (CSV)
+                📊 Xuất Báo Cáo Doanh Thu (.xlsx)
               </button>
             </div>
           </div>
@@ -1498,18 +1504,41 @@ function Dashboard() {
                 </p>
                 <button
                   type="button"
-                  onClick={() => exportToCsv(
-                    'Bao_Cao_Ton_Kho_Linh_Kien.csv',
-                    ['Mã Linh Kiện', 'Tên Linh Kiện', 'Giá Bán (VNĐ)', 'Số Lượng Tồn', 'Tình Trạng'],
-                    parts.map(p => {
-                      const qty = Number(p.so_luong);
-                      const status = qty <= 0 ? 'Hết hàng' : qty < Number(lowStockThreshold || 5) ? 'Sắp hết' : 'Còn hàng';
-                      return [p.id, p.ten_linh_kien, p.gia_ban, qty, status];
-                    })
-                  )}
+                  onClick={() => {
+                    let totalQty = 0;
+                    let totalValue = 0;
+                    const rows = parts.map((p, idx) => {
+                      const qty = Number(p.so_luong || 0);
+                      const price = Number(p.gia_ban || 0);
+                      const itemTotal = qty * price;
+                      totalQty += qty;
+                      totalValue += itemTotal;
+                      const status = qty <= 0 ? 'HẾT HÀNG' : qty < Number(lowStockThreshold || 5) ? 'CẢNH BÁO: SẮP HẾT' : 'ĐỦ TỒN KHO';
+                      return [
+                        idx + 1,
+                        `LK-${String(p.id).padStart(4, '0')}`,
+                        p.ten_linh_kien,
+                        price,
+                        qty,
+                        status,
+                        itemTotal
+                      ];
+                    });
+                    const summaryRow = ['', 'TỔNG CỘNG TOÀN KHO', `Tổng số mặt hàng: ${parts.length}`, '', totalQty, '', totalValue];
+                    exportEnterpriseExcel({
+                      filename: `Bao_Cao_Ton_Kho_Linh_Kien_${new Date().toISOString().slice(0, 10)}.xlsx`,
+                      sheetName: 'Kiểm Kê Tồn Kho',
+                      title: 'BÁO CÁO KIỂM KÊ TỒN KHO LINH KIỆN & VẬT TƯ SỬA CHỮA',
+                      headers: ['STT', 'Mã Linh Kiện', 'Tên Linh Kiện & Thông Số', 'Đơn Giá Bán (VNĐ)', 'Số Lượng Tồn Kho', 'Tình Trạng Kho', 'Tổng Giá Trị Tồn (VNĐ)'],
+                      rows,
+                      summaryRow,
+                      signRole: 'THỦ KHO LINH KIỆN'
+                    });
+                    showToast('📥 Đã xuất Báo Cáo Tồn Kho (.xlsx) chuẩn doanh nghiệp!');
+                  }}
                   className="rounded-lg bg-brand-blue px-4 py-2 text-sm font-bold text-white hover:bg-blue-900"
                 >
-                  📥 Xuất Kho (CSV)
+                  📊 Xuất Báo Cáo Tồn Kho (.xlsx)
                 </button>
                 {canManageInventory && (
                   <button
