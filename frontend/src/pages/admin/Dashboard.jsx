@@ -856,33 +856,33 @@ function Dashboard() {
 
   return (
     <div className="p-6 md:p-8 bg-slate-50 min-h-screen">
-      {/* Header Điều Hành & Chuyển Nhanh Chức Vụ (RBAC Switcher) */}
+      {/* Header Điều Hành & Phân Quyền */}
       <div className="bg-white rounded-2xl p-5 shadow-xs border border-slate-200/90 mb-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-2.5">
-              <h2 className="text-xl md:text-2xl font-extrabold text-brand-blue">
-                Bảng Điều Khiển — {currentRoleInfo.title}
+              <h2 className="text-xl md:text-2xl font-bold text-brand-blue">
+                Bảng Điều Khiển Vận Hành
               </h2>
-              <span className={`px-3 py-1 rounded-full text-xs font-extrabold border ${currentRoleInfo.badgeClass}`}>
+              <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${currentRoleInfo.badgeClass}`}>
                 {currentRoleInfo.badge}
               </span>
             </div>
             <p className="text-slate-600 text-xs mt-1.5">
-              Xin chào <strong className="text-slate-800">{fullName}</strong> {currentUsername ? `(@${currentUsername})` : ''} — <span className="text-slate-500">{currentRoleInfo.permissionsText}</span>
+              Xin chào <strong className="text-slate-800">{fullName}</strong> • <span className="text-slate-500">{currentRoleInfo.title}</span>
             </p>
           </div>
 
           <div className="relative flex flex-wrap items-center gap-2.5 shrink-0">
-            {/* Bộ chuyển nhanh chức vụ để kiểm thử phân quyền */}
+            {/* Bộ chuyển vai trò */}
             <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
-              <span className="text-[11px] font-bold text-slate-500 whitespace-nowrap">⚡ Test chức vụ:</span>
+              <span className="text-[11px] font-semibold text-slate-500 whitespace-nowrap">🔄 Vai trò:</span>
               <select
                 value={currentUsername || (role === 'GIAM_DOC' ? 'giamdoc' : role === 'QUAN_LY' ? 'quanly' : role === 'KE_TOAN' ? 'ketoan' : role === 'THU_KHO' ? 'thukho' : role === 'KY_THUAT_VIEN' ? 'kythuat' : 'letan')}
                 disabled={switchingRole}
                 onChange={(e) => handleQuickSwitchRole(e.target.value)}
-                aria-label="Chuyển nhanh chức vụ phân quyền"
-                className="text-xs font-extrabold text-brand-blue bg-transparent outline-none cursor-pointer"
+                aria-label="Chuyển vai trò"
+                className="text-xs font-semibold text-brand-blue bg-transparent outline-none cursor-pointer"
               >
                 {QUICK_SWITCH_ROLES.map(item => (
                   <option key={item.username} value={item.username}>
@@ -934,38 +934,40 @@ function Dashboard() {
         </div>
 
         {/* Thanh Điều Hướng Các Trang Quản Trị Cấp Cao */}
-        <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mr-1">
-            Chuyển nhanh:
-          </span>
-          <span className="rounded-xl bg-brand-blue px-3.5 py-1.5 text-xs font-bold text-white shadow-2xs">
-            📋 Bàn Vận Hành Kỹ Thuật
-          </span>
-          {isExecutive && (
-            <Link
-              to="/admin/giam-doc"
-              className="flex items-center gap-1.5 rounded-xl bg-white border border-slate-200 px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition shadow-2xs"
-            >
-              <span>👑</span> Trang Giám Đốc
-            </Link>
-          )}
-          {isManagerOrAbove && (
-            <Link
-              to="/admin/quan-ly"
-              className="flex items-center gap-1.5 rounded-xl bg-white border border-slate-200 px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition shadow-2xs"
-            >
-              <span>🏬</span> Trang Quản Lý
-            </Link>
-          )}
-          {canManageEmployees && (
-            <Link
-              to="/admin/nhan-su"
-              className="flex items-center gap-1.5 rounded-xl bg-white border border-slate-200 px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition shadow-2xs"
-            >
-              <span>👥</span> Quản Lý Nhân Sự & Phân Quyền
-            </Link>
-          )}
-        </div>
+        {(isExecutive || isManagerOrAbove || canManageEmployees) && (
+          <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mr-1">
+              Chuyển nhanh:
+            </span>
+            <span className="rounded-xl bg-brand-blue px-3.5 py-1.5 text-xs font-semibold text-white shadow-2xs">
+              📋 Bàn Vận Hành Kỹ Thuật
+            </span>
+            {isExecutive && (
+              <Link
+                to="/admin/giam-doc"
+                className="flex items-center gap-1.5 rounded-xl bg-white border border-slate-200 px-3.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition shadow-2xs"
+              >
+                <span>👑</span> Trang Giám Đốc
+              </Link>
+            )}
+            {isManagerOrAbove && (
+              <Link
+                to="/admin/quan-ly"
+                className="flex items-center gap-1.5 rounded-xl bg-white border border-slate-200 px-3.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition shadow-2xs"
+              >
+                <span>🏬</span> Trang Quản Lý
+              </Link>
+            )}
+            {canManageEmployees && (
+              <Link
+                to="/admin/nhan-su"
+                className="flex items-center gap-1.5 rounded-xl bg-white border border-slate-200 px-3.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition shadow-2xs"
+              >
+                <span>👥</span> Quản Lý Nhân Sự & Phân Quyền
+              </Link>
+            )}
+          </div>
+        )}
       </div>
 
 

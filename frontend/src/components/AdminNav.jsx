@@ -121,7 +121,7 @@ export default function AdminNav({ activeKey }) {
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Quick switcher for testing */}
           <div className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5">
-            <span className="text-[11px] font-medium text-slate-500 whitespace-nowrap">⚡ Test vai trò:</span>
+            <span className="text-[11px] font-medium text-slate-500 whitespace-nowrap">🔄 Vai trò:</span>
             <select
               value={username || (role === 'GIAM_DOC' ? 'giamdoc' : role === 'QUAN_LY' ? 'quanly' : 'letan')}
               disabled={switching}
