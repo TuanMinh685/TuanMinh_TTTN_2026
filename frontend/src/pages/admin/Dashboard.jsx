@@ -180,11 +180,17 @@ function Dashboard() {
   const knownBookingStatuses = useRef(null);
   const knownStock = useRef(null);
 
+  const toastTimeoutRef = useRef(null);
   const showToast = (message) => {
+    if (!message) return;
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
     setLatestNotice({
       title: message,
       description: message
     });
+    toastTimeoutRef.current = setTimeout(() => {
+      setLatestNotice(null);
+    }, 2500);
   };
 
   
@@ -931,9 +937,9 @@ function Dashboard() {
 
 
       {latestNotice && (
-        <div role="status" className="fixed right-5 top-5 z-50 flex max-w-sm items-start gap-3 rounded-xl bg-green-700 p-4 text-white shadow-xl">
-          <p className="flex-1">{latestNotice.description || latestNotice.title}</p>
-          <button type="button" onClick={() => setLatestNotice(null)} aria-label="Đóng thông báo" className="font-bold">×</button>
+        <div role="status" className="fixed bottom-5 right-5 z-50 flex items-center gap-2 rounded-xl bg-slate-800 px-4 py-2.5 text-xs text-white shadow-lg transition-all animate-fade-in-up">
+          <p className="font-medium">{latestNotice.description || latestNotice.title}</p>
+          <button type="button" onClick={() => setLatestNotice(null)} aria-label="Đóng thông báo" className="ml-2 text-slate-400 hover:text-white text-sm">×</button>
         </div>
       )}
 
@@ -1042,8 +1048,7 @@ function Dashboard() {
                     summaryRow,
                     signRole: 'KẾ TOÁN / THU NGÂN'
                   });
-                  showToast('📥 Đã xuất Báo Cáo Phiếu Sửa Chữa (.xlsx) chuẩn doanh nghiệp!');
-                }}
+                                  }}
                 className="rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 shadow-xs whitespace-nowrap"
               >
                 📊 Xuất Báo Cáo Excel (.xlsx)
@@ -1288,8 +1293,7 @@ function Dashboard() {
                     summaryRow,
                     signRole: 'KẾ TOÁN TRƯỞNG'
                   });
-                  showToast('📥 Đã xuất Báo Cáo Doanh Thu (.xlsx) chuẩn doanh nghiệp!');
-                }}
+                                  }}
                 className="rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-sm"
               >
                 📊 Xuất Báo Cáo Doanh Thu (.xlsx)
@@ -1537,8 +1541,7 @@ function Dashboard() {
                       summaryRow,
                       signRole: 'THỦ KHO LINH KIỆN'
                     });
-                    showToast('📥 Đã xuất Báo Cáo Tồn Kho (.xlsx) chuẩn doanh nghiệp!');
-                  }}
+                                      }}
                   className="rounded-lg bg-brand-blue px-4 py-2 text-sm font-bold text-white hover:bg-blue-900"
                 >
                   📊 Xuất Báo Cáo Tồn Kho (.xlsx)
