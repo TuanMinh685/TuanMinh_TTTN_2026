@@ -16,6 +16,12 @@ const STATUS_LABELS = {
   'YÊU_CẦU_BẢO_HÀNH': 'Yêu cầu bảo hành'
 };
 
+const isNotificationCorrupted = (item) => {
+  if (!item) return false;
+  const text = `${item.title || ''} ${item.description || ''}`;
+  return /[¿»º¯›]|â€|Ä‘|Æ°|áº|á»|Phiá|Lá»/.test(text);
+};
+
 const ROLE_META = {
   GIAM_DOC: {
     level: 100,
@@ -127,14 +133,21 @@ function Dashboard() {
   const [notifications, setNotifications] = useState(() => {
     try {
       const saved = localStorage.getItem('ticketNotifications');
-      if (saved && (saved.includes('áº') || saved.includes('á»') || saved.includes('â€') || saved.includes('Ä‘') || saved.includes('Phiá') || saved.includes('Lá»'))) {
-        localStorage.removeItem('ticketNotifications');
-        return [];
+      if (!saved) return [];
+      const parsed = JSON.parse(saved);
+      if (!Array.isArray(parsed)) return [];
+      const clean = parsed.filter(item => !isNotificationCorrupted(item));
+      if (clean.length !== parsed.length) {
+        if (clean.length > 0) {
+          localStorage.setItem('ticketNotifications', JSON.stringify(clean.slice(0, 50)));
+        } else {
+          localStorage.removeItem('ticketNotifications');
+        }
       }
-      const parsed = saved ? JSON.parse(saved) : [];
-      return Array.isArray(parsed) ? parsed.slice(0, 50).map(item => ({ ...item, read: item.read ?? true })) : [];
+      return clean.slice(0, 50).map(item => ({ ...item, read: item.read ?? true }));
     } catch (error) {
       console.error('Không đọc được thông báo đã lưu:', error);
+      localStorage.removeItem('ticketNotifications');
       return [];
     }
   });
@@ -864,14 +877,14 @@ function Dashboard() {
               onClick={() => setShowNotifications(open => !open)}
               aria-expanded={showNotifications}
               aria-label={`Thông báo (${unreadNotificationCount})`}
-              className="relative rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-brand-blue hover:bg-slate-50"
+              className="relative rounded-xl border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
             >
               🔔 Thông báo
               {unreadNotificationCount > 0 && (
                 <span className="ml-1.5 rounded-full bg-red-500 px-2 py-0.5 text-[10px] text-white">{unreadNotificationCount}</span>
               )}
             </button>
-            <button onClick={logout} className="rounded-xl bg-red-500 px-4 py-2 text-xs font-bold text-white hover:bg-red-600">
+            <button onClick={logout} className="rounded-xl border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 hover:text-red-700 hover:border-red-200 transition">
               Đăng Xuất
             </button>
             {showNotifications && (
@@ -886,14 +899,14 @@ function Dashboard() {
                   Đánh dấu tất cả đã đọc
                 </button>
                 <div className="max-h-80 space-y-2 overflow-y-auto">
-                  {notifications.map(notification => (
+                  {notifications.filter(item => !isNotificationCorrupted(item)).map(notification => (
                     <div key={notification.id} className={`rounded-lg p-3 text-sm ${notification.read ? 'bg-slate-50' : 'bg-blue-50'}`}>
                       <p className="font-semibold">{notification.title || `Phiếu ${notification.ticketCode}: ${notification.status}`}</p>
                       {notification.description && <p className="mt-1 text-slate-700">{notification.description}</p>}
                       <p className="mt-1 text-xs text-slate-500">{notification.createdAt}</p>
                     </div>
                   ))}
-                  {notifications.length === 0 && <p className="py-6 text-center text-sm text-slate-500">Chưa có thông báo mới.</p>}
+                  {notifications.filter(item => !isNotificationCorrupted(item)).length === 0 && <p className="py-6 text-center text-sm text-slate-500">Chưa có thông báo mới.</p>}
                 </div>
               </div>
             )}
@@ -1476,6 +1489,7 @@ function Dashboard() {
           </label>
           <div className="space-y-2">
             {notifications
+              .filter(item => !isNotificationCorrupted(item))
               .filter(notification => notificationFilter !== 'UNREAD' || !notification.read)
               .map(notification => (
               <article key={notification.id} className={`rounded-lg border p-4 ${notification.read ? 'border-slate-100 bg-white' : 'border-blue-100 bg-blue-50'}`}>
@@ -1484,7 +1498,7 @@ function Dashboard() {
                 <p className="mt-1 text-xs text-slate-500">{notification.createdAt}</p>
               </article>
             ))}
-            {notifications.filter(notification => notificationFilter !== 'UNREAD' || !notification.read).length === 0 && (
+            {notifications.filter(item => !isNotificationCorrupted(item)).filter(notification => notificationFilter !== 'UNREAD' || !notification.read).length === 0 && (
               <p className="py-8 text-center text-sm text-slate-500">
                 {notificationFilter === 'UNREAD' ? 'Không có thông báo chưa đọc.' : 'Chưa có thông báo mới.'}
               </p>
