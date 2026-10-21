@@ -22,6 +22,7 @@ const readSoftwarePackageRequest = (description) => {
 
     issueDescription = issueDescription
         .replace(/^Gói phần mềm yêu cầu:\s*.+$/gm, '')
+        .replace(/^\[ƯU ĐÃI SINH VIÊN -15%\]:.*$/gm, '')
         .trim();
 
     return { issueDescription, packages };
@@ -106,8 +107,8 @@ const submitIntake = async (customerData) => {
         // 4. Lưu nhật ký sửa chữa
         await client.query(`
             INSERT INTO nhat_ky_sua_chua (phieu_sua_chua_id, trang_thai_moi, ghi_chu)
-            VALUES ($1, 'CHỜ_KHÁM', 'Khách hàng vừa tạo yêu cầu tiếp nhận qua mã QR')
-        `, [ticket.id]);
+            VALUES ($1, $2, $3)
+        `, [ticket.id, 'CHỜ_KHÁM', 'Khách hàng vừa tạo yêu cầu tiếp nhận qua mã QR']);
 
         await client.query('COMMIT');
 
@@ -343,8 +344,8 @@ const updateBookingStatus = async (id, status, deviceName = '') => {
             const newTicketId = createdTicket.rows[0]?.id;
             if (newTicketId) {
                 await client.query(
-                    `INSERT INTO nhat_ky_sua_chua (phieu_sua_chua_id, trang_thai_moi, ghi_chu) VALUES ($1, 'CHỜ_KHÁM', 'Tiếp nhận máy trực tiếp từ lịch hẹn đã đặt trước tại 615 Âu Cơ')`,
-                    [newTicketId]
+                    `INSERT INTO nhat_ky_sua_chua (phieu_sua_chua_id, trang_thai_moi, ghi_chu) VALUES ($1, $2, $3)`,
+                    [newTicketId, 'CHỜ_KHÁM', 'Tiếp nhận máy trực tiếp từ lịch hẹn đã đặt trước tại 615 Âu Cơ']
                 );
             }
             

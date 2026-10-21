@@ -54,9 +54,6 @@ function IntakeForm() {
     setError('');
     
     try {
-      const studentNote = isStudent 
-        ? `\n[ƯU ĐÃI SINH VIÊN -15%]: Trường ${schoolName || 'Chưa rõ'} - MSSV: ${studentId || 'Chưa cung cấp'}` 
-        : '';
       // Gọi API Tiếp nhận máy
       const response = await api.post('/tickets/intake', {
         ...formData,
@@ -64,9 +61,9 @@ function IntakeForm() {
         schoolName,
         studentId,
         photos,
-        issueDescription: (softwarePackage
+        issueDescription: softwarePackage
           ? `${formData.issueDescription}\nGói phần mềm yêu cầu: ${softwarePackage}`
-          : formData.issueDescription) + studentNote
+          : formData.issueDescription
       });
       if (response.data.success) {
         // Chuyển sang trang Tra cứu tiến độ ngay lập tức với mã phiếu

@@ -233,8 +233,8 @@ function executeMockQuery(sql, params = []) {
         const nk = {
             id: newId,
             phieu_sua_chua_id: Number(params[0]),
-            trang_thai_moi: params[1] || params[2] || 'CẬP_NHẬT',
-            ghi_chu: params[2] || params[3] || '',
+            trang_thai_moi: params[1] || params[2] || 'CHỜ_KHÁM',
+            ghi_chu: params[2] || params[3] || 'Khách hàng vừa tạo yêu cầu tiếp nhận qua mã QR',
             ngay_tao: new Date().toISOString()
         };
         s.nhat_ky_sua_chua.push(nk);

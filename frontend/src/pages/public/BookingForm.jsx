@@ -27,17 +27,14 @@ function BookingForm() {
     e.preventDefault();
     setLoading(true);
     try {
-      const studentNote = isStudent 
-        ? `\n[ƯU ĐÃI SINH VIÊN -15%]: Trường ${schoolName || 'Chưa rõ'} - MSSV: ${studentId || 'Chưa cung cấp'}` 
-        : '';
       await api.post('/tickets/booking', {
         ...formData,
         isStudent,
         schoolName,
         studentId,
-        moTaLoi: (softwarePackage
+        moTaLoi: softwarePackage
           ? `${formData.moTaLoi}\nGói phần mềm yêu cầu: ${softwarePackage}`
-          : formData.moTaLoi) + studentNote
+          : formData.moTaLoi
       });
       setSuccess(true);
     } catch (err) {
