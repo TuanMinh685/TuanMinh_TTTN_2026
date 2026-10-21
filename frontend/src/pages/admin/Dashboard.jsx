@@ -897,16 +897,16 @@ function Dashboard() {
 
         {/* Thanh Điều Hướng Các Trang Quản Trị Cấp Cao */}
         <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
-          <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 mr-1">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mr-1">
             Chuyển nhanh:
           </span>
-          <span className="rounded-xl bg-brand-blue px-3.5 py-1.5 text-xs font-bold text-white shadow-xs">
-            📋 Bàn Vận Hành Kỹ Thuật (Hiện tại)
+          <span className="rounded-xl bg-slate-800 px-3.5 py-1.5 text-xs font-bold text-white shadow-2xs">
+            📋 Bàn Vận Hành Kỹ Thuật
           </span>
           {isExecutive && (
             <Link
               to="/admin/giam-doc"
-              className="flex items-center gap-1.5 rounded-xl bg-purple-50 border border-purple-200 px-3.5 py-1.5 text-xs font-bold text-purple-700 hover:bg-purple-100 transition shadow-2xs"
+              className="flex items-center gap-1.5 rounded-xl bg-white border border-slate-200 px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition shadow-2xs"
             >
               <span>👑</span> Trang Giám Đốc
             </Link>
@@ -914,7 +914,7 @@ function Dashboard() {
           {isManagerOrAbove && (
             <Link
               to="/admin/quan-ly"
-              className="flex items-center gap-1.5 rounded-xl bg-blue-50 border border-blue-200 px-3.5 py-1.5 text-xs font-bold text-blue-700 hover:bg-blue-100 transition shadow-2xs"
+              className="flex items-center gap-1.5 rounded-xl bg-white border border-slate-200 px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition shadow-2xs"
             >
               <span>🏬</span> Trang Quản Lý
             </Link>
@@ -922,7 +922,7 @@ function Dashboard() {
           {canManageEmployees && (
             <Link
               to="/admin/nhan-su"
-              className="flex items-center gap-1.5 rounded-xl bg-emerald-50 border border-emerald-200 px-3.5 py-1.5 text-xs font-bold text-emerald-700 hover:bg-emerald-100 transition shadow-2xs"
+              className="flex items-center gap-1.5 rounded-xl bg-white border border-slate-200 px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition shadow-2xs"
             >
               <span>👥</span> Quản Lý Nhân Sự & Phân Quyền
             </Link>
@@ -1124,15 +1124,15 @@ function Dashboard() {
                   </td>
                   <td className="py-3 px-4">{ticket.mo_ta_loi}</td>
                   <td className="py-3 px-4">
-                    <span className={`px-2 py-1 rounded text-xs font-bold ${
-                      ticket.trang_thai === 'CHỜ_KHÁM' ? 'bg-yellow-100 text-yellow-700' :
-                      ticket.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' ? 'bg-orange-100 text-orange-700' :
-                      ticket.trang_thai === 'CHỜ_KHÁCH_CHỐT_GIÁ' ? 'bg-amber-100 text-amber-800 border border-amber-300' :
-                      ticket.trang_thai === 'ĐANG_SỬA' ? 'bg-blue-100 text-blue-700' :
-                      ticket.trang_thai === 'ĐÃ_SỬA_XONG' ? 'bg-green-100 text-green-700' : 
-                      ticket.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' ? 'bg-purple-100 text-purple-700' :
-                      ticket.trang_thai === 'YÊU_CẦU_BẢO_HÀNH' ? 'bg-red-100 text-red-700' :
-                      'bg-slate-100 text-slate-700'
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
+                      ticket.trang_thai === 'CHỜ_KHÁM' ? 'bg-slate-100 text-slate-700 border-slate-200' :
+                      ticket.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' ? 'bg-amber-50 text-amber-800 border-amber-200' :
+                      ticket.trang_thai === 'CHỜ_KHÁCH_CHỐT_GIÁ' ? 'bg-rose-50 text-rose-800 border-rose-200' :
+                      ticket.trang_thai === 'ĐANG_SỬA' ? 'bg-blue-50 text-blue-800 border-blue-200' :
+                      ticket.trang_thai === 'ĐÃ_SỬA_XONG' ? 'bg-teal-50 text-teal-800 border-teal-200' : 
+                      ticket.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' :
+                      ticket.trang_thai === 'YÊU_CẦU_BẢO_HÀNH' ? 'bg-red-50 text-red-700 border-red-200' :
+                      'bg-slate-100 text-slate-700 border-slate-200'
                     }`}>
                       {ticket.trang_thai.replace(/_/g, ' ')}
                     </span>
@@ -1148,59 +1148,86 @@ function Dashboard() {
                     {ticket.la_sinh_vien && rawTotal > 0 ? (
                       <div>
                         <div className="text-xs text-slate-400 line-through">{rawTotal.toLocaleString('vi-VN')} đ</div>
-                        <div className="font-bold text-red-600">{finalTotal.toLocaleString('vi-VN')} đ</div>
+                        <div className="font-extrabold text-brand-orange">{finalTotal.toLocaleString('vi-VN')} đ</div>
                       </div>
+                    ) : rawTotal > 0 ? (
+                      <span className="font-extrabold text-slate-800">{rawTotal.toLocaleString('vi-VN')} đ</span>
                     ) : (
-                      <span className="font-bold text-red-500">{rawTotal.toLocaleString('vi-VN')} đ</span>
+                      <span className="font-semibold text-slate-400">0 đ</span>
                     )}
                   </td>
-                  <td className="py-3 px-4 text-center space-y-1.5 flex flex-col items-center">
-                    {canReceptionAction && ticket.trang_thai === 'CHỜ_KHÁM' && (
-                      <button onClick={() => updateStatus(ticket.id, 'ĐANG_CHUẨN_ĐOÁN')} className="bg-brand-orange text-white px-3 py-1 rounded font-bold text-xs w-full">Chuyển Kỹ Thuật</button>
-                    )}
-                    {(canReceptionAction || canTechAction) && ticket.trang_thai === 'YÊU_CẦU_BẢO_HÀNH' && (
-                      <button onClick={() => updateStatus(ticket.id, 'ĐANG_SỬA')} className="bg-red-600 text-white px-3 py-1 rounded font-bold text-xs w-full">Tiếp Nhận Bảo Hành</button>
-                    )}
-                    {canTechAction && ticket.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' && (
-                      <>
-                        <button onClick={() => openPartModal(ticket.id)} className="bg-yellow-500 text-white px-3 py-1 rounded font-bold text-xs w-full">Thêm Linh Kiện</button>
-                        <button onClick={() => updateStatus(ticket.id, 'CHỜ_KHÁCH_CHỐT_GIÁ')} className="bg-amber-600 text-white px-3 py-1 rounded font-bold text-xs w-full">Gửi Báo Giá</button>
-                        <button onClick={() => updateStatus(ticket.id, 'ĐANG_SỬA')} className="bg-blue-500 text-white px-3 py-1 rounded font-bold text-xs w-full">Tiến hành Sửa</button>
-                      </>
-                    )}
-                    {(canReceptionAction || canTechAction) && ticket.trang_thai === 'CHỜ_KHÁCH_CHỐT_GIÁ' && (
-                      <button onClick={() => updateStatus(ticket.id, 'ĐANG_SỬA')} className="bg-blue-600 text-white px-3 py-1 rounded font-bold text-xs w-full">Khách Chốt (Sửa)</button>
-                    )}
-                    {canTechAction && ticket.trang_thai === 'ĐANG_SỬA' && (
-                      <>
-                        <button onClick={() => openPartModal(ticket.id)} className="bg-yellow-500 text-white px-3 py-1 rounded font-bold text-xs w-full mb-1">Thêm Linh Kiện</button>
-                        <button onClick={() => updateStatus(ticket.id, 'CHỜ_KHÁCH_CHỐT_GIÁ')} className="bg-amber-600 text-white px-3 py-1 rounded font-bold text-xs w-full">Gửi Báo Giá</button>
-                        <button onClick={() => updateStatus(ticket.id, 'ĐÃ_SỬA_XONG')} className="bg-brand-green text-white px-3 py-1 rounded font-bold text-xs w-full">Sửa Xong</button>
-                      </>
-                    )}
-                    {canCashierAction && ticket.trang_thai === 'ĐÃ_SỬA_XONG' && (
-                      <button onClick={() => updateStatus(ticket.id, 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN')} className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded font-bold text-xs w-full">Giao Khách &amp; Thu Tiền</button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => openPhotoModal(ticket)}
-                      className="w-full rounded bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800 border border-amber-300 hover:bg-amber-100"
-                    >
-                      📸 Ảnh ngoại quan
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setReceiptQr('');
-                        setReceiptParts([]);
-                        setReceiptPartsLoading(true);
-                        setReceiptPartsError('');
-                        setReceiptTicket(ticket);
-                      }}
-                      className="w-full rounded bg-slate-700 px-3 py-1 text-xs font-bold text-white hover:bg-slate-800"
-                    >
-                      In phiếu 80mm
-                    </button>
+                  <td className="py-3 px-4 text-center">
+                    <div className="flex flex-col gap-1.5 w-36 mx-auto">
+                      {/* Nút hành động chính dịu nhẹ */}
+                      {canReceptionAction && ticket.trang_thai === 'CHỜ_KHÁM' && (
+                        <button onClick={() => updateStatus(ticket.id, 'ĐANG_CHUẨN_ĐOÁN')} className="w-full bg-blue-50 text-blue-800 border border-blue-200 hover:bg-blue-100 px-2 py-1 rounded-lg font-bold text-xs transition shadow-2xs">
+                          Chuyển Kỹ Thuật
+                        </button>
+                      )}
+                      {(canReceptionAction || canTechAction) && ticket.trang_thai === 'YÊU_CẦU_BẢO_HÀNH' && (
+                        <button onClick={() => updateStatus(ticket.id, 'ĐANG_SỬA')} className="w-full bg-rose-50 text-rose-800 border border-rose-200 hover:bg-rose-100 px-2 py-1 rounded-lg font-bold text-xs transition shadow-2xs">
+                          Tiếp Nhận Bảo Hành
+                        </button>
+                      )}
+                      {canTechAction && ticket.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' && (
+                        <button onClick={() => updateStatus(ticket.id, 'ĐANG_SỬA')} className="w-full bg-blue-50 text-blue-800 border border-blue-200 hover:bg-blue-100 px-2 py-1 rounded-lg font-bold text-xs transition shadow-2xs">
+                          Tiến hành Sửa
+                        </button>
+                      )}
+                      {(canReceptionAction || canTechAction) && ticket.trang_thai === 'CHỜ_KHÁCH_CHỐT_GIÁ' && (
+                        <button onClick={() => updateStatus(ticket.id, 'ĐANG_SỬA')} className="w-full bg-blue-50 text-blue-800 border border-blue-200 hover:bg-blue-100 px-2 py-1 rounded-lg font-bold text-xs transition shadow-2xs">
+                          Khách Chốt (Sửa)
+                        </button>
+                      )}
+                      {canTechAction && ticket.trang_thai === 'ĐANG_SỬA' && (
+                        <button onClick={() => updateStatus(ticket.id, 'ĐÃ_SỬA_XONG')} className="w-full bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100 px-2 py-1 rounded-lg font-bold text-xs transition shadow-2xs">
+                          ✓ Sửa Xong
+                        </button>
+                      )}
+                      {canCashierAction && ticket.trang_thai === 'ĐÃ_SỬA_XONG' && (
+                        <button onClick={() => updateStatus(ticket.id, 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN')} className="w-full bg-purple-50 text-purple-800 border border-purple-200 hover:bg-purple-100 px-2 py-1 rounded-lg font-bold text-xs transition shadow-2xs">
+                          Giao Khách & Thu Tiền
+                        </button>
+                      )}
+
+                      {/* Nhóm nút tác vụ linh kiện & báo giá */}
+                      {canTechAction && (ticket.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' || ticket.trang_thai === 'ĐANG_SỬA') && (
+                        <div className="grid grid-cols-2 gap-1">
+                          <button onClick={() => openPartModal(ticket.id)} className="bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 px-1 py-1 rounded-lg font-semibold text-[11px] transition" title="Thêm linh kiện">
+                            + Linh kiện
+                          </button>
+                          <button onClick={() => updateStatus(ticket.id, 'CHỜ_KHÁCH_CHỐT_GIÁ')} className="bg-white text-amber-800 border border-amber-200 hover:bg-amber-50 px-1 py-1 rounded-lg font-semibold text-[11px] transition" title="Gửi báo giá">
+                            Báo giá
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Tiện ích in ấn & ảnh ngoại quan */}
+                      <div className="grid grid-cols-2 gap-1">
+                        <button
+                          type="button"
+                          onClick={() => openPhotoModal(ticket)}
+                          className="rounded-lg bg-white px-1 py-1 text-[11px] font-medium text-slate-600 border border-slate-200 hover:bg-slate-50 transition"
+                          title="Xem / chụp ảnh ngoại quan"
+                        >
+                          📸 Ảnh
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setReceiptQr('');
+                            setReceiptParts([]);
+                            setReceiptPartsLoading(true);
+                            setReceiptPartsError('');
+                            setReceiptTicket(ticket);
+                          }}
+                          className="rounded-lg bg-white px-1 py-1 text-[11px] font-medium text-slate-700 border border-slate-200 hover:bg-slate-50 transition"
+                          title="In hóa đơn nhiệt 80mm"
+                        >
+                          🖨️ In 80mm
+                        </button>
+                      </div>
+                    </div>
                   </td>
                 </tr>
               );
