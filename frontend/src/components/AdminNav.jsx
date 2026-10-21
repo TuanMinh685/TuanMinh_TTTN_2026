@@ -75,7 +75,7 @@ export default function AdminNav({ activeKey }) {
     try {
       const res = await api.post('/auth/login', {
         username: targetUser,
-        password: targetUser === 'giamdoc' ? 'GiamDoc@2026' : targetUser === 'quanly' ? 'QuanLy@2026' : '123456'
+        password: '123456'
       });
       if (res.data.success) {
         const { token, role: nextRole, fullName: nextName, username: nextUname, accountId } = res.data.data;
@@ -84,7 +84,14 @@ export default function AdminNav({ activeKey }) {
         localStorage.setItem('fullName', nextName);
         localStorage.setItem('username', nextUname || targetUser);
         if (accountId) localStorage.setItem('accountId', String(accountId));
-        window.location.reload();
+        
+        if (nextRole === 'GIAM_DOC' || nextRole === 'ADMIN') {
+          window.location.href = '/admin/giam-doc';
+        } else if (nextRole === 'QUAN_LY') {
+          window.location.href = '/admin/quan-ly';
+        } else {
+          window.location.href = '/admin';
+        }
       }
     } catch (e) {
       console.error('Lỗi chuyển chức vụ test:', e);

