@@ -254,7 +254,6 @@ function AppContent() {
           
           <div className="mt-12 pt-8 border-t border-blue-800 text-center text-blue-300 text-xs">
             <p>© {CURRENT_YEAR} Bản quyền thuộc về Công ty Cổ phần Phát triển Hùng Hậu - Hệ sinh thái HungHau Holdings.</p>
-            <p className="mt-1">Thiết kế chuẩn luồng UX/UI Mobile-first QR System.</p>
           </div>
         </div>
       </footer>
