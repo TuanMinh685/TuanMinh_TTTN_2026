@@ -38,7 +38,6 @@ function Pricing() {
   const [selectedPriceRange, setSelectedPriceRange] = useState('all');
   const [sortBy, setSortBy] = useState('default');
   const [viewMode, setViewMode] = useState('table'); // 'table' | 'cards'
-  const [selectedItems, setSelectedItems] = useState([]); // Array of item IDs for Cost Estimator
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -134,31 +133,8 @@ function Pricing() {
     navigate('/dat-lich', { state: { serviceName } });
   };
 
-  // Toggle item selection for Cost Estimator
-  const toggleSelectItem = (id) => {
-    setSelectedItems(prev => 
-      prev.includes(id) ? prev.filter(itemId => itemId !== id) : [...prev, id]
-    );
-  };
-
-  // Calculate Cost Estimator Summary
-  const estimatorSummary = useMemo(() => {
-    const chosen = parts.filter(p => selectedItems.includes(p.id));
-    const totalOriginal = chosen.reduce((sum, item) => sum + Number(item.gia_ban), 0);
-    const totalDiscount = Math.round(totalOriginal * 0.15);
-    const totalFinal = Math.max(0, totalOriginal - totalDiscount);
-    const names = chosen.map(c => c.ten_linh_kien).join(' + ');
-    return {
-      count: chosen.length,
-      totalOriginal,
-      totalDiscount,
-      totalFinal,
-      serviceCombinedName: names
-    };
-  }, [parts, selectedItems]);
-
   return (
-    <div className="bg-slate-50 min-h-screen py-12 font-sans relative pb-28">
+    <div className="bg-slate-50 min-h-screen py-12 font-sans relative">
       <div className="container mx-auto px-4 max-w-6xl">
         
         {/* Header Title */}
@@ -337,15 +313,6 @@ function Pricing() {
             {/* Thanh hiển thị số lượng kết quả */}
             <div className="flex justify-between items-center text-xs font-bold text-slate-500 mb-3 px-1">
               <span>Tìm thấy {filteredAndSortedParts.length} linh kiện & dịch vụ phù hợp</span>
-              {selectedItems.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setSelectedItems([])}
-                  className="text-red-500 hover:underline"
-                >
-                  Bỏ chọn tất cả ({selectedItems.length})
-                </button>
-              )}
             </div>
 
             {/* CHẾ ĐỘ 1: DẠNG BẢNG (TABLE VIEW) */}
@@ -355,9 +322,6 @@ function Pricing() {
                   <table className="w-full text-left border-collapse min-w-[700px]">
                     <thead>
                       <tr className="bg-gradient-to-r from-brand-blue to-blue-900 text-white text-sm">
-                        <th className="py-4 px-4 w-12 text-center">
-                          <span className="sr-only">Chọn</span>
-                        </th>
                         <th className="py-4 px-6">Tên Dịch Vụ / Linh Kiện</th>
                         <th className="py-4 px-6 text-right w-40">Giá Niêm Yết</th>
                         <th className="py-4 px-6 text-right w-44 text-amber-300">Giá Sinh Viên (-15%)</th>
@@ -368,21 +332,11 @@ function Pricing() {
                       {filteredAndSortedParts.length > 0 ? filteredAndSortedParts.map((item, idx) => {
                         const regularPrice = Number(item.gia_ban);
                         const studentPrice = Math.round(regularPrice * 0.85);
-                        const isSelected = selectedItems.includes(item.id);
                         return (
                           <tr 
                             key={item.id} 
-                            className={`transition-colors ${isSelected ? 'bg-amber-50/70' : idx % 2 === 0 ? 'bg-white hover:bg-slate-50' : 'bg-slate-50/50 hover:bg-slate-100/70'}`}
+                            className={`transition-colors ${idx % 2 === 0 ? 'bg-white hover:bg-slate-50' : 'bg-slate-50/50 hover:bg-slate-100/70'}`}
                           >
-                            <td className="py-4 px-4 text-center">
-                              <input 
-                                type="checkbox"
-                                checked={isSelected}
-                                onChange={() => toggleSelectItem(item.id)}
-                                className="w-4 h-4 rounded text-brand-blue cursor-pointer"
-                                title="Chọn để tính dự toán tổng tiền"
-                              />
-                            </td>
                             <td className="py-4 px-6">
                               <div className="font-bold text-slate-800 text-base">{item.ten_linh_kien}</div>
                               <div className="text-xs text-green-700 font-semibold flex items-center gap-1.5 mt-1">
@@ -405,16 +359,17 @@ function Pricing() {
                               <button
                                 type="button"
                                 onClick={() => handleBookService(item.ten_linh_kien)}
-                                className="px-4 py-2 bg-brand-green text-white font-bold text-xs rounded-xl hover:bg-green-700 transition-all shadow-md hover:shadow-lg"
+                                className="px-5 py-2.5 bg-brand-green text-white font-bold text-sm rounded-xl hover:bg-green-700 transition-all shadow-md hover:shadow-lg inline-flex items-center gap-1.5"
                               >
-                                Đặt lịch →
+                                <span>Đặt lịch</span>
+                                <span>→</span>
                               </button>
                             </td>
                           </tr>
                         );
                       }) : (
                         <tr>
-                          <td colSpan="5" className="py-16 text-center text-slate-400 text-base">
+                          <td colSpan="4" className="py-16 text-center text-slate-400 text-base">
                             Không tìm thấy dịch vụ hoặc linh kiện phù hợp với bộ lọc hiện tại.
                           </td>
                         </tr>
@@ -429,27 +384,15 @@ function Pricing() {
                 {filteredAndSortedParts.length > 0 ? filteredAndSortedParts.map(item => {
                   const regularPrice = Number(item.gia_ban);
                   const studentPrice = Math.round(regularPrice * 0.85);
-                  const isSelected = selectedItems.includes(item.id);
                   return (
                     <div 
                       key={item.id}
-                      className={`bg-white rounded-3xl p-6 border transition-all relative flex flex-col justify-between ${
-                        isSelected ? 'border-amber-400 shadow-xl ring-2 ring-amber-300 bg-amber-50/20' : 'border-slate-200 shadow-md hover:shadow-xl hover:-translate-y-1'
-                      }`}
+                      className="bg-white rounded-3xl p-6 border border-slate-200 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all relative flex flex-col justify-between"
                     >
                       <div>
-                        {/* Checkbox chọn + Badge */}
+                        {/* Badge chính hãng */}
                         <div className="flex justify-between items-start mb-3">
-                          <label className="flex items-center gap-2 cursor-pointer">
-                            <input 
-                              type="checkbox"
-                              checked={isSelected}
-                              onChange={() => toggleSelectItem(item.id)}
-                              className="w-4 h-4 rounded text-brand-blue cursor-pointer"
-                            />
-                            <span className="text-xs text-slate-500 font-semibold">Dự toán</span>
-                          </label>
-                          <span className="bg-green-100 text-green-800 px-2 py-0.5 rounded-full text-[10px] font-black uppercase">
+                          <span className="bg-green-100 text-green-800 px-2.5 py-1 rounded-full text-[10px] font-black uppercase">
                             Chính hãng 100%
                           </span>
                         </div>
@@ -509,53 +452,6 @@ function Pricing() {
         )}
 
       </div>
-
-      {/* THANH DỰ TOÁN CHI PHÍ NỔI (FLOATING COST ESTIMATOR BAR) */}
-      {selectedItems.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 text-white border-t-4 border-amber-400 backdrop-blur-md px-6 py-4 shadow-2xl animate-in slide-in-from-bottom duration-300">
-          <div className="container mx-auto max-w-6xl flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-amber-400 text-slate-900 rounded-2xl flex items-center justify-center font-black text-xl shadow-lg">
-                {estimatorSummary.count}
-              </div>
-              <div>
-                <div className="text-xs text-slate-300 font-semibold">
-                  Đã chọn {estimatorSummary.count} món linh kiện / dịch vụ
-                </div>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-black text-amber-300">
-                    {estimatorSummary.totalFinal.toLocaleString('vi-VN')} đ
-                  </span>
-                  <span className="text-xs text-slate-400 line-through">
-                    {estimatorSummary.totalOriginal.toLocaleString('vi-VN')} đ
-                  </span>
-                  <span className="text-[10px] bg-green-900/80 text-green-300 border border-green-700 px-2 py-0.5 rounded-full font-bold">
-                    Tiết kiệm {estimatorSummary.totalDiscount.toLocaleString('vi-VN')} đ (-15%)
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 w-full sm:w-auto">
-              <button
-                type="button"
-                onClick={() => setSelectedItems([])}
-                className="px-4 py-2.5 text-xs text-slate-300 hover:text-white font-bold transition-colors"
-              >
-                Hủy chọn
-              </button>
-              <button
-                type="button"
-                onClick={() => handleBookService(estimatorSummary.serviceCombinedName)}
-                className="flex-1 sm:flex-initial px-6 py-3 bg-brand-orange hover:bg-orange-600 text-white font-bold rounded-2xl shadow-lg transition-transform hover:scale-105 text-sm"
-              >
-                Đặt Lịch {estimatorSummary.count} Mục Này Ngay →
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
     </div>
   );
 }
