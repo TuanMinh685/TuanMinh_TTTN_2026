@@ -1,13 +1,23 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../../services/api';
 
 function Pricing() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [parts, setParts] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  // Tự động nhận diện từ khóa lọc từ URL (VD: /bang-gia?q=Pin, Sạc)
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const q = params.get('q');
+    if (q) {
+      setSearch(q);
+    }
+  }, [location.search]);
 
   const loadPricing = () => {
     setLoading(true);
@@ -28,9 +38,12 @@ function Pricing() {
     loadPricing();
   }, []);
 
-  const filteredParts = parts.filter(part =>
-    part.ten_linh_kien.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredParts = parts.filter(part => {
+    if (!search.trim()) return true;
+    const searchTerms = search.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+    const itemName = part.ten_linh_kien.toLowerCase();
+    return searchTerms.some(term => itemName.includes(term));
+  });
 
   const handleBookService = (serviceName) => {
     navigate('/dat-lich', { state: { serviceName } });
@@ -68,16 +81,54 @@ function Pricing() {
           </div>
         </div>
 
-        {/* Thanh tìm kiếm */}
-        <div className="bg-white p-6 rounded-2xl shadow-lg mb-10 flex flex-col md:flex-row gap-4 items-center justify-between border-t-4 border-brand-orange">
-          <div className="flex-1 w-full">
+        {/* Thanh tìm kiếm & Bộ lọc danh mục nhanh */}
+        <div className="bg-white p-6 rounded-2xl shadow-lg mb-10 flex flex-col gap-4 border-t-4 border-brand-orange">
+          <div className="w-full relative">
              <input 
                type="text" 
                placeholder="🔍 Tìm kiếm linh kiện, dịch vụ (VD: Màn hình, Pin, Cài win...)" 
-               className="w-full px-6 py-4 bg-slate-100 border-none rounded-full focus:ring-2 focus:ring-brand-blue text-lg outline-none"
+               className="w-full px-6 py-4 bg-slate-100 border-none rounded-full focus:ring-2 focus:ring-brand-blue text-lg outline-none pr-12"
                value={search}
                onChange={(e) => setSearch(e.target.value)}
              />
+             {search && (
+               <button
+                 type="button"
+                 onClick={() => setSearch('')}
+                 className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 font-bold text-sm bg-slate-200 hover:bg-slate-300 w-7 h-7 rounded-full flex items-center justify-center transition-colors"
+                 title="Xóa tìm kiếm"
+               >
+                 ✕
+               </button>
+             )}
+          </div>
+
+          {/* Quick Filter Pills */}
+          <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
+            <span className="font-bold text-slate-500 mr-1">Bộ lọc nhanh:</span>
+            {[
+              { label: 'Tất cả', val: '' },
+              { label: '🔋 Pin & Sạc Laptop', val: 'Pin, Sạc' },
+              { label: '💻 Màn hình & Bàn phím', val: 'Màn hình, Bàn phím' },
+              { label: '⚡ RAM & Ổ cứng SSD', val: 'RAM, SSD' },
+              { label: '❄️ Vệ sinh tra keo', val: 'Keo tản nhiệt, Vệ sinh' }
+            ].map(cat => {
+              const active = search === cat.val;
+              return (
+                <button
+                  key={cat.label}
+                  type="button"
+                  onClick={() => setSearch(cat.val)}
+                  className={`px-3 py-1.5 rounded-full font-bold transition-all ${
+                    active 
+                      ? 'bg-brand-blue text-white shadow-sm' 
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              );
+            })}
           </div>
         </div>
 

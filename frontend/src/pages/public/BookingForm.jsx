@@ -1,11 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import api from '../../services/api';
 import SoftwarePackageSelector from '../../components/SoftwarePackageSelector';
 
 function BookingForm() {
   const location = useLocation();
-  const initialServiceName = location.state?.serviceName || '';
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -13,15 +12,37 @@ function BookingForm() {
     zaloId: '',
     ngayHen: '',
     gioHen: '',
-    moTaLoi: initialServiceName ? `Cần dịch vụ / thay thế: ${initialServiceName}` : '',
+    moTaLoi: '',
     loaiDichVu: 'TAI_CUA_HANG'
   });
+  const [selectedServiceBanner, setSelectedServiceBanner] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [softwarePackage, setSoftwarePackage] = useState('');
   const [isStudent, setIsStudent] = useState(false);
   const [schoolName, setSchoolName] = useState('');
   const [studentId, setStudentId] = useState('');
+
+  // Tự động nhận diện Dịch vụ & Gói phần mềm được bấm từ Header Menu hoặc Bảng giá
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const serviceFromQuery = searchParams.get('service');
+    const pkgFromQuery = searchParams.get('pkg');
+    const serviceFromState = location.state?.serviceName;
+    const targetService = serviceFromQuery || serviceFromState || '';
+
+    if (targetService) {
+      setSelectedServiceBanner(targetService);
+      setFormData(prev => ({
+        ...prev,
+        moTaLoi: `Cần dịch vụ / thay thế: ${targetService}`
+      }));
+    }
+
+    if (pkgFromQuery) {
+      setSoftwarePackage(pkgFromQuery);
+    }
+  }, [location.search, location.state]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -65,7 +86,29 @@ function BookingForm() {
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden border-t-8 border-brand-orange">
           <div className="p-8">
             <h1 className="text-2xl font-bold text-brand-blue mb-2 text-center">Đặt Lịch Hẹn Sửa Chữa</h1>
-            <p className="text-slate-500 text-center mb-8">Điền thông tin để chúng tôi sắp xếp nhân viên kỹ thuật đón tiếp bạn chu đáo nhất.</p>
+            <p className="text-slate-500 text-center mb-6">Điền thông tin để chúng tôi sắp xếp nhân viên kỹ thuật đón tiếp bạn chu đáo nhất.</p>
+
+            {selectedServiceBanner && (
+              <div className="mb-6 p-4 bg-orange-50 border-l-4 border-brand-orange rounded-r-xl flex items-center justify-between animate-in fade-in">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">⚡</span>
+                  <div>
+                    <div className="text-xs uppercase font-extrabold text-brand-orange tracking-wider">Dịch vụ đã chọn từ menu</div>
+                    <div className="font-bold text-slate-800 text-base">{selectedServiceBanner}</div>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedServiceBanner('');
+                    setFormData(prev => ({ ...prev, moTaLoi: '' }));
+                  }}
+                  className="text-xs text-slate-400 hover:text-slate-600 underline font-semibold"
+                >
+                  Xóa chọn
+                </button>
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>

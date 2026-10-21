@@ -47,21 +47,21 @@ function AppContent() {
             {/* Dropdown: Dịch Vụ Máy Tính */}
             <div className="relative group h-full flex items-center px-3 xl:px-4 cursor-pointer">
               <span className="hover:text-brand-orange transition-colors flex items-center gap-1">Dịch vụ máy tính ▾</span>
-              <div className="absolute top-full left-0 bg-white text-slate-700 min-w-[220px] shadow-xl rounded-b-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 py-2 border-t-2 border-brand-orange">
-                <Link to="/dat-lich" className="block px-5 py-2.5 hover:bg-slate-50 hover:text-brand-orange transition-colors normal-case font-semibold">Sửa chữa máy tính - laptop</Link>
+              <div className="absolute top-full left-0 bg-white text-slate-700 min-w-[240px] shadow-xl rounded-b-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 py-2 border-t-2 border-brand-orange z-50">
+                <Link to="/dat-lich?service=Sửa chữa máy tính - laptop" className="block px-5 py-2.5 hover:bg-slate-50 hover:text-brand-orange transition-colors normal-case font-semibold">Sửa chữa máy tính - laptop</Link>
                 <Link to="/online-intake" className="block px-5 py-2.5 hover:bg-slate-50 hover:text-brand-orange transition-colors normal-case font-semibold">Cứu dữ liệu online từ xa</Link>
-                <Link to="/dat-lich" className="block px-5 py-2.5 hover:bg-slate-50 hover:text-brand-orange transition-colors normal-case font-semibold">Bảo trì & vệ sinh máy tính</Link>
-                <Link to="/dat-lich" className="block px-5 py-2.5 hover:bg-slate-50 hover:text-brand-orange transition-colors normal-case font-semibold">Dịch vụ cài Win & phần mềm</Link>
+                <Link to="/dat-lich?service=Bảo trì & vệ sinh máy tính" className="block px-5 py-2.5 hover:bg-slate-50 hover:text-brand-orange transition-colors normal-case font-semibold">Bảo trì & vệ sinh máy tính</Link>
+                <Link to="/dat-lich?service=Dịch vụ cài Win & phần mềm&pkg=OFFICE" className="block px-5 py-2.5 hover:bg-slate-50 hover:text-brand-orange transition-colors normal-case font-semibold">Dịch vụ cài Win & phần mềm</Link>
               </div>
             </div>
 
             {/* Dropdown: Dịch Vụ Laptop */}
             <div className="relative group h-full flex items-center px-3 xl:px-4 cursor-pointer">
               <span className="hover:text-brand-orange transition-colors flex items-center gap-1">Dịch vụ laptop ▾</span>
-              <div className="absolute top-full left-0 bg-white text-slate-700 min-w-[220px] shadow-xl rounded-b-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 py-2 border-t-2 border-brand-orange">
-                <Link to="/dat-lich" className="block px-5 py-2.5 hover:bg-slate-50 hover:text-brand-orange transition-colors normal-case font-semibold">Vệ sinh & tra keo tản nhiệt</Link>
-                <Link to="/bang-gia" className="block px-5 py-2.5 hover:bg-slate-50 hover:text-brand-orange transition-colors normal-case font-semibold">Bán sạc & pin laptop</Link>
-                <Link to="/bang-gia" className="block px-5 py-2.5 hover:bg-slate-50 hover:text-brand-orange transition-colors normal-case font-semibold">Thay màn hình & bàn phím</Link>
+              <div className="absolute top-full left-0 bg-white text-slate-700 min-w-[240px] shadow-xl rounded-b-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 py-2 border-t-2 border-brand-orange z-50">
+                <Link to="/dat-lich?service=Vệ sinh & tra keo tản nhiệt" className="block px-5 py-2.5 hover:bg-slate-50 hover:text-brand-orange transition-colors normal-case font-semibold">Vệ sinh & tra keo tản nhiệt</Link>
+                <Link to="/bang-gia?q=Pin, Sạc" className="block px-5 py-2.5 hover:bg-slate-50 hover:text-brand-orange transition-colors normal-case font-semibold">Bán sạc & pin laptop</Link>
+                <Link to="/bang-gia?q=Màn hình, Bàn phím" className="block px-5 py-2.5 hover:bg-slate-50 hover:text-brand-orange transition-colors normal-case font-semibold">Thay màn hình & bàn phím</Link>
               </div>
             </div>
 
