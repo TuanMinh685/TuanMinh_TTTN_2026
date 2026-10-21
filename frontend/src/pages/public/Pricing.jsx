@@ -32,29 +32,26 @@ function Pricing() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const initialQ = new URLSearchParams(location.search).get('q') || '';
+  const initialCategory = (() => {
+    if (!initialQ) return 'all';
+    const lower = initialQ.toLowerCase();
+    if (lower.includes('pin') || lower.includes('sạc')) return 'battery';
+    if (lower.includes('màn hình') || lower.includes('bản lề')) return 'screen';
+    if (lower.includes('ram') || lower.includes('ssd')) return 'memory';
+    if (lower.includes('phím')) return 'keyboard';
+    if (lower.includes('vệ sinh') || lower.includes('keo')) return 'cooling';
+    return 'all';
+  })();
+
   const [parts, setParts] = useState([]);
-  const [search, setSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [search, setSearch] = useState(initialQ);
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [selectedPriceRange, setSelectedPriceRange] = useState('all');
   const [sortBy, setSortBy] = useState('default');
   const [viewMode, setViewMode] = useState('table'); // 'table' | 'cards'
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
-  // Tự động nhận diện từ khóa lọc từ URL (VD: /bang-gia?q=Pin, Sạc)
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const q = params.get('q');
-    if (q) {
-      setSearch(q);
-      const lower = q.toLowerCase();
-      if (lower.includes('pin') || lower.includes('sạc')) setSelectedCategory('battery');
-      else if (lower.includes('màn hình') || lower.includes('bản lề')) setSelectedCategory('screen');
-      else if (lower.includes('ram') || lower.includes('ssd')) setSelectedCategory('memory');
-      else if (lower.includes('phím')) setSelectedCategory('keyboard');
-      else if (lower.includes('vệ sinh') || lower.includes('keo')) setSelectedCategory('cooling');
-    }
-  }, [location.search]);
 
   const loadPricing = () => {
     setLoading(true);
@@ -72,7 +69,27 @@ function Pricing() {
   };
 
   useEffect(() => {
-    loadPricing();
+    let ignore = false;
+    api.get('/public/pricing')
+      .then(response => {
+        if (!ignore) {
+          setParts(response.data.data || []);
+        }
+      })
+      .catch(requestError => {
+        if (!ignore) {
+          setError(requestError.response?.data?.message || 'Không tải được bảng giá. Vui lòng bấm Thử lại.');
+        }
+      })
+      .finally(() => {
+        if (!ignore) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   // Filter & Sort Logic

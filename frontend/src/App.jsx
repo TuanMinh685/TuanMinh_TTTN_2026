@@ -142,6 +142,7 @@ function AppContent() {
             <Route path="/tra-cuu" element={<PhoneTracking />} />
             <Route path="/intake" element={<IntakeForm />} />
             <Route path="/track/:ticketCode" element={<Tracking />} />
+            <Route path="/tra-cuu/:ticketCode" element={<Tracking />} />
             <Route path="/online-intake" element={<OnlineIntakeForm />} />
             <Route path="/cap-cuu-online" element={<OnlineIntakeForm />} />
 

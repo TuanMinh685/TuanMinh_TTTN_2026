@@ -1,13 +1,12 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "QR Repair Ticket System Backend API",
+  "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "test": "node test_all_features.js",
-    "postinstall": "prisma skills sync || exit 0"
+    "test": "node test_all_features.js"
   },
   "keywords": [],
   "author": "",

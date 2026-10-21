@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import api from '../../services/api';
 import SoftwarePackageSelector from '../../components/SoftwarePackageSelector';
@@ -6,43 +6,26 @@ import SoftwarePackageSelector from '../../components/SoftwarePackageSelector';
 function BookingForm() {
   const location = useLocation();
 
+  const searchParams = new URLSearchParams(location.search);
+  const targetService = searchParams.get('service') || location.state?.serviceName || '';
+  const pkgFromQuery = searchParams.get('pkg') || '';
+
   const [formData, setFormData] = useState({
     fullName: '',
     phone: '',
     zaloId: '',
     ngayHen: '',
     gioHen: '',
-    moTaLoi: '',
+    moTaLoi: targetService ? `Cần dịch vụ / thay thế: ${targetService}` : '',
     loaiDichVu: 'TAI_CUA_HANG'
   });
-  const [selectedServiceBanner, setSelectedServiceBanner] = useState('');
+  const [selectedServiceBanner, setSelectedServiceBanner] = useState(targetService);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [softwarePackage, setSoftwarePackage] = useState('');
+  const [softwarePackage, setSoftwarePackage] = useState(pkgFromQuery);
   const [isStudent, setIsStudent] = useState(false);
   const [schoolName, setSchoolName] = useState('');
   const [studentId, setStudentId] = useState('');
-
-  // Tự động nhận diện Dịch vụ & Gói phần mềm được bấm từ Header Menu hoặc Bảng giá
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const serviceFromQuery = searchParams.get('service');
-    const pkgFromQuery = searchParams.get('pkg');
-    const serviceFromState = location.state?.serviceName;
-    const targetService = serviceFromQuery || serviceFromState || '';
-
-    if (targetService) {
-      setSelectedServiceBanner(targetService);
-      setFormData(prev => ({
-        ...prev,
-        moTaLoi: `Cần dịch vụ / thay thế: ${targetService}`
-      }));
-    }
-
-    if (pkgFromQuery) {
-      setSoftwarePackage(pkgFromQuery);
-    }
-  }, [location.search, location.state]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
