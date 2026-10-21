@@ -10,6 +10,9 @@ const PhoneTracking = lazy(() => import('./pages/public/PhoneTracking'));
 const OnlineIntakeForm = lazy(() => import('./pages/public/OnlineIntakeForm'));
 const Login = lazy(() => import('./pages/admin/Login'));
 const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
+const DirectorDashboard = lazy(() => import('./pages/admin/DirectorDashboard'));
+const ManagerDashboard = lazy(() => import('./pages/admin/ManagerDashboard'));
+const EmployeeManagement = lazy(() => import('./pages/admin/EmployeeManagement'));
 const ProtectedRoute = lazy(() => import('./components/ProtectedRoute'));
 
 const CURRENT_YEAR = new Date().getFullYear();
@@ -150,6 +153,9 @@ function AppContent() {
             <Route path="/login" element={<Login />} />
             <Route element={<ProtectedRoute />}>
               <Route path="/admin" element={<Dashboard />} />
+              <Route path="/admin/giam-doc" element={<DirectorDashboard />} />
+              <Route path="/admin/quan-ly" element={<ManagerDashboard />} />
+              <Route path="/admin/nhan-su" element={<EmployeeManagement />} />
             </Route>
 
             {/* 404 Page Not Found */}
