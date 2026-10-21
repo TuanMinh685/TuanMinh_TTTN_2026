@@ -10,49 +10,49 @@ const ROLE_META = {
     level: 100,
     title: 'Giám Đốc Điều Hành',
     badge: '👑 Giám Đốc (Cấp 1 - Toàn quyền)',
-    badgeClass: 'bg-amber-100 text-amber-900 border-amber-300',
+    badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     permissionsText: 'Toàn quyền tối cao: Tất cả các trang, duyệt mọi trạng thái, tạo/khóa/phân quyền mọi cấp kể cả Quản lý.'
   },
   ADMIN: {
     level: 100,
     title: 'Tổng Quản Trị Hệ Thống',
     badge: '👑 Tổng Quản Trị (Cấp 1 - Toàn quyền)',
-    badgeClass: 'bg-amber-100 text-amber-900 border-amber-300',
+    badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     permissionsText: 'Toàn quyền tối cao: Tất cả các trang, duyệt mọi trạng thái, tạo/khóa/phân quyền mọi cấp kể cả Quản lý.'
   },
   QUAN_LY: {
     level: 80,
     title: 'Quản Lý Cửa Hàng',
     badge: '🛡️ Quản Lý Cửa Hàng (Cấp 2)',
-    badgeClass: 'bg-purple-100 text-purple-900 border-purple-300',
+    badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     permissionsText: 'Điều hành toàn bộ các trang nghiệp vụ & báo cáo; được tạo/sửa/khóa tài khoản nhân sự cấp dưới (Kế toán, Thủ kho, KTV, Lễ tân).'
   },
   KE_TOAN: {
     level: 60,
     title: 'Kế Toán & Thu Ngân',
     badge: '💰 Kế Toán / Thu Ngân (Cấp 3)',
-    badgeClass: 'bg-emerald-100 text-emerald-900 border-emerald-300',
+    badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     permissionsText: 'Truy cập Phiếu sửa chữa & Báo cáo tài chính; xác nhận thu tiền bàn giao máy, in hóa đơn 80mm VietQR & xuất báo cáo Excel.'
   },
   THU_KHO: {
     level: 50,
     title: 'Thủ Kho Linh Kiện',
     badge: '📦 Thủ Kho Linh Kiện (Cấp 4)',
-    badgeClass: 'bg-cyan-100 text-cyan-900 border-cyan-300',
+    badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     permissionsText: 'Quản lý toàn diện Kho linh kiện (thêm mới, sửa giá bán, nhập tồn kho, xuất báo cáo tồn kho) & đối chiếu phiếu xuất.'
   },
   KY_THUAT_VIEN: {
     level: 40,
     title: 'Kỹ Thuật Viên Sửa Chữa',
     badge: '🔧 Kỹ Thuật Viên (Cấp 5)',
-    badgeClass: 'bg-blue-100 text-blue-900 border-blue-300',
+    badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     permissionsText: 'Chẩn đoán kỹ thuật, gắn/gỡ linh kiện kèm mã Serial (S/N), chọn gói phần mềm, gửi báo giá và xác nhận Sửa Xong.'
   },
   LE_TAN: {
     level: 30,
     title: 'Lễ Tân & CSKH',
     badge: '💁 Lễ Tân & CSKH (Cấp 6)',
-    badgeClass: 'bg-orange-100 text-orange-900 border-orange-300',
+    badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     permissionsText: 'Tiếp nhận máy trực tiếp tại quầy (POS), chụp biên bản ảnh ngoại quan, xử lý lịch hẹn, bàn giao máy & thu tiền.'
   }
 };
@@ -900,7 +900,7 @@ function Dashboard() {
           <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mr-1">
             Chuyển nhanh:
           </span>
-          <span className="rounded-xl bg-slate-800 px-3.5 py-1.5 text-xs font-bold text-white shadow-2xs">
+          <span className="rounded-xl bg-brand-blue px-3.5 py-1.5 text-xs font-bold text-white shadow-2xs">
             📋 Bàn Vận Hành Kỹ Thuật
           </span>
           {isExecutive && (
@@ -988,7 +988,7 @@ function Dashboard() {
       </div>
 
       {activeTab === 'TICKETS' && (
-        <div className="rounded-xl border-t-4 border-brand-green bg-white p-5 shadow sm:p-6">
+        <div className="rounded-xl border-t-4 border-brand-blue bg-white p-5 shadow sm:p-6">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <h3 className="text-xl font-bold">Danh sách phiếu sửa chữa</h3>
             <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
@@ -1004,7 +1004,7 @@ function Dashboard() {
                 <button
                   type="button"
                   onClick={() => setShowPosModal(true)}
-                  className="rounded-lg bg-brand-orange px-3.5 py-2 text-xs font-bold text-white hover:bg-orange-600 shadow-sm whitespace-nowrap"
+                  className="rounded-lg bg-brand-blue px-3.5 py-2 text-xs font-bold text-white hover:bg-blue-900 shadow-sm whitespace-nowrap"
                 >
                   + Tiếp Nhận Tại Quầy (POS)
                 </button>
@@ -1033,7 +1033,7 @@ function Dashboard() {
                     ];
                   })
                 )}
-                className="rounded-lg bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white hover:bg-emerald-700 shadow-sm whitespace-nowrap"
+                className="rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-sm whitespace-nowrap"
               >
                 📥 Xuất Excel (CSV)
               </button>
@@ -1116,7 +1116,7 @@ function Dashboard() {
                     <div className="text-xs text-slate-400">{ticket.so_dien_thoai}</div>
                     {ticket.la_sinh_vien && (
                       <div className="mt-1">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
                           🎓 {ticket.truong_hoc || 'Sinh viên'} (-15%)
                         </span>
                       </div>
@@ -1125,20 +1125,15 @@ function Dashboard() {
                   <td className="py-3 px-4">{ticket.mo_ta_loi}</td>
                   <td className="py-3 px-4">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
-                      ticket.trang_thai === 'CHỜ_KHÁM' ? 'bg-slate-100 text-slate-700 border-slate-200' :
-                      ticket.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' ? 'bg-amber-50 text-amber-800 border-amber-200' :
-                      ticket.trang_thai === 'CHỜ_KHÁCH_CHỐT_GIÁ' ? 'bg-rose-50 text-rose-800 border-rose-200' :
-                      ticket.trang_thai === 'ĐANG_SỬA' ? 'bg-blue-50 text-blue-800 border-blue-200' :
-                      ticket.trang_thai === 'ĐÃ_SỬA_XONG' ? 'bg-teal-50 text-teal-800 border-teal-200' : 
-                      ticket.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' :
-                      ticket.trang_thai === 'YÊU_CẦU_BẢO_HÀNH' ? 'bg-red-50 text-red-700 border-red-200' :
-                      'bg-slate-100 text-slate-700 border-slate-200'
+                      ticket.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' || ticket.trang_thai === 'ĐÃ_SỬA_XONG'
+                        ? 'bg-slate-100 text-slate-700 border-slate-200'
+                        : 'bg-blue-50 text-brand-blue border-blue-200'
                     }`}>
-                      {ticket.trang_thai.replace(/_/g, ' ')}
+                      {getStatusBadge(ticket.trang_thai)}
                     </span>
                     {ticket.han_bao_hanh && (
                       <div className="mt-1">
-                        <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
                           🛡️ Đã cấp BH điện tử
                         </span>
                       </div>
@@ -1148,7 +1143,7 @@ function Dashboard() {
                     {ticket.la_sinh_vien && rawTotal > 0 ? (
                       <div>
                         <div className="text-xs text-slate-400 line-through">{rawTotal.toLocaleString('vi-VN')} đ</div>
-                        <div className="font-extrabold text-brand-orange">{finalTotal.toLocaleString('vi-VN')} đ</div>
+                        <div className="font-extrabold text-brand-blue">{finalTotal.toLocaleString('vi-VN')} đ</div>
                       </div>
                     ) : rawTotal > 0 ? (
                       <span className="font-extrabold text-slate-800">{rawTotal.toLocaleString('vi-VN')} đ</span>
@@ -1160,32 +1155,32 @@ function Dashboard() {
                     <div className="flex flex-col gap-1.5 w-36 mx-auto">
                       {/* Nút hành động chính dịu nhẹ */}
                       {canReceptionAction && ticket.trang_thai === 'CHỜ_KHÁM' && (
-                        <button onClick={() => updateStatus(ticket.id, 'ĐANG_CHUẨN_ĐOÁN')} className="w-full bg-blue-50 text-blue-800 border border-blue-200 hover:bg-blue-100 px-2 py-1 rounded-lg font-bold text-xs transition shadow-2xs">
+                        <button onClick={() => updateStatus(ticket.id, 'ĐANG_CHUẨN_ĐOÁN')} className="w-full bg-brand-blue text-white hover:bg-blue-900 px-2 py-1.5 rounded-lg font-bold text-xs transition shadow-2xs">
                           Chuyển Kỹ Thuật
                         </button>
                       )}
                       {(canReceptionAction || canTechAction) && ticket.trang_thai === 'YÊU_CẦU_BẢO_HÀNH' && (
-                        <button onClick={() => updateStatus(ticket.id, 'ĐANG_SỬA')} className="w-full bg-rose-50 text-rose-800 border border-rose-200 hover:bg-rose-100 px-2 py-1 rounded-lg font-bold text-xs transition shadow-2xs">
+                        <button onClick={() => updateStatus(ticket.id, 'ĐANG_SỬA')} className="w-full bg-brand-blue text-white hover:bg-blue-900 px-2 py-1.5 rounded-lg font-bold text-xs transition shadow-2xs">
                           Tiếp Nhận Bảo Hành
                         </button>
                       )}
                       {canTechAction && ticket.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' && (
-                        <button onClick={() => updateStatus(ticket.id, 'ĐANG_SỬA')} className="w-full bg-blue-50 text-blue-800 border border-blue-200 hover:bg-blue-100 px-2 py-1 rounded-lg font-bold text-xs transition shadow-2xs">
+                        <button onClick={() => updateStatus(ticket.id, 'ĐANG_SỬA')} className="w-full bg-brand-blue text-white hover:bg-blue-900 px-2 py-1.5 rounded-lg font-bold text-xs transition shadow-2xs">
                           Tiến hành Sửa
                         </button>
                       )}
                       {(canReceptionAction || canTechAction) && ticket.trang_thai === 'CHỜ_KHÁCH_CHỐT_GIÁ' && (
-                        <button onClick={() => updateStatus(ticket.id, 'ĐANG_SỬA')} className="w-full bg-blue-50 text-blue-800 border border-blue-200 hover:bg-blue-100 px-2 py-1 rounded-lg font-bold text-xs transition shadow-2xs">
+                        <button onClick={() => updateStatus(ticket.id, 'ĐANG_SỬA')} className="w-full bg-brand-blue text-white hover:bg-blue-900 px-2 py-1.5 rounded-lg font-bold text-xs transition shadow-2xs">
                           Khách Chốt (Sửa)
                         </button>
                       )}
                       {canTechAction && ticket.trang_thai === 'ĐANG_SỬA' && (
-                        <button onClick={() => updateStatus(ticket.id, 'ĐÃ_SỬA_XONG')} className="w-full bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100 px-2 py-1 rounded-lg font-bold text-xs transition shadow-2xs">
+                        <button onClick={() => updateStatus(ticket.id, 'ĐÃ_SỬA_XONG')} className="w-full bg-brand-blue text-white hover:bg-blue-900 px-2 py-1.5 rounded-lg font-bold text-xs transition shadow-2xs">
                           ✓ Sửa Xong
                         </button>
                       )}
                       {canCashierAction && ticket.trang_thai === 'ĐÃ_SỬA_XONG' && (
-                        <button onClick={() => updateStatus(ticket.id, 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN')} className="w-full bg-purple-50 text-purple-800 border border-purple-200 hover:bg-purple-100 px-2 py-1 rounded-lg font-bold text-xs transition shadow-2xs">
+                        <button onClick={() => updateStatus(ticket.id, 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN')} className="w-full bg-brand-blue text-white hover:bg-blue-900 px-2 py-1.5 rounded-lg font-bold text-xs transition shadow-2xs">
                           Giao Khách & Thu Tiền
                         </button>
                       )}
@@ -1196,7 +1191,7 @@ function Dashboard() {
                           <button onClick={() => openPartModal(ticket.id)} className="bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 px-1 py-1 rounded-lg font-semibold text-[11px] transition" title="Thêm linh kiện">
                             + Linh kiện
                           </button>
-                          <button onClick={() => updateStatus(ticket.id, 'CHỜ_KHÁCH_CHỐT_GIÁ')} className="bg-white text-amber-800 border border-amber-200 hover:bg-amber-50 px-1 py-1 rounded-lg font-semibold text-[11px] transition" title="Gửi báo giá">
+                          <button onClick={() => updateStatus(ticket.id, 'CHỜ_KHÁCH_CHỐT_GIÁ')} className="bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 px-1 py-1 rounded-lg font-semibold text-[11px] transition" title="Gửi báo giá">
                             Báo giá
                           </button>
                         </div>
@@ -1244,7 +1239,7 @@ function Dashboard() {
       )}
 
       {activeTab === 'STATS' && canViewStats && (
-        <div className="rounded-xl border-t-4 border-purple-500 bg-white p-5 shadow sm:p-6">
+        <div className="rounded-xl border-t-4 border-brand-blue bg-white p-5 shadow sm:p-6">
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
             <div>
               <h3 className="text-xl font-bold text-brand-blue">Báo cáo doanh thu &amp; hiệu suất</h3>
@@ -1276,7 +1271,7 @@ function Dashboard() {
                     stats.completedTickets || 0
                   ])
                 )}
-                className="rounded-lg bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white hover:bg-emerald-700 shadow-sm"
+                className="rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-sm"
               >
                 📥 Xuất Báo Cáo Kế Toán (CSV)
               </button>
@@ -1502,7 +1497,7 @@ function Dashboard() {
                       return [p.id, p.ten_linh_kien, p.gia_ban, qty, status];
                     })
                   )}
-                  className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700"
+                  className="rounded-lg bg-brand-blue px-4 py-2 text-sm font-bold text-white hover:bg-blue-900"
                 >
                   📥 Xuất Kho (CSV)
                 </button>
@@ -2421,7 +2416,7 @@ function Dashboard() {
                 <button
                   type="submit"
                   disabled={savingPos}
-                  className="rounded-xl bg-brand-orange px-5 py-2.5 font-bold text-white hover:bg-orange-600 shadow-md disabled:opacity-60"
+                  className="rounded-xl bg-brand-blue px-5 py-2.5 font-bold text-white hover:bg-blue-900 shadow-md disabled:opacity-60"
                 >
                   {savingPos ? 'Đang tạo phiếu...' : 'Tạo Phiếu & In Hóa Đơn 80mm →'}
                 </button>

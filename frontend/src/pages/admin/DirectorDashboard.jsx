@@ -67,7 +67,7 @@ export default function DirectorDashboard() {
       {/* Main Director Dashboard */}
       <div className="space-y-6">
         {/* Executive Banner */}
-        <section className="rounded-2xl border border-purple-200 bg-gradient-to-r from-purple-950 via-slate-900 to-indigo-950 p-6 text-white shadow-lg">
+        <section className="rounded-2xl border border-slate-200 bg-brand-blue p-6 text-white shadow-lg">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <div className="flex items-center gap-2.5">
@@ -76,14 +76,14 @@ export default function DirectorDashboard() {
                   Cổng Điều Hành Chiến Lược — Ban Giám Đốc
                 </h2>
               </div>
-              <p className="mt-2 text-sm text-purple-200 max-w-2xl leading-relaxed">
+              <p className="mt-2 text-sm text-blue-100 max-w-2xl leading-relaxed">
                 Giám sát toàn diện doanh thu thực thu, dòng tiền linh kiện, hiệu suất hoàn tất phiếu sửa chữa và điều phối nguồn lực 6 cấp bậc của HungHau IT Support.
               </p>
               <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
-                <span className="rounded-full bg-purple-900/80 border border-purple-700 px-3 py-1 font-bold">
+                <span className="rounded-full bg-white/10 border border-white/20 px-3 py-1 font-bold">
                   Khu vực: 615 Âu Cơ, P. Phú Trung, Q. Tân Phú
                 </span>
-                <span className="rounded-full bg-indigo-900/80 border border-indigo-700 px-3 py-1 font-bold">
+                <span className="rounded-full bg-white/10 border border-white/20 px-3 py-1 font-bold">
                   Quy mô nhân sự: {employeeCount} nhân viên
                 </span>
               </div>
@@ -94,7 +94,7 @@ export default function DirectorDashboard() {
               <button
                 onClick={() => setPeriod('week')}
                 className={`rounded-xl px-4 py-2 text-xs font-extrabold transition ${
-                  period === 'week' ? 'bg-white text-purple-950 shadow-md' : 'text-purple-200 hover:text-white'
+                  period === 'week' ? 'bg-white text-brand-blue shadow-md' : 'text-blue-100 hover:text-white'
                 }`}
               >
                 📅 7 Ngày Gần Nhất
@@ -102,7 +102,7 @@ export default function DirectorDashboard() {
               <button
                 onClick={() => setPeriod('month')}
                 className={`rounded-xl px-4 py-2 text-xs font-extrabold transition ${
-                  period === 'month' ? 'bg-white text-purple-950 shadow-md' : 'text-purple-200 hover:text-white'
+                  period === 'month' ? 'bg-white text-brand-blue shadow-md' : 'text-blue-100 hover:text-white'
                 }`}
               >
                 📆 Tháng Này
@@ -120,12 +120,12 @@ export default function DirectorDashboard() {
         {/* C-Level Financial Cards */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {/* Card 1: Tổng Doanh Thu */}
-          <div className="rounded-2xl border border-purple-200 bg-white p-5 shadow-xs">
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-purple-700">Tổng Doanh Thu Thực Thu</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-brand-blue">Tổng Doanh Thu Thực Thu</span>
               <span className="text-xl">💰</span>
             </div>
-            <p className="mt-3 text-2xl lg:text-3xl font-black text-purple-950">
+            <p className="mt-3 text-2xl lg:text-3xl font-black text-brand-blue">
               {totalRevenue.toLocaleString('vi-VN')} <span className="text-sm font-bold text-slate-500">đ</span>
             </p>
             <p className="mt-1 text-xs text-slate-500">
@@ -134,12 +134,12 @@ export default function DirectorDashboard() {
           </div>
 
           {/* Card 2: Doanh Thu Linh Kiện */}
-          <div className="rounded-2xl border border-blue-200 bg-white p-5 shadow-xs">
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-blue-700">Doanh Thu Linh Kiện</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-brand-blue">Doanh Thu Linh Kiện</span>
               <span className="text-xl">📦</span>
             </div>
-            <p className="mt-3 text-2xl lg:text-3xl font-black text-blue-900">
+            <p className="mt-3 text-2xl lg:text-3xl font-black text-slate-800">
               {partsRevenue.toLocaleString('vi-VN')} <span className="text-sm font-bold text-slate-500">đ</span>
             </p>
             <p className="mt-1 text-xs text-slate-500">
@@ -148,12 +148,12 @@ export default function DirectorDashboard() {
           </div>
 
           {/* Card 3: Doanh Thu Công Dịch Vụ */}
-          <div className="rounded-2xl border border-emerald-200 bg-white p-5 shadow-xs">
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">Doanh Thu Công Kỹ Thuật</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-brand-blue">Doanh Thu Công Kỹ Thuật</span>
               <span className="text-xl">🔧</span>
             </div>
-            <p className="mt-3 text-2xl lg:text-3xl font-black text-emerald-900">
+            <p className="mt-3 text-2xl lg:text-3xl font-black text-slate-800">
               {serviceRevenue.toLocaleString('vi-VN')} <span className="text-sm font-bold text-slate-500">đ</span>
             </p>
             <p className="mt-1 text-xs text-slate-500">
@@ -187,7 +187,7 @@ export default function DirectorDashboard() {
                 </h3>
                 <p className="text-xs text-slate-500">Dữ liệu thực tế ghi nhận từ hệ thống máy chủ</p>
               </div>
-              <span className="text-xs font-extrabold px-3 py-1 rounded-full bg-purple-100 text-purple-800 border border-purple-200">
+              <span className="text-xs font-extrabold px-3 py-1 rounded-full bg-purple-100 text-purple-800 border border-slate-200">
                 Doanh thu VND
               </span>
             </div>
@@ -291,7 +291,7 @@ export default function DirectorDashboard() {
               <tbody className="divide-y divide-slate-100">
                 {recentTickets.map(t => (
                   <tr key={t.id} className="hover:bg-slate-50/80">
-                    <td className="py-2.5 px-3 font-mono font-bold text-purple-700">{t.ma_tra_cuu}</td>
+                    <td className="py-2.5 px-3 font-mono font-bold text-brand-blue">{t.ma_tra_cuu}</td>
                     <td className="py-2.5 px-3 font-semibold text-slate-800">{t.ho_ten}</td>
                     <td className="py-2.5 px-3 text-slate-600">{t.ten_may || 'Laptop / PC'}</td>
                     <td className="py-2.5 px-3">
@@ -318,10 +318,10 @@ export default function DirectorDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Link
             to="/admin/nhan-su"
-            className="group rounded-2xl border border-emerald-200 bg-white p-5 shadow-xs hover:border-emerald-400 hover:shadow-md transition flex items-center justify-between"
+            className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-xs hover:border-brand-blue hover:shadow-md transition flex items-center justify-between"
           >
             <div>
-              <p className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Bộ Phận Nhân Sự</p>
+              <p className="text-xs font-bold text-brand-blue uppercase tracking-wider">Bộ Phận Nhân Sự</p>
               <h4 className="text-base font-extrabold text-slate-800 mt-1">Phân Quyền & Cấp Bậc</h4>
               <p className="text-xs text-slate-500 mt-1">Quản lý {employeeCount} tài khoản 6 cấp bậc</p>
             </div>
@@ -330,10 +330,10 @@ export default function DirectorDashboard() {
 
           <Link
             to="/admin/quan-ly"
-            className="group rounded-2xl border border-blue-200 bg-white p-5 shadow-xs hover:border-blue-400 hover:shadow-md transition flex items-center justify-between"
+            className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-xs hover:border-blue-400 hover:shadow-md transition flex items-center justify-between"
           >
             <div>
-              <p className="text-xs font-bold text-blue-700 uppercase tracking-wider">Cửa Hàng Chi Nhánh</p>
+              <p className="text-xs font-bold text-brand-blue uppercase tracking-wider">Cửa Hàng Chi Nhánh</p>
               <h4 className="text-base font-extrabold text-slate-800 mt-1">Điều Hành Quản Lý</h4>
               <p className="text-xs text-slate-500 mt-1">Giám sát tiếp nhận quầy & kỹ thuật viên</p>
             </div>
@@ -342,10 +342,10 @@ export default function DirectorDashboard() {
 
           <Link
             to="/admin"
-            className="group rounded-2xl border border-purple-200 bg-white p-5 shadow-xs hover:border-purple-400 hover:shadow-md transition flex items-center justify-between"
+            className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-xs hover:border-brand-blue hover:shadow-md transition flex items-center justify-between"
           >
             <div>
-              <p className="text-xs font-bold text-purple-700 uppercase tracking-wider">Bàn Vận Hành Kỹ Thuật</p>
+              <p className="text-xs font-bold text-brand-blue uppercase tracking-wider">Bàn Vận Hành Kỹ Thuật</p>
               <h4 className="text-base font-extrabold text-slate-800 mt-1">Kho & Phiếu Sửa Chữa</h4>
               <p className="text-xs text-slate-500 mt-1">Tác nghiệp trực tiếp mọi luồng hệ thống</p>
             </div>

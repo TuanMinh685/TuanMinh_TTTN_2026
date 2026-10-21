@@ -61,7 +61,7 @@ export default function ManagerDashboard() {
 
       <div className="space-y-6">
         {/* Store Manager Banner */}
-        <section className="rounded-2xl border border-blue-200 bg-gradient-to-r from-blue-900 via-slate-900 to-cyan-900 p-6 text-white shadow-lg">
+        <section className="rounded-2xl border border-slate-200 bg-brand-blue p-6 text-white shadow-lg">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <div className="flex items-center gap-2.5">
@@ -70,14 +70,14 @@ export default function ManagerDashboard() {
                   Cổng Điều Hành Vận Hành — Quản Lý Cửa Hàng
                 </h2>
               </div>
-              <p className="mt-2 text-sm text-blue-200 max-w-2xl leading-relaxed">
+              <p className="mt-2 text-sm text-blue-100 max-w-2xl leading-relaxed">
                 Trực tiếp điều phối ca làm việc, kiểm soát tiến độ sửa chữa quầy & kỹ thuật, xử lý lịch hẹn khách và quản lý phân quyền nhân sự cấp dưới (Level &lt; 80).
               </p>
               <div className="mt-3 flex flex-wrap gap-2 text-xs">
-                <span className="rounded-full bg-blue-800/80 border border-blue-600 px-3 py-1 font-bold">
+                <span className="rounded-full bg-white/10 border border-white/20 px-3 py-1 font-bold">
                   Trụ sở: 615 Âu Cơ, P. Phú Trung, Q. Tân Phú
                 </span>
-                <span className="rounded-full bg-cyan-800/80 border border-cyan-600 px-3 py-1 font-bold">
+                <span className="rounded-full bg-white/10 border border-white/20 px-3 py-1 font-bold">
                   Tổng nhân lực cửa hàng: {subordinateCount} nhân sự
                 </span>
               </div>
@@ -92,7 +92,7 @@ export default function ManagerDashboard() {
               </Link>
               <Link
                 to="/admin"
-                className="rounded-xl bg-cyan-500 px-4 py-2.5 text-xs font-extrabold text-white shadow-sm transition hover:bg-cyan-600"
+                className="rounded-xl bg-white/10 border border-white/20 px-4 py-2.5 text-xs font-extrabold text-white shadow-sm transition hover:bg-white/20"
               >
                 📋 Mở Bàn Vận Hành
               </Link>
@@ -108,30 +108,30 @@ export default function ManagerDashboard() {
 
         {/* Operational Priority Cards */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-2xl border border-amber-200 bg-white p-5 shadow-xs">
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-amber-700">Đang Chuẩn Đoán & Tiếp Nhận</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Đang Chuẩn Đoán & Tiếp Nhận</span>
               <span className="text-xl">🔍</span>
             </div>
-            <p className="mt-3 text-3xl font-black text-amber-900">{pendingIntake}</p>
+            <p className="mt-3 text-3xl font-black text-slate-800">{pendingIntake}</p>
             <p className="mt-1 text-xs text-slate-500">Cần KTV hoàn tất chẩn đoán</p>
           </div>
 
-          <div className="rounded-2xl border border-pink-200 bg-white p-5 shadow-xs">
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-pink-700">Chờ Khách Chốt Báo Giá</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Chờ Khách Chốt Báo Giá</span>
               <span className="text-xl">⏳</span>
             </div>
-            <p className="mt-3 text-3xl font-black text-pink-900">{waitingApproval}</p>
+            <p className="mt-3 text-3xl font-black text-slate-800">{waitingApproval}</p>
             <p className="mt-1 text-xs text-slate-500">Đã gửi báo giá qua cổng QR</p>
           </div>
 
-          <div className="rounded-2xl border border-indigo-200 bg-white p-5 shadow-xs">
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-indigo-700">Đang Trong Quá Trình Sửa</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Đang Trong Quá Trình Sửa</span>
               <span className="text-xl">🔧</span>
             </div>
-            <p className="mt-3 text-3xl font-black text-indigo-900">{inRepair}</p>
+            <p className="mt-3 text-3xl font-black text-slate-800">{inRepair}</p>
             <p className="mt-1 text-xs text-slate-500">Khách đã duyệt tiến hành</p>
           </div>
 
@@ -222,7 +222,7 @@ export default function ManagerDashboard() {
 
             <div className="flex-1 space-y-3 overflow-y-auto max-h-80">
               {lowStockParts.slice(0, 6).map(part => (
-                <div key={part.id} className="rounded-xl border border-amber-200 bg-amber-50/50 p-3 flex items-center justify-between">
+                <div key={part.id} className="rounded-xl border border-slate-200 bg-amber-50/50 p-3 flex items-center justify-between">
                   <div>
                     <p className="font-bold text-slate-800 text-xs">{part.ten_linh_kien}</p>
                     <p className="text-[11px] text-slate-500 mt-0.5">Mã: {part.ma_linh_kien} • Đơn giá: {Number(part.don_gia || 0).toLocaleString('vi-VN')} đ</p>
@@ -255,10 +255,10 @@ export default function ManagerDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Link
             to="/admin/nhan-su"
-            className="group rounded-2xl border border-emerald-200 bg-white p-5 shadow-xs hover:border-emerald-400 hover:shadow-md transition flex items-center justify-between"
+            className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-xs hover:border-brand-blue hover:shadow-md transition flex items-center justify-between"
           >
             <div>
-              <p className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Đội Ngũ Cửa Hàng</p>
+              <p className="text-xs font-bold text-brand-blue uppercase tracking-wider">Đội Ngũ Cửa Hàng</p>
               <h4 className="text-base font-extrabold text-slate-800 mt-1">Phân Quyền Nhân Sự</h4>
               <p className="text-xs text-slate-500 mt-1">Cấp tài khoản & điều phối ca trực</p>
             </div>
@@ -268,10 +268,10 @@ export default function ManagerDashboard() {
           {isExecutive && (
             <Link
               to="/admin/giam-doc"
-              className="group rounded-2xl border border-purple-200 bg-white p-5 shadow-xs hover:border-purple-400 hover:shadow-md transition flex items-center justify-between"
+              className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-xs hover:border-brand-blue hover:shadow-md transition flex items-center justify-between"
             >
               <div>
-                <p className="text-xs font-bold text-purple-700 uppercase tracking-wider">Chiến Lược C-Level</p>
+                <p className="text-xs font-bold text-brand-blue uppercase tracking-wider">Chiến Lược C-Level</p>
                 <h4 className="text-base font-extrabold text-slate-800 mt-1">Trang Giám Đốc</h4>
                 <p className="text-xs text-slate-500 mt-1">Báo cáo tài chính & chỉ số cấp cao</p>
               </div>

@@ -7,51 +7,44 @@ const ROLE_CONFIG = {
     level: 100,
     title: 'Giám Đốc Điều Hành (C-Level)',
     badge: '👑 Giám Đốc',
-    badgeClass: 'bg-purple-100 text-purple-800 border-purple-300',
-    color: 'purple'
-  },
+    badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
+      },
   ADMIN: {
     level: 100,
     title: 'Quản Trị Hệ Thống (System Admin)',
     badge: '🛡️ Admin',
-    badgeClass: 'bg-red-100 text-red-800 border-red-300',
-    color: 'red'
-  },
+    badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
+      },
   QUAN_LY: {
     level: 80,
     title: 'Quản Lý Cửa Hàng (Store Manager)',
     badge: '🏬 Quản Lý',
-    badgeClass: 'bg-blue-100 text-blue-800 border-blue-300',
-    color: 'blue'
-  },
+    badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
+      },
   KE_TOAN: {
     level: 60,
     title: 'Kế Toán Doanh Thu',
     badge: '📊 Kế Toán',
-    badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-300',
-    color: 'emerald'
-  },
+    badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
+      },
   THU_KHO: {
     level: 50,
     title: 'Thủ Kho Linh Kiện',
     badge: '📦 Thủ Kho',
-    badgeClass: 'bg-amber-100 text-amber-800 border-amber-300',
-    color: 'amber'
-  },
+    badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
+      },
   KY_THUAT_VIEN: {
     level: 40,
     title: 'Kỹ Thuật Viên Sửa Chữa',
     badge: '🔧 Kỹ Thuật Viên',
-    badgeClass: 'bg-indigo-100 text-indigo-800 border-indigo-300',
-    color: 'indigo'
-  },
+    badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
+      },
   LE_TAN: {
     level: 30,
     title: 'Lễ Tân Tiếp Nhận',
     badge: '📋 Lễ Tân',
-    badgeClass: 'bg-slate-100 text-slate-800 border-slate-300',
-    color: 'slate'
-  }
+    badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
+      }
 };
 
 const QUICK_SWITCH_OPTIONS = [
@@ -146,7 +139,7 @@ export default function AdminNav({ activeKey }) {
 
           <button
             onClick={handleLogout}
-            className="rounded-xl bg-red-500 px-4 py-2 text-xs font-bold text-white transition hover:bg-red-600"
+            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-100 hover:text-red-700 hover:border-red-200"
           >
             Đăng Xuất
           </button>
@@ -160,7 +153,7 @@ export default function AdminNav({ activeKey }) {
           className={`rounded-xl px-4 py-2 text-xs font-bold transition ${
             location.pathname === '/admin' && !activeKey
               ? 'bg-brand-blue text-white shadow-xs'
-              : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
           }`}
         >
           📋 Bàn Vận Hành Kỹ Thuật
@@ -171,8 +164,8 @@ export default function AdminNav({ activeKey }) {
             to="/admin/giam-doc"
             className={`flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition ${
               location.pathname === '/admin/giam-doc' || activeKey === 'GIAM_DOC'
-                ? 'bg-purple-700 text-white shadow-xs'
-                : 'bg-purple-50 text-purple-700 hover:bg-purple-100'
+                ? 'bg-brand-blue text-white shadow-xs'
+                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
             }`}
           >
             <span>👑</span> Trang Giám Đốc
@@ -184,8 +177,8 @@ export default function AdminNav({ activeKey }) {
             to="/admin/quan-ly"
             className={`flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition ${
               location.pathname === '/admin/quan-ly' || activeKey === 'QUAN_LY'
-                ? 'bg-blue-600 text-white shadow-xs'
-                : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
+                ? 'bg-brand-blue text-white shadow-xs'
+                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
             }`}
           >
             <span>🏬</span> Trang Quản Lý
@@ -197,8 +190,8 @@ export default function AdminNav({ activeKey }) {
             to="/admin/nhan-su"
             className={`flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition ${
               location.pathname === '/admin/nhan-su' || activeKey === 'NHAN_SU'
-                ? 'bg-emerald-600 text-white shadow-xs'
-                : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                ? 'bg-brand-blue text-white shadow-xs'
+                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
             }`}
           >
             <span>👥</span> Quản Lý Nhân Sự & Phân Quyền

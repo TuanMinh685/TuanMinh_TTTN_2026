@@ -7,7 +7,7 @@ const ROLE_PERMISSIONS_DETAIL = {
     title: 'Giám Đốc Điều Hành (Director)',
     level: 100,
     badge: '👑 Giám Đốc',
-    badgeClass: 'bg-purple-100 text-purple-800 border-purple-300',
+    badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     description: 'Quyền hạn tối cao toàn hệ thống: Xem toàn bộ báo cáo doanh thu, phê duyệt chỉ số chiến lược, quản trị và tạo mới mọi cấp bậc nhân sự.',
     canCreate: ['ADMIN', 'QUAN_LY', 'KE_TOAN', 'THU_KHO', 'KY_THUAT_VIEN', 'LE_TAN']
   },
@@ -15,7 +15,7 @@ const ROLE_PERMISSIONS_DETAIL = {
     title: 'Quản Trị Kỹ Thuật (System Admin)',
     level: 100,
     badge: '🛡️ Admin',
-    badgeClass: 'bg-red-100 text-red-800 border-red-300',
+    badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     description: 'Toàn quyền kỹ thuật và phân quyền tài khoản hệ thống.',
     canCreate: ['QUAN_LY', 'KE_TOAN', 'THU_KHO', 'KY_THUAT_VIEN', 'LE_TAN']
   },
@@ -23,7 +23,7 @@ const ROLE_PERMISSIONS_DETAIL = {
     title: 'Quản Lý Cửa Hàng (Store Manager)',
     level: 80,
     badge: '🏬 Quản Lý',
-    badgeClass: 'bg-blue-100 text-blue-800 border-blue-300',
+    badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     description: 'Điều hành toàn bộ hoạt động chi nhánh: Theo dõi sửa chữa, duyệt lịch hẹn, kiểm soát kho và quản lý nhân sự cấp dưới (< Level 80).',
     canCreate: ['KE_TOAN', 'THU_KHO', 'KY_THUAT_VIEN', 'LE_TAN']
   },
@@ -31,7 +31,7 @@ const ROLE_PERMISSIONS_DETAIL = {
     title: 'Kế Toán Doanh Thu',
     level: 60,
     badge: '📊 Kế Toán',
-    badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+    badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     description: 'Theo dõi báo cáo doanh thu, dòng tiền linh kiện, in hóa đơn nhiệt 80mm và thu ngân.',
     canCreate: []
   },
@@ -39,7 +39,7 @@ const ROLE_PERMISSIONS_DETAIL = {
     title: 'Thủ Kho Linh Kiện',
     level: 50,
     badge: '📦 Thủ Kho',
-    badgeClass: 'bg-amber-100 text-amber-800 border-amber-300',
+    badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     description: 'Quản lý danh mục linh kiện, cập nhật giá nhập/bán, cảnh báo số lượng tồn kho tối thiểu.',
     canCreate: []
   },
@@ -47,7 +47,7 @@ const ROLE_PERMISSIONS_DETAIL = {
     title: 'Kỹ Thuật Viên Sửa Chữa',
     level: 40,
     badge: '🔧 Kỹ Thuật Viên',
-    badgeClass: 'bg-indigo-100 text-indigo-800 border-indigo-300',
+    badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     description: 'Tiếp nhận chuẩn đoán, tải ảnh ngoại quan trước/sau, thêm linh kiện và gửi báo giá sửa chữa.',
     canCreate: []
   },
@@ -55,7 +55,7 @@ const ROLE_PERMISSIONS_DETAIL = {
     title: 'Lễ Tân Tiếp Nhận',
     level: 30,
     badge: '📋 Lễ Tân',
-    badgeClass: 'bg-slate-100 text-slate-800 border-slate-300',
+    badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     description: 'Tạo mã QR quầy tiếp nhận, hướng dẫn khách gửi máy, duyệt/hủy lịch hẹn online.',
     canCreate: []
   }
@@ -232,7 +232,7 @@ export default function EmployeeManagement() {
       {/* Main Content */}
       <div className="space-y-6">
         {/* Banner RBAC Introduction */}
-        <section className="rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-900 to-teal-800 p-6 text-white shadow-md">
+        <section className="rounded-2xl border border-slate-200 bg-brand-blue p-6 text-white shadow-md">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <div className="flex items-center gap-2">
@@ -241,14 +241,14 @@ export default function EmployeeManagement() {
                   Quản Trị Nhân Sự & Cấp Bậc Phân Quyền (RBAC)
                 </h2>
               </div>
-              <p className="mt-2 text-sm text-emerald-100 max-w-2xl leading-relaxed">
+              <p className="mt-2 text-sm text-blue-100 max-w-2xl leading-relaxed">
                 Hệ thống kiểm soát truy cập dựa trên vai trò phân tầng từ cấp Giám Đốc (Level 100), Quản Lý Cửa Hàng (Level 80) xuống các bộ phận Kế toán, Kho, Kỹ thuật và Lễ tân.
               </p>
               <div className="mt-3 flex flex-wrap gap-2 text-xs">
-                <span className="rounded-full bg-emerald-800/80 border border-emerald-600 px-3 py-1 font-semibold">
+                <span className="rounded-full bg-white/10 border border-white/20 px-3 py-1 font-semibold">
                   Vai trò của bạn: <strong>{currentRoleInfo.title} (Level {currentRoleInfo.level})</strong>
                 </span>
-                <span className="rounded-full bg-teal-800/80 border border-teal-600 px-3 py-1 font-semibold">
+                <span className="rounded-full bg-white/10 border border-white/20 px-3 py-1 font-semibold">
                   {isExecutive ? 'Quyền hạn: Toàn quyền tạo & phân cấp mọi vị trí' : 'Quyền hạn: Tạo & quản lý nhân sự cấp dưới (< Level 80)'}
                 </span>
               </div>
@@ -256,7 +256,7 @@ export default function EmployeeManagement() {
 
             <button
               onClick={openCreateModal}
-              className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-extrabold text-emerald-800 shadow-md transition hover:bg-emerald-50 active:scale-95"
+              className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-extrabold text-brand-blue shadow-md transition hover:bg-slate-100 active:scale-95"
             >
               <span>➕</span> Tạo Tài Khoản Mới
             </button>
@@ -270,19 +270,19 @@ export default function EmployeeManagement() {
             <p className="mt-2 text-3xl font-extrabold text-brand-blue">{totalCount}</p>
             <p className="mt-1 text-xs text-slate-500">Đã đăng ký trong hệ thống</p>
           </div>
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-5 shadow-xs">
-            <p className="text-xs font-bold uppercase tracking-wider text-emerald-700">Đang Hoạt Động</p>
-            <p className="mt-2 text-3xl font-extrabold text-emerald-700">{activeCount}</p>
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-800">Đang Hoạt Động</p>
+            <p className="mt-2 text-3xl font-extrabold text-slate-800">{activeCount}</p>
             <p className="mt-1 text-xs text-emerald-600">Sẵn sàng tác nghiệp</p>
           </div>
-          <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-5 shadow-xs">
-            <p className="text-xs font-bold uppercase tracking-wider text-amber-700">Tạm Khóa Quyền</p>
-            <p className="mt-2 text-3xl font-extrabold text-amber-700">{lockedCount}</p>
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-800">Tạm Khóa Quyền</p>
+            <p className="mt-2 text-3xl font-extrabold text-slate-800">{lockedCount}</p>
             <p className="mt-1 text-xs text-amber-600">Vô hiệu hóa đăng nhập</p>
           </div>
-          <div className="rounded-2xl border border-purple-200 bg-purple-50/50 p-5 shadow-xs">
-            <p className="text-xs font-bold uppercase tracking-wider text-purple-700">Cấp Bậc Quản Trị</p>
-            <p className="mt-2 text-3xl font-extrabold text-purple-700">6 Cấp Bậc</p>
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-800">Cấp Bậc Quản Trị</p>
+            <p className="mt-2 text-3xl font-extrabold text-slate-800">6 Cấp Bậc</p>
             <p className="mt-1 text-xs text-purple-600">Phân tầng bảo mật nghiêm ngặt</p>
           </div>
         </div>
@@ -419,7 +419,7 @@ export default function EmployeeManagement() {
                         </td>
                         <td className="py-3.5 px-4">
                           {emp.trang_thai === 'HOAT_DONG' ? (
-                            <span className="inline-flex items-center gap-1.5 text-emerald-700 font-bold">
+                            <span className="inline-flex items-center gap-1.5 text-slate-800 font-bold">
                               <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
                               Hoạt động
                             </span>
@@ -448,8 +448,8 @@ export default function EmployeeManagement() {
                                   onClick={() => handleToggleLock(emp)}
                                   className={`rounded-lg px-2.5 py-1 font-bold transition ${
                                     emp.trang_thai === 'HOAT_DONG'
-                                      ? 'border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100'
-                                      : 'border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                                      ? 'border border-amber-200 bg-amber-50 text-slate-800 hover:bg-amber-100'
+                                      : 'border border-emerald-200 bg-emerald-50 text-slate-800 hover:bg-emerald-100'
                                   }`}
                                   title={emp.trang_thai === 'HOAT_DONG' ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}
                                 >
@@ -604,7 +604,7 @@ export default function EmployeeManagement() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="rounded-xl bg-emerald-600 px-5 py-2 font-extrabold text-white shadow-xs hover:bg-emerald-700 disabled:opacity-50"
+                  className="rounded-xl bg-brand-blue px-5 py-2 font-extrabold text-white shadow-xs hover:bg-blue-900 disabled:opacity-50"
                 >
                   {saving ? 'Đang lưu...' : editingEmployee ? 'Cập Nhật Quyền' : 'Tạo Tài Khoản'}
                 </button>
