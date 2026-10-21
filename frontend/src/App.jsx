@@ -1,5 +1,6 @@
 import { Component, lazy, Suspense, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import api from './services/api';
 
 const IntakeForm = lazy(() => import('./pages/public/IntakeForm'));
 const Tracking = lazy(() => import('./pages/public/Tracking'));
@@ -120,15 +121,75 @@ const ROLE_NAV_CONFIG = {
   }
 };
 
+function isNotificationCorrupted(item) {
+  const text = (item?.title || '') + (item?.description || '');
+  return text.includes('Ã') || text.includes('Â') || text.includes('áº') || text.includes('Lá»');
+}
+
 function AppContent() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showNotificationsDropdown, setShowNotificationsDropdown] = useState(false);
+  const [notificationsList, setNotificationsList] = useState(() => {
+    try {
+      const raw = typeof window !== 'undefined' ? localStorage.getItem('ticketNotifications') : null;
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        return parsed.filter(n => !isNotificationCorrupted(n));
+      }
+    } catch {}
+    return [];
+  });
   useLocation(); // Theo dõi chuyển hướng trang để cập nhật phiên đăng nhập tức thì
 
   // Đọc thông tin đăng nhập trực tiếp từ localStorage theo từng lượt render
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   const role = typeof window !== 'undefined' ? localStorage.getItem('role') : null;
+  const username = typeof window !== 'undefined' ? localStorage.getItem('username') : '';
   const fullName = typeof window !== 'undefined' ? (localStorage.getItem('fullName') || '') : '';
   const isLoggedIn = Boolean(token && role);
+
+  const unreadCount = notificationsList.filter(n => !n.read).length;
+
+  const markAllNotificationsRead = () => {
+    const updated = notificationsList.map(n => ({ ...n, read: true }));
+    setNotificationsList(updated);
+    try {
+      localStorage.setItem('ticketNotifications', JSON.stringify(updated));
+    } catch {}
+  };
+
+  const clearAllNotifications = () => {
+    setNotificationsList([]);
+    try {
+      localStorage.removeItem('ticketNotifications');
+    } catch {}
+  };
+
+  const handleQuickSwitchRole = async (targetUser) => {
+    if (!targetUser) return;
+    try {
+      const res = await api.post('/auth/login', {
+        username: targetUser,
+        password: targetUser === 'giamdoc' ? 'GiamDoc@2026' : targetUser === 'quanly' ? 'QuanLy@2026' : '123456'
+      });
+      if (res.data.success) {
+        const { token: nextToken, role: nextRole, fullName: nextName, username: nextUname, accountId } = res.data.data;
+        localStorage.setItem('token', nextToken);
+        localStorage.setItem('role', nextRole);
+        localStorage.setItem('fullName', nextName);
+        localStorage.setItem('username', nextUname || targetUser);
+        if (accountId) localStorage.setItem('accountId', String(accountId));
+        window.location.reload();
+      }
+    } catch (e) {
+      console.error('Lỗi chuyển vai trò:', e);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.clear();
+    window.location.href = '/login';
+  };
 
   const navRoleInfo = isLoggedIn
     ? (ROLE_NAV_CONFIG[role] || {
@@ -187,15 +248,110 @@ function AppContent() {
             <Link to="/intake" className="px-3 xl:px-4 h-full flex items-center hover:text-brand-orange transition-colors">Tạo Phiếu QR</Link>
           </nav>
 
-          {/* Nút Chức vụ Đăng nhập & Nút Menu Mobile */}
-          <div className="flex items-center gap-3">
-            <Link 
-              to={navRoleInfo.link} 
-              className={`hidden sm:inline-flex items-center gap-2 px-4 xl:px-6 py-2 font-bold rounded-full transition-all text-sm shadow-md ${navRoleInfo.bgClass}`}
-            >
-              <span>{navRoleInfo.shortLabel}</span>
-            </Link>
-            
+          {/* Cụm Điều Hành Người Dùng (User Cluster) & Nút Menu Mobile */}
+          <div className="flex items-center gap-2.5">
+            {isLoggedIn ? (
+              <div className="hidden sm:flex items-center gap-2">
+                {/* Bộ chuyển vai trò làm việc */}
+                <div className="flex items-center gap-1 bg-slate-100 hover:bg-slate-200/70 border border-slate-200 rounded-full px-2.5 py-1 transition">
+                  <span className="text-[11px] font-medium text-slate-500">🔄</span>
+                  <select
+                    value={username || (role === 'GIAM_DOC' ? 'giamdoc' : role === 'QUAN_LY' ? 'quanly' : role === 'KE_TOAN' ? 'ketoan' : role === 'THU_KHO' ? 'thukho' : role === 'KY_THUAT_VIEN' ? 'kythuat' : 'letan')}
+                    onChange={(e) => handleQuickSwitchRole(e.target.value)}
+                    aria-label="Chuyển vai trò"
+                    className="text-xs font-semibold text-slate-700 bg-transparent outline-none cursor-pointer"
+                  >
+                    <option value="kythuat">🔧 Kỹ Thuật Viên</option>
+                    <option value="letan">👩‍💼 Lễ Tân</option>
+                    <option value="quanly">🏬 Quản Lý</option>
+                    <option value="giamdoc">👑 Giám Đốc</option>
+                    <option value="thukho">📦 Thủ Kho</option>
+                    <option value="ketoan">📊 Kế Toán</option>
+                  </select>
+                </div>
+
+                {/* Nút Thông Báo với Popup */}
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setShowNotificationsDropdown(open => !open)}
+                    aria-label={`Thông báo (${unreadCount})`}
+                    className="relative flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 transition"
+                  >
+                    <span className="text-xs">🔔</span>
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white shadow-xs">
+                        {unreadCount}
+                      </span>
+                    )}
+                  </button>
+
+                  {showNotificationsDropdown && (
+                    <div className="absolute right-0 top-full z-50 mt-2 w-80 max-w-[90vw] rounded-2xl border border-slate-200 bg-white p-3 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-150">
+                      <div className="mb-2 flex items-center justify-between pb-2 border-b border-slate-100">
+                        <h3 className="font-bold text-slate-800 text-xs uppercase tracking-wider">Thông báo hệ thống</h3>
+                        <button
+                          type="button"
+                          onClick={clearAllNotifications}
+                          className="text-[11px] text-brand-blue hover:underline"
+                        >
+                          Xóa tất cả
+                        </button>
+                      </div>
+                      {unreadCount > 0 && (
+                        <button
+                          type="button"
+                          onClick={markAllNotificationsRead}
+                          className="mb-2 text-[11px] text-slate-500 hover:text-brand-blue block text-left"
+                        >
+                          ✓ Đánh dấu tất cả đã đọc
+                        </button>
+                      )}
+                      <div className="max-h-72 space-y-1.5 overflow-y-auto">
+                        {notificationsList.length === 0 ? (
+                          <p className="py-6 text-center text-xs text-slate-400">Chưa có thông báo mới.</p>
+                        ) : (
+                          notificationsList.slice(0, 15).map(n => (
+                            <div key={n.id} className={`rounded-xl p-2.5 text-xs ${n.read ? 'bg-slate-50 text-slate-600' : 'bg-blue-50/70 text-slate-800 font-medium'}`}>
+                              <p className="font-semibold text-slate-800">{n.title || `Phiếu ${n.ticketCode}: ${n.status}`}</p>
+                              {n.description && <p className="mt-0.5 text-slate-600 text-[11px]">{n.description}</p>}
+                              <p className="mt-1 text-[10px] text-slate-400">{n.createdAt}</p>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Huy hiệu Chức vụ Hiện tại */}
+                <Link 
+                  to={navRoleInfo.link} 
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 font-bold rounded-full transition-all text-xs shadow-xs ${navRoleInfo.bgClass}`}
+                >
+                  <span>{navRoleInfo.shortLabel}</span>
+                </Link>
+
+                {/* Nút Đăng Xuất */}
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  title="Đăng xuất khỏi hệ thống"
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-full border border-slate-200 bg-white hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-xs font-semibold text-slate-600 transition"
+                >
+                  <span>🚪</span>
+                  <span className="hidden xl:inline">Đăng Xuất</span>
+                </button>
+              </div>
+            ) : (
+              <Link 
+                to="/login" 
+                className="hidden sm:inline-flex items-center gap-1.5 px-4 xl:px-6 py-2 bg-brand-green text-white font-bold rounded-full hover:bg-green-600 transition-all text-sm shadow-md"
+              >
+                <span>🔐 Cổng Nhân Viên</span>
+              </Link>
+            )}
+
             {/* Nút bấm mở/đóng Menu Mobile */}
             <button 
               type="button"

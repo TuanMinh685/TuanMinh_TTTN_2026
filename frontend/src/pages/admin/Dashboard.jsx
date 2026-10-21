@@ -74,15 +74,6 @@ const ROLE_META = {
   }
 };
 
-const QUICK_SWITCH_ROLES = [
-  { username: 'giamdoc', label: '👑 Giám Đốc Điều Hành' },
-  { username: 'quanly', label: '🛡️ Quản Lý Cửa Hàng' },
-  { username: 'ketoan', label: '💰 Kế Toán / Thu Ngân' },
-  { username: 'thukho', label: '📦 Thủ Kho Linh Kiện' },
-  { username: 'kythuat', label: '🔧 Kỹ Thuật Viên Sửa Chữa' },
-  { username: 'letan', label: '💁 Lễ Tân & CSKH' }
-];
-
 function Dashboard() {
   const role = localStorage.getItem('role') || 'LE_TAN';
   const fullName = localStorage.getItem('fullName') || 'Nhân viên';
@@ -151,7 +142,6 @@ function Dashboard() {
       return [];
     }
   });
-  const [showNotifications, setShowNotifications] = useState(false);
   const [notificationFilter, setNotificationFilter] = useState('ALL');
   const [latestNotice, setLatestNotice] = useState(null);
   const [statusFilter, setStatusFilter] = useState('ALL');
@@ -169,7 +159,6 @@ function Dashboard() {
     vai_tro: 'LE_TAN',
     trang_thai: 'HOAT_DONG'
   });
-  const [switchingRole, setSwitchingRole] = useState(false);
   const [showPosModal, setShowPosModal] = useState(false);
   const [savingPos, setSavingPos] = useState(false);
   const [posForm, setPosForm] = useState({
@@ -634,30 +623,6 @@ function Dashboard() {
     }
   };
 
-  const handleQuickSwitchRole = async (targetUsername) => {
-    if (!targetUsername || switchingRole) return;
-    setSwitchingRole(true);
-    try {
-      const response = await api.post('/auth/login', {
-        username: targetUsername,
-        password: '123456'
-      });
-      if (response.data.success) {
-        const { token, role: nextRole, fullName: nextName, accountId, username } = response.data.data;
-        localStorage.setItem('token', token);
-        localStorage.setItem('role', nextRole);
-        localStorage.setItem('fullName', nextName);
-        if (accountId) localStorage.setItem('accountId', String(accountId));
-        if (username) localStorage.setItem('username', username);
-        window.location.reload();
-      }
-    } catch (err) {
-      showToast(`❌ ${err.response?.data?.message || 'Không chuyển được tài khoản demo'}`);
-      setSwitchingRole(false);
-    }
-  };
-
-  
   const selectSoftwareTicket = (ticketId) => {
     setSelectedSoftwareTicketId(ticketId);
     const ticket = tickets.find(item => String(item.id) === ticketId);
@@ -826,11 +791,6 @@ function Dashboard() {
     }
   };
 
-  const logout = () => {
-    localStorage.clear();
-    window.location.href = '/login';
-  };
-
   const matchesStatusFilter = (ticket) => {
     if (statusFilter === 'ALL') return true;
     if (statusFilter === 'CHO_KHAM') return ticket.trang_thai === 'CHỜ_KHÁM';
@@ -856,96 +816,23 @@ function Dashboard() {
 
   return (
     <div className="p-6 md:p-8 bg-slate-50 min-h-screen">
-      {/* Header Điều Hành & Phân Quyền */}
-      <div className="bg-white rounded-2xl p-5 shadow-xs border border-slate-200/90 mb-6">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div>
-            <div className="flex flex-wrap items-center gap-2.5">
-              <h2 className="text-xl md:text-2xl font-bold text-brand-blue">
-                Bảng Điều Khiển Vận Hành
-              </h2>
-              <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${currentRoleInfo.badgeClass}`}>
-                {currentRoleInfo.badge}
-              </span>
-            </div>
-            <p className="text-slate-600 text-xs mt-1.5">
-              Xin chào <strong className="text-slate-800">{fullName}</strong> • <span className="text-slate-500">{currentRoleInfo.title}</span>
-            </p>
-          </div>
-
-          <div className="relative flex flex-wrap items-center gap-2.5 shrink-0">
-            {/* Bộ chuyển vai trò */}
-            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
-              <span className="text-[11px] font-semibold text-slate-500 whitespace-nowrap">🔄 Vai trò:</span>
-              <select
-                value={currentUsername || (role === 'GIAM_DOC' ? 'giamdoc' : role === 'QUAN_LY' ? 'quanly' : role === 'KE_TOAN' ? 'ketoan' : role === 'THU_KHO' ? 'thukho' : role === 'KY_THUAT_VIEN' ? 'kythuat' : 'letan')}
-                disabled={switchingRole}
-                onChange={(e) => handleQuickSwitchRole(e.target.value)}
-                aria-label="Chuyển vai trò"
-                className="text-xs font-semibold text-brand-blue bg-transparent outline-none cursor-pointer"
-              >
-                {QUICK_SWITCH_ROLES.map(item => (
-                  <option key={item.username} value={item.username}>
-                    {item.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setShowNotifications(open => !open)}
-              aria-expanded={showNotifications}
-              aria-label={`Thông báo (${unreadNotificationCount})`}
-              className="relative rounded-xl border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
-            >
-              🔔 Thông báo
-              {unreadNotificationCount > 0 && (
-                <span className="ml-1.5 rounded-full bg-red-500 px-2 py-0.5 text-[10px] text-white">{unreadNotificationCount}</span>
-              )}
-            </button>
-            <button onClick={logout} className="rounded-xl border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 hover:text-red-700 hover:border-red-200 transition">
-              Đăng Xuất
-            </button>
-            {showNotifications && (
-              <div className="absolute right-0 top-full z-40 mt-2 w-80 max-w-[90vw] rounded-xl border border-slate-200 bg-white p-3 shadow-xl">
-                <div className="mb-2 flex items-center justify-between">
-                  <h3 className="font-bold text-slate-800">Trung tâm thông báo</h3>
-                  <button type="button" onClick={clearNotifications} className="text-xs font-semibold text-brand-blue hover:underline">
-                    Xóa tất cả
-                  </button>
-                </div>
-                <button type="button" onClick={markAllNotificationsRead} className="mb-2 text-xs font-semibold text-brand-blue hover:underline">
-                  Đánh dấu tất cả đã đọc
-                </button>
-                <div className="max-h-80 space-y-2 overflow-y-auto">
-                  {notifications.filter(item => !isNotificationCorrupted(item)).map(notification => (
-                    <div key={notification.id} className={`rounded-lg p-3 text-sm ${notification.read ? 'bg-slate-50' : 'bg-blue-50'}`}>
-                      <p className="font-semibold">{notification.title || `Phiếu ${notification.ticketCode}: ${notification.status}`}</p>
-                      {notification.description && <p className="mt-1 text-slate-700">{notification.description}</p>}
-                      <p className="mt-1 text-xs text-slate-500">{notification.createdAt}</p>
-                    </div>
-                  ))}
-                  {notifications.filter(item => !isNotificationCorrupted(item)).length === 0 && <p className="py-6 text-center text-sm text-slate-500">Chưa có thông báo mới.</p>}
-                </div>
-              </div>
-            )}
-          </div>
+      {/* Tiêu đề & Điều hướng Vận Hành */}
+      <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">
+            Bảng Điều Khiển Vận Hành
+          </h1>
+          <p className="text-slate-500 text-xs mt-1">
+            Xin chào <strong className="text-slate-700">{fullName ? fullName.replace(/\s*\(.*?\)/, '') : 'Kỹ thuật viên'}</strong> • Chúc bạn một ngày làm việc hiệu quả!
+          </p>
         </div>
 
-        {/* Thanh Điều Hướng Các Trang Quản Trị Cấp Cao */}
         {(isExecutive || isManagerOrAbove || canManageEmployees) && (
-          <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mr-1">
-              Chuyển nhanh:
-            </span>
-            <span className="rounded-xl bg-brand-blue px-3.5 py-1.5 text-xs font-semibold text-white shadow-2xs">
-              📋 Bàn Vận Hành Kỹ Thuật
-            </span>
+          <div className="flex flex-wrap items-center gap-2">
             {isExecutive && (
               <Link
                 to="/admin/giam-doc"
-                className="flex items-center gap-1.5 rounded-xl bg-white border border-slate-200 px-3.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition shadow-2xs"
+                className="flex items-center gap-1.5 rounded-xl bg-white border border-slate-200 px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 transition shadow-2xs"
               >
                 <span>👑</span> Trang Giám Đốc
               </Link>
@@ -953,7 +840,7 @@ function Dashboard() {
             {isManagerOrAbove && (
               <Link
                 to="/admin/quan-ly"
-                className="flex items-center gap-1.5 rounded-xl bg-white border border-slate-200 px-3.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition shadow-2xs"
+                className="flex items-center gap-1.5 rounded-xl bg-white border border-slate-200 px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 transition shadow-2xs"
               >
                 <span>🏬</span> Trang Quản Lý
               </Link>
@@ -961,7 +848,7 @@ function Dashboard() {
             {canManageEmployees && (
               <Link
                 to="/admin/nhan-su"
-                className="flex items-center gap-1.5 rounded-xl bg-white border border-slate-200 px-3.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition shadow-2xs"
+                className="flex items-center gap-1.5 rounded-xl bg-white border border-slate-200 px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 transition shadow-2xs"
               >
                 <span>👥</span> Quản Lý Nhân Sự & Phân Quyền
               </Link>
