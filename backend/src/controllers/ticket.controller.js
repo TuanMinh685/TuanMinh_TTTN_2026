@@ -298,7 +298,8 @@ const createPart = async (req, res, next) => {
         const part = {
             ten_linh_kien: typeof name === 'string' ? name.trim() : name,
             gia_ban: req.body.gia_ban,
-            so_luong: req.body.so_luong
+            so_luong: req.body.so_luong,
+            hinh_anh: req.body.hinh_anh || null
         };
         const validationMessage = validatePartInput(part);
         if (validationMessage) {
@@ -323,7 +324,8 @@ const updatePart = async (req, res, next) => {
         const part = {
             ten_linh_kien: typeof name === 'string' ? name.trim() : name,
             gia_ban: req.body.gia_ban,
-            so_luong: req.body.so_luong
+            so_luong: req.body.so_luong,
+            hinh_anh: req.body.hinh_anh || null
         };
         const validationMessage = validatePartInput(part);
         if (validationMessage) {

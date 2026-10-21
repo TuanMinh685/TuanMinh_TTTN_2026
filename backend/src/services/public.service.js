@@ -55,7 +55,7 @@ const trackTicket = async (ticketCode) => {
 
     // Lấy danh sách linh kiện đã thay kèm số Serial
     const partsRes = await pool.query(`
-        SELECT p.id, p.so_luong, p.don_gia, p.so_serial, l.ten_linh_kien
+        SELECT p.id, p.so_luong, p.don_gia, p.so_serial, l.ten_linh_kien, l.hinh_anh
         FROM phieu_linh_kien p
         JOIN linh_kien l ON p.linh_kien_id = l.id
         WHERE p.phieu_sua_chua_id = $1

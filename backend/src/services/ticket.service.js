@@ -466,35 +466,35 @@ const getParts = async () => {
 
 const getPublicParts = async () => {
     const { rows } = await pool.query(`
-        SELECT id, ten_linh_kien, gia_ban
+        SELECT id, ten_linh_kien, gia_ban, hinh_anh
         FROM linh_kien
         ORDER BY ten_linh_kien ASC
     `);
     return rows;
 };
 
-const createPart = async ({ ten_linh_kien, gia_ban, so_luong }) => {
+const createPart = async ({ ten_linh_kien, gia_ban, so_luong, hinh_anh }) => {
     const { rows } = await pool.query(`
-        INSERT INTO linh_kien (ten_linh_kien, gia_ban, so_luong)
-        VALUES ($1, $2, $3)
-        RETURNING id, ten_linh_kien, gia_ban, so_luong
-    `, [ten_linh_kien, gia_ban, so_luong]);
+        INSERT INTO linh_kien (ten_linh_kien, gia_ban, so_luong, hinh_anh)
+        VALUES ($1, $2, $3, $4)
+        RETURNING id, ten_linh_kien, gia_ban, so_luong, hinh_anh
+    `, [ten_linh_kien, gia_ban, so_luong, hinh_anh || null]);
     return rows[0];
 };
 
-const updatePart = async (id, { ten_linh_kien, gia_ban, so_luong }) => {
+const updatePart = async (id, { ten_linh_kien, gia_ban, so_luong, hinh_anh }) => {
     const { rows } = await pool.query(`
         UPDATE linh_kien
-        SET ten_linh_kien = $1, gia_ban = $2, so_luong = $3
-        WHERE id = $4
-        RETURNING id, ten_linh_kien, gia_ban, so_luong
-    `, [ten_linh_kien, gia_ban, so_luong, id]);
+        SET ten_linh_kien = $1, gia_ban = $2, so_luong = $3, hinh_anh = COALESCE($4, hinh_anh)
+        WHERE id = $5
+        RETURNING id, ten_linh_kien, gia_ban, so_luong, hinh_anh
+    `, [ten_linh_kien, gia_ban, so_luong, hinh_anh || null, id]);
     return rows[0] || null;
 };
 
 const getTicketParts = async (ticketId) => {
     const query = `
-        SELECT p.*, l.ten_linh_kien 
+        SELECT p.*, l.ten_linh_kien, l.hinh_anh 
         FROM phieu_linh_kien p
         JOIN linh_kien l ON p.linh_kien_id = l.id
         WHERE p.phieu_sua_chua_id = $1

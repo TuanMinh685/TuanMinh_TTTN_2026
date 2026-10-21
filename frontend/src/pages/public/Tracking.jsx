@@ -778,20 +778,30 @@ function Tracking() {
                 <div className="divide-y divide-slate-100 text-sm">
                   {ticket.linh_kien.map((item, idx) => (
                     <div key={idx} className="py-3 flex justify-between items-start gap-3">
-                      <div>
-                        <div className="font-bold text-slate-800">
-                          {item.ten_linh_kien} <span className="text-xs text-slate-500 font-semibold">(x{item.so_luong})</span>
-                        </div>
-                        {item.so_serial && (
-                          <div className="text-xs font-mono mt-1 flex items-center gap-1.5">
-                            <span className="text-slate-400">Serial:</span>
-                            <span className="bg-blue-50 text-brand-blue px-2 py-0.5 rounded-md font-bold border border-blue-200">
-                              {item.so_serial}
-                            </span>
-                          </div>
+                      <div className="flex items-start gap-3">
+                        {item.hinh_anh && (
+                          <img
+                            src={item.hinh_anh}
+                            alt={item.ten_linh_kien}
+                            className="w-11 h-11 rounded-xl object-cover border border-slate-200 shadow-2xs shrink-0"
+                            loading="lazy"
+                          />
                         )}
+                        <div>
+                          <div className="font-bold text-slate-800">
+                            {item.ten_linh_kien} <span className="text-xs text-slate-500 font-semibold">(x{item.so_luong})</span>
+                          </div>
+                          {item.so_serial && (
+                            <div className="text-xs font-mono mt-1 flex items-center gap-1.5">
+                              <span className="text-slate-400">Serial:</span>
+                              <span className="bg-blue-50 text-brand-blue px-2 py-0.5 rounded-md font-bold border border-blue-200">
+                                {item.so_serial}
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <div className="font-extrabold text-slate-800 shrink-0">
+                      <div className="font-bold text-slate-800 shrink-0">
                         {(Number(item.don_gia) * Number(item.so_luong)).toLocaleString('vi-VN')} ₫
                       </div>
                     </div>

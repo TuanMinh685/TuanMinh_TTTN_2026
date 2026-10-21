@@ -355,12 +355,28 @@ function Pricing() {
                             className={`transition-colors ${idx % 2 === 0 ? 'bg-white hover:bg-slate-50' : 'bg-slate-50/50 hover:bg-slate-100/70'}`}
                           >
                             <td className="py-4 px-6">
-                              <div className="font-bold text-slate-800 text-base">{item.ten_linh_kien}</div>
-                              <div className="text-xs text-green-700 font-semibold flex items-center gap-1.5 mt-1">
-                                <span className="bg-green-100 text-green-800 px-2 py-0.5 rounded-md text-[10px] font-black uppercase">Chính Hãng</span>
-                                <span>🛡️ Bảo hành 12 - 36 tháng</span>
-                                <span className="text-slate-300">•</span>
-                                <span>Serial/IMEI kiểm soát</span>
+                              <div className="flex items-center gap-3.5">
+                                {item.hinh_anh ? (
+                                  <img
+                                    src={item.hinh_anh}
+                                    alt={item.ten_linh_kien}
+                                    className="w-12 h-12 rounded-xl object-cover border border-slate-200 shadow-2xs shrink-0"
+                                    loading="lazy"
+                                  />
+                                ) : (
+                                  <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-xl shrink-0">
+                                    ⚙️
+                                  </div>
+                                )}
+                                <div>
+                                  <div className="font-bold text-slate-800 text-base">{item.ten_linh_kien}</div>
+                                  <div className="text-xs text-green-700 font-semibold flex flex-wrap items-center gap-1.5 mt-0.5">
+                                    <span className="bg-green-100 text-green-800 px-2 py-0.5 rounded-md text-[10px] font-black uppercase">Chính Hãng</span>
+                                    <span>🛡️ Bảo hành 12 - 36 tháng</span>
+                                    <span className="text-slate-300">•</span>
+                                    <span>Serial/IMEI kiểm soát</span>
+                                  </div>
+                                </div>
                               </div>
                             </td>
                             <td className="py-4 px-6 text-right font-medium text-slate-400 text-sm line-through whitespace-nowrap">
@@ -407,14 +423,27 @@ function Pricing() {
                       className="bg-white rounded-3xl p-6 border border-slate-200 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all relative flex flex-col justify-between"
                     >
                       <div>
-                        {/* Badge chính hãng */}
-                        <div className="flex justify-between items-start mb-3">
-                          <span className="bg-green-100 text-green-800 px-2.5 py-1 rounded-full text-[10px] font-black uppercase">
+                        {/* Ảnh linh kiện */}
+                        <div className="relative w-full h-44 mb-4 rounded-2xl overflow-hidden bg-slate-100 flex items-center justify-center border border-slate-100 group">
+                          {item.hinh_anh ? (
+                            <img
+                              src={item.hinh_anh}
+                              alt={item.ten_linh_kien}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="flex flex-col items-center justify-center text-slate-400">
+                              <span className="text-4xl">⚙️</span>
+                              <span className="text-[10px] text-slate-400 mt-1 font-semibold">Chính hãng</span>
+                            </div>
+                          )}
+                          <span className="absolute top-2.5 left-2.5 bg-white/95 backdrop-blur-md text-emerald-700 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase shadow-xs">
                             Chính hãng 100%
                           </span>
                         </div>
 
-                        <h3 className="font-black text-slate-800 text-lg mb-2 leading-snug">
+                        <h3 className="font-bold text-slate-800 text-base mb-2 leading-snug">
                           {item.ten_linh_kien}
                         </h3>
 

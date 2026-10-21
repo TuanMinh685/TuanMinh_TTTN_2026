@@ -107,7 +107,7 @@ function Dashboard() {
   const [ticketPhotos, setTicketPhotos] = useState([]);
   const [newPhotoNote, setNewPhotoNote] = useState('');
   const [savingPhoto, setSavingPhoto] = useState(false);
-  const [partForm, setPartForm] = useState({ ten_linh_kien: '', gia_ban: '', so_luong: '0' });
+  const [partForm, setPartForm] = useState({ ten_linh_kien: '', gia_ban: '', so_luong: '0', hinh_anh: '' });
   const [editingPartId, setEditingPartId] = useState(null);
   const [partFormError, setPartFormError] = useState('');
   const [savingPart, setSavingPart] = useState(false);
@@ -698,7 +698,7 @@ function Dashboard() {
   };
 
   const resetPartForm = () => {
-    setPartForm({ ten_linh_kien: '', gia_ban: '', so_luong: '0' });
+    setPartForm({ ten_linh_kien: '', gia_ban: '', so_luong: '0', hinh_anh: '' });
     setEditingPartId(null);
     setPartFormError('');
     setShowInventoryForm(false);
@@ -709,7 +709,8 @@ function Dashboard() {
     setPartForm({
       ten_linh_kien: part.ten_linh_kien,
       gia_ban: String(part.gia_ban),
-      so_luong: String(part.so_luong)
+      so_luong: String(part.so_luong),
+      hinh_anh: part.hinh_anh || ''
     });
     setPartFormError('');
     setShowInventoryForm(true);
@@ -737,7 +738,8 @@ function Dashboard() {
     const payload = {
       ten_linh_kien: partForm.ten_linh_kien.trim(),
       gia_ban: price,
-      so_luong: quantity
+      so_luong: quantity,
+      hinh_anh: partForm.hinh_anh?.trim() || null
     };
 
     try {
@@ -1531,6 +1533,7 @@ function Dashboard() {
               <table className="w-full min-w-[680px] text-left">
                 <thead>
                   <tr className="border-b border-slate-200 text-xs font-bold uppercase tracking-wide text-slate-500">
+                    <th className="px-3 py-3 w-16 text-center">Ảnh</th>
                     <th className="px-3 py-3">Tên linh kiện</th>
                     <th className="px-3 py-3 text-right">Giá bán</th>
                     <th className="px-3 py-3 text-center">Tồn kho</th>
@@ -1556,12 +1559,30 @@ function Dashboard() {
                       const lowStock = !outOfStock && quantity < threshold;
                       return (
                         <tr key={part.id} className="border-b border-slate-100 text-sm last:border-0 hover:bg-slate-50">
+                          <td className="px-3 py-3 text-center">
+                            <div className="h-12 w-12 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center mx-auto shrink-0 shadow-sm">
+                              {part.hinh_anh ? (
+                                <img
+                                  src={part.hinh_anh}
+                                  alt={part.ten_linh_kien}
+                                  className="h-full w-full object-cover transition-transform duration-200 hover:scale-125"
+                                  onError={(e) => {
+                                    e.currentTarget.onerror = null;
+                                    e.currentTarget.style.display = 'none';
+                                    const next = e.currentTarget.nextElementSibling;
+                                    if (next) next.classList.remove('hidden');
+                                  }}
+                                />
+                              ) : null}
+                              <span className={`text-xl ${part.hinh_anh ? 'hidden' : ''}`}>⚙️</span>
+                            </div>
+                          </td>
                           <td className="px-3 py-3 font-semibold text-slate-700">{part.ten_linh_kien}</td>
-                          <td className="px-3 py-3 text-right tabular-nums">{Number(part.gia_ban).toLocaleString('vi-VN')} đ</td>
+                          <td className="px-3 py-3 text-right tabular-nums font-semibold text-brand-blue">{Number(part.gia_ban).toLocaleString('vi-VN')} đ</td>
                           <td className="px-3 py-3 text-center font-semibold tabular-nums">{quantity}</td>
                           <td className="px-3 py-3 text-center">
                             <span className={`inline-block rounded-full px-3 py-1 text-xs font-bold ${
-                              outOfStock ? 'bg-red-50 text-red-700' : lowStock ? 'bg-amber-50 text-amber-800' : 'bg-green-50 text-green-700'
+                              outOfStock ? 'bg-red-50 text-red-700 border border-red-200' : lowStock ? 'bg-amber-50 text-amber-800 border border-amber-200' : 'bg-green-50 text-green-700 border border-green-200'
                             }`}>
                               {outOfStock ? 'Hết hàng' : lowStock ? 'Sắp hết' : 'Còn hàng'}
                             </span>
@@ -1583,7 +1604,7 @@ function Dashboard() {
                       );
                     })}
                   {parts.length === 0 && (
-                    <tr><td colSpan="5" className="py-10 text-center text-sm text-slate-400">Chưa có linh kiện trong kho.</td></tr>
+                    <tr><td colSpan="6" className="py-10 text-center text-sm text-slate-400">Chưa có linh kiện trong kho.</td></tr>
                   )}
                   {parts.length > 0 && parts.filter(part =>
                     part.ten_linh_kien.toLowerCase().includes(partSearch.toLowerCase())
@@ -1595,7 +1616,7 @@ function Dashboard() {
                     if (stockFilter === 'AVAILABLE') return quantity >= threshold;
                     return true;
                   }).length === 0 && (
-                    <tr><td colSpan="5" className="py-10 text-center text-sm text-slate-400">Không tìm thấy linh kiện phù hợp.</td></tr>
+                    <tr><td colSpan="6" className="py-10 text-center text-sm text-slate-400">Không tìm thấy linh kiện phù hợp.</td></tr>
                   )}
 
                 </tbody>
@@ -1657,6 +1678,38 @@ function Dashboard() {
                   onChange={event => setPartForm({ ...partForm, so_luong: event.target.value })}
                   className="w-full rounded-lg border border-slate-300 px-3 py-2"
                 />
+              </div>
+              <div>
+                <label htmlFor="part-image" className="mb-1 block text-sm font-semibold text-slate-700">Link hình ảnh linh kiện (URL)</label>
+                <input
+                  id="part-image"
+                  type="url"
+                  placeholder="https://images.unsplash.com/... hoặc link ảnh sản phẩm"
+                  value={partForm.hinh_anh}
+                  onChange={event => setPartForm({ ...partForm, hinh_anh: event.target.value })}
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                />
+                {partForm.hinh_anh && (
+                  <div className="mt-2 flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 p-2">
+                    <img
+                      src={partForm.hinh_anh}
+                      alt="Xem trước"
+                      className="h-12 w-12 rounded-lg object-cover border border-slate-200 shrink-0"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        const fallback = e.currentTarget.parentElement?.querySelector('.preview-fallback');
+                        if (fallback) fallback.classList.remove('hidden');
+                      }}
+                    />
+                    <div className="preview-fallback hidden h-12 w-12 rounded-lg bg-amber-50 border border-amber-200 items-center justify-center text-amber-700 text-xs font-bold shrink-0">
+                      Lỗi ảnh
+                    </div>
+                    <div className="min-w-0 flex-1 text-xs text-slate-600">
+                      <p className="font-semibold text-slate-800">Ảnh xem trước</p>
+                      <p className="truncate text-[11px] text-slate-500">{partForm.hinh_anh}</p>
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="flex gap-3">
                 <button
@@ -2182,12 +2235,29 @@ function Dashboard() {
                 <div className="space-y-2 max-h-40 overflow-y-auto">
                   {modalTicketParts.map(item => (
                     <div key={item.id} className="flex items-center justify-between gap-2 bg-white p-2 rounded-lg border border-slate-200 text-xs">
-                      <div>
-                        <p className="font-bold text-slate-800">{item.ten_linh_kien} (x{item.so_luong})</p>
-                        <p className="text-[10px] text-slate-500">
-                          {(Number(item.don_gia) * Number(item.so_luong)).toLocaleString('vi-VN')} đ
-                          {item.so_serial ? ` • S/N: ${item.so_serial}` : ''}
-                        </p>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="h-9 w-9 rounded-md bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0">
+                          {item.hinh_anh ? (
+                            <img
+                              src={item.hinh_anh}
+                              alt=""
+                              className="h-full w-full object-cover"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                                const next = e.currentTarget.nextElementSibling;
+                                if (next) next.classList.remove('hidden');
+                              }}
+                            />
+                          ) : null}
+                          <span className={`text-sm ${item.hinh_anh ? 'hidden' : ''}`}>⚙️</span>
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-bold text-slate-800 truncate">{item.ten_linh_kien} (x{item.so_luong})</p>
+                          <p className="text-[10px] text-slate-500">
+                            {(Number(item.don_gia) * Number(item.so_luong)).toLocaleString('vi-VN')} đ
+                            {item.so_serial ? ` • S/N: ${item.so_serial}` : ''}
+                          </p>
+                        </div>
                       </div>
                       <button
                         type="button"
