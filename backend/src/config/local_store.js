@@ -1,166 +1,84 @@
 const fs = require('fs');
 const path = require('path');
-const bcrypt = require('bcrypt');
 
-const DATA_FILE = path.join(__dirname, '../../data_store.json');
+const STORE_PATH = path.join(__dirname, '../../data_store.json');
 
-// Khởi tạo dữ liệu mẫu phong phú đầy đủ các trường mới
-function getDefaultData() {
-    const salt = bcrypt.genSaltSync(10);
-    const hash = bcrypt.hashSync('123456', salt);
+const INITIAL_STORE = {
+    nhan_vien: [
+        { id: 1, ten_dang_nhap: 'giamdoc', ho_ten: 'Lê Trần Tuấn Minh (Giám Đốc)', vai_tro: 'GIAM_DOC', mat_khau: '$2b$10$8u4nqyS5X7oTqI7H9yW0xed0PkWv3VjI4V5q2H6fO6y7V9k3H5vOe', trang_thai: 'HOAT_DONG', ngay_tao: '2026-10-10T08:00:00.000Z' },
+        { id: 2, ten_dang_nhap: 'admin', ho_ten: 'Ban Giám Đốc Hệ Thống', vai_tro: 'ADMIN', mat_khau: '$2b$10$8u4nqyS5X7oTqI7H9yW0xed0PkWv3VjI4V5q2H6fO6y7V9k3H5vOe', trang_thai: 'HOAT_DONG', ngay_tao: '2026-10-10T08:00:00.000Z' },
+        { id: 3, ten_dang_nhap: 'quanly', ho_ten: 'Nguyễn Đức Quản Lý (Cửa Hàng Trưởng)', vai_tro: 'QUAN_LY', mat_khau: '$2b$10$8u4nqyS5X7oTqI7H9yW0xed0PkWv3VjI4V5q2H6fO6y7V9k3H5vOe', trang_thai: 'HOAT_DONG', ngay_tao: '2026-10-10T08:00:00.000Z' },
+        { id: 4, ten_dang_nhap: 'ketoan', ho_ten: 'Phạm Thị Thu Ngân (Kế Toán)', vai_tro: 'KE_TOAN', mat_khau: '$2b$10$8u4nqyS5X7oTqI7H9yW0xed0PkWv3VjI4V5q2H6fO6y7V9k3H5vOe', trang_thai: 'HOAT_DONG', ngay_tao: '2026-10-10T08:00:00.000Z' },
+        { id: 5, ten_dang_nhap: 'thukho', ho_ten: 'Võ Hoàng Thủ Kho (Quản Kho Linh Kiện)', vai_tro: 'THU_KHO', mat_khau: '$2b$10$8u4nqyS5X7oTqI7H9yW0xed0PkWv3VjI4V5q2H6fO6y7V9k3H5vOe', trang_thai: 'HOAT_DONG', ngay_tao: '2026-10-10T08:00:00.000Z' },
+        { id: 6, ten_dang_nhap: 'kythuat', ho_ten: 'Trần Văn Kỹ Thuật (KTV Phần Cứng)', vai_tro: 'KY_THUAT_VIEN', mat_khau: '$2b$10$8u4nqyS5X7oTqI7H9yW0xed0PkWv3VjI4V5q2H6fO6y7V9k3H5vOe', trang_thai: 'HOAT_DONG', ngay_tao: '2026-10-10T08:00:00.000Z' },
+        { id: 7, ten_dang_nhap: 'letan', ho_ten: 'Nguyễn Thị Lễ Tân (CSKH Tại Quầy)', vai_tro: 'LE_TAN', mat_khau: '$2b$10$8u4nqyS5X7oTqI7H9yW0xed0PkWv3VjI4V5q2H6fO6y7V9k3H5vOe', trang_thai: 'HOAT_DONG', ngay_tao: '2026-10-10T08:00:00.000Z' }
+    ],
+    linh_kien: [
+        { id: 1, ten_linh_kien: 'RAM Kingston Fury Beast 8GB DDR4 3200MHz', gia_ban: 650000, so_luong: 25 },
+        { id: 2, ten_linh_kien: 'RAM Samsung 16GB DDR5 4800MHz Laptop', gia_ban: 1250000, so_luong: 15 },
+        { id: 3, ten_linh_kien: 'Ổ cứng SSD Kingston NV2 500GB PCIe 4.0 NVMe', gia_ban: 950000, so_luong: 20 },
+        { id: 4, ten_linh_kien: 'Ổ cứng SSD Samsung 980 Pro 1TB NVMe M.2', gia_ban: 2150000, so_luong: 10 },
+        { id: 5, ten_linh_kien: 'Pin Laptop Dell Inspiron 15 3511 / 3520 Zin Chính Hãng', gia_ban: 850000, so_luong: 12 },
+        { id: 6, ten_linh_kien: 'Màn hình Laptop 15.6 inch FHD IPS 144Hz Chống Chói', gia_ban: 1850000, so_luong: 8 },
+        { id: 7, ten_linh_kien: 'Bàn phím Laptop Asus TUF Gaming Có LED RGB', gia_ban: 550000, so_luong: 14 },
+        { id: 8, ten_linh_kien: 'Keo tản nhiệt Arctic MX-4 & Vệ sinh máy chuyên sâu', gia_ban: 150000, so_luong: 100 },
+        { id: 9, ten_linh_kien: 'Sạc Laptop Macbook Type-C 67W Zin Chuẩn PD', gia_ban: 1100000, so_luong: 9 },
+        { id: 10, ten_linh_kien: 'RAM Corsair Vengeance 32GB (2x16GB) DDR4 3200MHz', gia_ban: 1950000, so_luong: 10 },
+        { id: 11, ten_linh_kien: 'RAM Crucial 16GB DDR4 3200MHz Sodimm Laptop', gia_ban: 850000, so_luong: 20 },
+        { id: 12, ten_linh_kien: 'Ổ cứng SSD Kingston A400 240GB SATA 3 (Nâng cấp máy cũ)', gia_ban: 450000, so_luong: 30 },
+        { id: 13, ten_linh_kien: 'Ổ cứng SSD Crucial P3 Plus 1TB PCIe Gen4 NVMe', gia_ban: 1750000, so_luong: 12 },
+        { id: 14, ten_linh_kien: 'Ổ cứng SSD Samsung 990 Pro 2TB Siêu Tốc Độ Cao', gia_ban: 4200000, so_luong: 5 },
+        { id: 15, ten_linh_kien: 'Pin Laptop Asus Zenbook / Vivobook 42Wh Zin', gia_ban: 820000, so_luong: 10 },
+        { id: 16, ten_linh_kien: 'Pin Laptop Lenovo Thinkpad T480 / T490 / E14', gia_ban: 890000, so_luong: 8 },
+        { id: 17, ten_linh_kien: 'Pin Laptop HP Pavilion 14 / 15 HT03XL Zin', gia_ban: 790000, so_luong: 14 },
+        { id: 18, ten_linh_kien: 'Pin Laptop Macbook Air M1 / M2 Zin Hãng', gia_ban: 1650000, so_luong: 7 },
+        { id: 19, ten_linh_kien: 'Màn hình Laptop 14.0 inch FHD IPS Siêu Sáng Slim 30 Pin', gia_ban: 1450000, so_luong: 10 },
+        { id: 20, ten_linh_kien: 'Màn hình Laptop 15.6 inch 2K QHD 165Hz Chuyên Đồ Họa', gia_ban: 2650000, so_luong: 5 },
+        { id: 21, ten_linh_kien: 'Hàn gia cố bản lề bung bể vỏ laptop (Bảo hành vĩnh viễn)', gia_ban: 250000, so_luong: 50 },
+        { id: 22, ten_linh_kien: 'Bàn phím Laptop Dell Inspiron / Vostro LED Trắng', gia_ban: 450000, so_luong: 15 },
+        { id: 23, ten_linh_kien: 'Bàn phím Laptop Lenovo Thinkpad Gõ Êm Chống Tràn Nước', gia_ban: 590000, so_luong: 10 },
+        { id: 24, ten_linh_kien: 'Sạc Laptop Type-C 65W Đa Năng GaN (Dell, HP, Asus, Lenovo)', gia_ban: 490000, so_luong: 25 },
+        { id: 25, ten_linh_kien: 'Sạc Laptop Dell 65W Chân Kim Nhỏ 4.5x3.0mm Zin', gia_ban: 350000, so_luong: 20 },
+        { id: 26, ten_linh_kien: 'Vệ sinh tra keo tản nhiệt gốm Thermal Grizzly Kryonaut (Gaming)', gia_ban: 250000, so_luong: 40 },
+        { id: 27, ten_linh_kien: 'Thay quạt tản nhiệt Laptop Dell / Asus / Acer kêu rè rè', gia_ban: 350000, so_luong: 15 },
+        { id: 28, 'ten_linh_kien': 'Cài đặt Windows 10 / 11 Pro Bản Quyền + Đủ Driver & Font', gia_ban: 100000, so_luong: 100 },
+        { id: 29, 'ten_linh_kien': 'Bộ phần mềm Văn phòng Office 365 + PDF + Gõ Tiếng Việt', gia_ban: 80000, so_luong: 100 },
+        { id: 30, 'ten_linh_kien': 'Cài đặt trọn bộ đồ họa Adobe 2024 (Photoshop, Illustrator, Premiere)', gia_ban: 150000, so_luong: 50 },
+        { id: 31, 'ten_linh_kien': 'Cứu dữ liệu ổ cứng bị Bad Sector / Format nhầm / Xóa nhầm', gia_ban: 350000, so_luong: 30 }
+    ],
+    khach_hang: [],
+    thiet_bi: [],
+    phieu_sua_chua: [],
+    phieu_linh_kien: [],
+    nhat_ky_sua_chua: [],
+    lich_hen: [],
+    danh_gia: [],
+    hinh_anh_phieu: []
+};
 
-    return {
-        nhan_vien: [
-            { id: 1, ten_dang_nhap: 'admin', ho_ten: 'Quản Trị Hệ Thống', vai_tro: 'ADMIN', mat_khau: hash, trang_thai: 'HOAT_DONG', ngay_tao: '2026-10-01T08:00:00Z' },
-            { id: 2, ten_dang_nhap: 'letan', ho_ten: 'Nguyễn Thị Lễ Tân', vai_tro: 'LE_TAN', mat_khau: hash, trang_thai: 'HOAT_DONG', ngay_tao: '2026-10-01T08:00:00Z' },
-            { id: 3, ten_dang_nhap: 'kythuat', ho_ten: 'Trần Kỹ Thuật Viên', vai_tro: 'KY_THUAT_VIEN', mat_khau: hash, trang_thai: 'HOAT_DONG', ngay_tao: '2026-10-01T08:00:00Z' },
-            { id: 4, ten_dang_nhap: 'giamdoc', ho_ten: 'Lê Tổng Giám Đốc', vai_tro: 'GIAM_DOC', mat_khau: hash, trang_thai: 'HOAT_DONG', ngay_tao: '2026-10-01T08:00:00Z' },
-            { id: 5, ten_dang_nhap: 'quanly', ho_ten: 'Phạm Quản Lý Cửa Hàng', vai_tro: 'QUAN_LY', mat_khau: hash, trang_thai: 'HOAT_DONG', ngay_tao: '2026-10-01T08:00:00Z' },
-            { id: 6, ten_dang_nhap: 'ketoan', ho_ten: 'Đặng Thu Ngân Kế Toán', vai_tro: 'KE_TOAN', mat_khau: hash, trang_thai: 'HOAT_DONG', ngay_tao: '2026-10-01T08:00:00Z' },
-            { id: 7, ten_dang_nhap: 'thukho', ho_ten: 'Võ Thủ Kho Linh Kiện', vai_tro: 'THU_KHO', mat_khau: hash, trang_thai: 'HOAT_DONG', ngay_tao: '2026-10-01T08:00:00Z' }
-        ],
-        khach_hang: [
-            { id: 1, ho_ten: 'Lê Trần Tuấn Minh', so_dien_thoai: '0901234567', zalo_id: '0901234567', la_sinh_vien: true, truong_hoc: 'Trường Đại học Văn Hiến (VHU)', ma_sinh_vien: '221A010123', diem_tich_luy: 120, hang_thanh_vien: 'BAC', ngay_tao: '2026-10-10T09:00:00Z' },
-            { id: 2, ho_ten: 'Trần Hoàng Bách', so_dien_thoai: '0912345678', zalo_id: '0912345678', la_sinh_vien: true, truong_hoc: 'Trường Đại học Bách Khoa - ĐHQG TP.HCM', ma_sinh_vien: '2014589', diem_tich_luy: 85, hang_thanh_vien: 'DONG', ngay_tao: '2026-10-11T10:00:00Z' },
-            { id: 3, ho_ten: 'Nguyễn Văn Khang', so_dien_thoai: '0988776655', zalo_id: '0988776655', la_sinh_vien: false, truong_hoc: '', ma_sinh_vien: '', diem_tich_luy: 200, hang_thanh_vien: 'VANG', ngay_tao: '2026-10-12T14:00:00Z' }
-        ],
-        thiet_bi: [
-            { id: 1, khach_hang_id: 1, ten_may: 'Laptop Dell Inspiron 5510', so_imei_serial: 'SN-DELL-8823', tinh_trang_may: 'Màn hình nhấp nháy, quạt kêu to', ngay_tao: '2026-10-10T09:05:00Z' },
-            { id: 2, khach_hang_id: 2, ten_may: 'MacBook Air M1 2020', so_imei_serial: 'SN-APPLE-M1-9921', tinh_trang_may: 'Bàn phím kẹt phím Space, pin chai 70%', ngay_tao: '2026-10-11T10:10:00Z' },
-            { id: 3, khach_hang_id: 3, ten_may: 'Laptop Asus ROG Strix G15', so_imei_serial: 'SN-ASUS-ROG-4412', tinh_trang_may: 'Cần nâng cấp SSD 500GB và vệ sinh tra keo', ngay_tao: '2026-10-12T14:15:00Z' }
-        ],
-        phieu_sua_chua: [
-            {
-                id: 1,
-                thiet_bi_id: 1,
-                ma_tra_cuu: 'RP-839400',
-                loai_dich_vu: 'OFFLINE',
-                trang_thai: 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN',
-                tong_tien: 850000,
-                giam_gia_sinh_vien: 127500, // 15%
-                tien_sau_giam: 722500,
-                la_sinh_vien: true,
-                truong_hoc: 'Trường Đại học Văn Hiến (VHU)',
-                ma_sinh_vien: '221A010123',
-                han_bao_hanh: '2027-01-16T12:00:00Z', // Còn hơn 80 ngày bảo hành
-                ngay_tao: '2026-10-10T09:10:00Z',
-                ngay_cap_nhat: '2026-10-12T11:00:00Z'
-            },
-            {
-                id: 2,
-                thiet_bi_id: 2,
-                ma_tra_cuu: 'RP-648045',
-                loai_dich_vu: 'OFFLINE',
-                trang_thai: 'CHỜ_KHÁCH_CHỐT_GIÁ',
-                tong_tien: 1200000,
-                giam_gia_sinh_vien: 180000, // 15%
-                tien_sau_giam: 1020000,
-                la_sinh_vien: true,
-                truong_hoc: 'Trường Đại học Bách Khoa - ĐHQG TP.HCM',
-                ma_sinh_vien: '2014589',
-                han_bao_hanh: '2027-01-20T12:00:00Z',
-                ngay_tao: '2026-10-11T10:15:00Z',
-                ngay_cap_nhat: '2026-10-12T15:00:00Z'
-            },
-            {
-                id: 3,
-                thiet_bi_id: 3,
-                ma_tra_cuu: 'RP-100299',
-                loai_dich_vu: 'OFFLINE',
-                trang_thai: 'ĐANG_SỬA',
-                tong_tien: 950000,
-                giam_gia_sinh_vien: 0,
-                tien_sau_giam: 950000,
-                la_sinh_vien: false,
-                truong_hoc: '',
-                ma_sinh_vien: '',
-                han_bao_hanh: '2027-04-16T12:00:00Z',
-                ngay_tao: '2026-10-12T14:20:00Z',
-                ngay_cap_nhat: '2026-10-12T16:00:00Z'
-            }
-        ],
-        linh_kien: [
-            { id: 1, ten_linh_kien: 'Màn hình LCD Dell 15.6 inch FHD IPS', gia_ban: 1450000, so_luong: 8, ngay_tao: '2026-10-01T08:00:00Z' },
-            { id: 2, ten_linh_kien: 'Bàn phím cơ DareU EK87 Tenkeyless', gia_ban: 500000, so_luong: 15, ngay_tao: '2026-10-01T08:00:00Z' },
-            { id: 3, ten_linh_kien: 'Ổ cứng SSD NVMe Kingston 500GB Gen 4', gia_ban: 850000, so_luong: 12, ngay_tao: '2026-10-01T08:00:00Z' },
-            { id: 4, ten_linh_kien: 'RAM Laptop Kingston 8GB DDR4 3200MHz', gia_ban: 450000, so_luong: 3, ngay_tao: '2026-10-01T08:00:00Z' }, // Cảnh báo tồn kho
-            { id: 5, ten_linh_kien: 'Pin Laptop Dell 42Wh 3-Cell Chính Hãng', gia_ban: 650000, so_luong: 2, ngay_tao: '2026-10-01T08:00:00Z' }, // Cảnh báo tồn kho
-            { id: 6, ten_linh_kien: 'Combo vệ sinh máy & tra keo gốm tản nhiệt Arctic MX-4', gia_ban: 150000, so_luong: 50, ngay_tao: '2026-10-01T08:00:00Z' }
-        ],
-        phieu_linh_kien: [
-            { id: 1, phieu_sua_chua_id: 1, linh_kien_id: 3, so_luong: 1, don_gia: 850000, so_serial: 'SN-SSD-KST-9872134', ngay_them: '2026-10-11T09:00:00Z' },
-            { id: 2, phieu_sua_chua_id: 2, linh_kien_id: 2, so_luong: 1, don_gia: 500000, so_serial: 'SN-KB-DAREU-554109', ngay_them: '2026-10-12T10:00:00Z' },
-            { id: 3, phieu_sua_chua_id: 2, linh_kien_id: 5, so_luong: 1, don_gia: 650000, so_serial: 'SN-BAT-DELL-441290', ngay_them: '2026-10-12T10:05:00Z' }
-        ],
-        hinh_anh_phieu: [
-            {
-                id: 1,
-                phieu_sua_chua_id: 1,
-                duong_dan_anh: 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=600&auto=format&fit=crop&q=80',
-                loai_anh: 'NGOAI_QUAN_TRUOC',
-                ghi_chu: 'Màn hình bị trầy nhẹ góc dưới bên phải lúc tiếp nhận tại 615 Âu Cơ',
-                ngay_tao: '2026-10-10T09:12:00Z'
-            },
-            {
-                id: 2,
-                phieu_sua_chua_id: 1,
-                duong_dan_anh: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600&auto=format&fit=crop&q=80',
-                loai_anh: 'BAN_PHIM_VO_MAY',
-                ghi_chu: 'Mặt C và bàn phím còn nguyên tem niêm phong',
-                ngay_tao: '2026-10-10T09:13:00Z'
-            },
-            {
-                id: 3,
-                phieu_sua_chua_id: 2,
-                duong_dan_anh: 'https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=600&auto=format&fit=crop&q=80',
-                loai_anh: 'NGOAI_QUAN_CAN_MOP',
-                ghi_chu: 'Vỏ nhôm bị cấn nhẹ góc trái cạnh cổng Type-C',
-                ngay_tao: '2026-10-11T10:20:00Z'
-            }
-        ],
-        lich_hen: [
-            { id: 1, khach_hang_id: 1, ngay_hen: '2026-10-20', gio_hen: '09:30', moTaLoi: 'Vệ sinh tra keo tản nhiệt và cài lại Windows', loai_dich_vu: 'TAI_CUA_HANG', trang_thai: 'CHO_XAC_NHAN' },
-            { id: 2, khach_hang_id: 2, ngay_hen: '2026-10-21', gio_hen: '14:00', moTaLoi: 'Hỗ trợ kiểm tra máy chạy chậm từ xa', loai_dich_vu: 'ONLINE_TUXA', trang_thai: 'CHO_XAC_NHAN' }
-        ],
-        nhat_ky_sua_chua: [
-            { id: 1, phieu_sua_chua_id: 1, trang_thai_moi: 'CHỜ_KHÁM', ghi_chu: 'Tiếp nhận máy tại quầy 615 Âu Cơ', ngay_tao: '2026-10-10T09:10:00Z' },
-            { id: 2, phieu_sua_chua_id: 1, trang_thai_moi: 'ĐANG_KIỂM_TRA', ghi_chu: 'KTV tháo máy kiểm tra bo mạch và SSD', ngay_tao: '2026-10-10T09:30:00Z' },
-            { id: 3, phieu_sua_chua_id: 1, trang_thai_moi: 'CHỜ_KHÁCH_CHỐT_GIÁ', ghi_chu: 'Báo giá thay SSD NVMe 500GB giá 850.000đ (Ưu đãi SV -15%)', ngay_tao: '2026-10-10T10:00:00Z' },
-            { id: 4, phieu_sua_chua_id: 1, trang_thai_moi: 'ĐANG_SỬA', ghi_chu: 'Khách hàng ĐÃ ĐỒNG Ý báo giá qua điện thoại', ngay_tao: '2026-10-10T10:15:00Z' },
-            { id: 5, phieu_sua_chua_id: 1, trang_thai_moi: 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN', ghi_chu: 'Đã hoàn tất sửa chữa, kích hoạt bảo hành điện tử 90 ngày', ngay_tao: '2026-10-12T11:00:00Z' },
-            { id: 6, phieu_sua_chua_id: 2, trang_thai_moi: 'CHỜ_KHÁCH_CHỐT_GIÁ', ghi_chu: 'Đã gửi báo giá thay bàn phím và pin cho khách duyệt', ngay_tao: '2026-10-12T15:00:00Z' }
-        ],
-        danh_gia: [
-            { id: 1, phieu_sua_chua_id: 1, so_sao: 5, nhan_xet: 'Dịch vụ tại 615 Âu Cơ rất chu đáo, KTV nhiệt tình giải thích, lại có giảm giá sinh viên và bảo hành điện tử tra cứu dễ dàng!', ngay_danh_gia: '2026-10-12T11:30:00Z' },
-            { id: 2, phieu_sua_chua_id: 3, so_sao: 5, nhan_xet: 'Máy sửa nhanh, theo dõi tiến độ qua mã QR tiện lợi không phải gọi điện hỏi.', ngay_danh_gia: '2026-10-13T09:00:00Z' }
-        ]
-    };
-}
-
-let store = null;
+let memoryStore = null;
 
 function loadStore() {
-    if (!store) {
-        if (fs.existsSync(DATA_FILE)) {
-            try {
-                store = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
-            } catch (e) {
-                store = getDefaultData();
-            }
+    if (memoryStore) return memoryStore;
+    try {
+        if (fs.existsSync(STORE_PATH)) {
+            const raw = fs.readFileSync(STORE_PATH, 'utf-8');
+            memoryStore = JSON.parse(raw);
         } else {
-            store = getDefaultData();
+            memoryStore = { ...INITIAL_STORE };
             saveStore();
         }
+    } catch (e) {
+        memoryStore = { ...INITIAL_STORE };
     }
-    return store;
+    return memoryStore;
 }
 
 function saveStore() {
+    if (!memoryStore) return;
     try {
-        fs.writeFileSync(DATA_FILE, JSON.stringify(store, null, 2), 'utf8');
-    } catch (e) {
-        console.error('Lỗi lưu data_store.json:', e);
-    }
+        fs.writeFileSync(STORE_PATH, JSON.stringify(memoryStore, null, 2), 'utf-8');
+    } catch (e) {}
 }
 
 module.exports = {
