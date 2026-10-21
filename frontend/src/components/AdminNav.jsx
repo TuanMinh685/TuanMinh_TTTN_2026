@@ -105,10 +105,10 @@ export default function AdminNav({ activeKey }) {
         {/* User Info & Role Badge */}
         <div>
           <div className="flex flex-wrap items-center gap-2.5">
-            <h1 className="text-xl font-extrabold text-brand-blue md:text-2xl">
+            <h1 className="text-xl font-bold text-brand-blue md:text-2xl">
               Hệ Thống Điều Hành & Quản Trị
             </h1>
-            <span className={`rounded-full border px-3 py-1 text-xs font-extrabold ${currentRoleInfo.badgeClass}`}>
+            <span className={`rounded-full border px-3 py-1 text-xs font-medium ${currentRoleInfo.badgeClass}`}>
               {currentRoleInfo.badge} • Level {currentRoleInfo.level}
             </span>
           </div>
@@ -121,13 +121,13 @@ export default function AdminNav({ activeKey }) {
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Quick switcher for testing */}
           <div className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5">
-            <span className="text-[11px] font-bold text-slate-500 whitespace-nowrap">⚡ Test vai trò:</span>
+            <span className="text-[11px] font-medium text-slate-500 whitespace-nowrap">⚡ Test vai trò:</span>
             <select
               value={username || (role === 'GIAM_DOC' ? 'giamdoc' : role === 'QUAN_LY' ? 'quanly' : 'letan')}
               disabled={switching}
               onChange={(e) => handleQuickSwitch(e.target.value)}
               aria-label="Chuyển vai trò test"
-              className="cursor-pointer bg-transparent text-xs font-extrabold text-brand-blue outline-none"
+              className="cursor-pointer bg-transparent text-xs font-medium text-slate-700 outline-none"
             >
               {QUICK_SWITCH_OPTIONS.map(opt => (
                 <option key={opt.username} value={opt.username}>
@@ -139,7 +139,7 @@ export default function AdminNav({ activeKey }) {
 
           <button
             onClick={handleLogout}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-100 hover:text-red-700 hover:border-red-200"
+            className="rounded-xl border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-100 hover:text-red-700 hover:border-red-200"
           >
             Đăng Xuất
           </button>
@@ -150,7 +150,7 @@ export default function AdminNav({ activeKey }) {
       <nav className="mt-5 flex flex-wrap gap-2 border-t border-slate-100 pt-4">
         <Link
           to="/admin"
-          className={`rounded-xl px-4 py-2 text-xs font-bold transition ${
+          className={`rounded-xl px-3.5 py-1.5 text-xs font-medium transition ${
             location.pathname === '/admin' && !activeKey
               ? 'bg-brand-blue text-white shadow-xs'
               : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
@@ -162,7 +162,7 @@ export default function AdminNav({ activeKey }) {
         {isExecutive && (
           <Link
             to="/admin/giam-doc"
-            className={`flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition ${
+            className={`flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-medium transition ${
               location.pathname === '/admin/giam-doc' || activeKey === 'GIAM_DOC'
                 ? 'bg-brand-blue text-white shadow-xs'
                 : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
@@ -175,7 +175,7 @@ export default function AdminNav({ activeKey }) {
         {isManagerOrAbove && (
           <Link
             to="/admin/quan-ly"
-            className={`flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition ${
+            className={`flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-medium transition ${
               location.pathname === '/admin/quan-ly' || activeKey === 'QUAN_LY'
                 ? 'bg-brand-blue text-white shadow-xs'
                 : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
@@ -188,7 +188,7 @@ export default function AdminNav({ activeKey }) {
         {isManagerOrAbove && (
           <Link
             to="/admin/nhan-su"
-            className={`flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition ${
+            className={`flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-medium transition ${
               location.pathname === '/admin/nhan-su' || activeKey === 'NHAN_SU'
                 ? 'bg-brand-blue text-white shadow-xs'
                 : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'

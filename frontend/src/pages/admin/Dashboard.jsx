@@ -127,6 +127,10 @@ function Dashboard() {
   const [notifications, setNotifications] = useState(() => {
     try {
       const saved = localStorage.getItem('ticketNotifications');
+      if (saved && (saved.includes('áº') || saved.includes('á»') || saved.includes('â€') || saved.includes('Ä‘') || saved.includes('Phiá') || saved.includes('Lá»'))) {
+        localStorage.removeItem('ticketNotifications');
+        return [];
+      }
       const parsed = saved ? JSON.parse(saved) : [];
       return Array.isArray(parsed) ? parsed.slice(0, 50).map(item => ({ ...item, read: item.read ?? true })) : [];
     } catch (error) {
@@ -414,7 +418,7 @@ function Dashboard() {
                 ticketCode: ticket.ma_phieu,
                 status: ticket.trang_thai,
                 title: isNewTicket ? 'Phiếu sửa chữa mới' : 'Phiếu đã cập nhật trạng thái',
-                description: `Phiếu ${ticket.ma_phieu} — ${ticket.trang_thai.replace(/_/g, ' ')}`,
+                description: `Phiếu ${ticket.ma_phieu} — ${STATUS_LABELS[ticket.trang_thai] || ticket.trang_thai}`,
                 createdAt: now,
                 read: false
               });
@@ -686,6 +690,7 @@ function Dashboard() {
   const clearNotifications = () => {
     setNotifications([]);
     setLatestNotice(null);
+    localStorage.removeItem('ticketNotifications');
   };
 
   const resetPartForm = () => {
@@ -936,47 +941,47 @@ function Dashboard() {
       <div className="mb-6 flex flex-wrap gap-2 border-b border-slate-200">
         <button 
           onClick={() => setActiveTab('TICKETS')}
-          className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'TICKETS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
+          className={`rounded-t-lg px-4 py-2.5 text-xs font-medium ${activeTab === 'TICKETS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
           📋 Phiếu sửa chữa
         </button>
         {canReceptionAction && (
           <button 
             onClick={() => setActiveTab('BOOKINGS')}
-            className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'BOOKINGS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
+            className={`rounded-t-lg px-4 py-2.5 text-xs font-medium ${activeTab === 'BOOKINGS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
             📅 Lịch hẹn
           </button>
         )}
         {canViewInventory && (
           <button
             onClick={() => setActiveTab('INVENTORY')}
-            className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'INVENTORY' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
+            className={`rounded-t-lg px-4 py-2.5 text-xs font-medium ${activeTab === 'INVENTORY' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
             📦 Kho linh kiện
           </button>
         )}
         {canTechAction && (
           <button
             onClick={() => setActiveTab('SOFTWARE')}
-            className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'SOFTWARE' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
+            className={`rounded-t-lg px-4 py-2.5 text-xs font-medium ${activeTab === 'SOFTWARE' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
             💿 Gói phần mềm
           </button>
         )}
         {canViewStats && (
           <button
             onClick={() => setActiveTab('STATS')}
-            className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'STATS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
+            className={`rounded-t-lg px-4 py-2.5 text-xs font-medium ${activeTab === 'STATS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
             📊 Báo cáo doanh thu
           </button>
         )}
         {canManageEmployees && (
           <button
             onClick={() => setActiveTab('EMPLOYEES')}
-            className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'EMPLOYEES' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
+            className={`rounded-t-lg px-4 py-2.5 text-xs font-medium ${activeTab === 'EMPLOYEES' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
             👥 Nhân sự &amp; Phân quyền ({employees.length})
           </button>
         )}
         <button
           onClick={() => setActiveTab('NOTIFICATIONS')}
-          className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'NOTIFICATIONS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
+          className={`rounded-t-lg px-4 py-2.5 text-xs font-medium ${activeTab === 'NOTIFICATIONS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
           🔔 Thông báo{notifications.length > 0 ? ` (${notifications.length})` : ''}
         </button>
       </div>
@@ -984,7 +989,7 @@ function Dashboard() {
       {activeTab === 'TICKETS' && (
         <div className="rounded-xl border-t-4 border-brand-blue bg-white p-5 shadow sm:p-6">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <h3 className="text-xl font-bold">Danh sách phiếu sửa chữa</h3>
+            <h3 className="text-lg font-bold text-slate-800">Danh sách phiếu sửa chữa</h3>
             <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
               <input
                 type="search"
@@ -998,7 +1003,7 @@ function Dashboard() {
                 <button
                   type="button"
                   onClick={() => setShowPosModal(true)}
-                  className="rounded-lg bg-brand-blue px-3.5 py-2 text-xs font-bold text-white hover:bg-blue-900 shadow-sm whitespace-nowrap"
+                  className="rounded-lg bg-brand-blue px-3.5 py-2 text-xs font-medium text-white hover:bg-blue-900 shadow-xs whitespace-nowrap"
                 >
                   + Tiếp Nhận Tại Quầy (POS)
                 </button>
@@ -1039,7 +1044,7 @@ function Dashboard() {
                   });
                   showToast('📥 Đã xuất Báo Cáo Phiếu Sửa Chữa (.xlsx) chuẩn doanh nghiệp!');
                 }}
-                className="rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-sm whitespace-nowrap"
+                className="rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 shadow-xs whitespace-nowrap"
               >
                 📊 Xuất Báo Cáo Excel (.xlsx)
               </button>
@@ -1060,10 +1065,8 @@ function Dashboard() {
                 key={tab.id}
                 type="button"
                 onClick={() => setStatusFilter(tab.id)}
-                className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition ${
-                  statusFilter === tab.id
-                    ? 'bg-brand-blue text-white shadow-sm'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                className={`rounded-full px-3 py-1 text-xs transition ${
+                  statusFilter === tab.id ? 'bg-brand-blue text-white font-medium shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 font-normal'
                 }`}
               >
                 {tab.label} ({tab.count})
@@ -1086,13 +1089,13 @@ function Dashboard() {
           <div className="overflow-x-auto">
           <table className="w-full min-w-[900px] text-left border-collapse">
             <thead>
-              <tr className="border-b-2 border-slate-200">
-                <th className="py-3 px-4">Mã Phiếu</th>
-                <th className="py-3 px-4">Khách hàng</th>
-                <th className="py-3 px-4">Lỗi mô tả</th>
-                <th className="py-3 px-4">Trạng thái</th>
-                <th className="py-3 px-4 text-right">Tổng Tiền</th>
-                <th className="py-3 px-4 text-center">Thao tác</th>
+              <tr className="border-b border-slate-200 bg-slate-50/70 text-xs font-medium text-slate-500 uppercase tracking-wider">
+                <th className="py-2.5 px-4 font-medium">Mã Phiếu</th>
+                <th className="py-2.5 px-4 font-medium">Khách hàng</th>
+                <th className="py-2.5 px-4 font-medium">Lỗi mô tả</th>
+                <th className="py-2.5 px-4 font-medium">Trạng thái</th>
+                <th className="py-2.5 px-4 font-medium text-right">Tổng Tiền</th>
+                <th className="py-2.5 px-4 font-medium text-center">Thao tác</th>
               </tr>
             </thead>
             <tbody>
@@ -1118,11 +1121,11 @@ function Dashboard() {
                     )}
                   </td>
                   <td className="py-3 px-4">
-                    <div className="font-semibold text-slate-800">{ticket.ho_ten_khach}</div>
+                    <div className="font-medium text-slate-800 text-sm">{ticket.ho_ten_khach}</div>
                     <div className="text-xs text-slate-400">{ticket.so_dien_thoai}</div>
                     {ticket.la_sinh_vien && (
                       <div className="mt-1">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
                           🎓 {ticket.truong_hoc || 'Sinh viên'} (-15%)
                         </span>
                       </div>
@@ -1130,7 +1133,7 @@ function Dashboard() {
                   </td>
                   <td className="py-3 px-4">{ticket.mo_ta_loi}</td>
                   <td className="py-3 px-4">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
                       ticket.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' || ticket.trang_thai === 'ĐÃ_SỬA_XONG'
                         ? 'bg-slate-100 text-slate-700 border-slate-200'
                         : 'bg-blue-50 text-brand-blue border-blue-200'
@@ -1161,32 +1164,32 @@ function Dashboard() {
                     <div className="flex flex-col gap-1.5 w-36 mx-auto">
                       {/* Nút hành động chính dịu nhẹ */}
                       {canReceptionAction && ticket.trang_thai === 'CHỜ_KHÁM' && (
-                        <button onClick={() => updateStatus(ticket.id, 'ĐANG_CHUẨN_ĐOÁN')} className="w-full bg-brand-blue text-white hover:bg-blue-900 px-2 py-1.5 rounded-lg font-bold text-xs transition shadow-2xs">
+                        <button onClick={() => updateStatus(ticket.id, 'ĐANG_CHUẨN_ĐOÁN')} className="w-full bg-brand-blue text-white hover:bg-blue-900 px-2 py-1.5 rounded-lg font-medium text-xs transition shadow-2xs">
                           Chuyển Kỹ Thuật
                         </button>
                       )}
                       {(canReceptionAction || canTechAction) && ticket.trang_thai === 'YÊU_CẦU_BẢO_HÀNH' && (
-                        <button onClick={() => updateStatus(ticket.id, 'ĐANG_SỬA')} className="w-full bg-brand-blue text-white hover:bg-blue-900 px-2 py-1.5 rounded-lg font-bold text-xs transition shadow-2xs">
+                        <button onClick={() => updateStatus(ticket.id, 'ĐANG_SỬA')} className="w-full bg-brand-blue text-white hover:bg-blue-900 px-2 py-1.5 rounded-lg font-medium text-xs transition shadow-2xs">
                           Tiếp Nhận Bảo Hành
                         </button>
                       )}
                       {canTechAction && ticket.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' && (
-                        <button onClick={() => updateStatus(ticket.id, 'ĐANG_SỬA')} className="w-full bg-brand-blue text-white hover:bg-blue-900 px-2 py-1.5 rounded-lg font-bold text-xs transition shadow-2xs">
+                        <button onClick={() => updateStatus(ticket.id, 'ĐANG_SỬA')} className="w-full bg-brand-blue text-white hover:bg-blue-900 px-2 py-1.5 rounded-lg font-medium text-xs transition shadow-2xs">
                           Tiến hành Sửa
                         </button>
                       )}
                       {(canReceptionAction || canTechAction) && ticket.trang_thai === 'CHỜ_KHÁCH_CHỐT_GIÁ' && (
-                        <button onClick={() => updateStatus(ticket.id, 'ĐANG_SỬA')} className="w-full bg-brand-blue text-white hover:bg-blue-900 px-2 py-1.5 rounded-lg font-bold text-xs transition shadow-2xs">
+                        <button onClick={() => updateStatus(ticket.id, 'ĐANG_SỬA')} className="w-full bg-brand-blue text-white hover:bg-blue-900 px-2 py-1.5 rounded-lg font-medium text-xs transition shadow-2xs">
                           Khách Chốt (Sửa)
                         </button>
                       )}
                       {canTechAction && ticket.trang_thai === 'ĐANG_SỬA' && (
-                        <button onClick={() => updateStatus(ticket.id, 'ĐÃ_SỬA_XONG')} className="w-full bg-brand-blue text-white hover:bg-blue-900 px-2 py-1.5 rounded-lg font-bold text-xs transition shadow-2xs">
+                        <button onClick={() => updateStatus(ticket.id, 'ĐÃ_SỬA_XONG')} className="w-full bg-brand-blue text-white hover:bg-blue-900 px-2 py-1.5 rounded-lg font-medium text-xs transition shadow-2xs">
                           ✓ Sửa Xong
                         </button>
                       )}
                       {canCashierAction && ticket.trang_thai === 'ĐÃ_SỬA_XONG' && (
-                        <button onClick={() => updateStatus(ticket.id, 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN')} className="w-full bg-brand-blue text-white hover:bg-blue-900 px-2 py-1.5 rounded-lg font-bold text-xs transition shadow-2xs">
+                        <button onClick={() => updateStatus(ticket.id, 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN')} className="w-full bg-brand-blue text-white hover:bg-blue-900 px-2 py-1.5 rounded-lg font-medium text-xs transition shadow-2xs">
                           Giao Khách & Thu Tiền
                         </button>
                       )}
@@ -1194,10 +1197,10 @@ function Dashboard() {
                       {/* Nhóm nút tác vụ linh kiện & báo giá */}
                       {canTechAction && (ticket.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' || ticket.trang_thai === 'ĐANG_SỬA') && (
                         <div className="grid grid-cols-2 gap-1">
-                          <button onClick={() => openPartModal(ticket.id)} className="bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 px-1 py-1 rounded-lg font-semibold text-[11px] transition" title="Thêm linh kiện">
+                          <button onClick={() => openPartModal(ticket.id)} className="bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 px-1 py-1 rounded-lg font-normal text-xs transition" title="Thêm linh kiện">
                             + Linh kiện
                           </button>
-                          <button onClick={() => updateStatus(ticket.id, 'CHỜ_KHÁCH_CHỐT_GIÁ')} className="bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 px-1 py-1 rounded-lg font-semibold text-[11px] transition" title="Gửi báo giá">
+                          <button onClick={() => updateStatus(ticket.id, 'CHỜ_KHÁCH_CHỐT_GIÁ')} className="bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 px-1 py-1 rounded-lg font-normal text-xs transition" title="Gửi báo giá">
                             Báo giá
                           </button>
                         </div>
@@ -1472,8 +1475,8 @@ function Dashboard() {
               .filter(notification => notificationFilter !== 'UNREAD' || !notification.read)
               .map(notification => (
               <article key={notification.id} className={`rounded-lg border p-4 ${notification.read ? 'border-slate-100 bg-white' : 'border-blue-100 bg-blue-50'}`}>
-                <p className="font-semibold text-slate-800">{notification.title || `Phiếu ${notification.ticketCode}: ${notification.status}`}</p>
-                {notification.description && <p className="mt-1 text-sm text-slate-600">{notification.description}</p>}
+                <p className="font-medium text-sm text-slate-800">{notification.title || `Phiếu ${notification.ticketCode}: ${notification.status}`}</p>
+                {notification.description && <p className="mt-1 text-xs text-slate-500 font-normal">{notification.description}</p>}
                 <p className="mt-1 text-xs text-slate-500">{notification.createdAt}</p>
               </article>
             ))}
@@ -1755,11 +1758,11 @@ function Dashboard() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b-2 border-slate-200">
-                <th className="py-3 px-4">Ngày / Giờ Hẹn</th>
-                <th className="py-3 px-4">Khách hàng</th>
-                <th className="py-3 px-4">Lỗi mô tả</th>
-                <th className="py-3 px-4">Trạng thái</th>
-                <th className="py-3 px-4 text-center">Thao tác</th>
+                <th className="py-2.5 px-4 font-medium">Ngày / Giờ Hẹn</th>
+                <th className="py-2.5 px-4 font-medium">Khách hàng</th>
+                <th className="py-2.5 px-4 font-medium">Lỗi mô tả</th>
+                <th className="py-2.5 px-4 font-medium">Trạng thái</th>
+                <th className="py-2.5 px-4 font-medium text-center">Thao tác</th>
               </tr>
             </thead>
             <tbody>
@@ -1889,12 +1892,12 @@ function Dashboard() {
               <table className="w-full min-w-[820px] text-left border-collapse">
                 <thead>
                   <tr className="border-b-2 border-slate-200 text-xs font-bold uppercase text-slate-500">
-                    <th className="py-3 px-4">Mã NV</th>
-                    <th className="py-3 px-4">Họ và Tên</th>
-                    <th className="py-3 px-4">Tài khoản</th>
-                    <th className="py-3 px-4">Chức vụ &amp; Cấp bậc</th>
-                    <th className="py-3 px-4 text-center">Trạng thái</th>
-                    <th className="py-3 px-4 text-right">Thao tác phân quyền</th>
+                    <th className="py-2.5 px-4 font-medium">Mã NV</th>
+                    <th className="py-2.5 px-4 font-medium">Họ và Tên</th>
+                    <th className="py-2.5 px-4 font-medium">Tài khoản</th>
+                    <th className="py-2.5 px-4 font-medium">Chức vụ &amp; Cấp bậc</th>
+                    <th className="py-2.5 px-4 font-medium text-center">Trạng thái</th>
+                    <th className="py-2.5 px-4 font-medium text-right">Thao tác phân quyền</th>
                   </tr>
                 </thead>
                 <tbody>

@@ -237,7 +237,7 @@ export default function EmployeeManagement() {
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-2xl">👥</span>
-                <h2 className="text-2xl font-extrabold tracking-tight">
+                <h2 className="text-2xl font-semibold tracking-tight">
                   Quản Trị Nhân Sự & Cấp Bậc Phân Quyền (RBAC)
                 </h2>
               </div>
@@ -256,7 +256,7 @@ export default function EmployeeManagement() {
 
             <button
               onClick={openCreateModal}
-              className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-extrabold text-brand-blue shadow-md transition hover:bg-slate-100 active:scale-95"
+              className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-brand-blue shadow-md transition hover:bg-slate-100 active:scale-95"
             >
               <span>➕</span> Tạo Tài Khoản Mới
             </button>
@@ -267,29 +267,29 @@ export default function EmployeeManagement() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
             <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Tổng Số Nhân Sự</p>
-            <p className="mt-2 text-3xl font-extrabold text-brand-blue">{totalCount}</p>
+            <p className="mt-2 text-3xl font-semibold text-brand-blue">{totalCount}</p>
             <p className="mt-1 text-xs text-slate-500">Đã đăng ký trong hệ thống</p>
           </div>
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
             <p className="text-xs font-bold uppercase tracking-wider text-slate-800">Đang Hoạt Động</p>
-            <p className="mt-2 text-3xl font-extrabold text-slate-800">{activeCount}</p>
+            <p className="mt-2 text-3xl font-semibold text-slate-800">{activeCount}</p>
             <p className="mt-1 text-xs text-emerald-600">Sẵn sàng tác nghiệp</p>
           </div>
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
             <p className="text-xs font-bold uppercase tracking-wider text-slate-800">Tạm Khóa Quyền</p>
-            <p className="mt-2 text-3xl font-extrabold text-slate-800">{lockedCount}</p>
+            <p className="mt-2 text-3xl font-semibold text-slate-800">{lockedCount}</p>
             <p className="mt-1 text-xs text-amber-600">Vô hiệu hóa đăng nhập</p>
           </div>
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
             <p className="text-xs font-bold uppercase tracking-wider text-slate-800">Cấp Bậc Quản Trị</p>
-            <p className="mt-2 text-3xl font-extrabold text-slate-800">6 Cấp Bậc</p>
+            <p className="mt-2 text-3xl font-semibold text-slate-800">6 Cấp Bậc</p>
             <p className="mt-1 text-xs text-purple-600">Phân tầng bảo mật nghiêm ngặt</p>
           </div>
         </div>
 
         {/* Hierarchical Role Matrix Visual Cards */}
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
-          <h3 className="text-base font-extrabold text-slate-800 mb-4 flex items-center gap-2">
+          <h3 className="text-base font-semibold text-slate-800 mb-4 flex items-center gap-2">
             <span>🛡️</span> Ma Trận Cấp Bậc & Quyền Hạn Trong Cửa Hàng
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -298,7 +298,7 @@ export default function EmployeeManagement() {
               return (
                 <div key={key} className="rounded-xl border border-slate-200 p-4 bg-slate-50/60 hover:bg-white hover:shadow-xs transition">
                   <div className="flex items-center justify-between mb-2">
-                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-extrabold border ${roleItem.badgeClass}`}>
+                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${roleItem.badgeClass}`}>
                       {roleItem.badge} • Level {roleItem.level}
                     </span>
                     <span className="text-xs font-bold text-slate-500">
@@ -316,7 +316,7 @@ export default function EmployeeManagement() {
         {/* Employee Table & Filter Controls */}
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between mb-6">
-            <h3 className="text-lg font-extrabold text-slate-800">
+            <h3 className="text-lg font-semibold text-slate-800">
               Danh Sách Tài Khoản Nhân Sự ({filteredEmployees.length} / {totalCount})
             </h3>
 
@@ -373,7 +373,7 @@ export default function EmployeeManagement() {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-200 bg-slate-50 text-[11px] font-extrabold uppercase text-slate-500">
+                  <tr className="border-b border-slate-200 bg-slate-50 text-[11px] font-semibold uppercase text-slate-500">
                     <th className="py-3 px-4">Nhân sự</th>
                     <th className="py-3 px-4">Tên đăng nhập</th>
                     <th className="py-3 px-4">Chức vụ & Cấp bậc</th>
@@ -393,11 +393,11 @@ export default function EmployeeManagement() {
                       <tr key={emp.id} className="hover:bg-slate-50/80 transition">
                         <td className="py-3.5 px-4">
                           <div className="flex items-center gap-2.5">
-                            <div className="h-8 w-8 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-black text-xs shrink-0">
+                            <div className="h-8 w-8 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-xs shrink-0">
                               {emp.ho_ten?.charAt(0)?.toUpperCase() || 'U'}
                             </div>
                             <div>
-                              <p className="font-extrabold text-slate-800 text-sm">
+                              <p className="font-semibold text-slate-800 text-sm">
                                 {emp.ho_ten}
                                 {isSelf && (
                                   <span className="ml-2 rounded-md bg-blue-100 px-1.5 py-0.5 text-[10px] font-bold text-blue-700">
@@ -494,7 +494,7 @@ export default function EmployeeManagement() {
           <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div>
-                <h3 className="text-lg font-extrabold text-slate-800">
+                <h3 className="text-lg font-semibold text-slate-800">
                   {editingEmployee ? `✏️ Phân Quyền: ${editingEmployee.ho_ten}` : '➕ Tạo Tài Khoản Nhân Sự Mới'}
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
@@ -604,7 +604,7 @@ export default function EmployeeManagement() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="rounded-xl bg-brand-blue px-5 py-2 font-extrabold text-white shadow-xs hover:bg-blue-900 disabled:opacity-50"
+                  className="rounded-xl bg-brand-blue px-5 py-2 font-semibold text-white shadow-xs hover:bg-blue-900 disabled:opacity-50"
                 >
                   {saving ? 'Đang lưu...' : editingEmployee ? 'Cập Nhật Quyền' : 'Tạo Tài Khoản'}
                 </button>

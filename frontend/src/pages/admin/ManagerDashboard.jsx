@@ -66,7 +66,7 @@ export default function ManagerDashboard() {
             <div>
               <div className="flex items-center gap-2.5">
                 <span className="text-3xl">🏬</span>
-                <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight">
+                <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
                   Cổng Điều Hành Vận Hành — Quản Lý Cửa Hàng
                 </h2>
               </div>
@@ -86,13 +86,13 @@ export default function ManagerDashboard() {
             <div className="flex shrink-0 flex-wrap gap-2">
               <Link
                 to="/admin/nhan-su"
-                className="rounded-xl bg-white px-4 py-2.5 text-xs font-extrabold text-blue-900 shadow-sm transition hover:bg-blue-50"
+                className="rounded-xl bg-white px-4 py-2.5 text-xs font-semibold text-blue-900 shadow-sm transition hover:bg-blue-50"
               >
                 👥 Quản Lý Nhân Sự
               </Link>
               <Link
                 to="/admin"
-                className="rounded-xl bg-white/10 border border-white/20 px-4 py-2.5 text-xs font-extrabold text-white shadow-sm transition hover:bg-white/20"
+                className="rounded-xl bg-white/10 border border-white/20 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-white/20"
               >
                 📋 Mở Bàn Vận Hành
               </Link>
@@ -113,7 +113,7 @@ export default function ManagerDashboard() {
               <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Đang Chuẩn Đoán & Tiếp Nhận</span>
               <span className="text-xl">🔍</span>
             </div>
-            <p className="mt-3 text-3xl font-black text-slate-800">{pendingIntake}</p>
+            <p className="mt-3 text-3xl font-bold text-slate-800">{pendingIntake}</p>
             <p className="mt-1 text-xs text-slate-500">Cần KTV hoàn tất chẩn đoán</p>
           </div>
 
@@ -122,7 +122,7 @@ export default function ManagerDashboard() {
               <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Chờ Khách Chốt Báo Giá</span>
               <span className="text-xl">⏳</span>
             </div>
-            <p className="mt-3 text-3xl font-black text-slate-800">{waitingApproval}</p>
+            <p className="mt-3 text-3xl font-bold text-slate-800">{waitingApproval}</p>
             <p className="mt-1 text-xs text-slate-500">Đã gửi báo giá qua cổng QR</p>
           </div>
 
@@ -131,7 +131,7 @@ export default function ManagerDashboard() {
               <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Đang Trong Quá Trình Sửa</span>
               <span className="text-xl">🔧</span>
             </div>
-            <p className="mt-3 text-3xl font-black text-slate-800">{inRepair}</p>
+            <p className="mt-3 text-3xl font-bold text-slate-800">{inRepair}</p>
             <p className="mt-1 text-xs text-slate-500">Khách đã duyệt tiến hành</p>
           </div>
 
@@ -140,7 +140,7 @@ export default function ManagerDashboard() {
               <span className="text-xs font-bold uppercase tracking-wider text-blue-700">Lịch Hẹn Cần Duyệt Gấp</span>
               <span className="text-xl">📅</span>
             </div>
-            <p className="mt-3 text-3xl font-black text-blue-900">{pendingBookings}</p>
+            <p className="mt-3 text-3xl font-bold text-blue-900">{pendingBookings}</p>
             <p className="mt-1 text-xs text-slate-500">Khách đặt online chờ xếp ca</p>
           </div>
         </div>
@@ -151,7 +151,7 @@ export default function ManagerDashboard() {
           <section className="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-base font-extrabold text-slate-800">
+                <h3 className="text-base font-semibold text-slate-800">
                   Tiến Độ Các Phiếu Sửa Chữa Mới Nhất
                 </h3>
                 <p className="text-xs text-slate-500">Giám sát trạng thái điều phối giữa Lễ tân và Kỹ thuật viên</p>
@@ -167,7 +167,7 @@ export default function ManagerDashboard() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
-                    <tr className="border-b border-slate-200 bg-slate-50 text-[11px] font-extrabold uppercase text-slate-500">
+                    <tr className="border-b border-slate-200 bg-slate-50 text-[11px] font-semibold uppercase text-slate-500">
                       <th className="py-2.5 px-3">Mã phiếu</th>
                       <th className="py-2.5 px-3">Khách hàng</th>
                       <th className="py-2.5 px-3">Thiết bị</th>
@@ -212,7 +212,7 @@ export default function ManagerDashboard() {
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs flex flex-col">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-base font-extrabold text-slate-800">
+                <h3 className="text-base font-semibold text-slate-800">
                   Cảnh Báo Linh Kiện (Sắp Hết)
                 </h3>
                 <p className="text-xs text-slate-500">Mức tồn kho &le; 5 cần nhập gấp</p>
@@ -227,7 +227,7 @@ export default function ManagerDashboard() {
                     <p className="font-bold text-slate-800 text-xs">{part.ten_linh_kien}</p>
                     <p className="text-[11px] text-slate-500 mt-0.5">Mã: {part.ma_linh_kien} • Đơn giá: {Number(part.don_gia || 0).toLocaleString('vi-VN')} đ</p>
                   </div>
-                  <span className="rounded-lg bg-red-100 border border-red-300 px-2.5 py-1 text-xs font-black text-red-700 shrink-0">
+                  <span className="rounded-lg bg-red-100 border border-red-300 px-2.5 py-1 text-xs font-bold text-red-700 shrink-0">
                     Còn {part.so_luong_ton} cái
                   </span>
                 </div>
@@ -259,7 +259,7 @@ export default function ManagerDashboard() {
           >
             <div>
               <p className="text-xs font-bold text-brand-blue uppercase tracking-wider">Đội Ngũ Cửa Hàng</p>
-              <h4 className="text-base font-extrabold text-slate-800 mt-1">Phân Quyền Nhân Sự</h4>
+              <h4 className="text-base font-semibold text-slate-800 mt-1">Phân Quyền Nhân Sự</h4>
               <p className="text-xs text-slate-500 mt-1">Cấp tài khoản & điều phối ca trực</p>
             </div>
             <span className="text-2xl group-hover:translate-x-1 transition-transform">👥 →</span>
@@ -272,7 +272,7 @@ export default function ManagerDashboard() {
             >
               <div>
                 <p className="text-xs font-bold text-brand-blue uppercase tracking-wider">Chiến Lược C-Level</p>
-                <h4 className="text-base font-extrabold text-slate-800 mt-1">Trang Giám Đốc</h4>
+                <h4 className="text-base font-semibold text-slate-800 mt-1">Trang Giám Đốc</h4>
                 <p className="text-xs text-slate-500 mt-1">Báo cáo tài chính & chỉ số cấp cao</p>
               </div>
               <span className="text-2xl group-hover:translate-x-1 transition-transform">👑 →</span>
@@ -285,7 +285,7 @@ export default function ManagerDashboard() {
           >
             <div>
               <p className="text-xs font-bold text-blue-700 uppercase tracking-wider">Tác Nghiệp Thực Tế</p>
-              <h4 className="text-base font-extrabold text-slate-800 mt-1">Bàn Vận Hành Kỹ Thuật</h4>
+              <h4 className="text-base font-semibold text-slate-800 mt-1">Bàn Vận Hành Kỹ Thuật</h4>
               <p className="text-xs text-slate-500 mt-1">Duyệt phiếu, tạo QR và xuất hóa đơn</p>
             </div>
             <span className="text-2xl group-hover:translate-x-1 transition-transform">📋 →</span>

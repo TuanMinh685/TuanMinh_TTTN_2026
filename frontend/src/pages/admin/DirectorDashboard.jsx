@@ -96,7 +96,7 @@ export default function DirectorDashboard() {
             <div>
               <div className="flex items-center gap-2.5">
                 <span className="text-3xl">👑</span>
-                <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight">
+                <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
                   Cổng Điều Hành Chiến Lược — Ban Giám Đốc
                 </h2>
               </div>
@@ -117,7 +117,7 @@ export default function DirectorDashboard() {
             <div className="flex shrink-0 flex-wrap items-center gap-2 bg-white/10 p-1.5 rounded-2xl backdrop-blur-xs border border-white/10">
               <button
                 onClick={() => setPeriod('week')}
-                className={`rounded-xl px-4 py-2 text-xs font-extrabold transition ${
+                className={`rounded-xl px-4 py-2 text-xs font-semibold transition ${
                   period === 'week' ? 'bg-white text-brand-blue shadow-md' : 'text-blue-100 hover:text-white'
                 }`}
               >
@@ -125,7 +125,7 @@ export default function DirectorDashboard() {
               </button>
               <button
                 onClick={() => setPeriod('month')}
-                className={`rounded-xl px-4 py-2 text-xs font-extrabold transition ${
+                className={`rounded-xl px-4 py-2 text-xs font-semibold transition ${
                   period === 'month' ? 'bg-white text-brand-blue shadow-md' : 'text-blue-100 hover:text-white'
                 }`}
               >
@@ -133,7 +133,7 @@ export default function DirectorDashboard() {
               </button>
               <button
                 onClick={handleExportDirectorExcel}
-                className="rounded-xl bg-white px-4 py-2 text-xs font-extrabold text-brand-blue shadow-md transition hover:bg-slate-100"
+                className="rounded-xl bg-white px-4 py-2 text-xs font-semibold text-brand-blue shadow-md transition hover:bg-slate-100"
               >
                 📊 Xuất Báo Cáo Excel (.xlsx)
               </button>
@@ -155,7 +155,7 @@ export default function DirectorDashboard() {
               <span className="text-xs font-bold uppercase tracking-wider text-brand-blue">Tổng Doanh Thu Thực Thu</span>
               <span className="text-xl">💰</span>
             </div>
-            <p className="mt-3 text-2xl lg:text-3xl font-black text-brand-blue">
+            <p className="mt-3 text-2xl lg:text-3xl font-bold text-brand-blue">
               {totalRevenue.toLocaleString('vi-VN')} <span className="text-sm font-bold text-slate-500">đ</span>
             </p>
             <p className="mt-1 text-xs text-slate-500">
@@ -169,7 +169,7 @@ export default function DirectorDashboard() {
               <span className="text-xs font-bold uppercase tracking-wider text-brand-blue">Doanh Thu Linh Kiện</span>
               <span className="text-xl">📦</span>
             </div>
-            <p className="mt-3 text-2xl lg:text-3xl font-black text-slate-800">
+            <p className="mt-3 text-2xl lg:text-3xl font-bold text-slate-800">
               {partsRevenue.toLocaleString('vi-VN')} <span className="text-sm font-bold text-slate-500">đ</span>
             </p>
             <p className="mt-1 text-xs text-slate-500">
@@ -183,7 +183,7 @@ export default function DirectorDashboard() {
               <span className="text-xs font-bold uppercase tracking-wider text-brand-blue">Doanh Thu Công Kỹ Thuật</span>
               <span className="text-xl">🔧</span>
             </div>
-            <p className="mt-3 text-2xl lg:text-3xl font-black text-slate-800">
+            <p className="mt-3 text-2xl lg:text-3xl font-bold text-slate-800">
               {serviceRevenue.toLocaleString('vi-VN')} <span className="text-sm font-bold text-slate-500">đ</span>
             </p>
             <p className="mt-1 text-xs text-slate-500">
@@ -197,7 +197,7 @@ export default function DirectorDashboard() {
               <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Phiếu Hoàn Tất Thu Tiền</span>
               <span className="text-xl">✅</span>
             </div>
-            <p className="mt-3 text-2xl lg:text-3xl font-black text-slate-900">
+            <p className="mt-3 text-2xl lg:text-3xl font-bold text-slate-900">
               {completedTickets} <span className="text-sm font-bold text-slate-500">ca</span>
             </p>
             <p className="mt-1 text-xs text-emerald-600 font-bold">
@@ -212,12 +212,12 @@ export default function DirectorDashboard() {
           <div className="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-base font-extrabold text-slate-800">
+                <h3 className="text-base font-semibold text-slate-800">
                   Biểu Đồ Xu Hướng Doanh Thu ({period === 'week' ? '7 Ngày Gần Nhất' : 'Tháng Hiện Tại'})
                 </h3>
                 <p className="text-xs text-slate-500">Dữ liệu thực tế ghi nhận từ hệ thống máy chủ</p>
               </div>
-              <span className="text-xs font-extrabold px-3 py-1 rounded-full bg-purple-100 text-purple-800 border border-slate-200">
+              <span className="text-xs font-semibold px-3 py-1 rounded-full bg-purple-100 text-purple-800 border border-slate-200">
                 Doanh thu VND
               </span>
             </div>
@@ -256,7 +256,7 @@ export default function DirectorDashboard() {
 
           {/* Biểu đồ Phân Bố Trạng Thái Phiếu */}
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs flex flex-col">
-            <h3 className="text-base font-extrabold text-slate-800 mb-1">
+            <h3 className="text-base font-semibold text-slate-800 mb-1">
               Cơ Cấu Trạng Thái Sửa Chữa
             </h3>
             <p className="text-xs text-slate-500 mb-4">Tỷ lệ các ca xử lý trong toàn chuỗi</p>
@@ -297,7 +297,7 @@ export default function DirectorDashboard() {
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-base font-extrabold text-slate-800">
+              <h3 className="text-base font-semibold text-slate-800">
                 Phiếu Sửa Chữa Đang Tác Nghiệp (Live Operations)
               </h3>
               <p className="text-xs text-slate-500">Giám sát các ca xử lý mới nhất trong toàn hệ thống</p>
@@ -310,7 +310,7 @@ export default function DirectorDashboard() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50 text-[11px] font-extrabold uppercase text-slate-500">
+                <tr className="border-b border-slate-200 bg-slate-50 text-[11px] font-semibold uppercase text-slate-500">
                   <th className="py-2.5 px-3">Mã phiếu</th>
                   <th className="py-2.5 px-3">Khách hàng</th>
                   <th className="py-2.5 px-3">Thiết bị</th>
@@ -352,7 +352,7 @@ export default function DirectorDashboard() {
           >
             <div>
               <p className="text-xs font-bold text-brand-blue uppercase tracking-wider">Bộ Phận Nhân Sự</p>
-              <h4 className="text-base font-extrabold text-slate-800 mt-1">Phân Quyền & Cấp Bậc</h4>
+              <h4 className="text-base font-semibold text-slate-800 mt-1">Phân Quyền & Cấp Bậc</h4>
               <p className="text-xs text-slate-500 mt-1">Quản lý {employeeCount} tài khoản 6 cấp bậc</p>
             </div>
             <span className="text-2xl group-hover:translate-x-1 transition-transform">👥 →</span>
@@ -364,7 +364,7 @@ export default function DirectorDashboard() {
           >
             <div>
               <p className="text-xs font-bold text-brand-blue uppercase tracking-wider">Cửa Hàng Chi Nhánh</p>
-              <h4 className="text-base font-extrabold text-slate-800 mt-1">Điều Hành Quản Lý</h4>
+              <h4 className="text-base font-semibold text-slate-800 mt-1">Điều Hành Quản Lý</h4>
               <p className="text-xs text-slate-500 mt-1">Giám sát tiếp nhận quầy & kỹ thuật viên</p>
             </div>
             <span className="text-2xl group-hover:translate-x-1 transition-transform">🏬 →</span>
@@ -376,7 +376,7 @@ export default function DirectorDashboard() {
           >
             <div>
               <p className="text-xs font-bold text-brand-blue uppercase tracking-wider">Bàn Vận Hành Kỹ Thuật</p>
-              <h4 className="text-base font-extrabold text-slate-800 mt-1">Kho & Phiếu Sửa Chữa</h4>
+              <h4 className="text-base font-semibold text-slate-800 mt-1">Kho & Phiếu Sửa Chữa</h4>
               <p className="text-xs text-slate-500 mt-1">Tác nghiệp trực tiếp mọi luồng hệ thống</p>
             </div>
             <span className="text-2xl group-hover:translate-x-1 transition-transform">📋 →</span>
