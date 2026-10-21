@@ -657,6 +657,7 @@ function Dashboard() {
     }
   };
 
+  
   const selectSoftwareTicket = (ticketId) => {
     setSelectedSoftwareTicketId(ticketId);
     const ticket = tickets.find(item => String(item.id) === ticketId);
@@ -665,6 +666,24 @@ function Dashboard() {
   };
 
   const toggleSoftwarePackage = (packageName) => {
+    let currentTicketId = selectedSoftwareTicketId;
+    if (!currentTicketId) {
+      if (tickets.length > 0) {
+        const activeTicket = tickets.find(t => t.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' || t.trang_thai === 'ĐANG_SỬA') || tickets[0];
+        currentTicketId = String(activeTicket.id);
+        setSelectedSoftwareTicketId(currentTicketId);
+        const initialPackages = activeTicket?.software_packages || [];
+        const nextPackages = initialPackages.includes(packageName)
+          ? initialPackages.filter(item => item !== packageName)
+          : [...initialPackages, packageName];
+        setSelectedSoftwarePackages(nextPackages);
+        setSoftwarePackageError('');
+        return;
+      } else {
+        setSoftwarePackageError('⚠️ Hiện chưa có phiếu sửa chữa nào trong hệ thống để gán phần mềm.');
+        return;
+      }
+    }
     setSelectedSoftwarePackages(previous => previous.includes(packageName)
       ? previous.filter(item => item !== packageName)
       : [...previous, packageName]);
@@ -699,6 +718,7 @@ function Dashboard() {
       setSoftwarePackageError(error.response?.data?.message || 'Không lưu được các gói phần mềm. Vui lòng thử lại.');
     } finally {
       setSavingSoftwarePackages(false);
+      showToast('✅ Đã lưu danh sách gói phần mềm vào phiếu thành công!');
     }
   };
 
@@ -979,7 +999,16 @@ function Dashboard() {
         )}
         {canTechAction && (
           <button
-            onClick={() => setActiveTab('SOFTWARE')}
+            onClick={() => {
+              setActiveTab('SOFTWARE');
+              if (!selectedSoftwareTicketId && tickets.length > 0) {
+                const target = tickets.find(t => t.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' || t.trang_thai === 'ĐANG_SỬA') || tickets[0];
+                if (target) {
+                  setSelectedSoftwareTicketId(String(target.id));
+                  setSelectedSoftwarePackages(target.software_packages || []);
+                }
+              }
+            }}
             className={`rounded-t-lg px-4 py-2.5 text-xs font-medium ${activeTab === 'SOFTWARE' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
             💿 Gói phần mềm
           </button>
@@ -1382,7 +1411,7 @@ function Dashboard() {
                 onChange={event => selectSoftwareTicket(event.target.value)}
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-normal"
               >
-                <option value="">Chọn phiếu sửa chữa</option>
+                <option value="">-- Chọn phiếu sửa chữa để gán phần mềm --</option>
                 {tickets.map(ticket => (
                   <option key={ticket.id} value={ticket.id}>
                     {ticket.ma_phieu} — {ticket.ho_ten_khach} ({ticket.trang_thai.replace(/_/g, ' ')})
@@ -1423,7 +1452,6 @@ function Dashboard() {
                       type="checkbox"
                       checked={checked}
                       onChange={() => toggleSoftwarePackage(option.name)}
-                      disabled={!selectedSoftwareTicketId}
                       className="mt-1 h-4 w-4 accent-[#0b5b9c]"
                     />
                     <span>
