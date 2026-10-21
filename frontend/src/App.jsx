@@ -9,6 +9,7 @@ const BookingForm = lazy(() => import('./pages/public/BookingForm'));
 const Pricing = lazy(() => import('./pages/public/Pricing'));
 const PhoneTracking = lazy(() => import('./pages/public/PhoneTracking'));
 const OnlineIntakeForm = lazy(() => import('./pages/public/OnlineIntakeForm'));
+const Payment = lazy(() => import('./pages/public/Payment'));
 const Login = lazy(() => import('./pages/admin/Login'));
 const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
 const DirectorDashboard = lazy(() => import('./pages/admin/DirectorDashboard'));
@@ -230,6 +231,7 @@ function AppContent() {
           <nav className="hidden lg:flex items-center text-xs font-bold text-slate-600 uppercase h-full">
             <Link to="/" className="px-3 xl:px-4 h-full flex items-center hover:text-brand-orange transition-colors">Trang chủ</Link>
             <Link to="/tra-cuu" className="px-3 xl:px-4 h-full flex items-center hover:text-brand-orange transition-colors">Tra Cứu Tiến Độ</Link>
+            <Link to="/thanh-toan" className="px-3 xl:px-4 h-full flex items-center hover:text-brand-orange transition-colors text-brand-blue font-extrabold">💳 Thanh Toán</Link>
             <Link to="/dat-lich" className="px-3 xl:px-4 h-full flex items-center hover:text-brand-orange transition-colors">Đặt Lịch Hẹn</Link>
             <Link to="/bang-gia" className="px-3 xl:px-4 h-full flex items-center hover:text-brand-orange transition-colors">Bảng Giá</Link>
             
@@ -384,6 +386,9 @@ function AppContent() {
               <Link to="/tra-cuu" className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-slate-100 text-brand-orange font-bold">
                 <span className="text-xl">📷</span> Tra cứu tiến độ & Quét QR
               </Link>
+              <Link to="/thanh-toan" className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-slate-100 text-brand-blue font-bold">
+                <span className="text-xl">💳</span> Cổng thanh toán & Hóa đơn
+              </Link>
               <Link to="/intake" className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-slate-100">
                 <span className="text-xl">📝</span> Tạo phiếu sửa chữa tại quầy
               </Link>
@@ -440,6 +445,9 @@ function AppContent() {
             <Route path="/dat-lich" element={<BookingForm />} />
             <Route path="/bang-gia" element={<Pricing />} />
             <Route path="/pricing" element={<Pricing />} />
+            <Route path="/thanh-toan" element={<Payment />} />
+            <Route path="/thanh-toan/:ticketCode" element={<Payment />} />
+            <Route path="/payment" element={<Payment />} />
 
             {/* Các trang tra cứu & tiếp nhận */}
             <Route path="/tra-cuu" element={<PhoneTracking />} />

@@ -5,7 +5,7 @@ const trackTicket = async (ticketCode) => {
     // Lấy thông tin cơ bản
     const result = await pool.query(`
         SELECT 
-            p.id, p.ma_tra_cuu, p.trang_thai, p.loai_dich_vu, p.ma_ultraviewer, p.tong_tien, p.han_bao_hanh, p.ngay_tao, p.ngay_cap_nhat,
+            p.id, p.ma_tra_cuu, p.trang_thai, p.loai_dich_vu, p.ma_ultraviewer, p.tong_tien, p.han_bao_hanh, p.phuong_thuc_thanh_toan, p.ngay_thanh_toan, p.ngay_tao, p.ngay_cap_nhat,
             k.ho_ten, k.so_dien_thoai, k.la_sinh_vien, k.truong_hoc, k.ma_sinh_vien,
             t.ten_may, t.so_imei_serial, t.tinh_trang_may,
             EXISTS (

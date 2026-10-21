@@ -729,6 +729,16 @@ function Tracking() {
                         </div>
                       </div>
                     )}
+
+                    <div className="mt-3">
+                      <Link
+                        to={`/thanh-toan/${ticketCode}`}
+                        className="w-full py-3 px-4 bg-brand-blue hover:bg-blue-800 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-md shadow-blue-900/10 text-center"
+                      >
+                        <span>💳</span>
+                        <span>Mở Cổng Thanh Toán &amp; Hóa Đơn Trực Tuyến</span>
+                      </Link>
+                    </div>
                   </div>
                 </div>
               ) : (

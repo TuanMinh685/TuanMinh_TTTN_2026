@@ -181,7 +181,7 @@ const submitIntake = async (customerData) => {
 
 const getAllTickets = async () => {
     const query = `
-        SELECT p.id, p.ma_tra_cuu as ma_phieu, p.ma_tra_cuu, p.trang_thai, p.loai_dich_vu, p.ma_ultraviewer, p.tong_tien, p.han_bao_hanh, p.ngay_tao, p.ngay_cap_nhat,
+        SELECT p.id, p.ma_tra_cuu as ma_phieu, p.ma_tra_cuu, p.trang_thai, p.loai_dich_vu, p.ma_ultraviewer, p.tong_tien, p.han_bao_hanh, p.phuong_thuc_thanh_toan, p.ngay_thanh_toan, p.ngay_tao, p.ngay_cap_nhat,
             k.ho_ten as ho_ten_khach, k.so_dien_thoai, k.la_sinh_vien, k.truong_hoc, k.ma_sinh_vien as mssv,
             t.ten_may as ten_thiet_bi, t.so_imei_serial, t.tinh_trang_may as mo_ta_loi
         FROM phieu_sua_chua p
@@ -251,7 +251,7 @@ const updateTicketSoftwarePackages = async (ticketId, packages) => {
     }
 };
 
-const updateTicketStatus = async (idOrCode, status, ghiChu = '', employeeId = null) => {
+const updateTicketStatus = async (idOrCode, status, ghiChu = '', employeeId = null, paymentMethod = null) => {
     // Cho phép truyền ID số hoặc Mã phiếu (VD: RP-123456)
     const isNumericId = /^\d+$/.test(String(idOrCode).trim());
     const lookupRes = isNumericId
@@ -273,11 +273,19 @@ const updateTicketStatus = async (idOrCode, status, ghiChu = '', employeeId = nu
             han_bao_hanh = CASE
                 WHEN $1::varchar = 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' AND han_bao_hanh IS NULL THEN CURRENT_TIMESTAMP + INTERVAL '180 days'
                 ELSE han_bao_hanh
+            END,
+            ngay_thanh_toan = CASE
+                WHEN $1::varchar = 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' AND ngay_thanh_toan IS NULL THEN CURRENT_TIMESTAMP
+                ELSE ngay_thanh_toan
+            END,
+            phuong_thuc_thanh_toan = CASE
+                WHEN $3::varchar IS NOT NULL AND $3::varchar != '' THEN $3::varchar
+                ELSE phuong_thuc_thanh_toan
             END
         WHERE id = $2 
-        RETURNING id, ma_tra_cuu, trang_thai, ngay_cap_nhat, han_bao_hanh
+        RETURNING id, ma_tra_cuu, trang_thai, ngay_cap_nhat, han_bao_hanh, ngay_thanh_toan, phuong_thuc_thanh_toan
     `;
-    const { rows } = await pool.query(query, [status, ticketId]);
+    const { rows } = await pool.query(query, [status, ticketId, paymentMethod]);
     
     if (rows.length > 0) {
         const defaultNoteMap = {

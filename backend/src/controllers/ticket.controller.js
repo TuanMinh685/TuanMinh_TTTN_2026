@@ -164,6 +164,7 @@ const updateTicketStatus = async (req, res, next) => {
         const { id } = req.params;
         const rawStatus = req.body.trang_thai || req.body.status;
         const ghi_chu = req.body.ghi_chu || req.body.note || '';
+        const phuong_thuc_thanh_toan = req.body.phuong_thuc_thanh_toan || req.body.paymentMethod || null;
         const userRole = req.user?.Role;
         const employeeId = req.user?.AccountID || null;
 
@@ -184,7 +185,7 @@ const updateTicketStatus = async (req, res, next) => {
             });
         }
 
-        const data = await ticketService.updateTicketStatus(id, trang_thai, ghi_chu, employeeId);
+        const data = await ticketService.updateTicketStatus(id, trang_thai, ghi_chu, employeeId, phuong_thuc_thanh_toan);
         if (!data) {
             return res.status(404).json({
                 success: false,

@@ -93,7 +93,14 @@ function Dashboard() {
 
   const [tickets, setTickets] = useState([]);
   const [bookings, setBookings] = useState([]);
-  const [activeTab, setActiveTab] = useState(() => (role === 'THU_KHO' ? 'INVENTORY' : 'TICKETS'));
+  const [activeTab, setActiveTab] = useState(() => (role === 'THU_KHO' ? 'INVENTORY' : role === 'KE_TOAN' ? 'CASHIER' : 'TICKETS'));
+  const [cashierTicket, setCashierTicket] = useState(null);
+  const [cashierMethod, setCashierMethod] = useState('TIEN_MAT');
+  const [cashierReceived, setCashierReceived] = useState('');
+  const [cashierNote, setCashierNote] = useState('');
+  const [cashierProcessing, setCashierProcessing] = useState(false);
+  const [cashierSearch, setCashierSearch] = useState('');
+  const [cashierFilter, setCashierFilter] = useState('PENDING');
   const [stats, setStats] = useState({ revenueData: [], statusData: [], totalRevenue: 0, completedTickets: 0, totalPartsRevenue: 0 });
   const [ticketSearch, setTicketSearch] = useState('');
   const [parts, setParts] = useState([]);
@@ -757,11 +764,12 @@ function Dashboard() {
     }
   };
 
-  const updateStatus = async (id, status) => {
+  const updateStatus = async (id, status, customNote = '', paymentMethod = null) => {
     try {
       await api.patch(`/tickets/${id}/status`, {
         trang_thai: status,
-        ghi_chu: statusNote.trim() || undefined
+        ghi_chu: (customNote || statusNote).trim() || undefined,
+        phuong_thuc_thanh_toan: paymentMethod || undefined
       });
       setStatusNote('');
       showToast(`✅ Đã chuyển trạng thái sang: ${status.replace(/_/g, ' ')}`);
@@ -772,6 +780,42 @@ function Dashboard() {
     } catch (err) {
       console.error('Không cập nhật được trạng thái phiếu:', err);
       showToast(`❌ ${err.response?.data?.message || 'Lỗi cập nhật trạng thái'}`);
+    }
+  };
+
+  const openCashierModal = (ticket) => {
+    const isStudent = Boolean(ticket.la_sinh_vien || ticket.mssv);
+    const finalAmount = isStudent ? Math.round(Number(ticket.tong_tien || 0) * 0.85) : Number(ticket.tong_tien || 0);
+    setCashierTicket(ticket);
+    setCashierMethod('TIEN_MAT');
+    setCashierReceived(String(finalAmount));
+    setCashierNote('');
+  };
+
+  const confirmCashierPayment = async () => {
+    if (!cashierTicket) return;
+    setCashierProcessing(true);
+    try {
+      const isStudent = Boolean(cashierTicket.la_sinh_vien || cashierTicket.mssv);
+      const finalAmount = isStudent ? Math.round(Number(cashierTicket.tong_tien || 0) * 0.85) : Number(cashierTicket.tong_tien || 0);
+      const methodName = cashierMethod === 'TIEN_MAT' ? 'Tiền mặt' : cashierMethod === 'CHUYEN_KHOAN_VIETQR' ? 'Chuyển khoản VietQR' : 'Quẹt thẻ POS';
+      const note = `[Thu ngân đã thu ${finalAmount.toLocaleString('vi-VN')} đ qua ${methodName}] ${cashierNote.trim()}`;
+      
+      await api.patch(`/tickets/${cashierTicket.id}/status`, {
+        trang_thai: 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN',
+        ghi_chu: note,
+        phuong_thuc_thanh_toan: cashierMethod
+      });
+      showToast(`🎉 Đã thu tiền thành công phiếu ${cashierTicket.ma_phieu || cashierTicket.ma_tra_cuu}! Mở cửa sổ in hóa đơn...`);
+      const targetTicket = cashierTicket;
+      setCashierTicket(null);
+      await refreshTickets();
+      if (canViewStats) setStats(await fetchStats());
+      setReceiptTicket(targetTicket);
+    } catch (err) {
+      showToast(`❌ ${err.response?.data?.message || 'Lỗi xử lý thanh toán'}`);
+    } finally {
+      setCashierProcessing(false);
     }
   };
 
@@ -811,6 +855,23 @@ function Dashboard() {
     ticket.ten_thiet_bi,
     ticket.trang_thai
   ].some(value => String(value || '').toLocaleLowerCase('vi').includes(ticketSearch.trim().toLocaleLowerCase('vi'))));
+
+  const filteredCashierTickets = tickets
+    .filter(t => {
+      if (!cashierSearch.trim()) return true;
+      const q = cashierSearch.trim().toLowerCase();
+      const code = (t.ma_phieu || t.ma_tra_cuu || '').toLowerCase();
+      const name = (t.ho_ten_khach || t.fullName || '').toLowerCase();
+      const phone = (t.so_dien_thoai || t.phone || '').toLowerCase();
+      const device = (t.ten_thiet_bi || t.deviceName || '').toLowerCase();
+      return code.includes(q) || name.includes(q) || phone.includes(q) || device.includes(q);
+    })
+    .filter(t => {
+      const isPaid = t.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN';
+      if (cashierFilter === 'PENDING') return !isPaid && Number(t.tong_tien || 0) > 0;
+      if (cashierFilter === 'PAID') return isPaid;
+      return true;
+    });
   const receiptTotal = Number(receiptTicket?.tong_tien || 0);
   const receiptPartsTotal = receiptParts.reduce((total, item) => total + Number(item.so_luong) * Number(item.don_gia), 0);
   const receiptServiceTotal = Math.max(receiptTotal - receiptPartsTotal, 0);
@@ -879,6 +940,13 @@ function Dashboard() {
             onClick={() => setActiveTab('BOOKINGS')}
             className={`rounded-t-lg px-4 py-2.5 text-xs font-medium ${activeTab === 'BOOKINGS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
             📅 Lịch hẹn
+          </button>
+        )}
+        {canCashierAction && (
+          <button 
+            onClick={() => setActiveTab('CASHIER')}
+            className={`rounded-t-lg px-4 py-2.5 text-xs font-medium ${activeTab === 'CASHIER' ? 'bg-brand-blue text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
+            💳 Thu ngân &amp; Thanh toán
           </button>
         )}
         {canViewInventory && (
@@ -1181,6 +1249,367 @@ function Dashboard() {
               )}
             </tbody>
           </table>
+          </div>
+        </div>
+      )}
+
+      {/* TAB: THU NGÂN & XÁC NHẬN THANH TOÁN (CASHIER) */}
+      {activeTab === 'CASHIER' && canCashierAction && (
+        <div className="space-y-6">
+          {/* Cashier Stats & Overview */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-amber-600">Chờ thu tiền</span>
+                <span className="p-2 rounded-xl bg-amber-50 text-amber-600 text-lg">⏳</span>
+              </div>
+              <p className="text-2xl font-black text-slate-800 mt-2">
+                {tickets.filter(t => t.trang_thai !== 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' && Number(t.tong_tien || 0) > 0).length} ca
+              </p>
+              <p className="text-[11px] text-slate-400 mt-1">Đã có báo giá &amp; sẵn sàng thu tiền</p>
+            </div>
+
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">Đã thu &amp; giao máy</span>
+                <span className="p-2 rounded-xl bg-emerald-50 text-emerald-600 text-lg">✓</span>
+              </div>
+              <p className="text-2xl font-black text-slate-800 mt-2">
+                {tickets.filter(t => t.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN').length} ca
+              </p>
+              <p className="text-[11px] text-slate-400 mt-1">Hoàn tất quy trình thu ngân</p>
+            </div>
+
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-brand-blue">Tổng thực thu</span>
+                <span className="p-2 rounded-xl bg-blue-50 text-brand-blue text-lg">💰</span>
+              </div>
+              <p className="text-2xl font-black text-brand-blue mt-2">
+                {tickets
+                  .filter(t => t.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN')
+                  .reduce((sum, t) => sum + (t.la_sinh_vien ? Math.round(Number(t.tong_tien || 0) * 0.85) : Number(t.tong_tien || 0)), 0)
+                  .toLocaleString('vi-VN')} đ
+              </p>
+              <p className="text-[11px] text-slate-400 mt-1">Doanh số thu ngân lũy kế</p>
+            </div>
+          </div>
+
+          {/* Cashier Table Section */}
+          <div className="bg-white p-5 md:p-6 rounded-2xl border border-slate-200/90 shadow-2xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+              <div>
+                <h3 className="text-lg font-bold text-brand-blue flex items-center gap-2">
+                  <span>💳</span> Bàn Thu Ngân &amp; Quản Lý Hóa Đơn
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">Xác nhận thu tiền mặt, tạo mã VietQR tức thì và in hóa đơn nhiệt 80mm cho khách.</p>
+              </div>
+
+              {/* Search & Filter */}
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">🔍</span>
+                  <input
+                    type="text"
+                    placeholder="Tìm mã phiếu, SĐT, tên khách..."
+                    value={cashierSearch}
+                    onChange={(e) => setCashierSearch(e.target.value)}
+                    className="pl-8 pr-3 py-1.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-brand-blue w-56"
+                  />
+                </div>
+                <select
+                  value={cashierFilter}
+                  onChange={(e) => setCashierFilter(e.target.value)}
+                  className="py-1.5 px-3 rounded-xl border border-slate-200 text-xs font-semibold bg-white text-slate-700 outline-none"
+                >
+                  <option value="PENDING">⏳ Chờ thu tiền</option>
+                  <option value="PAID">✓ Đã thu tiền</option>
+                  <option value="ALL">📋 Tất cả phiếu</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs min-w-[750px]">
+                <thead>
+                  <tr className="border-b border-slate-200 text-slate-500 uppercase tracking-wider text-[11px]">
+                    <th className="py-3 px-3">Mã phiếu / Ngày</th>
+                    <th className="py-3 px-3">Khách hàng</th>
+                    <th className="py-3 px-3">Thiết bị</th>
+                    <th className="py-3 px-3 text-right">Tổng thanh toán</th>
+                    <th className="py-3 px-3 text-center">Trạng thái</th>
+                    <th className="py-3 px-3 text-center">PT Thanh toán</th>
+                    <th className="py-3 px-3 text-right">Thao tác thu ngân</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {filteredCashierTickets.map(t => {
+                    const rawAmount = Number(t.tong_tien || 0);
+                    const isSv = Boolean(t.la_sinh_vien || t.mssv);
+                    const finalPay = isSv ? Math.round(rawAmount * 0.85) : rawAmount;
+                    const ticketIsPaid = t.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN';
+
+                    return (
+                      <tr key={t.id} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="py-3 px-3">
+                          <strong className="font-mono text-brand-blue text-xs">{t.ma_phieu || t.ma_tra_cuu}</strong>
+                          <p className="text-[10px] text-slate-400 mt-0.5">{t.ngay_tao ? new Date(t.ngay_tao).toLocaleDateString('vi-VN') : ''}</p>
+                        </td>
+                        <td className="py-3 px-3 font-semibold text-slate-800">
+                          {t.ho_ten_khach || t.fullName}
+                          <p className="text-[10px] text-slate-500 font-normal">{t.so_dien_thoai || t.phone}</p>
+                        </td>
+                        <td className="py-3 px-3 text-slate-700">
+                          {t.ten_thiet_bi || t.deviceName}
+                          {t.so_imei_serial && <p className="text-[10px] text-slate-400 font-mono">S/N: {t.so_imei_serial}</p>}
+                        </td>
+                        <td className="py-3 px-3 text-right">
+                          <strong className="text-sm font-black text-slate-900">{finalPay.toLocaleString('vi-VN')} đ</strong>
+                          {isSv && (
+                            <span className="block text-[10px] text-emerald-600 font-bold">🎓 Trợ giá SV (-15%)</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-3 text-center">
+                          <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                            ticketIsPaid
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                              : 'bg-amber-50 text-amber-700 border-amber-200'
+                          }`}>
+                            {ticketIsPaid ? '✓ Đã thu tiền' : '⏳ Chờ thu tiền'}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3 text-center text-slate-600">
+                          {ticketIsPaid ? (
+                            <span className="text-[11px] font-semibold">
+                              {t.phuong_thuc_thanh_toan === 'CHUYEN_KHOAN_VIETQR' ? '📱 VietQR' : t.phuong_thuc_thanh_toan === 'THE_POS' ? '💳 Thẻ POS' : '💵 Tiền mặt'}
+                            </span>
+                          ) : (
+                            <span className="text-slate-400 text-[11px]">—</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-3 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            {!ticketIsPaid ? (
+                              <button
+                                type="button"
+                                onClick={() => openCashierModal(t)}
+                                className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-2xs transition flex items-center gap-1"
+                              >
+                                <span>💵</span> Thu tiền
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => setReceiptTicket(t)}
+                                className="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs border border-slate-200 transition"
+                              >
+                                🖨️ In (80mm)
+                              </button>
+                            )}
+                            <a
+                              href={`/thanh-toan/${t.ma_phieu || t.ma_tra_cuu}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="px-2 py-1.5 rounded-lg text-brand-blue hover:bg-blue-50 font-bold text-xs"
+                              title="Xem trang thanh toán công khai của khách"
+                            >
+                              🔗
+                            </a>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {filteredCashierTickets.length === 0 && (
+                    <tr>
+                      <td colSpan="7" className="py-12 text-center text-slate-400">
+                        Không có phiếu sửa chữa nào trong danh sách thu ngân.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Xác Nhận Thu Tiền & Chọn Phương Thức Thanh Toán */}
+      {cashierTicket && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="w-full max-w-lg max-h-[92vh] overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div>
+                <h3 className="text-lg font-bold text-brand-blue flex items-center gap-2">
+                  <span>💵</span> Thu Ngân Phiếu {cashierTicket.ma_phieu || cashierTicket.ma_tra_cuu}
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Khách: <strong>{cashierTicket.ho_ten_khach || cashierTicket.fullName}</strong> ({cashierTicket.so_dien_thoai || cashierTicket.phone})
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCashierTicket(null)}
+                className="text-slate-400 hover:text-slate-600 text-2xl font-bold"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Chi tiết số tiền */}
+            <div className="my-4 p-4 rounded-2xl bg-blue-50/70 border border-blue-200">
+              <div className="flex justify-between items-center text-xs text-slate-600 mb-1">
+                <span>Thiết bị:</span>
+                <strong className="text-slate-800">{cashierTicket.ten_thiet_bi || cashierTicket.deviceName}</strong>
+              </div>
+              <div className="flex justify-between items-center text-xs text-slate-600 mb-1">
+                <span>Tổng chi phí gốc:</span>
+                <span className={cashierTicket.la_sinh_vien ? 'line-through text-slate-400' : 'font-bold text-slate-800'}>
+                  {Number(cashierTicket.tong_tien || 0).toLocaleString('vi-VN')} đ
+                </span>
+              </div>
+              {cashierTicket.la_sinh_vien && (
+                <div className="flex justify-between items-center text-xs text-emerald-700 font-bold mb-1">
+                  <span>🎓 Trợ giá sinh viên (-15%):</span>
+                  <span>-{Math.round(Number(cashierTicket.tong_tien || 0) * 0.15).toLocaleString('vi-VN')} đ</span>
+                </div>
+              )}
+              <div className="flex justify-between items-center text-sm font-black text-slate-900 pt-2 border-t border-blue-200/80">
+                <span>Số tiền cần thu:</span>
+                <span className="text-xl font-black text-brand-blue">
+                  {(cashierTicket.la_sinh_vien
+                    ? Math.round(Number(cashierTicket.tong_tien || 0) * 0.85)
+                    : Number(cashierTicket.tong_tien || 0)
+                  ).toLocaleString('vi-VN')} đ
+                </span>
+              </div>
+            </div>
+
+            {/* Chọn hình thức thanh toán */}
+            <div className="mb-4">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                Phương thức khách thanh toán *
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCashierMethod('TIEN_MAT')}
+                  className={`p-3 rounded-xl border text-xs font-bold transition flex flex-col items-center gap-1 ${
+                    cashierMethod === 'TIEN_MAT'
+                      ? 'border-emerald-600 bg-emerald-50 text-emerald-800 shadow-xs'
+                      : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <span className="text-xl">💵</span>
+                  <span>Tiền mặt</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCashierMethod('CHUYEN_KHOAN_VIETQR')}
+                  className={`p-3 rounded-xl border text-xs font-bold transition flex flex-col items-center gap-1 ${
+                    cashierMethod === 'CHUYEN_KHOAN_VIETQR'
+                      ? 'border-blue-600 bg-blue-50 text-blue-800 shadow-xs'
+                      : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <span className="text-xl">📱</span>
+                  <span>VietQR</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCashierMethod('THE_POS')}
+                  className={`p-3 rounded-xl border text-xs font-bold transition flex flex-col items-center gap-1 ${
+                    cashierMethod === 'THE_POS'
+                      ? 'border-purple-600 bg-purple-50 text-purple-800 shadow-xs'
+                      : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <span className="text-xl">💳</span>
+                  <span>Thẻ POS</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Nếu là Tiền mặt: Máy tính tiền thừa */}
+            {cashierMethod === 'TIEN_MAT' && (
+              <div className="mb-4 p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <label htmlFor="cash-received" className="font-bold text-slate-700">Tiền khách đưa (VNĐ):</label>
+                  <input
+                    id="cash-received"
+                    type="number"
+                    min="0"
+                    step="1000"
+                    value={cashierReceived}
+                    onChange={(e) => setCashierReceived(e.target.value)}
+                    className="w-36 px-2.5 py-1.5 rounded-lg border border-slate-300 text-right font-bold text-slate-800"
+                  />
+                </div>
+                {Number(cashierReceived) > 0 && (
+                  <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-200">
+                    <span className="text-slate-500">Tiền thối lại cho khách:</span>
+                    <strong className={`text-sm font-black ${
+                      Number(cashierReceived) - (cashierTicket.la_sinh_vien ? Math.round(Number(cashierTicket.tong_tien || 0) * 0.85) : Number(cashierTicket.tong_tien || 0)) >= 0
+                        ? 'text-emerald-700'
+                        : 'text-red-600'
+                    }`}>
+                      {Math.max(
+                        0,
+                        Number(cashierReceived) - (cashierTicket.la_sinh_vien ? Math.round(Number(cashierTicket.tong_tien || 0) * 0.85) : Number(cashierTicket.tong_tien || 0))
+                      ).toLocaleString('vi-VN')} đ
+                    </strong>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Nếu là VietQR: Hiển thị mã QR ngân hàng trực tiếp cho khách quét tại quầy */}
+            {cashierMethod === 'CHUYEN_KHOAN_VIETQR' && (
+              <div className="mb-4 p-3.5 rounded-2xl bg-blue-50/70 border border-blue-200 text-center">
+                <p className="text-xs font-bold text-brand-blue mb-2">Đưa mã QR này cho khách quét bằng App Ngân Hàng</p>
+                <img
+                  src={`https://img.vietqr.io/image/MB-02838604999-compact2.png?amount=${
+                    cashierTicket.la_sinh_vien ? Math.round(Number(cashierTicket.tong_tien || 0) * 0.85) : Number(cashierTicket.tong_tien || 0)
+                  }&addInfo=${encodeURIComponent(`TT ${cashierTicket.ma_phieu || cashierTicket.ma_tra_cuu}`)}&accountName=${encodeURIComponent('HUNGHAU IT SUPPORT')}`}
+                  alt="VietQR"
+                  className="w-40 h-auto mx-auto rounded-xl border border-slate-200 bg-white p-1"
+                />
+                <p className="text-[11px] text-slate-500 mt-2">Nội dung: <strong>TT {cashierTicket.ma_phieu || cashierTicket.ma_tra_cuu}</strong></p>
+              </div>
+            )}
+
+            {/* Ghi chú */}
+            <div className="mb-5">
+              <label htmlFor="cashier-note" className="block text-xs font-bold text-slate-700 mb-1">Ghi chú thu ngân (tùy chọn)</label>
+              <input
+                id="cashier-note"
+                type="text"
+                placeholder="VD: Khách chuyển khoản MB, đã xuất hóa đơn kèm phụ kiện..."
+                value={cashierNote}
+                onChange={(e) => setCashierNote(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-brand-blue"
+              />
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setCashierTicket(null)}
+                className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition"
+              >
+                Hủy
+              </button>
+              <button
+                type="button"
+                disabled={cashierProcessing}
+                onClick={confirmCashierPayment}
+                className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-md transition disabled:opacity-50"
+              >
+                {cashierProcessing ? 'Đang ghi nhận...' : '✓ Xác Nhận Đã Thu & Bàn Giao'}
+              </button>
+            </div>
           </div>
         </div>
       )}
