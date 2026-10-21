@@ -4,9 +4,11 @@ function executeMockQuery(sql, params = []) {
     const s = loadStore();
     const cleanSql = sql.replace(/\s+/g, ' ').trim();
 
-    // 1. nhan_vien login
-    if (/SELECT .* FROM nhan_vien WHERE ten_dang_nhap = \$1/i.test(cleanSql)) {
-        const u = s.nhan_vien.find(x => x.ten_dang_nhap === params[0]);
+    // 1. nhan_vien login (supports username or email)
+    if (/SELECT .* FROM nhan_vien WHERE .*ten_dang_nhap/i.test(cleanSql)) {
+        const p0 = String(params[0] || '').trim().toLowerCase();
+        const p1 = String(params[1] || p0.split('@')[0]).trim().toLowerCase();
+        const u = s.nhan_vien.find(x => x.ten_dang_nhap.toLowerCase() === p0 || x.ten_dang_nhap.toLowerCase() === p1);
         return { rows: u ? [{ ...u }] : [] };
     }
 

@@ -3,11 +3,14 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const login = async (username, password) => {
+    const cleanInput = String(username || '').trim().toLowerCase();
+    const shortUser = cleanInput.includes('@') ? cleanInput.split('@')[0] : cleanInput;
     const result = await pool.query(`
         SELECT id, ten_dang_nhap, mat_khau, ho_ten, vai_tro, trang_thai
         FROM nhan_vien
-        WHERE ten_dang_nhap = $1
-    `, [username]);
+        WHERE LOWER(ten_dang_nhap) = $1 OR LOWER(ten_dang_nhap) = $2
+        LIMIT 1
+    `, [cleanInput, shortUser]);
         
     const user = result.rows[0];
     if (!user) return null; // Không tìm thấy user
