@@ -1,9 +1,9 @@
 import ExcelJS from 'exceljs';
 
 const ROLE_NAMES = {
-  GIAM_DOC: 'Giám Đốc Điều Hành (C-Level)',
-  ADMIN: 'Tổng Quản Trị Hệ Thống (System Admin)',
-  QUAN_LY: 'Quản Lý Cửa Hàng (Store Manager)',
+  GIAM_DOC: 'Giám Đốc Điều Hành',
+  ADMIN: 'Tổng Quản Trị Hệ Thống',
+  QUAN_LY: 'Quản Lý Cửa Hàng',
   KE_TOAN: 'Kế Toán & Thu Ngân',
   THU_KHO: 'Thủ Kho Linh Kiện',
   KY_THUAT_VIEN: 'Kỹ Thuật Viên Sửa Chữa',

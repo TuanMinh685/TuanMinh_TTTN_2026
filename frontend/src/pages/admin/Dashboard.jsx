@@ -20,61 +20,61 @@ const ROLE_META = {
   GIAM_DOC: {
     level: 100,
     title: 'Giám Đốc Điều Hành',
-    badge: '👑 Giám Đốc (Cấp 1 - Toàn quyền)',
+    badge: '👑 Giám Đốc Điều Hành',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     permissionsText: 'Toàn quyền tối cao: Tất cả các trang, duyệt mọi trạng thái, tạo/khóa/phân quyền mọi cấp kể cả Quản lý.'
   },
   ADMIN: {
     level: 100,
     title: 'Tổng Quản Trị Hệ Thống',
-    badge: '👑 Tổng Quản Trị (Cấp 1 - Toàn quyền)',
+    badge: '👑 Tổng Quản Trị Hệ Thống',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     permissionsText: 'Toàn quyền tối cao: Tất cả các trang, duyệt mọi trạng thái, tạo/khóa/phân quyền mọi cấp kể cả Quản lý.'
   },
   QUAN_LY: {
     level: 80,
     title: 'Quản Lý Cửa Hàng',
-    badge: '🛡️ Quản Lý Cửa Hàng (Cấp 2)',
+    badge: '🛡️ Quản Lý Cửa Hàng',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     permissionsText: 'Điều hành toàn bộ các trang nghiệp vụ & báo cáo; được tạo/sửa/khóa tài khoản nhân sự cấp dưới (Kế toán, Thủ kho, KTV, Lễ tân).'
   },
   KE_TOAN: {
     level: 60,
     title: 'Kế Toán & Thu Ngân',
-    badge: '💰 Kế Toán / Thu Ngân (Cấp 3)',
+    badge: '💰 Kế Toán / Thu Ngân',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     permissionsText: 'Truy cập Phiếu sửa chữa & Báo cáo tài chính; xác nhận thu tiền bàn giao máy, in hóa đơn 80mm VietQR & xuất báo cáo Excel.'
   },
   THU_KHO: {
     level: 50,
     title: 'Thủ Kho Linh Kiện',
-    badge: '📦 Thủ Kho Linh Kiện (Cấp 4)',
+    badge: '📦 Thủ Kho Linh Kiện',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     permissionsText: 'Quản lý toàn diện Kho linh kiện (thêm mới, sửa giá bán, nhập tồn kho, xuất báo cáo tồn kho) & đối chiếu phiếu xuất.'
   },
   KY_THUAT_VIEN: {
     level: 40,
     title: 'Kỹ Thuật Viên Sửa Chữa',
-    badge: '🔧 Kỹ Thuật Viên (Cấp 5)',
+    badge: '🔧 Kỹ Thuật Viên Sửa Chữa',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     permissionsText: 'Chẩn đoán kỹ thuật, gắn/gỡ linh kiện kèm mã Serial (S/N), chọn gói phần mềm, gửi báo giá và xác nhận Sửa Xong.'
   },
   LE_TAN: {
     level: 30,
     title: 'Lễ Tân & CSKH',
-    badge: '💁 Lễ Tân & CSKH (Cấp 6)',
+    badge: '💁 Lễ Tân & CSKH',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     permissionsText: 'Tiếp nhận máy trực tiếp tại quầy (POS), chụp biên bản ảnh ngoại quan, xử lý lịch hẹn, bàn giao máy & thu tiền.'
   }
 };
 
 const QUICK_SWITCH_ROLES = [
-  { username: 'giamdoc', label: '👑 Giám Đốc (Cấp 1)' },
-  { username: 'quanly', label: '🛡️ Quản Lý (Cấp 2)' },
-  { username: 'ketoan', label: '💰 Kế Toán (Cấp 3)' },
-  { username: 'thukho', label: '📦 Thủ Kho (Cấp 4)' },
-  { username: 'kythuat', label: '🔧 Kỹ Thuật Viên (Cấp 5)' },
-  { username: 'letan', label: '💁 Lễ Tân (Cấp 6)' }
+  { username: 'giamdoc', label: '👑 Giám Đốc Điều Hành' },
+  { username: 'quanly', label: '🛡️ Quản Lý Cửa Hàng' },
+  { username: 'ketoan', label: '💰 Kế Toán / Thu Ngân' },
+  { username: 'thukho', label: '📦 Thủ Kho Linh Kiện' },
+  { username: 'kythuat', label: '🔧 Kỹ Thuật Viên Sửa Chữa' },
+  { username: 'letan', label: '💁 Lễ Tân & CSKH' }
 ];
 
 function Dashboard() {
@@ -832,7 +832,7 @@ function Dashboard() {
                 Bảng Điều Khiển — {currentRoleInfo.title}
               </h2>
               <span className={`px-3 py-1 rounded-full text-xs font-extrabold border ${currentRoleInfo.badgeClass}`}>
-                {currentRoleInfo.badge} • Level {currentRoleInfo.level}
+                {currentRoleInfo.badge}
               </span>
             </div>
             <p className="text-slate-600 text-xs mt-1.5">
@@ -1859,7 +1859,7 @@ function Dashboard() {
                         <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-extrabold border ${meta.badgeClass}`}>
                           {meta.badge}
                         </span>
-                        <span className="text-[11px] font-mono font-bold text-slate-500">Level {meta.level}</span>
+                        <span className="text-[11px] font-mono font-bold text-slate-500"></span>
                       </div>
                       <p className="text-xs text-slate-600 leading-relaxed mt-1">{meta.permissionsText}</p>
                     </div>
@@ -1924,7 +1924,7 @@ function Dashboard() {
                         <td className="py-3 px-4 font-mono font-bold text-brand-blue">@{emp.ten_dang_nhap}</td>
                         <td className="py-3 px-4">
                           <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${empMeta.badgeClass}`}>
-                            {empMeta.badge} • Lv.{empLevel}
+                            {empMeta.badge}
                           </span>
                         </td>
                         <td className="py-3 px-4 text-center">
@@ -2066,14 +2066,14 @@ function Dashboard() {
                 >
                   {isExecutive && (
                     <>
-                      <option value="GIAM_DOC">👑 Giám Đốc Điều Hành (Cấp 1 - Level 100 - Toàn quyền)</option>
-                      <option value="QUAN_LY">🛡️ Quản Lý Cửa Hàng (Cấp 2 - Level 80 - Quản lý vận hành)</option>
+                      <option value="GIAM_DOC">👑 Giám Đốc Điều Hành</option>
+                      <option value="QUAN_LY">🛡️ Quản Lý Cửa Hàng</option>
                     </>
                   )}
-                  <option value="KE_TOAN">💰 Kế Toán / Thu Ngân (Cấp 3 - Level 60 - Báo cáo &amp; Thu tiền)</option>
-                  <option value="THU_KHO">📦 Thủ Kho Linh Kiện (Cấp 4 - Level 50 - Quản lý xuất nhập kho)</option>
-                  <option value="KY_THUAT_VIEN">🔧 Kỹ Thuật Viên (Cấp 5 - Level 40 - Sửa chữa, Serial &amp; Phần mềm)</option>
-                  <option value="LE_TAN">💁 Lễ Tân &amp; CSKH (Cấp 6 - Level 30 - Tiếp nhận POS &amp; Lịch hẹn)</option>
+                  <option value="KE_TOAN">💰 Kế Toán / Thu Ngân</option>
+                  <option value="THU_KHO">📦 Thủ Kho Linh Kiện</option>
+                  <option value="KY_THUAT_VIEN">🔧 Kỹ Thuật Viên Sửa Chữa</option>
+                  <option value="LE_TAN">💁 Lễ Tân &amp; CSKH</option>
                 </select>
                 <p className="mt-1.5 text-[11px] text-slate-500 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
                   {ROLE_META[employeeForm.vai_tro]?.permissionsText}

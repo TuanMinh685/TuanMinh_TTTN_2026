@@ -5,55 +5,55 @@ import api from '../services/api';
 const ROLE_CONFIG = {
   GIAM_DOC: {
     level: 100,
-    title: 'Giám Đốc Điều Hành (C-Level)',
-    badge: '👑 Giám Đốc',
+    title: 'Giám Đốc Điều Hành',
+    badge: '👑 Giám Đốc Điều Hành',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
       },
   ADMIN: {
     level: 100,
-    title: 'Quản Trị Hệ Thống (System Admin)',
-    badge: '🛡️ Admin',
+    title: 'Tổng Quản Trị Hệ Thống',
+    badge: '🛡️ Tổng Quản Trị Hệ Thống',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
       },
   QUAN_LY: {
     level: 80,
-    title: 'Quản Lý Cửa Hàng (Store Manager)',
-    badge: '🏬 Quản Lý',
+    title: 'Quản Lý Cửa Hàng',
+    badge: '🏬 Quản Lý Cửa Hàng',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
       },
   KE_TOAN: {
     level: 60,
     title: 'Kế Toán Doanh Thu',
-    badge: '📊 Kế Toán',
+    badge: '📊 Kế Toán Doanh Thu',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
       },
   THU_KHO: {
     level: 50,
     title: 'Thủ Kho Linh Kiện',
-    badge: '📦 Thủ Kho',
+    badge: '📦 Thủ Kho Linh Kiện',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
       },
   KY_THUAT_VIEN: {
     level: 40,
     title: 'Kỹ Thuật Viên Sửa Chữa',
-    badge: '🔧 Kỹ Thuật Viên',
+    badge: '🔧 Kỹ Thuật Viên Sửa Chữa',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
       },
   LE_TAN: {
     level: 30,
     title: 'Lễ Tân Tiếp Nhận',
-    badge: '📋 Lễ Tân',
+    badge: '📋 Lễ Tân Tiếp Nhận',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
       }
 };
 
 const QUICK_SWITCH_OPTIONS = [
-  { username: 'giamdoc', label: '👑 Giám Đốc (Level 100)' },
-  { username: 'quanly', label: '🏬 Quản Lý (Level 80)' },
-  { username: 'ketoan', label: '📊 Kế Toán (Level 60)' },
-  { username: 'thukho', label: '📦 Thủ Kho (Level 50)' },
-  { username: 'kythuat', label: '🔧 Kỹ Thuật Viên (Level 40)' },
-  { username: 'letan', label: '📋 Lễ Tân (Level 30)' }
+  { username: 'giamdoc', label: '👑 Giám Đốc Điều Hành' },
+  { username: 'quanly', label: '🏬 Quản Lý Cửa Hàng' },
+  { username: 'ketoan', label: '📊 Kế Toán Doanh Thu' },
+  { username: 'thukho', label: '📦 Thủ Kho Linh Kiện' },
+  { username: 'kythuat', label: '🔧 Kỹ Thuật Viên Sửa Chữa' },
+  { username: 'letan', label: '📋 Lễ Tân Tiếp Nhận' }
 ];
 
 export default function AdminNav({ activeKey }) {
@@ -109,7 +109,7 @@ export default function AdminNav({ activeKey }) {
               Hệ Thống Điều Hành & Quản Trị
             </h1>
             <span className={`rounded-full border px-3 py-1 text-xs font-medium ${currentRoleInfo.badgeClass}`}>
-              {currentRoleInfo.badge} • Level {currentRoleInfo.level}
+              {currentRoleInfo.badge}
             </span>
           </div>
           <p className="mt-1 text-xs text-slate-600">

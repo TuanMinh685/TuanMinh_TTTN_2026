@@ -6,7 +6,7 @@ const ROLE_PERMISSIONS_DETAIL = {
   GIAM_DOC: {
     title: 'Giám Đốc Điều Hành (Director)',
     level: 100,
-    badge: '👑 Giám Đốc',
+    badge: '👑 Giám Đốc Điều Hành',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     description: 'Quyền hạn tối cao toàn hệ thống: Xem toàn bộ báo cáo doanh thu, phê duyệt chỉ số chiến lược, quản trị và tạo mới mọi cấp bậc nhân sự.',
     canCreate: ['ADMIN', 'QUAN_LY', 'KE_TOAN', 'THU_KHO', 'KY_THUAT_VIEN', 'LE_TAN']
@@ -14,7 +14,7 @@ const ROLE_PERMISSIONS_DETAIL = {
   ADMIN: {
     title: 'Quản Trị Kỹ Thuật (System Admin)',
     level: 100,
-    badge: '🛡️ Admin',
+    badge: '🛡️ Tổng Quản Trị Hệ Thống',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     description: 'Toàn quyền kỹ thuật và phân quyền tài khoản hệ thống.',
     canCreate: ['QUAN_LY', 'KE_TOAN', 'THU_KHO', 'KY_THUAT_VIEN', 'LE_TAN']
@@ -22,7 +22,7 @@ const ROLE_PERMISSIONS_DETAIL = {
   QUAN_LY: {
     title: 'Quản Lý Cửa Hàng (Store Manager)',
     level: 80,
-    badge: '🏬 Quản Lý',
+    badge: '🏬 Quản Lý Cửa Hàng',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     description: 'Điều hành toàn bộ hoạt động chi nhánh: Theo dõi sửa chữa, duyệt lịch hẹn, kiểm soát kho và quản lý nhân sự cấp dưới (< Level 80).',
     canCreate: ['KE_TOAN', 'THU_KHO', 'KY_THUAT_VIEN', 'LE_TAN']
@@ -30,7 +30,7 @@ const ROLE_PERMISSIONS_DETAIL = {
   KE_TOAN: {
     title: 'Kế Toán Doanh Thu',
     level: 60,
-    badge: '📊 Kế Toán',
+    badge: '📊 Kế Toán Doanh Thu',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     description: 'Theo dõi báo cáo doanh thu, dòng tiền linh kiện, in hóa đơn nhiệt 80mm và thu ngân.',
     canCreate: []
@@ -38,7 +38,7 @@ const ROLE_PERMISSIONS_DETAIL = {
   THU_KHO: {
     title: 'Thủ Kho Linh Kiện',
     level: 50,
-    badge: '📦 Thủ Kho',
+    badge: '📦 Thủ Kho Linh Kiện',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     description: 'Quản lý danh mục linh kiện, cập nhật giá nhập/bán, cảnh báo số lượng tồn kho tối thiểu.',
     canCreate: []
@@ -46,7 +46,7 @@ const ROLE_PERMISSIONS_DETAIL = {
   KY_THUAT_VIEN: {
     title: 'Kỹ Thuật Viên Sửa Chữa',
     level: 40,
-    badge: '🔧 Kỹ Thuật Viên',
+    badge: '🔧 Kỹ Thuật Viên Sửa Chữa',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     description: 'Tiếp nhận chuẩn đoán, tải ảnh ngoại quan trước/sau, thêm linh kiện và gửi báo giá sửa chữa.',
     canCreate: []
@@ -54,7 +54,7 @@ const ROLE_PERMISSIONS_DETAIL = {
   LE_TAN: {
     title: 'Lễ Tân Tiếp Nhận',
     level: 30,
-    badge: '📋 Lễ Tân',
+    badge: '📋 Lễ Tân Tiếp Nhận',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     description: 'Tạo mã QR quầy tiếp nhận, hướng dẫn khách gửi máy, duyệt/hủy lịch hẹn online.',
     canCreate: []
@@ -246,7 +246,7 @@ export default function EmployeeManagement() {
               </p>
               <div className="mt-3 flex flex-wrap gap-2 text-xs">
                 <span className="rounded-full bg-white/10 border border-white/20 px-3 py-1 font-semibold">
-                  Vai trò của bạn: <strong>{currentRoleInfo.title} (Level {currentRoleInfo.level})</strong>
+                  Vai trò của bạn: <strong>{currentRoleInfo.title}</strong>
                 </span>
                 <span className="rounded-full bg-white/10 border border-white/20 px-3 py-1 font-semibold">
                   {isExecutive ? 'Quyền hạn: Toàn quyền tạo & phân cấp mọi vị trí' : 'Quyền hạn: Tạo & quản lý nhân sự cấp dưới (< Level 80)'}
@@ -299,7 +299,7 @@ export default function EmployeeManagement() {
                 <div key={key} className="rounded-xl border border-slate-200 p-4 bg-slate-50/60 hover:bg-white hover:shadow-xs transition">
                   <div className="flex items-center justify-between mb-2">
                     <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${roleItem.badgeClass}`}>
-                      {roleItem.badge} • Level {roleItem.level}
+                      {roleItem.badge}
                     </span>
                     <span className="text-xs font-bold text-slate-500">
                       {countInRole} nhân sự
@@ -414,7 +414,7 @@ export default function EmployeeManagement() {
                         </td>
                         <td className="py-3.5 px-4">
                           <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-bold border ${empMeta.badgeClass}`}>
-                            {empMeta.badge} • Level {empLevel}
+                            {empMeta.badge}
                           </span>
                         </td>
                         <td className="py-3.5 px-4">
@@ -566,13 +566,13 @@ export default function EmployeeManagement() {
                   onChange={(e) => setFormData({ ...formData, vai_tro: e.target.value })}
                   className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 font-bold text-slate-800 outline-none focus:border-brand-blue"
                 >
-                  {isExecutive && <option value="GIAM_DOC">👑 Giám Đốc Điều Hành (Level 100)</option>}
-                  {isExecutive && <option value="ADMIN">🛡️ Quản Trị Hệ Thống (Level 100)</option>}
-                  {isExecutive && <option value="QUAN_LY">🏬 Quản Lý Cửa Hàng (Level 80)</option>}
-                  <option value="KE_TOAN">📊 Kế Toán Doanh Thu (Level 60)</option>
-                  <option value="THU_KHO">📦 Thủ Kho Linh Kiện (Level 50)</option>
-                  <option value="KY_THUAT_VIEN">🔧 Kỹ Thuật Viên Sửa Chữa (Level 40)</option>
-                  <option value="LE_TAN">📋 Lễ Tân Tiếp Nhận (Level 30)</option>
+                  {isExecutive && <option value="GIAM_DOC">👑 Giám Đốc Điều Hành</option>}
+                  {isExecutive && <option value="ADMIN">🛡️ Quản Trị Hệ Thống</option>}
+                  {isExecutive && <option value="QUAN_LY">🏬 Quản Lý Cửa Hàng</option>}
+                  <option value="KE_TOAN">📊 Kế Toán Doanh Thu</option>
+                  <option value="THU_KHO">📦 Thủ Kho Linh Kiện</option>
+                  <option value="KY_THUAT_VIEN">🔧 Kỹ Thuật Viên Sửa Chữa</option>
+                  <option value="LE_TAN">📋 Lễ Tân Tiếp Nhận</option>
                 </select>
                 <p className="mt-1.5 text-[11px] text-slate-500 leading-relaxed bg-slate-50 p-2.5 rounded-lg border border-slate-200">
                   {ROLE_PERMISSIONS_DETAIL[formData.vai_tro]?.description}
