@@ -10,7 +10,7 @@ function executeMockQuery(sql, params = []) {
         return { rows: u ? [{ ...u }] : [] };
     }
 
-    // 2. nhan_vien getMe
+    // 2. nhan_vien getMe / by id
     if (/SELECT .* FROM nhan_vien WHERE id = \$1/i.test(cleanSql)) {
         const u = s.nhan_vien.find(x => x.id === Number(params[0]));
         return { rows: u ? [{ ...u }] : [] };
@@ -18,7 +18,61 @@ function executeMockQuery(sql, params = []) {
 
     // 3. nhan_vien list
     if (/SELECT .* FROM nhan_vien/i.test(cleanSql)) {
-        return { rows: s.nhan_vien.map(u => ({ ...u })) };
+        const sorted = [...s.nhan_vien].sort((a, b) => a.id - b.id);
+        return { rows: sorted.map(({ mat_khau, ...rest }) => ({ ...rest })) };
+    }
+
+    // 3b. nhan_vien insert
+    if (/INSERT INTO nhan_vien/i.test(cleanSql)) {
+        const newId = s.nhan_vien.length > 0 ? Math.max(...s.nhan_vien.map(x => x.id)) + 1 : 1;
+        const emp = {
+            id: newId,
+            ten_dang_nhap: String(params[0]).trim(),
+            mat_khau: params[1],
+            ho_ten: String(params[2]).trim(),
+            vai_tro: params[3],
+            trang_thai: params[4] || 'HOAT_DONG',
+            ngay_tao: new Date().toISOString()
+        };
+        s.nhan_vien.push(emp);
+        saveStore();
+        const { mat_khau, ...safeEmp } = emp;
+        return { rows: [safeEmp] };
+    }
+
+    // 3c. nhan_vien update with password
+    if (/UPDATE nhan_vien SET ho_ten = \$1, vai_tro = \$2, trang_thai = \$3, mat_khau = \$4 WHERE id = \$5/i.test(cleanSql)) {
+        const emp = s.nhan_vien.find(x => x.id === Number(params[4]));
+        if (!emp) return { rows: [] };
+        emp.ho_ten = String(params[0]).trim();
+        emp.vai_tro = params[1];
+        emp.trang_thai = params[2];
+        emp.mat_khau = params[3];
+        saveStore();
+        const { mat_khau, ...safeEmp } = emp;
+        return { rows: [safeEmp] };
+    }
+
+    // 3d. nhan_vien update without password
+    if (/UPDATE nhan_vien SET ho_ten = \$1, vai_tro = \$2, trang_thai = \$3 WHERE id = \$4/i.test(cleanSql)) {
+        const emp = s.nhan_vien.find(x => x.id === Number(params[3]));
+        if (!emp) return { rows: [] };
+        emp.ho_ten = String(params[0]).trim();
+        emp.vai_tro = params[1];
+        emp.trang_thai = params[2];
+        saveStore();
+        const { mat_khau, ...safeEmp } = emp;
+        return { rows: [safeEmp] };
+    }
+
+    // 3e. nhan_vien delete
+    if (/DELETE FROM nhan_vien WHERE id = \$1/i.test(cleanSql)) {
+        const idx = s.nhan_vien.findIndex(x => x.id === Number(params[0]));
+        if (idx === -1) return { rows: [] };
+        const [removed] = s.nhan_vien.splice(idx, 1);
+        saveStore();
+        const { mat_khau, ...safeEmp } = removed;
+        return { rows: [safeEmp] };
     }
 
     // 4. linh_kien public / pricing

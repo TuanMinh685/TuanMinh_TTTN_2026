@@ -20,25 +20,24 @@ const validateSubmit = [
 // Khách hàng quét mã QR Cố định và điền form (QR Intake)
 router.post('/intake', submitLimiter, validateSubmit, ticketController.submitIntake);
 
-// API cho Lễ tân và Kỹ thuật viên (Yêu cầu đăng nhập)
+// API cho nhân sự nội bộ (Yêu cầu đăng nhập)
 router.get('/', verifyToken, ticketController.getTickets);
-router.patch('/:id/status', verifyToken, ticketController.updateTicketStatus);
-router.patch('/:id/software-packages', verifyToken, requireRole('KY_THUAT_VIEN', 'QUAN_LY', 'ADMIN'), ticketController.updateTicketSoftwarePackages);
+router.patch('/:id/status', verifyToken, requireRole('GIAM_DOC', 'ADMIN', 'QUAN_LY', 'LE_TAN', 'KY_THUAT_VIEN', 'KE_TOAN'), ticketController.updateTicketStatus);
+router.patch('/:id/software-packages', verifyToken, requireRole('GIAM_DOC', 'ADMIN', 'QUAN_LY', 'KY_THUAT_VIEN'), ticketController.updateTicketSoftwarePackages);
 
-// API Booking
+// API Booking (Lịch hẹn): Lễ tân, Quản lý, Giám đốc
 router.post('/booking', submitLimiter, ticketController.submitBooking);
-router.get('/booking', verifyToken, ticketController.getBookings);
-router.patch('/booking/:id/status', verifyToken, ticketController.updateBookingStatus);
-
+router.get('/booking', verifyToken, requireRole('GIAM_DOC', 'ADMIN', 'QUAN_LY', 'LE_TAN'), ticketController.getBookings);
+router.patch('/booking/:id/status', verifyToken, requireRole('GIAM_DOC', 'ADMIN', 'QUAN_LY', 'LE_TAN'), ticketController.updateBookingStatus);
 
 // Inventory & Photo routes
-router.get('/parts', verifyToken, requireRole('KY_THUAT_VIEN', 'LE_TAN', 'QUAN_LY', 'ADMIN'), ticketController.getParts);
-router.post('/parts', verifyToken, requireRole('QUAN_LY', 'ADMIN'), ticketController.createPart);
-router.patch('/parts/:id', verifyToken, requireRole('QUAN_LY', 'ADMIN'), ticketController.updatePart);
-router.get('/:id/parts', verifyToken, requireRole('KY_THUAT_VIEN', 'LE_TAN', 'QUAN_LY', 'ADMIN'), ticketController.getTicketParts);
-router.post('/:id/parts', verifyToken, requireRole('KY_THUAT_VIEN', 'QUAN_LY', 'ADMIN'), ticketController.addPartToTicket);
-router.delete('/:id/parts/:partRecordId', verifyToken, requireRole('KY_THUAT_VIEN', 'QUAN_LY', 'ADMIN'), ticketController.removePartFromTicket);
-router.get('/:id/photos', verifyToken, requireRole('KY_THUAT_VIEN', 'LE_TAN', 'QUAN_LY', 'ADMIN'), ticketController.getTicketPhotos);
-router.post('/:id/photos', verifyToken, requireRole('KY_THUAT_VIEN', 'LE_TAN', 'QUAN_LY', 'ADMIN'), ticketController.addTicketPhoto);
+router.get('/parts', verifyToken, requireRole('GIAM_DOC', 'ADMIN', 'QUAN_LY', 'THU_KHO', 'KY_THUAT_VIEN', 'LE_TAN', 'KE_TOAN'), ticketController.getParts);
+router.post('/parts', verifyToken, requireRole('GIAM_DOC', 'ADMIN', 'QUAN_LY', 'THU_KHO'), ticketController.createPart);
+router.patch('/parts/:id', verifyToken, requireRole('GIAM_DOC', 'ADMIN', 'QUAN_LY', 'THU_KHO'), ticketController.updatePart);
+router.get('/:id/parts', verifyToken, requireRole('GIAM_DOC', 'ADMIN', 'QUAN_LY', 'THU_KHO', 'KY_THUAT_VIEN', 'LE_TAN', 'KE_TOAN'), ticketController.getTicketParts);
+router.post('/:id/parts', verifyToken, requireRole('GIAM_DOC', 'ADMIN', 'QUAN_LY', 'KY_THUAT_VIEN'), ticketController.addPartToTicket);
+router.delete('/:id/parts/:partRecordId', verifyToken, requireRole('GIAM_DOC', 'ADMIN', 'QUAN_LY', 'KY_THUAT_VIEN'), ticketController.removePartFromTicket);
+router.get('/:id/photos', verifyToken, requireRole('GIAM_DOC', 'ADMIN', 'QUAN_LY', 'KY_THUAT_VIEN', 'LE_TAN', 'KE_TOAN'), ticketController.getTicketPhotos);
+router.post('/:id/photos', verifyToken, requireRole('GIAM_DOC', 'ADMIN', 'QUAN_LY', 'KY_THUAT_VIEN', 'LE_TAN'), ticketController.addTicketPhoto);
 
 module.exports = router;

@@ -4,12 +4,87 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cel
 import QRCode from 'qrcode';
 import { SOFTWARE_PACKAGE_GROUPS, SOFTWARE_PACKAGE_OPTIONS } from '../../components/softwarePackages';
 
+const ROLE_META = {
+  GIAM_DOC: {
+    level: 100,
+    title: 'Giám Đốc Điều Hành',
+    badge: '👑 Giám Đốc (Cấp 1 - Toàn quyền)',
+    badgeClass: 'bg-amber-100 text-amber-900 border-amber-300',
+    permissionsText: 'Toàn quyền tối cao: Tất cả các trang, duyệt mọi trạng thái, tạo/khóa/phân quyền mọi cấp kể cả Quản lý.'
+  },
+  ADMIN: {
+    level: 100,
+    title: 'Tổng Quản Trị Hệ Thống',
+    badge: '👑 Tổng Quản Trị (Cấp 1 - Toàn quyền)',
+    badgeClass: 'bg-amber-100 text-amber-900 border-amber-300',
+    permissionsText: 'Toàn quyền tối cao: Tất cả các trang, duyệt mọi trạng thái, tạo/khóa/phân quyền mọi cấp kể cả Quản lý.'
+  },
+  QUAN_LY: {
+    level: 80,
+    title: 'Quản Lý Cửa Hàng',
+    badge: '🛡️ Quản Lý Cửa Hàng (Cấp 2)',
+    badgeClass: 'bg-purple-100 text-purple-900 border-purple-300',
+    permissionsText: 'Điều hành toàn bộ các trang nghiệp vụ & báo cáo; được tạo/sửa/khóa tài khoản nhân sự cấp dưới (Kế toán, Thủ kho, KTV, Lễ tân).'
+  },
+  KE_TOAN: {
+    level: 60,
+    title: 'Kế Toán & Thu Ngân',
+    badge: '💰 Kế Toán / Thu Ngân (Cấp 3)',
+    badgeClass: 'bg-emerald-100 text-emerald-900 border-emerald-300',
+    permissionsText: 'Truy cập Phiếu sửa chữa & Báo cáo tài chính; xác nhận thu tiền bàn giao máy, in hóa đơn 80mm VietQR & xuất báo cáo Excel.'
+  },
+  THU_KHO: {
+    level: 50,
+    title: 'Thủ Kho Linh Kiện',
+    badge: '📦 Thủ Kho Linh Kiện (Cấp 4)',
+    badgeClass: 'bg-cyan-100 text-cyan-900 border-cyan-300',
+    permissionsText: 'Quản lý toàn diện Kho linh kiện (thêm mới, sửa giá bán, nhập tồn kho, xuất báo cáo tồn kho) & đối chiếu phiếu xuất.'
+  },
+  KY_THUAT_VIEN: {
+    level: 40,
+    title: 'Kỹ Thuật Viên Sửa Chữa',
+    badge: '🔧 Kỹ Thuật Viên (Cấp 5)',
+    badgeClass: 'bg-blue-100 text-blue-900 border-blue-300',
+    permissionsText: 'Chẩn đoán kỹ thuật, gắn/gỡ linh kiện kèm mã Serial (S/N), chọn gói phần mềm, gửi báo giá và xác nhận Sửa Xong.'
+  },
+  LE_TAN: {
+    level: 30,
+    title: 'Lễ Tân & CSKH',
+    badge: '💁 Lễ Tân & CSKH (Cấp 6)',
+    badgeClass: 'bg-orange-100 text-orange-900 border-orange-300',
+    permissionsText: 'Tiếp nhận máy trực tiếp tại quầy (POS), chụp biên bản ảnh ngoại quan, xử lý lịch hẹn, bàn giao máy & thu tiền.'
+  }
+};
+
+const QUICK_SWITCH_ROLES = [
+  { username: 'giamdoc', label: '👑 Giám Đốc (Cấp 1)' },
+  { username: 'quanly', label: '🛡️ Quản Lý (Cấp 2)' },
+  { username: 'ketoan', label: '💰 Kế Toán (Cấp 3)' },
+  { username: 'thukho', label: '📦 Thủ Kho (Cấp 4)' },
+  { username: 'kythuat', label: '🔧 Kỹ Thuật Viên (Cấp 5)' },
+  { username: 'letan', label: '💁 Lễ Tân (Cấp 6)' }
+];
+
 function Dashboard() {
-  const role = localStorage.getItem('role');
-  const fullName = localStorage.getItem('fullName');
+  const role = localStorage.getItem('role') || 'LE_TAN';
+  const fullName = localStorage.getItem('fullName') || 'Nhân viên';
+  const currentUsername = localStorage.getItem('username') || '';
+  const currentAccountId = Number(localStorage.getItem('accountId') || 0);
+
+  const isExecutive = role === 'GIAM_DOC' || role === 'ADMIN';
+  const isManagerOrAbove = isExecutive || role === 'QUAN_LY';
+  const canReceptionAction = isManagerOrAbove || role === 'LE_TAN';
+  const canTechAction = isManagerOrAbove || role === 'KY_THUAT_VIEN';
+  const canCashierAction = isManagerOrAbove || role === 'LE_TAN' || role === 'KE_TOAN';
+  const canViewInventory = isManagerOrAbove || role === 'THU_KHO' || role === 'KY_THUAT_VIEN';
+  const canManageInventory = isManagerOrAbove || role === 'THU_KHO';
+  const canViewStats = isManagerOrAbove || role === 'KE_TOAN';
+  const canManageEmployees = isManagerOrAbove;
+  const currentRoleLevel = ROLE_META[role]?.level || 30;
+
   const [tickets, setTickets] = useState([]);
   const [bookings, setBookings] = useState([]);
-  const [activeTab, setActiveTab] = useState('TICKETS');
+  const [activeTab, setActiveTab] = useState(() => (role === 'THU_KHO' ? 'INVENTORY' : 'TICKETS'));
   const [stats, setStats] = useState({ revenueData: [], statusData: [], totalRevenue: 0, completedTickets: 0, totalPartsRevenue: 0 });
   const [ticketSearch, setTicketSearch] = useState('');
   const [parts, setParts] = useState([]);
@@ -54,6 +129,18 @@ function Dashboard() {
   const [statusNote, setStatusNote] = useState('');
   const [modalTicketParts, setModalTicketParts] = useState([]);
   const [employees, setEmployees] = useState([]);
+  const [showEmployeeModal, setShowEmployeeModal] = useState(false);
+  const [editingEmployee, setEditingEmployee] = useState(null);
+  const [savingEmployee, setSavingEmployee] = useState(false);
+  const [employeeError, setEmployeeError] = useState('');
+  const [employeeForm, setEmployeeForm] = useState({
+    ho_ten: '',
+    ten_dang_nhap: '',
+    mat_khau: '',
+    vai_tro: 'LE_TAN',
+    trang_thai: 'HOAT_DONG'
+  });
+  const [switchingRole, setSwitchingRole] = useState(false);
   const [showPosModal, setShowPosModal] = useState(false);
   const [savingPos, setSavingPos] = useState(false);
   const [posForm, setPosForm] = useState({
@@ -142,7 +229,7 @@ function Dashboard() {
       const res = await api.get(`/tickets/${selectedTicketId}/parts`);
       setModalTicketParts(res.data.data || []);
       await refreshTickets();
-      if (role === 'KY_THUAT_VIEN' || role === 'QUAN_LY' || role === 'ADMIN') {
+      if (canViewInventory) {
         setParts(await fetchParts());
       }
     } catch (err) {
@@ -157,7 +244,7 @@ function Dashboard() {
       const res = await api.get(`/tickets/${selectedTicketId}/parts`);
       setModalTicketParts(res.data.data || []);
       await refreshTickets();
-      if (role === 'KY_THUAT_VIEN' || role === 'QUAN_LY' || role === 'ADMIN') {
+      if (canViewInventory) {
         setParts(await fetchParts());
       }
     } catch (err) {
@@ -275,22 +362,23 @@ function Dashboard() {
     };
 
     load(fetchTickets, setTickets, 'danh sách phiếu');
-    if (role === 'LE_TAN' || role === 'QUAN_LY' || role === 'ADMIN') {
+    if (canReceptionAction) {
       load(fetchBookings, setBookings, 'danh sách lịch hẹn');
     }
-    if (role === 'QUAN_LY' || role === 'ADMIN') {
+    if (canViewStats) {
       load(fetchStats, setStats, 'thống kê dashboard');
+    }
+    if (canManageEmployees) {
       load(fetchEmployees, setEmployees, 'danh sách nhân sự');
     }
-    if (role === 'KY_THUAT_VIEN' || role === 'QUAN_LY' || role === 'ADMIN') {
+    if (canViewInventory) {
       load(fetchParts, setParts, 'danh sách linh kiện');
     }
 
-    /* Socket.io temporarily disabled for Vercel deployment */
     return () => {
       active = false;
     };
-  }, [role, fetchTickets, fetchBookings, fetchStats, fetchParts, fetchEmployees]);
+  }, [canReceptionAction, canViewStats, canManageEmployees, canViewInventory, fetchTickets, fetchBookings, fetchStats, fetchParts, fetchEmployees]);
 
   useEffect(() => {
     try {
@@ -311,8 +399,8 @@ function Dashboard() {
       try {
         const [latestTickets, latestBookings, latestParts] = await Promise.all([
           fetchTickets(),
-          role === 'LE_TAN' || role === 'QUAN_LY' || role === 'ADMIN' ? fetchBookings() : Promise.resolve(null),
-          role === 'KY_THUAT_VIEN' || role === 'QUAN_LY' || role === 'ADMIN' ? fetchParts() : Promise.resolve(null)
+          canReceptionAction ? fetchBookings() : Promise.resolve(null),
+          canViewInventory ? fetchParts() : Promise.resolve(null)
         ]);
         if (!active) return;
         setTickets(latestTickets);
@@ -396,7 +484,7 @@ function Dashboard() {
       active = false;
       window.clearInterval(intervalId);
     };
-  }, [fetchTickets, fetchBookings, fetchParts, lowStockThreshold, role]);
+  }, [fetchTickets, fetchBookings, fetchParts, lowStockThreshold, canReceptionAction, canViewInventory]);
 
   useEffect(() => {
     if (!receiptTicket) {
@@ -442,6 +530,112 @@ function Dashboard() {
       setBookings(await fetchBookings());
     } catch (error) {
       console.error('Không tải lại được danh sách lịch hẹn:', error);
+    }
+  };
+
+  const openCreateEmployeeModal = () => {
+    setEditingEmployee(null);
+    setEmployeeError('');
+    setEmployeeForm({
+      ho_ten: '',
+      ten_dang_nhap: '',
+      mat_khau: '',
+      vai_tro: 'LE_TAN',
+      trang_thai: 'HOAT_DONG'
+    });
+    setShowEmployeeModal(true);
+  };
+
+  const openEditEmployeeModal = (emp) => {
+    setEditingEmployee(emp);
+    setEmployeeError('');
+    setEmployeeForm({
+      ho_ten: emp.ho_ten || '',
+      ten_dang_nhap: emp.ten_dang_nhap || '',
+      mat_khau: '',
+      vai_tro: emp.vai_tro || 'LE_TAN',
+      trang_thai: emp.trang_thai || 'HOAT_DONG'
+    });
+    setShowEmployeeModal(true);
+  };
+
+  const saveEmployee = async (e) => {
+    e.preventDefault();
+    setSavingEmployee(true);
+    setEmployeeError('');
+    try {
+      if (editingEmployee) {
+        const res = await api.patch(`/admin/employees/${editingEmployee.id}`, {
+          ho_ten: employeeForm.ho_ten.trim(),
+          vai_tro: employeeForm.vai_tro,
+          trang_thai: employeeForm.trang_thai,
+          mat_khau: employeeForm.mat_khau.trim() || undefined
+        });
+        showToast(`✅ ${res.data?.message || 'Đã cập nhật tài khoản nhân viên!'}`);
+      } else {
+        const res = await api.post('/admin/employees', {
+          ho_ten: employeeForm.ho_ten.trim(),
+          ten_dang_nhap: employeeForm.ten_dang_nhap.trim(),
+          mat_khau: employeeForm.mat_khau.trim(),
+          vai_tro: employeeForm.vai_tro
+        });
+        showToast(`🎉 ${res.data?.message || 'Đã tạo tài khoản nhân viên mới!'}`);
+      }
+      setEmployees(await fetchEmployees());
+      setShowEmployeeModal(false);
+    } catch (err) {
+      setEmployeeError(err.response?.data?.message || 'Không lưu được thông tin nhân viên.');
+    } finally {
+      setSavingEmployee(false);
+    }
+  };
+
+  const toggleEmployeeLock = async (emp) => {
+    const nextStatus = emp.trang_thai === 'HOAT_DONG' ? 'KHOA' : 'HOAT_DONG';
+    try {
+      const res = await api.patch(`/admin/employees/${emp.id}`, {
+        ho_ten: emp.ho_ten,
+        vai_tro: emp.vai_tro,
+        trang_thai: nextStatus
+      });
+      showToast(`🔒 ${res.data?.message || 'Đã cập nhật trạng thái tài khoản!'}`);
+      setEmployees(await fetchEmployees());
+    } catch (err) {
+      showToast(`❌ ${err.response?.data?.message || 'Không đổi được trạng thái tài khoản'}`);
+    }
+  };
+
+  const removeEmployee = async (emp) => {
+    if (!window.confirm(`Bạn có chắc chắn muốn xóa tài khoản "${emp.ho_ten}" (@${emp.ten_dang_nhap})?`)) return;
+    try {
+      const res = await api.delete(`/admin/employees/${emp.id}`);
+      showToast(`🗑️ ${res.data?.message || 'Đã xóa tài khoản nhân viên!'}`);
+      setEmployees(await fetchEmployees());
+    } catch (err) {
+      showToast(`❌ ${err.response?.data?.message || 'Không xóa được tài khoản'}`);
+    }
+  };
+
+  const handleQuickSwitchRole = async (targetUsername) => {
+    if (!targetUsername || switchingRole) return;
+    setSwitchingRole(true);
+    try {
+      const response = await api.post('/auth/login', {
+        username: targetUsername,
+        password: '123456'
+      });
+      if (response.data.success) {
+        const { token, role: nextRole, fullName: nextName, accountId, username } = response.data.data;
+        localStorage.setItem('token', token);
+        localStorage.setItem('role', nextRole);
+        localStorage.setItem('fullName', nextName);
+        if (accountId) localStorage.setItem('accountId', String(accountId));
+        if (username) localStorage.setItem('username', username);
+        window.location.reload();
+      }
+    } catch (err) {
+      showToast(`❌ ${err.response?.data?.message || 'Không chuyển được tài khoản demo'}`);
+      setSwitchingRole(false);
     }
   };
 
@@ -566,7 +760,7 @@ function Dashboard() {
       setStatusNote('');
       showToast(`✅ Đã chuyển trạng thái sang: ${status.replace(/_/g, ' ')}`);
       await refreshTickets();
-      if (role === 'QUAN_LY' || role === 'ADMIN') {
+      if (canViewStats) {
         setStats(await fetchStats());
       }
     } catch (err) {
@@ -598,9 +792,6 @@ function Dashboard() {
     window.location.href = '/login';
   };
 
-  const canReceptionAction = role === 'LE_TAN' || role === 'QUAN_LY' || role === 'ADMIN';
-  const canTechAction = role === 'KY_THUAT_VIEN' || role === 'QUAN_LY' || role === 'ADMIN';
-
   const matchesStatusFilter = (ticket) => {
     if (statusFilter === 'ALL') return true;
     if (statusFilter === 'CHO_KHAM') return ticket.trang_thai === 'CHỜ_KHÁM';
@@ -622,53 +813,85 @@ function Dashboard() {
   const receiptTotal = Number(receiptTicket?.tong_tien || 0);
   const receiptPartsTotal = receiptParts.reduce((total, item) => total + Number(item.so_luong) * Number(item.don_gia), 0);
   const receiptServiceTotal = Math.max(receiptTotal - receiptPartsTotal, 0);
+  const currentRoleInfo = ROLE_META[role] || ROLE_META.LE_TAN;
 
   return (
-    <div className="p-8 bg-slate-50 min-h-screen">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h2 className="text-2xl font-bold text-brand-blue">
-            Bảng điều khiển - {role === 'LE_TAN' ? 'Lễ Tân' : (role === 'QUAN_LY' || role === 'ADMIN') ? 'Quản Lý' : 'Kỹ Thuật Viên'}
-          </h2>
-          <p className="text-slate-500">Xin chào, {fullName}</p>
-        </div>
-        <div className="relative flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => setShowNotifications(open => !open)}
-            aria-expanded={showNotifications}
-            aria-label={`Thông báo (${unreadNotificationCount})`}
-            className="relative rounded-lg border border-slate-200 bg-white px-4 py-2 font-bold text-brand-blue hover:bg-slate-50"
-          >
-            Thông báo
-            {unreadNotificationCount > 0 && (
-              <span className="ml-2 rounded-full bg-red-500 px-2 py-0.5 text-xs text-white">{unreadNotificationCount}</span>
-            )}
-          </button>
-          <button onClick={logout} className="rounded bg-red-500 px-4 py-2 font-bold text-white hover:bg-red-600">Đăng Xuất</button>
-          {showNotifications && (
-            <div className="absolute right-0 top-full z-40 mt-2 w-80 max-w-[90vw] rounded-xl border border-slate-200 bg-white p-3 shadow-xl">
-              <div className="mb-2 flex items-center justify-between">
-                <h3 className="font-bold text-slate-800">Trung tâm thông báo</h3>
-                <button type="button" onClick={clearNotifications} className="text-xs font-semibold text-brand-blue hover:underline">
-                  Xóa tất cả
-                </button>
-              </div>
-              <button type="button" onClick={markAllNotificationsRead} className="mb-2 text-xs font-semibold text-brand-blue hover:underline">
-                Đánh dấu tất cả đã đọc
-              </button>
-              <div className="max-h-80 space-y-2 overflow-y-auto">
-                {notifications.map(notification => (
-                  <div key={notification.id} className={`rounded-lg p-3 text-sm ${notification.read ? 'bg-slate-50' : 'bg-blue-50'}`}>
-                    <p className="font-semibold">{notification.title || `Phiếu ${notification.ticketCode}: ${notification.status}`}</p>
-                    {notification.description && <p className="mt-1 text-slate-700">{notification.description}</p>}
-                    <p className="mt-1 text-xs text-slate-500">{notification.createdAt}</p>
-                  </div>
-                ))}
-                {notifications.length === 0 && <p className="py-6 text-center text-sm text-slate-500">Chưa có thông báo mới.</p>}
-              </div>
+    <div className="p-6 md:p-8 bg-slate-50 min-h-screen">
+      {/* Header Điều Hành & Chuyển Nhanh Chức Vụ (RBAC Switcher) */}
+      <div className="bg-white rounded-2xl p-5 shadow-xs border border-slate-200/90 mb-6">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h2 className="text-xl md:text-2xl font-extrabold text-brand-blue">
+                Bảng Điều Khiển — {currentRoleInfo.title}
+              </h2>
+              <span className={`px-3 py-1 rounded-full text-xs font-extrabold border ${currentRoleInfo.badgeClass}`}>
+                {currentRoleInfo.badge} • Level {currentRoleInfo.level}
+              </span>
             </div>
-          )}
+            <p className="text-slate-600 text-xs mt-1.5">
+              Xin chào <strong className="text-slate-800">{fullName}</strong> {currentUsername ? `(@${currentUsername})` : ''} — <span className="text-slate-500">{currentRoleInfo.permissionsText}</span>
+            </p>
+          </div>
+
+          <div className="relative flex flex-wrap items-center gap-2.5 shrink-0">
+            {/* Bộ chuyển nhanh chức vụ để kiểm thử phân quyền */}
+            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
+              <span className="text-[11px] font-bold text-slate-500 whitespace-nowrap">⚡ Test chức vụ:</span>
+              <select
+                value={currentUsername || (role === 'GIAM_DOC' ? 'giamdoc' : role === 'QUAN_LY' ? 'quanly' : role === 'KE_TOAN' ? 'ketoan' : role === 'THU_KHO' ? 'thukho' : role === 'KY_THUAT_VIEN' ? 'kythuat' : 'letan')}
+                disabled={switchingRole}
+                onChange={(e) => handleQuickSwitchRole(e.target.value)}
+                aria-label="Chuyển nhanh chức vụ phân quyền"
+                className="text-xs font-extrabold text-brand-blue bg-transparent outline-none cursor-pointer"
+              >
+                {QUICK_SWITCH_ROLES.map(item => (
+                  <option key={item.username} value={item.username}>
+                    {item.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowNotifications(open => !open)}
+              aria-expanded={showNotifications}
+              aria-label={`Thông báo (${unreadNotificationCount})`}
+              className="relative rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-brand-blue hover:bg-slate-50"
+            >
+              🔔 Thông báo
+              {unreadNotificationCount > 0 && (
+                <span className="ml-1.5 rounded-full bg-red-500 px-2 py-0.5 text-[10px] text-white">{unreadNotificationCount}</span>
+              )}
+            </button>
+            <button onClick={logout} className="rounded-xl bg-red-500 px-4 py-2 text-xs font-bold text-white hover:bg-red-600">
+              Đăng Xuất
+            </button>
+            {showNotifications && (
+              <div className="absolute right-0 top-full z-40 mt-2 w-80 max-w-[90vw] rounded-xl border border-slate-200 bg-white p-3 shadow-xl">
+                <div className="mb-2 flex items-center justify-between">
+                  <h3 className="font-bold text-slate-800">Trung tâm thông báo</h3>
+                  <button type="button" onClick={clearNotifications} className="text-xs font-semibold text-brand-blue hover:underline">
+                    Xóa tất cả
+                  </button>
+                </div>
+                <button type="button" onClick={markAllNotificationsRead} className="mb-2 text-xs font-semibold text-brand-blue hover:underline">
+                  Đánh dấu tất cả đã đọc
+                </button>
+                <div className="max-h-80 space-y-2 overflow-y-auto">
+                  {notifications.map(notification => (
+                    <div key={notification.id} className={`rounded-lg p-3 text-sm ${notification.read ? 'bg-slate-50' : 'bg-blue-50'}`}>
+                      <p className="font-semibold">{notification.title || `Phiếu ${notification.ticketCode}: ${notification.status}`}</p>
+                      {notification.description && <p className="mt-1 text-slate-700">{notification.description}</p>}
+                      <p className="mt-1 text-xs text-slate-500">{notification.createdAt}</p>
+                    </div>
+                  ))}
+                  {notifications.length === 0 && <p className="py-6 text-center text-sm text-slate-500">Chưa có thông báo mới.</p>}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -679,51 +902,52 @@ function Dashboard() {
         </div>
       )}
 
+      {/* Thanh Tab Nghiệp Vụ (Hiển thị tự động theo Cấp Bậc Phân Quyền) */}
       <div className="mb-6 flex flex-wrap gap-2 border-b border-slate-200">
         <button 
           onClick={() => setActiveTab('TICKETS')}
           className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'TICKETS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
-          Phiếu sửa chữa
+          📋 Phiếu sửa chữa
         </button>
         {canReceptionAction && (
           <button 
             onClick={() => setActiveTab('BOOKINGS')}
             className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'BOOKINGS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
-            Lịch hẹn
+            📅 Lịch hẹn
           </button>
         )}
-        {canTechAction && (
+        {canViewInventory && (
           <button
             onClick={() => setActiveTab('INVENTORY')}
             className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'INVENTORY' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
-            Kho linh kiện
+            📦 Kho linh kiện
           </button>
         )}
         {canTechAction && (
           <button
             onClick={() => setActiveTab('SOFTWARE')}
             className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'SOFTWARE' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
-            Gói phần mềm
+            💿 Gói phần mềm
           </button>
         )}
-        {(role === 'QUAN_LY' || role === 'ADMIN') && (
+        {canViewStats && (
           <button
             onClick={() => setActiveTab('STATS')}
             className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'STATS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
-            Báo cáo
+            📊 Báo cáo doanh thu
           </button>
         )}
-        {(role === 'QUAN_LY' || role === 'ADMIN') && (
+        {canManageEmployees && (
           <button
             onClick={() => setActiveTab('EMPLOYEES')}
             className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'EMPLOYEES' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
-            Nhân sự ({employees.length})
+            👥 Nhân sự &amp; Phân quyền ({employees.length})
           </button>
         )}
         <button
           onClick={() => setActiveTab('NOTIFICATIONS')}
           className={`rounded-t-lg px-5 py-3 text-sm font-bold ${activeTab === 'NOTIFICATIONS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
-          Thông báo{notifications.length > 0 ? ` (${notifications.length})` : ''}
+          🔔 Thông báo{notifications.length > 0 ? ` (${notifications.length})` : ''}
         </button>
       </div>
 
@@ -918,8 +1142,8 @@ function Dashboard() {
                         <button onClick={() => updateStatus(ticket.id, 'ĐÃ_SỬA_XONG')} className="bg-brand-green text-white px-3 py-1 rounded font-bold text-xs w-full">Sửa Xong</button>
                       </>
                     )}
-                    {canReceptionAction && ticket.trang_thai === 'ĐÃ_SỬA_XONG' && (
-                      <button onClick={() => updateStatus(ticket.id, 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN')} className="bg-purple-500 text-white px-3 py-1 rounded font-bold text-xs w-full">Giao Khách</button>
+                    {canCashierAction && ticket.trang_thai === 'ĐÃ_SỬA_XONG' && (
+                      <button onClick={() => updateStatus(ticket.id, 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN')} className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded font-bold text-xs w-full">Giao Khách &amp; Thu Tiền</button>
                     )}
                     <button
                       type="button"
@@ -956,7 +1180,7 @@ function Dashboard() {
         </div>
       )}
 
-      {activeTab === 'STATS' && (
+      {activeTab === 'STATS' && canViewStats && (
         <div className="rounded-xl border-t-4 border-purple-500 bg-white p-5 shadow sm:p-6">
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -1188,13 +1412,17 @@ function Dashboard() {
         </section>
       )}
 
-      {activeTab === 'INVENTORY' && canTechAction && (
+      {activeTab === 'INVENTORY' && canViewInventory && (
         <div className="space-y-5">
           <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
             <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
               <div>
                 <h3 className="text-xl font-bold text-brand-blue">Kho linh kiện &amp; vật tư</h3>
-                <p className="mt-1 text-sm text-slate-500">Theo dõi số lượng tồn kho và giá bán linh kiện.</p>
+                <p className="mt-1 text-sm text-slate-500">
+                  {canManageInventory
+                    ? 'Quản lý danh mục, nhập thêm số lượng tồn kho và cập nhật giá niêm yết.'
+                    : 'Chế độ Kỹ thuật viên: Tra cứu tồn kho linh kiện (Quyền sửa giá & nhập hàng thuộc về Thủ kho / Quản lý).'}
+                </p>
               </div>
               <div className="flex flex-wrap items-center gap-3">
                 <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-800">
@@ -1215,7 +1443,7 @@ function Dashboard() {
                 >
                   📥 Xuất Kho (CSV)
                 </button>
-                {(role === 'QUAN_LY' || role === 'ADMIN') && (
+                {canManageInventory && (
                   <button
                     type="button"
                     onClick={() => { resetPartForm(); setShowInventoryForm(true); }}
@@ -1305,16 +1533,16 @@ function Dashboard() {
                             </span>
                           </td>
                           <td className="px-3 py-3 text-right">
-                            {(role === 'QUAN_LY' || role === 'ADMIN') ? (
+                            {canManageInventory ? (
                               <button
                                 type="button"
                                 onClick={() => editPart(part)}
                                 className="rounded-md px-3 py-1.5 text-sm font-semibold text-brand-blue hover:bg-blue-50"
                               >
-                                Sửa
+                                Sửa giá / Nhập kho
                               </button>
                             ) : (
-                              <span className="text-xs text-slate-400">Xem tồn kho</span>
+                              <span className="text-xs text-slate-400">Chỉ xem tồn kho</span>
                             )}
                           </td>
                         </tr>
@@ -1419,7 +1647,7 @@ function Dashboard() {
         </div>
       )}
       
-      {activeTab === 'BOOKINGS' && (
+      {activeTab === 'BOOKINGS' && canReceptionAction && (
         <div className="bg-white p-6 rounded-xl shadow border-t-4 border-brand-orange">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-xl font-bold">Lịch hẹn chưa xử lý / Sắp tới</h3>
@@ -1489,62 +1717,297 @@ function Dashboard() {
         </div>
       )}
 
-      {activeTab === 'EMPLOYEES' && (role === 'QUAN_LY' || role === 'ADMIN') && (
-        <div className="bg-white p-6 rounded-xl shadow border-t-4 border-brand-blue">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h3 className="text-xl font-bold text-brand-blue">Danh sách Nhân sự &amp; Phân quyền Hệ thống</h3>
-              <p className="text-xs text-slate-500 mt-1">Quản lý đội ngũ Lễ tân, Kỹ thuật viên và Quản lý tại trung tâm 615 Âu Cơ.</p>
+      {activeTab === 'EMPLOYEES' && canManageEmployees && (
+        <div className="space-y-6">
+          {/* Sơ đồ Ma trận Phân quyền 6 Cấp bậc Từ Trên Xuống (Top-Down RBAC Hierarchy) */}
+          <div className="bg-white p-6 rounded-2xl shadow-xs border border-slate-200/90">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
+              <div>
+                <h3 className="text-lg font-extrabold text-brand-blue flex items-center gap-2">
+                  <span>🏛️</span> Tháp Phân Quyền 6 Cấp Bậc Từ Trên Xuống (Top-Down RBAC)
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Cấp trên quản lý cấp dưới: Giám Đốc (Level 100) cấp phát mọi quyền; Quản Lý (Level 80) chỉ cấp phát và điều hành nhân sự cấp dưới (&lt; Level 80).
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={openCreateEmployeeModal}
+                className="rounded-xl bg-brand-blue hover:bg-blue-800 px-4 py-2.5 text-xs font-extrabold text-white shadow-sm transition flex items-center gap-1.5"
+              >
+                <span>+</span> Tạo Tài Khoản Nhân Viên Mới
+              </button>
             </div>
-            <div className="flex gap-2">
-              <span className="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-bold text-brand-blue border border-blue-200">
-                👨‍🔧 Đang xử lý: {tickets.filter(t => t.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' || t.trang_thai === 'ĐANG_SỬA').length} máy
-              </span>
-              <span className="rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 border border-emerald-200">
-                ✅ Đã hoàn tất: {tickets.filter(t => t.trang_thai === 'ĐÃ_SỬA_XONG' || t.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN').length} máy
-              </span>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {[
+                { key: 'GIAM_DOC', pages: 'Tất cả 6 trang + Quản trị tối cao' },
+                { key: 'QUAN_LY', pages: 'Tất cả 6 trang (Quản lý nhân sự cấp dưới)' },
+                { key: 'KE_TOAN', pages: 'Phiếu sửa chữa • Báo cáo doanh thu • Thu ngân' },
+                { key: 'THU_KHO', pages: 'Kho linh kiện (Nhập/Sửa giá) • Đối chiếu phiếu' },
+                { key: 'KY_THUAT_VIEN', pages: 'Phiếu sửa chữa • Gói phần mềm • Xem kho' },
+                { key: 'LE_TAN', pages: 'Phiếu sửa chữa (POS) • Lịch hẹn • Bàn giao máy' }
+              ].map((item) => {
+                const meta = ROLE_META[item.key];
+                return (
+                  <div key={item.key} className="rounded-xl border border-slate-200/90 p-3.5 bg-slate-50/60 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between gap-2 mb-1.5">
+                        <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-extrabold border ${meta.badgeClass}`}>
+                          {meta.badge}
+                        </span>
+                        <span className="text-[11px] font-mono font-bold text-slate-500">Level {meta.level}</span>
+                      </div>
+                      <p className="text-xs text-slate-600 leading-relaxed mt-1">{meta.permissionsText}</p>
+                    </div>
+                    <p className="text-[11px] font-bold text-brand-blue mt-2 pt-2 border-t border-slate-200/70">
+                      📌 Trang truy cập: <span className="font-semibold text-slate-700">{item.pages}</span>
+                    </p>
+                  </div>
+                );
+              })}
             </div>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b-2 border-slate-200 text-xs font-bold uppercase text-slate-500">
-                  <th className="py-3 px-4">Mã NV</th>
-                  <th className="py-3 px-4">Họ và Tên</th>
-                  <th className="py-3 px-4">Tài khoản đăng nhập</th>
-                  <th className="py-3 px-4">Vai trò / Chức vụ</th>
-                  <th className="py-3 px-4 text-center">Trạng thái</th>
-                </tr>
-              </thead>
-              <tbody>
-                {employees.map(emp => (
-                  <tr key={emp.id} className="border-b hover:bg-slate-50 text-sm">
-                    <td className="py-3 px-4 font-bold text-slate-600">NV-{String(emp.id).padStart(3, '0')}</td>
-                    <td className="py-3 px-4 font-semibold text-slate-800">{emp.ho_ten}</td>
-                    <td className="py-3 px-4 font-mono text-brand-blue">{emp.ten_dang_nhap}</td>
-                    <td className="py-3 px-4">
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
-                        emp.vai_tro === 'QUAN_LY' || emp.vai_tro === 'ADMIN'
-                          ? 'bg-purple-100 text-purple-800'
-                          : emp.vai_tro === 'KY_THUAT_VIEN'
-                            ? 'bg-blue-100 text-blue-800'
-                            : 'bg-orange-100 text-orange-800'
-                      }`}>
-                        {emp.vai_tro === 'QUAN_LY' || emp.vai_tro === 'ADMIN' ? '🛡️ Quản Lý / Admin' : emp.vai_tro === 'KY_THUAT_VIEN' ? '🔧 Kỹ Thuật Viên' : '💁 Lễ Tân'}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">
-                        ● Đang hoạt động
-                      </span>
-                    </td>
+
+          {/* Danh sách Tài khoản Nhân sự & Công cụ Cấp phát / Khóa / Đổi chức vụ */}
+          <div className="bg-white p-6 rounded-2xl shadow-xs border-t-4 border-brand-blue">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h3 className="text-xl font-extrabold text-slate-800">Danh Sách Tài Khoản Nhân Sự ({employees.length})</h3>
+                <p className="text-xs text-slate-500 mt-1">
+                  Đang đăng nhập với quyền: <strong>{currentRoleInfo.title} (Level {currentRoleLevel})</strong> — {isExecutive ? 'Bạn có toàn quyền tạo, đổi chức vụ và khóa mọi tài khoản.' : 'Bạn chỉ được phép tạo, sửa hoặc khóa tài khoản nhân sự cấp dưới (< Level 80).'}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <span className="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-bold text-brand-blue border border-blue-200">
+                  👨‍🔧 Đang xử lý: {tickets.filter(t => t.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' || t.trang_thai === 'ĐANG_SỬA').length} máy
+                </span>
+                <span className="rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 border border-emerald-200">
+                  ✅ Đã hoàn tất: {tickets.filter(t => t.trang_thai === 'ĐÃ_SỬA_XONG' || t.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN').length} máy
+                </span>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[820px] text-left border-collapse">
+                <thead>
+                  <tr className="border-b-2 border-slate-200 text-xs font-bold uppercase text-slate-500">
+                    <th className="py-3 px-4">Mã NV</th>
+                    <th className="py-3 px-4">Họ và Tên</th>
+                    <th className="py-3 px-4">Tài khoản</th>
+                    <th className="py-3 px-4">Chức vụ &amp; Cấp bậc</th>
+                    <th className="py-3 px-4 text-center">Trạng thái</th>
+                    <th className="py-3 px-4 text-right">Thao tác phân quyền</th>
                   </tr>
-                ))}
-                {employees.length === 0 && (
-                  <tr><td colSpan="5" className="text-center py-8 text-slate-400">Chưa có dữ liệu nhân sự.</td></tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {employees.map(emp => {
+                    const empMeta = ROLE_META[emp.vai_tro] || ROLE_META.LE_TAN;
+                    const empLevel = empMeta.level;
+                    const isSelf = (currentAccountId && Number(emp.id) === currentAccountId) || (currentUsername && emp.ten_dang_nhap === currentUsername);
+                    const canModifyTarget = !isSelf && (isExecutive || empLevel < currentRoleLevel);
+
+                    return (
+                      <tr key={emp.id} className="border-b hover:bg-slate-50 text-sm">
+                        <td className="py-3 px-4 font-bold text-slate-600">NV-{String(emp.id).padStart(3, '0')}</td>
+                        <td className="py-3 px-4">
+                          <span className="font-bold text-slate-800">{emp.ho_ten}</span>
+                          {isSelf && (
+                            <span className="ml-2 px-2 py-0.5 rounded bg-blue-100 text-brand-blue text-[10px] font-extrabold">
+                              Bạn
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4 font-mono font-bold text-brand-blue">@{emp.ten_dang_nhap}</td>
+                        <td className="py-3 px-4">
+                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${empMeta.badgeClass}`}>
+                            {empMeta.badge} • Lv.{empLevel}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          {emp.trang_thai === 'HOAT_DONG' ? (
+                            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">
+                              ● Hoạt động
+                            </span>
+                          ) : (
+                            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-700">
+                              🔒 Đã khóa
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4 text-right">
+                          {canModifyTarget ? (
+                            <div className="inline-flex items-center gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => openEditEmployeeModal(emp)}
+                                className="px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-brand-blue border border-blue-200 text-xs font-bold transition"
+                              >
+                                ✏️ Phân quyền / Đổi MK
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => toggleEmployeeLock(emp)}
+                                className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition ${
+                                  emp.trang_thai === 'HOAT_DONG'
+                                    ? 'bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-200'
+                                    : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-200'
+                                }`}
+                              >
+                                {emp.trang_thai === 'HOAT_DONG' ? 'Khóa TK' : 'Mở khóa'}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => removeEmployee(emp)}
+                                className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs font-bold transition"
+                              >
+                                Xóa
+                              </button>
+                            </div>
+                          ) : (
+                            <span className="text-xs font-semibold text-slate-400">
+                              {isSelf ? '🛡️ Tài khoản đang dùng' : '🔒 Cấp trên / Ngang cấp'}
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {employees.length === 0 && (
+                    <tr><td colSpan="6" className="text-center py-8 text-slate-400">Chưa có dữ liệu nhân sự.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Tạo mới / Phân quyền & Đặt lại mật khẩu Nhân viên */}
+      {showEmployeeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl">
+            <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-200">
+              <div>
+                <h3 className="text-lg font-extrabold text-brand-blue">
+                  {editingEmployee ? `✏️ Phân Quyền Nhân Viên: ${editingEmployee.ho_ten}` : '👤 Tạo Tài Khoản Nhân Sự Mới'}
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  {isExecutive
+                    ? 'Quyền Giám Đốc (Level 100): Được phép gán mọi chức vụ trong hệ thống.'
+                    : 'Quyền Quản Lý (Level 80): Chỉ được phép gán chức vụ nhân viên cấp dưới (< Level 80).'}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowEmployeeModal(false)}
+                className="text-slate-400 hover:text-slate-700 text-2xl font-bold"
+              >
+                ×
+              </button>
+            </div>
+
+            {employeeError && (
+              <div role="alert" className="mb-4 rounded-xl bg-red-50 border border-red-200 p-3 text-xs font-bold text-red-700">
+                {employeeError}
+              </div>
+            )}
+
+            <form onSubmit={saveEmployee} className="space-y-4 text-sm">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Họ và tên nhân viên *</label>
+                <input
+                  type="text"
+                  required
+                  value={employeeForm.ho_ten}
+                  onChange={(e) => setEmployeeForm({ ...employeeForm, ho_ten: e.target.value })}
+                  placeholder="VD: Nguyễn Văn Minh"
+                  className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 focus:border-brand-blue outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Tên đăng nhập *</label>
+                  <input
+                    type="text"
+                    required
+                    disabled={Boolean(editingEmployee)}
+                    value={employeeForm.ten_dang_nhap}
+                    onChange={(e) => setEmployeeForm({ ...employeeForm, ten_dang_nhap: e.target.value })}
+                    placeholder="VD: ktv_minh"
+                    className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 font-mono focus:border-brand-blue outline-none disabled:bg-slate-100 disabled:text-slate-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    {editingEmployee ? 'Mật khẩu mới (Để trống nếu giữ nguyên)' : 'Mật khẩu khởi tạo *'}
+                  </label>
+                  <input
+                    type="password"
+                    required={!editingEmployee}
+                    value={employeeForm.mat_khau}
+                    onChange={(e) => setEmployeeForm({ ...employeeForm, mat_khau: e.target.value })}
+                    placeholder={editingEmployee ? 'Nhập nếu muốn đổi MK...' : 'Tối thiểu 6 ký tự'}
+                    className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 focus:border-brand-blue outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Chức vụ &amp; Cấp bậc Phân quyền *</label>
+                <select
+                  value={employeeForm.vai_tro}
+                  onChange={(e) => setEmployeeForm({ ...employeeForm, vai_tro: e.target.value })}
+                  className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 font-bold text-slate-800 focus:border-brand-blue outline-none"
+                >
+                  {isExecutive && (
+                    <>
+                      <option value="GIAM_DOC">👑 Giám Đốc Điều Hành (Cấp 1 - Level 100 - Toàn quyền)</option>
+                      <option value="QUAN_LY">🛡️ Quản Lý Cửa Hàng (Cấp 2 - Level 80 - Quản lý vận hành)</option>
+                    </>
+                  )}
+                  <option value="KE_TOAN">💰 Kế Toán / Thu Ngân (Cấp 3 - Level 60 - Báo cáo &amp; Thu tiền)</option>
+                  <option value="THU_KHO">📦 Thủ Kho Linh Kiện (Cấp 4 - Level 50 - Quản lý xuất nhập kho)</option>
+                  <option value="KY_THUAT_VIEN">🔧 Kỹ Thuật Viên (Cấp 5 - Level 40 - Sửa chữa, Serial &amp; Phần mềm)</option>
+                  <option value="LE_TAN">💁 Lễ Tân &amp; CSKH (Cấp 6 - Level 30 - Tiếp nhận POS &amp; Lịch hẹn)</option>
+                </select>
+                <p className="mt-1.5 text-[11px] text-slate-500 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                  {ROLE_META[employeeForm.vai_tro]?.permissionsText}
+                </p>
+              </div>
+
+              {editingEmployee && (
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Trạng thái tài khoản</label>
+                  <select
+                    value={employeeForm.trang_thai}
+                    onChange={(e) => setEmployeeForm({ ...employeeForm, trang_thai: e.target.value })}
+                    className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 font-semibold focus:border-brand-blue outline-none"
+                  >
+                    <option value="HOAT_DONG">● Đang hoạt động (Cho phép đăng nhập)</option>
+                    <option value="KHOA">🔒 Khóa tài khoản (Chặn đăng nhập)</option>
+                  </select>
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setShowEmployeeModal(false)}
+                  className="rounded-xl bg-slate-100 px-4 py-2.5 font-bold text-slate-700 hover:bg-slate-200"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingEmployee}
+                  className="rounded-xl bg-brand-blue px-5 py-2.5 font-extrabold text-white hover:bg-blue-800 shadow-md disabled:opacity-60"
+                >
+                  {savingEmployee ? 'Đang lưu...' : editingEmployee ? 'Lưu Phân Quyền' : 'Tạo Tài Khoản →'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

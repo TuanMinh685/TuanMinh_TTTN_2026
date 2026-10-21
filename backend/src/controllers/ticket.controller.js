@@ -50,10 +50,29 @@ const getTickets = async (req, res, next) => {
     }
 };
 
+const ROLE_ALLOWED_STATUSES = {
+    GIAM_DOC: null, // Toàn quyền mọi trạng thái
+    ADMIN: null,    // Toàn quyền mọi trạng thái
+    QUAN_LY: null,  // Toàn quyền mọi trạng thái
+    LE_TAN: ['ĐANG_CHUẨN_ĐOÁN', 'ĐANG_SỬA', 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN', 'KHÁCH_TỪ_CHỐI_SỬA'],
+    KY_THUAT_VIEN: ['ĐANG_CHUẨN_ĐOÁN', 'CHỜ_KHÁCH_CHỐT_GIÁ', 'ĐANG_SỬA', 'ĐÃ_SỬA_XONG'],
+    KE_TOAN: ['ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN']
+};
+
 const updateTicketStatus = async (req, res, next) => {
     try {
         const { id } = req.params;
         const { trang_thai, ghi_chu } = req.body;
+        const userRole = req.user?.Role;
+
+        const allowedStatuses = ROLE_ALLOWED_STATUSES[userRole];
+        if (Array.isArray(allowedStatuses) && !allowedStatuses.includes(trang_thai)) {
+            return res.status(403).json({
+                success: false,
+                message: `Phân quyền nghiệp vụ: Chức vụ (${userRole}) không được phép chuyển phiếu sang trạng thái "${trang_thai.replace(/_/g, ' ')}"!`
+            });
+        }
+
         const data = await ticketService.updateTicketStatus(id, trang_thai, ghi_chu);
         res.status(200).json({ success: true, message: 'Cập nhật trạng thái thành công', data });
     } catch (error) {

@@ -4,14 +4,17 @@ const adminController = require('../controllers/admin.controller');
 const { verifyToken, requireRole } = require('../middlewares/auth.middleware');
 
 router.use(verifyToken);
-router.use(requireRole('QUAN_LY', 'ADMIN')); // Chỉ dành cho Quản lý
 
-router.get('/dashboard', adminController.getDashboard);
-router.get('/employees', adminController.getEmployees);
+// Quản trị nhân sự & cấp phát tài khoản: Chỉ dành cho Giám Đốc, Admin và Quản Lý Cửa Hàng
+router.get('/employees', requireRole('GIAM_DOC', 'ADMIN', 'QUAN_LY'), adminController.getEmployees);
+router.post('/employees', requireRole('GIAM_DOC', 'ADMIN', 'QUAN_LY'), adminController.createEmployee);
+router.patch('/employees/:id', requireRole('GIAM_DOC', 'ADMIN', 'QUAN_LY'), adminController.updateEmployee);
+router.delete('/employees/:id', requireRole('GIAM_DOC', 'ADMIN', 'QUAN_LY'), adminController.deleteEmployee);
 
+// Báo cáo doanh thu & thống kê: Dành cho Giám Đốc, Admin, Quản Lý và Kế Toán
+router.get('/dashboard', requireRole('GIAM_DOC', 'ADMIN', 'QUAN_LY', 'KE_TOAN'), adminController.getDashboard);
 
-// NEW: Dashboard stats
-router.get('/dashboard-stats', async (req, res, next) => {
+router.get('/dashboard-stats', requireRole('GIAM_DOC', 'ADMIN', 'QUAN_LY', 'KE_TOAN'), async (req, res, next) => {
     try {
         const { pool } = require('../config/db.config');
         const period = req.query.period || 'week';
@@ -39,7 +42,6 @@ router.get('/dashboard-stats', async (req, res, next) => {
             ORDER BY d.date ASC
         `, [period]);
         
-        // Status distribution
         const statusQ = await pool.query(`
             SELECT trang_thai as name, CAST(COUNT(*) AS INTEGER) as value
             FROM phieu_sua_chua

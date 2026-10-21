@@ -11,9 +11,13 @@ function getDefaultData() {
 
     return {
         nhan_vien: [
-            { id: 1, ten_dang_nhap: 'admin', ho_ten: 'Quản Trị Viên', vai_tro: 'ADMIN', mat_khau: hash, trang_thai: 'HOAT_DONG', ngay_tao: '2026-10-01T08:00:00Z' },
-            { id: 2, ten_dang_nhap: 'letan', ho_ten: 'Nguyễn Thị Tân', vai_tro: 'LE_TAN', mat_khau: hash, trang_thai: 'HOAT_DONG', ngay_tao: '2026-10-01T08:00:00Z' },
-            { id: 3, ten_dang_nhap: 'kythuat', ho_ten: 'Trần Kỹ Thuật', vai_tro: 'KY_THUAT_VIEN', mat_khau: hash, trang_thai: 'HOAT_DONG', ngay_tao: '2026-10-01T08:00:00Z' }
+            { id: 1, ten_dang_nhap: 'admin', ho_ten: 'Quản Trị Hệ Thống', vai_tro: 'ADMIN', mat_khau: hash, trang_thai: 'HOAT_DONG', ngay_tao: '2026-10-01T08:00:00Z' },
+            { id: 2, ten_dang_nhap: 'letan', ho_ten: 'Nguyễn Thị Lễ Tân', vai_tro: 'LE_TAN', mat_khau: hash, trang_thai: 'HOAT_DONG', ngay_tao: '2026-10-01T08:00:00Z' },
+            { id: 3, ten_dang_nhap: 'kythuat', ho_ten: 'Trần Kỹ Thuật Viên', vai_tro: 'KY_THUAT_VIEN', mat_khau: hash, trang_thai: 'HOAT_DONG', ngay_tao: '2026-10-01T08:00:00Z' },
+            { id: 4, ten_dang_nhap: 'giamdoc', ho_ten: 'Lê Tổng Giám Đốc', vai_tro: 'GIAM_DOC', mat_khau: hash, trang_thai: 'HOAT_DONG', ngay_tao: '2026-10-01T08:00:00Z' },
+            { id: 5, ten_dang_nhap: 'quanly', ho_ten: 'Phạm Quản Lý Cửa Hàng', vai_tro: 'QUAN_LY', mat_khau: hash, trang_thai: 'HOAT_DONG', ngay_tao: '2026-10-01T08:00:00Z' },
+            { id: 6, ten_dang_nhap: 'ketoan', ho_ten: 'Đặng Thu Ngân Kế Toán', vai_tro: 'KE_TOAN', mat_khau: hash, trang_thai: 'HOAT_DONG', ngay_tao: '2026-10-01T08:00:00Z' },
+            { id: 7, ten_dang_nhap: 'thukho', ho_ten: 'Võ Thủ Kho Linh Kiện', vai_tro: 'THU_KHO', mat_khau: hash, trang_thai: 'HOAT_DONG', ngay_tao: '2026-10-01T08:00:00Z' }
         ],
         khach_hang: [
             { id: 1, ho_ten: 'Lê Trần Tuấn Minh', so_dien_thoai: '0901234567', zalo_id: '0901234567', la_sinh_vien: true, truong_hoc: 'Trường Đại học Văn Hiến (VHU)', ma_sinh_vien: '221A010123', diem_tich_luy: 120, hang_thanh_vien: 'BAC', ngay_tao: '2026-10-10T09:00:00Z' },

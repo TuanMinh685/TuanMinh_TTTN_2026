@@ -1,7 +1,19 @@
 const jwt = require('jsonwebtoken');
 
+const ROLE_HIERARCHY = {
+    GIAM_DOC: 100,
+    ADMIN: 100,
+    QUAN_LY: 80,
+    KE_TOAN: 60,
+    THU_KHO: 50,
+    KY_THUAT_VIEN: 40,
+    LE_TAN: 30,
+    RECEPTIONIST: 30
+};
+
+const getRoleLevel = (role) => ROLE_HIERARCHY[role] || 0;
+
 const verifyToken = (req, res, next) => {
-    // Lấy token từ Header: "Authorization: Bearer <token>"
     const authHeader = req.headers['authorization'];
     if (!authHeader) {
         return res.status(401).json({ success: false, message: 'Access Denied: Không tìm thấy Token xác thực!' });
@@ -13,10 +25,9 @@ const verifyToken = (req, res, next) => {
     }
 
     try {
-        // Giải mã token
         const verified = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = verified; // Lưu thông tin người dùng vào request để các hàm sau sử dụng
-        next(); // Cho phép đi tiếp
+        req.user = verified;
+        next();
     } catch (err) {
         if (err.name === 'TokenExpiredError') {
             return res.status(401).json({ success: false, message: 'Token Expired: Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!' });
@@ -25,17 +36,26 @@ const verifyToken = (req, res, next) => {
     }
 };
 
-// Middleware kiểm tra quyền hạn (Role)
+// Middleware kiểm tra quyền hạn (Role) - Giám đốc & Admin luôn có quyền tối cao từ trên xuống
 const requireRole = (...roles) => {
     return (req, res, next) => {
-        if (!req.user || !roles.includes(req.user.Role)) {
+        if (!req.user) {
             return res.status(403).json({ success: false, message: 'Forbidden: Bạn không có quyền truy cập API này!' });
         }
-        next();
+        const userRole = req.user.Role;
+        if (userRole === 'GIAM_DOC' || userRole === 'ADMIN' || roles.includes(userRole)) {
+            return next();
+        }
+        return res.status(403).json({
+            success: false,
+            message: `Phân quyền từ chối: Chức vụ (${userRole}) không được phép thực hiện nghiệp vụ này!`
+        });
     };
 };
 
 module.exports = {
     verifyToken,
-    requireRole
+    requireRole,
+    ROLE_HIERARCHY,
+    getRoleLevel
 };
