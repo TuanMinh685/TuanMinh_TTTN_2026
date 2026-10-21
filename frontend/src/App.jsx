@@ -75,8 +75,74 @@ class ErrorBoundary extends Component {
   }
 }
 
+const ROLE_NAV_CONFIG = {
+  GIAM_DOC: {
+    shortLabel: '👑 Giám Đốc',
+    fullTitle: '👑 Giám Đốc Điều Hành',
+    link: '/admin/giam-doc',
+    bgClass: 'bg-slate-900 text-amber-300 hover:bg-slate-800'
+  },
+  ADMIN: {
+    shortLabel: '👑 Ban Giám Đốc',
+    fullTitle: '👑 Ban Giám Đốc Hệ Thống',
+    link: '/admin/giam-doc',
+    bgClass: 'bg-slate-900 text-amber-300 hover:bg-slate-800'
+  },
+  QUAN_LY: {
+    shortLabel: '🏬 Quản Lý',
+    fullTitle: '🏬 Quản Lý Cửa Hàng',
+    link: '/admin/quan-ly',
+    bgClass: 'bg-blue-600 text-white hover:bg-blue-700'
+  },
+  KE_TOAN: {
+    shortLabel: '📊 Kế Toán',
+    fullTitle: '📊 Kế Toán Doanh Thu',
+    link: '/admin',
+    bgClass: 'bg-emerald-600 text-white hover:bg-emerald-700'
+  },
+  THU_KHO: {
+    shortLabel: '📦 Thủ Kho',
+    fullTitle: '📦 Thủ Kho Linh Kiện',
+    link: '/admin',
+    bgClass: 'bg-amber-600 text-white hover:bg-amber-700'
+  },
+  KY_THUAT_VIEN: {
+    shortLabel: '🔧 Kỹ Thuật Viên',
+    fullTitle: '🔧 Kỹ Thuật Viên Sửa Chữa',
+    link: '/admin',
+    bgClass: 'bg-brand-green text-white hover:bg-green-600'
+  },
+  LE_TAN: {
+    shortLabel: '👩‍💼 Lễ Tân',
+    fullTitle: '👩‍💼 Nhân Viên Lễ Tân',
+    link: '/admin',
+    bgClass: 'bg-sky-600 text-white hover:bg-sky-700'
+  }
+};
+
 function AppContent() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  useLocation(); // Theo dõi chuyển hướng trang để cập nhật phiên đăng nhập tức thì
+
+  // Đọc thông tin đăng nhập trực tiếp từ localStorage theo từng lượt render
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  const role = typeof window !== 'undefined' ? localStorage.getItem('role') : null;
+  const fullName = typeof window !== 'undefined' ? (localStorage.getItem('fullName') || '') : '';
+  const isLoggedIn = Boolean(token && role);
+
+  const navRoleInfo = isLoggedIn
+    ? (ROLE_NAV_CONFIG[role] || {
+        shortLabel: '💼 ' + (role || 'Nội Bộ'),
+        fullTitle: '💼 Cổng Quản Trị Hệ Thống',
+        link: '/admin',
+        bgClass: 'bg-brand-green text-white hover:bg-green-600'
+      })
+    : {
+        shortLabel: '🔐 Cổng Nhân Viên',
+        fullTitle: '🔐 Đăng Nhập Nhân Viên',
+        link: '/login',
+        bgClass: 'bg-brand-green text-white hover:bg-green-600'
+      };
 
   return (
     <div className="min-h-screen font-sans text-slate-800 bg-white flex flex-col">
@@ -121,10 +187,13 @@ function AppContent() {
             <Link to="/intake" className="px-3 xl:px-4 h-full flex items-center hover:text-brand-orange transition-colors">Tạo Phiếu QR</Link>
           </nav>
 
-          {/* Cổng KTV & Nút Menu Mobile */}
+          {/* Nút Chức vụ Đăng nhập & Nút Menu Mobile */}
           <div className="flex items-center gap-3">
-            <Link to="/admin" className="hidden sm:inline-flex px-4 xl:px-6 py-2 bg-brand-green text-white font-bold rounded-full hover:bg-green-600 transition-all text-sm shadow-md">
-              Cổng KTV
+            <Link 
+              to={navRoleInfo.link} 
+              className={`hidden sm:inline-flex items-center gap-2 px-4 xl:px-6 py-2 font-bold rounded-full transition-all text-sm shadow-md ${navRoleInfo.bgClass}`}
+            >
+              <span>{navRoleInfo.shortLabel}</span>
             </Link>
             
             {/* Nút bấm mở/đóng Menu Mobile */}
@@ -164,9 +233,24 @@ function AppContent() {
               </Link>
               
               <div className="pt-3 mt-2 border-t border-slate-200 flex flex-col gap-3">
-                <Link to="/admin" className="py-3 px-4 bg-brand-green text-white font-bold rounded-xl text-center shadow-md hover:bg-green-600 transition-colors">
-                  🔧 Cổng Kỹ thuật viên / Quản lý
+                <Link 
+                  to={navRoleInfo.link} 
+                  className={`py-3 px-4 font-bold rounded-xl text-center shadow-md transition-colors ${navRoleInfo.bgClass}`}
+                >
+                  {navRoleInfo.fullTitle}
                 </Link>
+                {isLoggedIn && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      localStorage.clear();
+                      window.location.href = '/login';
+                    }}
+                    className="py-2.5 px-4 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors text-center"
+                  >
+                    🚪 Đăng xuất ({fullName || role})
+                  </button>
+                )}
                 <div className="flex justify-between items-center text-xs text-slate-500 px-1 pt-1">
                   <span>📞 Hotline: (028) 3860 4999</span>
                   <a href="tel:02838604999" className="text-blue-600 font-bold hover:underline">
