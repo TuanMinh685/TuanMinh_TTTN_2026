@@ -1,20 +1,49 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 
 function QrScannerModal({ isOpen, onClose, onScanSuccess }) {
   const [error, setError] = useState('');
   const [isStarting, setIsStarting] = useState(true);
   const scannerRef = useRef(null);
+  const isStoppingRef = useRef(false);
   const scannerElementId = 'qr-reader-viewport';
+
+  const stopAndClearScanner = useCallback(async () => {
+    const scanner = scannerRef.current;
+    if (!scanner || isStoppingRef.current) return;
+    isStoppingRef.current = true;
+    try {
+      if (scanner.isScanning) {
+        await scanner.stop();
+      }
+    } catch {
+      // Bỏ qua nếu scanner đã dừng trước đó
+    }
+    try {
+      scanner.clear();
+    } catch {
+      // Bỏ qua
+    }
+    scannerRef.current = null;
+    isStoppingRef.current = false;
+  }, []);
+
+  const handleClose = useCallback(async () => {
+    await stopAndClearScanner();
+    onClose();
+  }, [stopAndClearScanner, onClose]);
 
   useEffect(() => {
     if (!isOpen) return;
 
-    let html5QrCode = null;
+    let isCancelled = false;
 
     const startScanner = async () => {
       try {
-        html5QrCode = new Html5Qrcode(scannerElementId);
+        const el = document.getElementById(scannerElementId);
+        if (!el || isCancelled) return;
+
+        const html5QrCode = new Html5Qrcode(scannerElementId);
         scannerRef.current = html5QrCode;
 
         const config = {
@@ -26,51 +55,42 @@ function QrScannerModal({ isOpen, onClose, onScanSuccess }) {
         await html5QrCode.start(
           { facingMode: 'environment' }, // Ưu tiên camera sau trên điện thoại
           config,
-          (decodedText) => {
-            // Khi quét thành công mã QR
-            if (decodedText) {
-              // Bóc tách mã phiếu nếu là đường dẫn URL: https://.../track/RP-123456
+          async (decodedText) => {
+            if (decodedText && !isCancelled) {
+              isCancelled = true;
               let code = decodedText.trim();
               const match = code.match(/track\/([A-Za-z0-9_-]+)/i);
               if (match && match[1]) {
                 code = match[1];
               }
-              // Dừng scanner và gọi callback
-              html5QrCode.stop().then(() => {
-                html5QrCode.clear();
-                onScanSuccess(code);
-              }).catch(() => {
-                onScanSuccess(code);
-              });
+              await stopAndClearScanner();
+              onScanSuccess(code);
             }
           },
           () => {
             // Lỗi frame quét (bỏ qua frame rỗng)
           }
         );
-        setIsStarting(false);
+        if (!isCancelled) {
+          setIsStarting(false);
+        }
       } catch (err) {
-        console.error('Lỗi khởi động camera quét QR:', err);
-        setError('Không thể mở Camera. Vui lòng cấp quyền truy cập Camera cho trình duyệt hoặc thử lại.');
-        setIsStarting(false);
+        if (!isCancelled) {
+          console.error('Lỗi khởi động camera quét QR:', err);
+          setError('Không thể mở Camera. Vui lòng cấp quyền truy cập Camera cho trình duyệt hoặc thử lại.');
+          setIsStarting(false);
+        }
       }
     };
 
-    // Đợi DOM render element qr-reader-viewport
     const timer = setTimeout(startScanner, 100);
 
     return () => {
+      isCancelled = true;
       clearTimeout(timer);
-      if (scannerRef.current) {
-        scannerRef.current.stop().catch(() => {}).finally(() => {
-          try {
-            scannerRef.current.clear();
-          } catch {}
-          scannerRef.current = null;
-        });
-      }
+      stopAndClearScanner();
     };
-  }, [isOpen, onScanSuccess]);
+  }, [isOpen, onScanSuccess, stopAndClearScanner]);
 
   if (!isOpen) return null;
 
@@ -84,7 +104,7 @@ function QrScannerModal({ isOpen, onClose, onScanSuccess }) {
             <h3 className="font-bold text-slate-800 text-lg">Quét mã QR trên phiếu</h3>
           </div>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-200 hover:text-slate-700 transition-colors"
             aria-label="Đóng"
           >
@@ -117,7 +137,7 @@ function QrScannerModal({ isOpen, onClose, onScanSuccess }) {
 
           <div className="mt-6 flex justify-center">
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="px-6 py-2.5 rounded-lg border border-slate-300 font-bold text-slate-600 hover:bg-slate-100 transition-colors"
             >
               Hủy / Đóng camera

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { Component, lazy, Suspense, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 
 const IntakeForm = lazy(() => import('./pages/public/IntakeForm'));
@@ -23,6 +23,56 @@ function ScrollToTop() {
     window.scrollTo(0, 0);
   }, [pathname]);
   return null;
+}
+
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('ErrorBoundary caught:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="container mx-auto px-4 py-20 text-center">
+          <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-amber-50 text-4xl mb-4">
+            ⚠️
+          </div>
+          <h2 className="text-xl font-bold text-slate-800 mb-2">Đã xảy ra gián đoạn hiển thị</h2>
+          <p className="text-slate-500 text-sm max-w-md mx-auto mb-6">
+            Hệ thống đã tự động bảo vệ dữ liệu. Vui lòng bấm làm mới hoặc quay về trang tra cứu.
+          </p>
+          <div className="flex justify-center gap-3">
+            <button
+              onClick={() => {
+                this.setState({ hasError: false });
+                window.location.reload();
+              }}
+              className="rounded-xl bg-brand-blue px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-800 transition"
+            >
+              Tải lại trang
+            </button>
+            <Link
+              to="/tra-cuu"
+              onClick={() => this.setState({ hasError: false })}
+              className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 transition"
+            >
+              Về Trang Tra Cứu
+            </Link>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
 }
 
 function AppContent() {
@@ -131,8 +181,9 @@ function AppContent() {
 
       {/* MAIN CONTENT AREA */}
       <main className="flex-1">
-        <Suspense fallback={<div className="py-20 text-center font-bold text-slate-500">Đang tải trang...</div>}>
-          <Routes>
+        <ErrorBoundary>
+          <Suspense fallback={<div className="py-20 text-center font-bold text-slate-500">Đang tải trang...</div>}>
+            <Routes>
             {/* Landing Page */}
             <Route path="/" element={<HomeLanding />} />
 
@@ -183,6 +234,7 @@ function AppContent() {
             />
           </Routes>
         </Suspense>
+        </ErrorBoundary>
       </main>
 
       {/* Floating Hotline & Contact Widget */}
