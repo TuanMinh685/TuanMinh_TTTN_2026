@@ -918,21 +918,6 @@ function Tracking() {
                 </section>
               )
             )}
-
-            {/* Card 5: Thông tin Hỗ trợ Trực tiếp tại Trung tâm */}
-            <div className="bg-slate-900 text-white rounded-3xl p-5 shadow-sm">
-              <p className="text-xs font-bold uppercase tracking-wider text-amber-400 mb-1">
-                🏢 Trung tâm Dịch vụ Khách hàng
-              </p>
-              <p className="text-sm font-extrabold">HungHau IT Support • 615 Âu Cơ</p>
-              <p className="text-xs text-slate-300 mt-1">
-                📍 615 Âu Cơ, Phường Phú Trung, Quận Tân Phú, TP. Hồ Chí Minh
-              </p>
-              <div className="mt-3 pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-2 text-xs">
-                <span>📞 Hotline: <strong className="text-amber-300">(028) 3860 4999</strong></span>
-                <span className="text-slate-400">07:30 – 17:30 (T2 - T7)</span>
-              </div>
-            </div>
           </div>
         </div>
 
