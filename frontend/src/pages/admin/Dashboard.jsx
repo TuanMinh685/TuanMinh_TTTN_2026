@@ -5,6 +5,16 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cel
 import QRCode from 'qrcode';
 import { SOFTWARE_PACKAGE_GROUPS, SOFTWARE_PACKAGE_OPTIONS } from '../../components/softwarePackages';
 
+const STATUS_LABELS = {
+  'CHỜ_KHÁM': 'Chờ khám',
+  'ĐANG_CHUẨN_ĐOÁN': 'Đang chuẩn đoán',
+  'CHỜ_KHÁCH_CHỐT_GIÁ': 'Chờ khách chốt giá',
+  'ĐANG_SỬA': 'Đang sửa chữa',
+  'ĐÃ_SỬA_XONG': 'Đã sửa xong',
+  'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN': 'Đã giao khách & thu tiền',
+  'YÊU_CẦU_BẢO_HÀNH': 'Yêu cầu bảo hành'
+};
+
 const ROLE_META = {
   GIAM_DOC: {
     level: 100,
@@ -1129,7 +1139,7 @@ function Dashboard() {
                         ? 'bg-slate-100 text-slate-700 border-slate-200'
                         : 'bg-blue-50 text-brand-blue border-blue-200'
                     }`}>
-                      {getStatusBadge(ticket.trang_thai)}
+                      {(ticket.trang_thai && (STATUS_LABELS[ticket.trang_thai] || ticket.trang_thai.replace(/_/g, ' '))) || '—'}
                     </span>
                     {ticket.han_bao_hanh && (
                       <div className="mt-1">
