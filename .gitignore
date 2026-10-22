@@ -15,3 +15,10 @@
 
 *.zip
 **/data_store.json
+
+# Test, temporary & report images
+hinh_anh_*
+hinh_anh_*/**
+test_reports/
+*.tmp
+*.log
