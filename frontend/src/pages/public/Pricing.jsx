@@ -389,14 +389,23 @@ function Pricing() {
                               </span>
                             </td>
                             <td className="py-4 px-6 text-center whitespace-nowrap">
-                              <button
-                                type="button"
-                                onClick={() => handleBookService(item.ten_linh_kien)}
-                                className="px-5 py-2.5 bg-brand-green text-white font-bold text-sm rounded-xl hover:bg-green-700 transition-all shadow-md hover:shadow-lg inline-flex items-center gap-1.5"
-                              >
-                                <span>Đặt lịch</span>
-                                <span>→</span>
-                              </button>
+                              <div className="flex items-center justify-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => handleBookService(item.ten_linh_kien)}
+                                  className="px-4 py-2 bg-brand-green text-white font-bold text-xs rounded-xl hover:bg-green-700 transition-all shadow-sm hover:shadow-md inline-flex items-center gap-1"
+                                >
+                                  <span>📅 Đặt lịch</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => navigate(`/thanh-toan?service=${encodeURIComponent(item.ten_linh_kien)}&price=${item.gia_ban}`)}
+                                  className="px-3 py-2 bg-blue-50 text-brand-blue border border-blue-200 hover:bg-blue-100 font-bold text-xs rounded-xl transition-all shadow-2xs inline-flex items-center gap-1"
+                                  title="Chọn dịch vụ này và vào thanh toán trực tuyến"
+                                >
+                                  <span>💳 Thanh toán</span>
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         );
@@ -476,14 +485,22 @@ function Pricing() {
                           </div>
                         </div>
 
-                        <button
-                          type="button"
-                          onClick={() => handleBookService(item.ten_linh_kien)}
-                          className="w-full py-2.5 bg-brand-green text-white font-bold text-sm rounded-xl hover:bg-green-700 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
-                        >
-                          <span>📅 Đặt lịch sửa ngay</span>
-                          <span>→</span>
-                        </button>
+                        <div className="grid grid-cols-2 gap-2 mt-2">
+                          <button
+                            type="button"
+                            onClick={() => handleBookService(item.ten_linh_kien)}
+                            className="w-full py-2.5 bg-brand-green text-white font-bold text-xs rounded-xl hover:bg-green-700 transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-1"
+                          >
+                            <span>📅 Đặt lịch</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => navigate(`/thanh-toan?service=${encodeURIComponent(item.ten_linh_kien)}&price=${item.gia_ban}`)}
+                            className="w-full py-2.5 bg-blue-50 text-brand-blue border border-blue-200 hover:bg-blue-100 font-bold text-xs rounded-xl transition-all shadow-2xs flex items-center justify-center gap-1"
+                          >
+                            <span>💳 Thanh toán</span>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );
