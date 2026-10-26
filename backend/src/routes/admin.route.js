@@ -36,8 +36,8 @@ router.get('/dashboard-stats', requireRole('GIAM_DOC', 'ADMIN', 'QUAN_LY', 'KE_T
             SELECT TO_CHAR(d.date, 'YYYY-MM-DD') AS date, COALESCE(SUM(p.tong_tien), 0) AS total_revenue
             FROM report_days d
             LEFT JOIN phieu_sua_chua p
-              ON DATE(p.ngay_tao) = d.date
-             AND p.trang_thai = 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN'
+              ON DATE(COALESCE(p.ngay_thanh_toan, p.ngay_cap_nhat, p.ngay_tao)) = d.date
+             AND (p.trang_thai = 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' OR p.trang_thai = 'ĐÃ_SỬA_XONG')
             GROUP BY d.date
             ORDER BY d.date ASC
         `, [period]);
@@ -52,8 +52,8 @@ router.get('/dashboard-stats', requireRole('GIAM_DOC', 'ADMIN', 'QUAN_LY', 'KE_T
             SELECT COALESCE(SUM(pl.so_luong * pl.don_gia), 0) AS total_parts_revenue
             FROM phieu_linh_kien pl
             JOIN phieu_sua_chua p ON p.id = pl.phieu_sua_chua_id
-            WHERE p.trang_thai = 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN'
-              AND p.ngay_tao >= CASE
+            WHERE (p.trang_thai = 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' OR p.trang_thai = 'ĐÃ_SỬA_XONG')
+              AND COALESCE(p.ngay_thanh_toan, p.ngay_cap_nhat, p.ngay_tao) >= CASE
                 WHEN $1 = 'month' THEN DATE_TRUNC('month', CURRENT_DATE)
                 ELSE CURRENT_DATE - 6
               END
@@ -64,12 +64,12 @@ router.get('/dashboard-stats', requireRole('GIAM_DOC', 'ADMIN', 'QUAN_LY', 'KE_T
                 COALESCE(SUM(tong_tien), 0) AS total_revenue,
                 COUNT(*)::integer AS completed_tickets
             FROM phieu_sua_chua
-            WHERE trang_thai = 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN'
-              AND ngay_tao >= CASE
+            WHERE (trang_thai = 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' OR trang_thai = 'ĐÃ_SỬA_XONG')
+              AND COALESCE(ngay_thanh_toan, ngay_cap_nhat, ngay_tao) >= CASE
                 WHEN $1 = 'month' THEN DATE_TRUNC('month', CURRENT_DATE)
                 ELSE CURRENT_DATE - 6
               END
-              AND ngay_tao < CURRENT_DATE + INTERVAL '1 day'
+              AND COALESCE(ngay_thanh_toan, ngay_cap_nhat, ngay_tao) < CURRENT_DATE + INTERVAL '1 day'
         `, [period]);
 
         res.status(200).json({

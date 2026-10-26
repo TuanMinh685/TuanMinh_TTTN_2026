@@ -764,12 +764,13 @@ function Dashboard() {
     }
   };
 
-  const updateStatus = async (id, status, customNote = '', paymentMethod = null) => {
+  const updateStatus = async (id, status, customNote = '', paymentMethod = null, tongTien = null) => {
     try {
       await api.patch(`/tickets/${id}/status`, {
         trang_thai: status,
         ghi_chu: (customNote || statusNote).trim() || undefined,
-        phuong_thuc_thanh_toan: paymentMethod || undefined
+        phuong_thuc_thanh_toan: paymentMethod || undefined,
+        tong_tien: tongTien !== null && Number(tongTien) > 0 ? Number(tongTien) : undefined
       });
       setStatusNote('');
       showToast(`✅ Đã chuyển trạng thái sang: ${status.replace(/_/g, ' ')}`);
@@ -781,6 +782,22 @@ function Dashboard() {
       console.error('Không cập nhật được trạng thái phiếu:', err);
       showToast(`❌ ${err.response?.data?.message || 'Lỗi cập nhật trạng thái'}`);
     }
+  };
+
+  const handleConfirmRepairDone = async (ticket) => {
+    let finalTongTien = Number(ticket.tong_tien || 0);
+    // Nếu phiếu chưa có giá trị (0đ), cho phép nhập chi phí/công kỹ thuật để doanh thu nhảy lên ngay
+    if (finalTongTien <= 0) {
+      const input = window.prompt(
+        `Phiếu ${ticket.ma_phieu || ticket.ma_tra_cuu} hiện có tổng tiền là 0đ.\nNhập tiền công sửa chữa/dịch vụ (VNĐ) để ghi nhận vào báo cáo doanh thu:`,
+        '150000'
+      );
+      if (input !== null) {
+        const val = parseInt(input.replace(/\D/g, ''), 10);
+        finalTongTien = !isNaN(val) && val > 0 ? val : 150000;
+      }
+    }
+    await updateStatus(ticket.id, 'ĐÃ_SỬA_XONG', null, null, finalTongTien);
   };
 
   const openCashierModal = (ticket) => {
@@ -1190,7 +1207,7 @@ function Dashboard() {
                         </button>
                       )}
                       {canTechAction && ticket.trang_thai === 'ĐANG_SỬA' && (
-                        <button onClick={() => updateStatus(ticket.id, 'ĐÃ_SỬA_XONG')} className="w-full bg-brand-blue text-white hover:bg-blue-900 px-2 py-1.5 rounded-lg font-medium text-xs transition shadow-2xs">
+                        <button onClick={() => handleConfirmRepairDone(ticket)} className="w-full bg-brand-blue text-white hover:bg-blue-900 px-2 py-1.5 rounded-lg font-medium text-xs transition shadow-2xs">
                           ✓ Sửa Xong
                         </button>
                       )}
@@ -1282,16 +1299,16 @@ function Dashboard() {
 
             <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-brand-blue">Tổng thực thu</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-brand-blue">Doanh số hoàn tất</span>
                 <span className="p-2 rounded-xl bg-blue-50 text-brand-blue text-lg">💰</span>
               </div>
               <p className="text-2xl font-black text-brand-blue mt-2">
                 {tickets
-                  .filter(t => t.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN')
+                  .filter(t => t.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' || t.trang_thai === 'ĐÃ_SỬA_XONG')
                   .reduce((sum, t) => sum + (t.la_sinh_vien ? Math.round(Number(t.tong_tien || 0) * 0.85) : Number(t.tong_tien || 0)), 0)
                   .toLocaleString('vi-VN')} đ
               </p>
-              <p className="text-[11px] text-slate-400 mt-1">Doanh số thu ngân lũy kế</p>
+              <p className="text-[11px] text-slate-400 mt-1">Gồm các ca sửa xong &amp; đã thu tiền</p>
             </div>
           </div>
 
@@ -1619,7 +1636,7 @@ function Dashboard() {
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
             <div>
               <h3 className="text-xl font-bold text-brand-blue">Báo cáo doanh thu &amp; hiệu suất</h3>
-              <p className="mt-1 text-sm text-slate-500">Doanh thu chỉ tính các phiếu đã giao khách và thu tiền.</p>
+              <p className="mt-1 text-sm text-slate-500">Doanh thu ghi nhận các phiếu đã sửa xong và đã thu tiền hoàn tất.</p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
@@ -1671,7 +1688,7 @@ function Dashboard() {
             <article className="rounded-xl bg-green-50 p-5">
               <p className="text-sm font-semibold text-slate-600">Phiếu đã hoàn tất</p>
               <p className="mt-2 text-2xl font-extrabold text-green-800">{Number(stats.completedTickets || 0)} phiếu</p>
-              <p className="mt-1 text-xs text-slate-500">Đã giao khách và thu tiền trong kỳ</p>
+              <p className="mt-1 text-xs text-slate-500">Đã hoàn tất sửa xong / giao khách trong kỳ</p>
             </article>
           </div>
           <div className="mb-5 rounded-lg bg-slate-50 px-4 py-3">

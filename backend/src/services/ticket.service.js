@@ -251,12 +251,12 @@ const updateTicketSoftwarePackages = async (ticketId, packages) => {
     }
 };
 
-const updateTicketStatus = async (idOrCode, status, ghiChu = '', employeeId = null, paymentMethod = null) => {
+const updateTicketStatus = async (idOrCode, status, ghiChu = '', employeeId = null, paymentMethod = null, customTongTien = null) => {
     // Cho phép truyền ID số hoặc Mã phiếu (VD: RP-123456)
     const isNumericId = /^\d+$/.test(String(idOrCode).trim());
     const lookupRes = isNumericId
-        ? await pool.query('SELECT id, ma_tra_cuu, trang_thai FROM phieu_sua_chua WHERE id = $1', [Number(idOrCode)])
-        : await pool.query('SELECT id, ma_tra_cuu, trang_thai FROM phieu_sua_chua WHERE ma_tra_cuu = $1', [String(idOrCode).trim()]);
+        ? await pool.query('SELECT id, ma_tra_cuu, trang_thai, tong_tien FROM phieu_sua_chua WHERE id = $1', [Number(idOrCode)])
+        : await pool.query('SELECT id, ma_tra_cuu, trang_thai, tong_tien FROM phieu_sua_chua WHERE ma_tra_cuu = $1', [String(idOrCode).trim()]);
 
     if (lookupRes.rows.length === 0) {
         return null;
@@ -270,12 +270,16 @@ const updateTicketStatus = async (idOrCode, status, ghiChu = '', employeeId = nu
         UPDATE phieu_sua_chua 
         SET trang_thai = $1::varchar,
             ngay_cap_nhat = CURRENT_TIMESTAMP,
+            tong_tien = CASE
+                WHEN $4::numeric IS NOT NULL AND $4::numeric > 0 THEN $4::numeric
+                ELSE tong_tien
+            END,
             han_bao_hanh = CASE
-                WHEN $1::varchar = 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' AND han_bao_hanh IS NULL THEN CURRENT_TIMESTAMP + INTERVAL '180 days'
+                WHEN $1::varchar IN ('ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN', 'ĐÃ_SỬA_XONG') AND han_bao_hanh IS NULL THEN CURRENT_TIMESTAMP + INTERVAL '180 days'
                 ELSE han_bao_hanh
             END,
             ngay_thanh_toan = CASE
-                WHEN $1::varchar = 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' AND ngay_thanh_toan IS NULL THEN CURRENT_TIMESTAMP
+                WHEN $1::varchar IN ('ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN', 'ĐÃ_SỬA_XONG') AND ngay_thanh_toan IS NULL THEN CURRENT_TIMESTAMP
                 ELSE ngay_thanh_toan
             END,
             phuong_thuc_thanh_toan = CASE
@@ -283,9 +287,9 @@ const updateTicketStatus = async (idOrCode, status, ghiChu = '', employeeId = nu
                 ELSE phuong_thuc_thanh_toan
             END
         WHERE id = $2 
-        RETURNING id, ma_tra_cuu, trang_thai, ngay_cap_nhat, han_bao_hanh, ngay_thanh_toan, phuong_thuc_thanh_toan
+        RETURNING id, ma_tra_cuu, trang_thai, ngay_cap_nhat, han_bao_hanh, ngay_thanh_toan, phuong_thuc_thanh_toan, tong_tien
     `;
-    const { rows } = await pool.query(query, [status, ticketId, paymentMethod]);
+    const { rows } = await pool.query(query, [status, ticketId, paymentMethod, customTongTien ? Number(customTongTien) : null]);
     
     if (rows.length > 0) {
         const defaultNoteMap = {

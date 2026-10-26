@@ -552,7 +552,7 @@ function executeMockQuery(sql, params = []) {
         while (cur <= today) {
             const dateStr = cur.toISOString().slice(0, 10);
             const dayRev = s.phieu_sua_chua
-                .filter(p => p.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' && String(p.ngay_tao || '').slice(0, 10) === dateStr)
+                .filter(p => (p.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' || p.trang_thai === 'ĐÃ_SỬA_XONG') && String(p.ngay_cap_nhat || p.ngay_thanh_toan || p.ngay_tao || '').slice(0, 10) === dateStr)
                 .reduce((sum, p) => sum + Number(p.tien_sau_giam || p.tong_tien || 0), 0);
             rows.push({ date: dateStr, total_revenue: dayRev });
             cur.setDate(cur.getDate() + 1);
@@ -564,7 +564,7 @@ function executeMockQuery(sql, params = []) {
     if (/SELECT COALESCE\(SUM\(pl\.so_luong \* pl\.don_gia\), 0\) AS total_parts_revenue/i.test(cleanSql)) {
         const completedIds = new Set(
             s.phieu_sua_chua
-                .filter(p => p.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN')
+                .filter(p => p.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' || p.trang_thai === 'ĐÃ_SỬA_XONG')
                 .map(p => p.id)
         );
         const totalPartsRev = s.phieu_linh_kien
@@ -575,7 +575,7 @@ function executeMockQuery(sql, params = []) {
 
     // 30c. stats: revenue & completed_tickets
     if (/SELECT COALESCE\(SUM\(tong_tien\), 0\) as total_revenue/i.test(cleanSql)) {
-        const completed = s.phieu_sua_chua.filter(x => x.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN');
+        const completed = s.phieu_sua_chua.filter(x => x.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' || x.trang_thai === 'ĐÃ_SỬA_XONG');
         const rev = completed.reduce((acc, cur) => acc + Number(cur.tien_sau_giam || cur.tong_tien || 0), 0);
         return { rows: [{ total_revenue: rev, completed_tickets: completed.length }] };
     }

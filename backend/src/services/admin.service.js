@@ -5,7 +5,7 @@ const getDashboardStats = async () => {
     const revenueResult = await pool.query(`
         SELECT COALESCE(SUM(tong_tien), 0) as total_revenue
         FROM phieu_sua_chua
-        WHERE trang_thai = 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN'
+        WHERE (trang_thai = 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' OR trang_thai = 'ĐÃ_SỬA_XONG')
     `);
 
     const ticketStats = await pool.query(`
