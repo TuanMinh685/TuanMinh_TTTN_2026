@@ -15,4 +15,7 @@ router.delete('/employees/:id', requireRole('GIAM_DOC', 'ADMIN', 'QUAN_LY'), adm
 router.get('/dashboard', requireRole('GIAM_DOC', 'ADMIN', 'QUAN_LY'), adminController.getDashboard);
 router.get('/dashboard-stats', requireRole('GIAM_DOC', 'ADMIN', 'QUAN_LY'), adminController.getDashboard);
 
+// Nhật ký Kiểm toán Bảo mật Doanh nghiệp (Enterprise Security Audit Logs)
+router.get('/audit-logs', requireRole('GIAM_DOC', 'ADMIN', 'QUAN_LY'), adminController.getSecurityAuditLogs);
+
 module.exports = router;

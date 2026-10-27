@@ -1,7 +1,9 @@
 const adminService = require('../services/admin.service');
-const { getRoleLevel } = require('../middlewares/auth.middleware');
+const { getRoleLevel, invalidateAccountCache } = require('../middlewares/auth.middleware');
+const { logSecurityEvent, getAuditLogs } = require('../utils/auditLogger');
+const { pool } = require('../config/db.config');
 
-const VALID_ROLES = ['GIAM_DOC', 'ADMIN', 'QUAN_LY', 'KE_TOAN', 'THU_KHO', 'KY_THUAT_VIEN', 'LE_TAN'];
+const VALID_ROLES = ['GIAM_DOC', 'ADMIN', 'QUAN_LY', 'KY_THUAT_VIEN', 'LE_TAN'];
 
 const getDashboard = async (req, res, next) => {
     try {
@@ -57,13 +59,10 @@ const createEmployee = async (req, res, next) => {
         }
 
         const targetLevel = getRoleLevel(vai_tro);
-        // Quy tắc phân quyền từ trên xuống:
-        // - Giám Đốc / Admin (Level 100) được tạo mọi chức vụ.
-        // - Quản Lý (Level 80) chỉ được tạo các chức vụ cấp dưới (< 80: Kế toán, Thủ kho, Kỹ thuật viên, Lễ tân).
         if (actorLevel < 100 && targetLevel >= actorLevel) {
             return res.status(403).json({
                 success: false,
-                message: 'Phân quyền từ trên xuống: Quản lý Cửa hàng chỉ được phép tạo tài khoản nhân sự cấp dưới (Kế toán, Thủ kho, Kỹ thuật viên, Lễ tân)!'
+                message: 'Phân quyền từ trên xuống: Trưởng bộ phận CSKH chỉ được phép tạo tài khoản nhân sự cấp dưới (Kỹ thuật viên, Lễ tân)!'
             });
         }
 
@@ -80,6 +79,14 @@ const createEmployee = async (req, res, next) => {
             mat_khau: String(mat_khau).trim(),
             ho_ten: String(ho_ten).trim(),
             vai_tro
+        });
+
+        logSecurityEvent({
+            req,
+            action: 'EMPLOYEE_CREATE',
+            target: `@${created.ten_dang_nhap} (${created.vai_tro})`,
+            status: 'SUCCESS',
+            details: `Tạo mới tài khoản nhân sự "${created.ho_ten}" với quyền ${created.vai_tro}`
         });
 
         res.status(201).json({
@@ -106,11 +113,10 @@ const updateEmployee = async (req, res, next) => {
 
         const currentTargetLevel = getRoleLevel(targetEmp.vai_tro);
 
-        // Quản lý không được sửa tài khoản của Giám đốc, Admin hoặc Quản lý khác
         if (actorLevel < 100 && currentTargetLevel >= actorLevel && targetId !== actorId) {
             return res.status(403).json({
                 success: false,
-                message: 'Phân quyền từ trên xuống: Bạn không có quyền chỉnh sửa hoặc khóa tài khoản của cấp Quản lý / Giám đốc!'
+                message: 'Phân quyền từ trên xuống: Bạn không có quyền chỉnh sửa hoặc khóa tài khoản của cấp Quản lý / Quản trị viên!'
             });
         }
 
@@ -127,7 +133,7 @@ const updateEmployee = async (req, res, next) => {
         if (actorLevel < 100 && nextTargetLevel >= actorLevel) {
             return res.status(403).json({
                 success: false,
-                message: 'Phân quyền từ trên xuống: Quản lý không được phép nâng quyền nhân viên lên cấp Quản lý hoặc Giám đốc!'
+                message: 'Phân quyền từ trên xuống: Trưởng bộ phận không được phép nâng quyền nhân viên lên cấp Quản lý hoặc Admin!'
             });
         }
 
@@ -150,6 +156,19 @@ const updateEmployee = async (req, res, next) => {
             vai_tro: nextVaiTro,
             trang_thai: nextTrangThai,
             mat_khau: nextMatKhau
+        });
+
+        // Xóa cache trạng thái tài khoản ngay lập tức để thu hồi/cập nhật quyền thời gian thực
+        invalidateAccountCache(targetId);
+
+        logSecurityEvent({
+            req,
+            action: nextTrangThai !== targetEmp.trang_thai
+                ? (nextTrangThai === 'KHOA' ? 'EMPLOYEE_LOCK' : 'EMPLOYEE_UNLOCK')
+                : 'EMPLOYEE_UPDATE',
+            target: `@${updated.ten_dang_nhap}`,
+            status: 'SUCCESS',
+            details: `Cập nhật nhân sự "${updated.ho_ten}": Vai trò=${updated.vai_tro}, Trạng thái=${updated.trang_thai}${nextMatKhau ? ' (Có đặt lại mật khẩu)' : ''}`
         });
 
         res.status(200).json({
@@ -190,10 +209,45 @@ const deleteEmployee = async (req, res, next) => {
         }
 
         const removed = await adminService.deleteEmployee(targetId);
+        invalidateAccountCache(targetId);
+
+        logSecurityEvent({
+            req,
+            action: 'EMPLOYEE_DELETE',
+            target: `@${removed.ten_dang_nhap}`,
+            status: 'WARNING',
+            details: `Xóa vĩnh viễn tài khoản nhân sự "${removed.ho_ten}" (${removed.vai_tro})`
+        });
+
         res.status(200).json({
             success: true,
             message: `Đã xóa tài khoản nhân viên "${removed.ho_ten}" (${removed.ten_dang_nhap}).`,
             data: removed
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+const getSecurityAuditLogs = async (req, res, next) => {
+    try {
+        const logs = getAuditLogs(100);
+        res.status(200).json({
+            success: true,
+            data: {
+                logs,
+                securityStatus: {
+                    jwtAlgorithm: 'HS256 (Strict Verification)',
+                    passwordHashing: 'Bcrypt (10 Salt Rounds)',
+                    httpHeaders: 'Helmet + Enterprise Security Headers (CSP, HSTS, X-Frame-Options: DENY)',
+                    inputProtection: 'Anti-XSS, Anti-Prototype Pollution & HPP Sanitizer',
+                    rateLimiting: 'Active (Global API + Brute-Force Auth Lockout)',
+                    databaseEncryption: pool.isCloudConnected && pool.isCloudConnected()
+                        ? 'Supabase PostgreSQL Cloud (SSL/TLS Pooler :6543)'
+                        : 'Local Fallback Store',
+                    rbacMode: 'Top-Down 4-Tier Live Account Verification'
+                }
+            }
         });
     } catch (err) {
         next(err);
@@ -205,5 +259,6 @@ module.exports = {
     getEmployees,
     createEmployee,
     updateEmployee,
-    deleteEmployee
+    deleteEmployee,
+    getSecurityAuditLogs
 };

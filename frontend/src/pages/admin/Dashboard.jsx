@@ -132,6 +132,12 @@ function Dashboard() {
     trang_thai: 'HOAT_DONG'
   });
 
+  // Enterprise Security & Audit Logs state
+  const [auditLogs, setAuditLogs] = useState([]);
+  const [securityStatus, setSecurityStatus] = useState(null);
+  const [pwForm, setPwForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [savingPw, setSavingPw] = useState(false);
+
   // POS Walk-in QR Intake modal state
   const [showPosModal, setShowPosModal] = useState(false);
   const [savingPos, setSavingPos] = useState(false);
@@ -178,6 +184,35 @@ function Dashboard() {
     return res.data.data || [];
   }, []);
 
+  const fetchAuditLogs = useCallback(async () => {
+    const res = await api.get('/admin/audit-logs');
+    return res.data.data || { logs: [], securityStatus: null };
+  }, []);
+
+  const submitChangePassword = async (e) => {
+    e.preventDefault();
+    if (pwForm.newPassword !== pwForm.confirmPassword) {
+      return showToast('⚠️ Mật khẩu xác nhận không khớp!');
+    }
+    setSavingPw(true);
+    try {
+      const res = await api.post('/auth/change-password', {
+        currentPassword: pwForm.currentPassword,
+        newPassword: pwForm.newPassword
+      });
+      showToast(`🔒 ${res.data?.message || 'Đã đổi mật khẩu bảo mật thành công!'}`);
+      setPwForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      if (canManageEmployees) {
+        const auditData = await fetchAuditLogs();
+        setAuditLogs(auditData.logs || []);
+      }
+    } catch (err) {
+      showToast(`❌ ${err.response?.data?.message || 'Lỗi đổi mật khẩu'}`);
+    } finally {
+      setSavingPw(false);
+    }
+  };
+
   useEffect(() => {
     let active = true;
     const load = (request, setData, description) => {
@@ -197,12 +232,20 @@ function Dashboard() {
     }
     if (canManageEmployees) {
       load(fetchEmployees, setEmployees, 'danh sách nhân sự CSKH');
+      fetchAuditLogs()
+        .then(data => {
+          if (active) {
+            setAuditLogs(data.logs || []);
+            setSecurityStatus(data.securityStatus || null);
+          }
+        })
+        .catch(err => console.error('Không tải được nhật ký bảo mật:', err));
     }
 
     return () => {
       active = false;
     };
-  }, [canReceptionAction, canViewStats, canManageEmployees, fetchTickets, fetchBookings, fetchStats, fetchEmployees]);
+  }, [canReceptionAction, canViewStats, canManageEmployees, fetchTickets, fetchBookings, fetchStats, fetchEmployees, fetchAuditLogs]);
 
   useEffect(() => {
     try {
@@ -581,6 +624,21 @@ function Dashboard() {
               Nhân Sự CSKH ({employees.length})
             </button>
           )}
+          <button
+            onClick={async () => {
+              setActiveTab('SECURITY');
+              if (canManageEmployees) {
+                try {
+                  const data = await fetchAuditLogs();
+                  setAuditLogs(data.logs || []);
+                  setSecurityStatus(data.securityStatus || null);
+                } catch {}
+              }
+            }}
+            className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'SECURITY' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
+          >
+            🛡️ Bảo Mật &amp; Audit
+          </button>
           <button
             onClick={() => {
               setActiveTab('NOTIFICATIONS');
@@ -1205,7 +1263,206 @@ function Dashboard() {
         </div>
       )}
 
-      {/* TAB 5: THÔNG BÁO THỜI GIAN THỰC */}
+      {/* TAB 5: BẢO MẬT DOANH NGHIỆP & NHẬT KÝ KIỂM TOÁN (ENTERPRISE SECURITY & AUDIT) */}
+      {activeTab === 'SECURITY' && (
+        <div className="space-y-6">
+          {/* 6 Lá chắn Bảo mật Cấp Doanh Nghiệp */}
+          <div className="bg-white p-6 rounded-2xl shadow-xs border-t-4 border-emerald-600">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-5 pb-3 border-b border-slate-100">
+              <div>
+                <h3 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+                  <span>🛡️</span> Kiến Trúc Bảo Mật Chuẩn Doanh Nghiệp (Enterprise Security Suite v2.0)
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Hệ thống tự động bảo vệ dữ liệu khách hàng, xác thực phiên JWT thời gian thực và ghi nhận mọi thao tác điều hành.
+                </p>
+              </div>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-extrabold">
+                ● 6/6 Lớp Bảo Mật Đang Hoạt Động
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[
+                {
+                  icon: '🔐',
+                  title: '1. Xác Thực JWT HS256 & Thu Hồi Tức Thì',
+                  desc: securityStatus?.jwtAlgorithm || 'Kiểm tra chữ ký số HS256 và đối chiếu trạng thái khóa tài khoản trực tiếp từ CSDL.'
+                },
+                {
+                  icon: '🧬',
+                  title: '2. Mã Hóa Mật Khẩu Một Chiều Bcrypt',
+                  desc: securityStatus?.passwordHashing || 'Mật khẩu nhân sự được băm một chiều với Bcrypt (10 Salt Rounds), chống giải mã ngược.'
+                },
+                {
+                  icon: '🧼',
+                  title: '3. Lọc Độc Thi XSS, SQLi & HPP Sanitizer',
+                  desc: securityStatus?.inputProtection || 'Tự động loại bỏ thẻ <script>, Prototype Pollution và tham số trùng lặp (HPP) ở mọi API.'
+                },
+                {
+                  icon: '🧱',
+                  title: '4. Helmet HTTP Security Headers & CSP',
+                  desc: securityStatus?.httpHeaders || 'Thiết lập Content-Security-Policy, X-Frame-Options: DENY (chống Clickjacking) và No-Sniff.'
+                },
+                {
+                  icon: '🚦',
+                  title: '5. Chống Dò Mật Khẩu (Brute-Force Lockout)',
+                  desc: securityStatus?.rateLimiting || 'Tự động khóa tạm thời 15 phút nếu đăng nhập sai 5 lần liên tiếp và giới hạn tần suất tạo phiếu QR.'
+                },
+                {
+                  icon: '☁️',
+                  title: '6. Kết Nối CSDL Đám Mây Mã Hóa SSL/TLS',
+                  desc: securityStatus?.databaseEncryption || 'Truyền tải dữ liệu qua Supabase PostgreSQL Cloud Transaction Pooler (:6543) có mã hóa SSL.'
+                }
+              ].map((shield, idx) => (
+                <div key={idx} className="rounded-xl border border-slate-200 p-4 bg-slate-50/70">
+                  <div className="flex items-center gap-2 font-bold text-sm text-brand-blue mb-1">
+                    <span className="text-lg">{shield.icon}</span>
+                    <span>{shield.title}</span>
+                  </div>
+                  <p className="text-xs text-slate-600 leading-relaxed">{shield.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Khối tự đổi mật khẩu bảo mật cá nhân cho mọi nhân sự */}
+          <div className="bg-white p-6 rounded-2xl shadow-xs border border-slate-200">
+            <h3 className="text-base font-extrabold text-slate-800 mb-1">🔑 Đổi Mật Khẩu Bảo Mật Cá Nhân (@{currentUsername || role})</h3>
+            <p className="text-xs text-slate-500 mb-4">Mật khẩu mới sẽ được mã hóa tự động bằng thuật toán Bcrypt (10 Salt Rounds) và ghi vào Nhật ký Kiểm toán.</p>
+            <form onSubmit={submitChangePassword} className="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Mật khẩu hiện tại *</label>
+                <input
+                  type="password"
+                  required
+                  value={pwForm.currentPassword}
+                  onChange={e => setPwForm({ ...pwForm, currentPassword: e.target.value })}
+                  placeholder="Nhập mật khẩu đang dùng..."
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-brand-blue outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Mật khẩu mới (&gt;= 6 ký tự) *</label>
+                <input
+                  type="password"
+                  required
+                  minLength={6}
+                  value={pwForm.newPassword}
+                  onChange={e => setPwForm({ ...pwForm, newPassword: e.target.value })}
+                  placeholder="Tối thiểu 6 ký tự..."
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-brand-blue outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Xác nhận mật khẩu mới *</label>
+                <input
+                  type="password"
+                  required
+                  minLength={6}
+                  value={pwForm.confirmPassword}
+                  onChange={e => setPwForm({ ...pwForm, confirmPassword: e.target.value })}
+                  placeholder="Nhập lại mật khẩu mới..."
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-brand-blue outline-none"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={savingPw}
+                className="rounded-lg bg-brand-blue hover:bg-blue-800 text-white font-bold text-xs px-4 py-2.5 shadow-xs disabled:opacity-50"
+              >
+                {savingPw ? 'Đang mã hóa...' : 'Cập Nhật Mật Khẩu'}
+              </button>
+            </form>
+          </div>
+
+          {/* Bảng Nhật ký Kiểm toán Bảo mật Doanh nghiệp (Chỉ dành cho Admin / Quản lý) */}
+          {canManageEmployees && (
+            <div className="bg-white p-6 rounded-2xl shadow-xs border-t-4 border-brand-blue">
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                <div>
+                  <h3 className="text-lg font-extrabold text-slate-800">📋 Nhật Ký Kiểm Toán Bảo Mật Thời Gian Thực (Security Audit Trail)</h3>
+                  <p className="text-xs text-slate-500">Ghi vết toàn bộ sự kiện đăng nhập, phân quyền nhân sự, khởi tạo phiếu QR và cập nhật trạng thái hồ sơ.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const rows = auditLogs.map((log, idx) => [
+                      idx + 1,
+                      log.timestamp,
+                      log.actor,
+                      log.role,
+                      log.action,
+                      log.target,
+                      log.ip,
+                      log.status,
+                      log.details
+                    ]);
+                    exportEnterpriseExcel({
+                      filename: `Nhat_Ky_Bao_Mat_Audit_Log_${new Date().toISOString().slice(0, 10)}.xlsx`,
+                      sheetName: 'Security Audit Log',
+                      title: 'BÁO CÁO NHẬT KÝ KIỂM TOÁN BẢO MẬT HỆ THỐNG (SECURITY AUDIT TRAIL) - MYH GROUP',
+                      headers: ['STT', 'Thời Gian (+07:00)', 'Tài Khoản Thực Hiện', 'Vai Trò', 'Hành Động (Action)', 'Đối Tượng Tác Động', 'Địa Chỉ IP', 'Trạng Thái', 'Chi Tiết Sự Kiện Bảo Mật'],
+                      rows,
+                      summaryRow: ['', 'TỔNG SỐ SỰ KIỆN GHI VẾT', `${auditLogs.length} bản ghi`, '', '', '', '', '', ''],
+                      signRole: 'QUẢN TRỊ AN TOÀN THÔNG TIN'
+                    });
+                  }}
+                  className="rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3.5 py-2 shadow-xs"
+                >
+                  📊 Xuất Nhật Ký Bảo Mật (.xlsx)
+                </button>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[820px] text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="border-b-2 border-slate-200 font-bold uppercase text-slate-500">
+                      <th className="py-2.5 px-3">Thời Gian</th>
+                      <th className="py-2.5 px-3">Tác Nhân (Actor)</th>
+                      <th className="py-2.5 px-3">Sự Kiện (Action)</th>
+                      <th className="py-2.5 px-3">Đối Tượng</th>
+                      <th className="py-2.5 px-3">IP</th>
+                      <th className="py-2.5 px-3">Trạng Thái</th>
+                      <th className="py-2.5 px-3">Chi Tiết Kiểm Toán</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {auditLogs.map((log) => (
+                      <tr key={log.id} className="border-b border-slate-100 hover:bg-slate-50">
+                        <td className="py-2.5 px-3 font-mono text-slate-500 whitespace-nowrap">{log.timestamp}</td>
+                        <td className="py-2.5 px-3 font-bold text-slate-800">
+                          {log.actor} <span className="text-[10px] font-normal text-slate-500">({log.role})</span>
+                        </td>
+                        <td className="py-2.5 px-3 font-mono font-bold text-brand-blue">{log.action}</td>
+                        <td className="py-2.5 px-3 font-semibold text-slate-700">{log.target}</td>
+                        <td className="py-2.5 px-3 font-mono text-slate-500">{log.ip}</td>
+                        <td className="py-2.5 px-3">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                            log.status === 'SUCCESS' ? 'bg-emerald-100 text-emerald-700' :
+                            log.status === 'WARNING' ? 'bg-amber-100 text-amber-800' :
+                            'bg-rose-100 text-rose-700'
+                          }`}>
+                            {log.status}
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-3 text-slate-600">{log.details}</td>
+                      </tr>
+                    ))}
+                    {auditLogs.length === 0 && (
+                      <tr>
+                        <td colSpan="7" className="text-center py-8 text-slate-400">Chưa có bản ghi kiểm toán bảo mật.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* TAB 6: THÔNG BÁO THỜI GIAN THỰC */}
       {activeTab === 'NOTIFICATIONS' && (
         <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
           <div className="flex flex-wrap items-center justify-between gap-2">

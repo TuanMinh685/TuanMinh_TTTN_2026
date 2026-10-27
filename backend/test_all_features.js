@@ -293,6 +293,52 @@ async function runTests() {
         }
     });
 
+    // 16. Kiểm tra Bảo mật Enterprise Health Probe & HTTP Security Headers (/api/health)
+    await testCase('Enterprise Security Headers & Health Probe (/api/health)', async () => {
+        const res = await fetch(`${baseUrl}/health`);
+        const data = await res.json();
+        if (!data.success || data.status !== 'HEALTHY') throw new Error('Health check thất bại');
+        if (!res.headers.get('x-request-id') || res.headers.get('x-frame-options') !== 'DENY') {
+            throw new Error('Thiếu HTTP Security Headers (X-Request-ID / X-Frame-Options)');
+        }
+    });
+
+    // 17. Kiểm tra Chặn dữ liệu không hợp lệ & Lọc mã độc XSS trên cổng tiếp nhận (/tickets/intake)
+    await testCase('Chặn SĐT giả mạo & Lọc mã độc XSS trên cổng tiếp nhận (/tickets/intake)', async () => {
+        const badRes = await fetch(`${baseUrl}/tickets/intake`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                fullName: 'Hacker <script>alert(1)</script>',
+                phone: 'abc-invalid-phone',
+                deviceName: 'Laptop Test',
+                issueDescription: 'Lỗi màn hình'
+            })
+        });
+        const badData = await badRes.json();
+        if (badRes.status !== 400 || badData.errorCode !== 'INVALID_PHONE') {
+            throw new Error('Bộ lọc Validation không chặn số điện thoại sai định dạng!');
+        }
+    });
+
+    // 18. Kiểm tra Nhật ký Kiểm toán Bảo mật Doanh nghiệp (/admin/audit-logs)
+    await testCase('Admin truy xuất Nhật ký Kiểm toán Bảo mật (/admin/audit-logs)', async () => {
+        const res = await fetch(`${baseUrl}/admin/audit-logs`, {
+            headers: { Authorization: `Bearer ${adminToken}` }
+        });
+        const data = await res.json();
+        if (!data.success || !Array.isArray(data.data?.logs) || data.data.logs.length === 0) {
+            throw new Error('Không lấy được Nhật ký Kiểm toán Bảo mật (Audit Logs)');
+        }
+    });
+
+    // Dọn dẹp bản ghi kiểm thử tạm thời để giữ sạch CSDL
+    if (createdTicketId) {
+        await pool.query('DELETE FROM phieu_sua_chua WHERE id = $1', [createdTicketId]).catch(() => {});
+    }
+    await pool.query("DELETE FROM lich_hen WHERE so_dien_thoai = '0988776655'").catch(() => {});
+    await pool.query("DELETE FROM khach_hang WHERE so_dien_thoai IN ('0909123456', '0988776655') AND ho_ten LIKE '%Supabase%'").catch(() => {});
+
     console.log(`\n======================================================`);
     console.log(`KẾT QUẢ KIỂM THỬ SUPABASE: ${passedCount} THÀNH CÔNG, ${failedCount} THẤT BẠI`);
     console.log(`======================================================\n`);

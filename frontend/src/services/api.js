@@ -5,8 +5,10 @@ const API_URL = isLocalBrowser ? '/api' : (import.meta.env.VITE_API_URL || 'http
 
 const api = axios.create({
   baseURL: API_URL,
+  timeout: 15000, // Timeout 15 giây chuẩn doanh nghiệp chống treo kết nối
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'X-Client-Version': '2.0.0-Enterprise'
   }
 });
 
@@ -19,14 +21,18 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Middleware response: xử lý đăng xuất và xóa phiên đăng nhập khi token hết hạn (401/403)
+// Middleware response: Phân tách rõ 401 (Hết hạn / Khóa TK -> Đăng xuất) và 403 (Thiếu quyền RBAC -> Giữ nguyên phiên)
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+    if (error.response && error.response.status === 401) {
       const isAuthApi = error.config?.url?.includes('/auth/login');
       if (!isAuthApi && localStorage.getItem('token')) {
-        localStorage.clear();
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
+        localStorage.removeItem('fullName');
+        localStorage.removeItem('username');
+        localStorage.removeItem('accountId');
         if (window.location.pathname.startsWith('/admin')) {
           window.location.href = '/login';
         }

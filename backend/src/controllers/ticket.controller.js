@@ -1,6 +1,7 @@
 const ticketService = require('../services/ticket.service');
 const ticketSessionService = require('../services/ticket_session.service');
 const { validationResult } = require('express-validator');
+const { logSecurityEvent } = require('../utils/auditLogger');
 
 // Lễ tân / Quản lý khởi tạo phiên tiếp nhận mã QR động (init-session)
 const initSession = async (req, res, next) => {
@@ -108,6 +109,16 @@ const submitIntake = async (req, res, next) => {
             deviceName,
             sessionToken
         });
+
+        logSecurityEvent({
+            req,
+            actor: req.user?.Username || fullName,
+            role: req.user?.Role || 'CUSTOMER_QR',
+            action: 'TICKET_INTAKE_CREATE',
+            target: result.ticketCode,
+            status: 'SUCCESS',
+            details: `Khởi tạo hồ sơ QR CSKH ${result.ticketCode} cho thiết bị "${deviceName}" (${phone})`
+        });
         
         res.status(201).json({
             success: true,
@@ -188,6 +199,14 @@ const updateTicketStatus = async (req, res, next) => {
                 message: 'Không tìm thấy hồ sơ phiếu CSKH cần cập nhật!'
             });
         }
+
+        logSecurityEvent({
+            req,
+            action: 'TICKET_STATUS_UPDATE',
+            target: data.ticketCode || `Ticket #${id}`,
+            status: 'SUCCESS',
+            details: `Chuyển trạng thái hồ sơ sang "${trang_thai}"${ghi_chu ? ` — Ghi chú: ${ghi_chu}` : ''}`
+        });
 
         res.status(200).json({
             success: true,
