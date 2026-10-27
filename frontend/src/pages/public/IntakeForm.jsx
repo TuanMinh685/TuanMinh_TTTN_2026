@@ -77,14 +77,19 @@ function IntakeForm() {
   };
 
   return (
-    <div className="max-w-xl mx-auto mt-10">
+    <div className="max-w-xl mx-auto my-10 px-4">
       <div className="bg-white/90 backdrop-blur-md rounded-2xl p-8 shadow-2xl border-t-4 border-brand-blue relative overflow-hidden">
         {/* Họa tiết trang trí lục giác */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-brand-orange/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
         
         <div className="text-center mb-8 relative z-10">
-          <h1 className="text-3xl font-bold text-brand-blue mb-2">Đăng Ký Sửa Chữa</h1>
-          <p className="text-slate-500">Điền thông tin máy để Lễ tân hỗ trợ bạn nhanh nhất</p>
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-brand-blue text-xs font-bold uppercase tracking-wider mb-2">
+            📷 Cổng Tiếp Nhận Tự Phục Vụ Bằng Mã QR
+          </span>
+          <h1 className="text-2xl sm:text-3xl font-bold text-brand-blue mb-2">Tạo Phiếu Tiếp Nhận & CSKH</h1>
+          <p className="text-slate-500 text-sm">
+            Điền thông tin thiết bị để hệ thống cấp ngay <strong>Mã QR định danh</strong> theo dõi tiến độ và kích hoạt bảo hành điện tử.
+          </p>
         </div>
 
         {error && <div className="bg-red-50 text-red-600 p-4 rounded-xl mb-6 text-sm">{error}</div>}
@@ -93,7 +98,7 @@ function IntakeForm() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1">Họ Tên *</label>
-              <input required type="text" name="fullName" onChange={handleChange} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/50" placeholder="VD: Lê Hào" />
+              <input required type="text" name="fullName" onChange={handleChange} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/50" placeholder="VD: Lê Trần Tuấn Minh" />
             </div>
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1">Số điện thoại *</label>
@@ -103,95 +108,99 @@ function IntakeForm() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">Tên Máy *</label>
-              <input required type="text" name="deviceName" onChange={handleChange} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/50" placeholder="VD: iPhone 13 Pro" />
+              <label className="block text-sm font-semibold text-slate-700 mb-1">Tên Thiết Bị *</label>
+              <input required type="text" name="deviceName" onChange={handleChange} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/50" placeholder="VD: Laptop Dell XPS 15" />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">Số IMEI/Serial</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-1">Số IMEI / Serial</label>
               <input type="text" name="serialImei" onChange={handleChange} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/50" placeholder="(Không bắt buộc)" />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">Mô tả tình trạng lỗi *</label>
-            <textarea required name="issueDescription" onChange={handleChange} rows="3" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/50" placeholder="Máy sạc không vào pin, bể màn hình..."></textarea>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">Mô tả tình trạng cần hỗ trợ / sửa chữa *</label>
+            <textarea required name="issueDescription" onChange={handleChange} rows="3" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/50" placeholder="Máy sạc không vào pin, cần vệ sinh tra keo tản nhiệt..."></textarea>
           </div>
 
           {/* Khối Ưu đãi Học sinh - Sinh viên toàn quốc */}
-          <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl">
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input 
-                type="checkbox" 
-                checked={isStudent} 
-                onChange={e => setIsStudent(e.target.checked)}
-                className="w-5 h-5 text-brand-blue rounded focus:ring-brand-blue"
+          <div className="rounded-xl border-2 border-indigo-200 bg-indigo-50/70 p-4 space-y-3">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isStudent}
+                onChange={(e) => setIsStudent(e.target.checked)}
+                className="mt-1 h-4 w-4 rounded border-indigo-300 text-indigo-600 focus:ring-indigo-500"
               />
               <div>
-                <span className="font-bold text-blue-900 text-sm">🎓 Tôi là Học sinh / Sinh viên (Giảm 15%)</span>
-                <p className="text-xs text-slate-500 mt-0.5">Áp dụng cho học sinh, sinh viên tất cả các trường trên toàn quốc</p>
+                <span className="font-bold text-indigo-950 text-sm block">
+                  🎓 Tôi là Học sinh / Sinh viên (Giảm ngay 15% tổng hóa đơn)
+                </span>
+                <span className="text-xs text-indigo-700">
+                  Áp dụng cho tất cả các trường Đại học, Cao đẳng, THPT trên toàn quốc (VHU, Bách Khoa, UEH, HUTECH, Văn Lang...).
+                </span>
               </div>
             </label>
 
             {isStudent && (
-              <div className="grid grid-cols-2 gap-3 mt-3 pt-3 border-t border-blue-200/60">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-indigo-200/80">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Trường ĐH / CĐ *</label>
-                  <input 
-                    type="text" 
+                  <label className="block text-xs font-semibold text-indigo-900 mb-1">Tên Trường ĐH / CĐ / THPT *</label>
+                  <input
+                    type="text"
                     required={isStudent}
-                    list="vn-schools-intake"
-                    placeholder="VD: ĐH Văn Hiến, Bách Khoa, Hutech..."
                     value={schoolName}
-                    onChange={e => setSchoolName(e.target.value)}
-                    className="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:border-brand-blue outline-none bg-white"
+                    onChange={(e) => setSchoolName(e.target.value)}
+                    placeholder="VD: ĐH Văn Hiến (VHU)"
+                    className="w-full px-3 py-2 text-sm rounded-lg border border-indigo-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
-                  <datalist id="vn-schools-intake">
-                    <option value="Trường Đại học Văn Hiến (VHU)" />
-                    <option value="Trường Đại học Bách Khoa - ĐHQG TP.HCM" />
-                    <option value="Trường Đại học Khoa học Tự nhiên - ĐHQG TP.HCM" />
-                    <option value="Trường Đại học Kinh tế TP.HCM (UEH)" />
-                    <option value="Trường Đại học Công nghệ TP.HCM (HUTECH)" />
-                    <option value="Trường Đại học Văn Lang" />
-                    <option value="Học sinh / Sinh viên trường khác trên toàn quốc" />
-                  </datalist>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Mã số sinh viên (MSSV) *</label>
-                  <input 
-                    type="text" 
+                  <label className="block text-xs font-semibold text-indigo-900 mb-1">Mã số Sinh viên / Học sinh (MSSV) *</label>
+                  <input
+                    type="text"
                     required={isStudent}
-                    placeholder="VD: 221A010123"
                     value={studentId}
-                    onChange={e => setStudentId(e.target.value)}
-                    className="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:border-brand-blue outline-none bg-white"
+                    onChange={(e) => setStudentId(e.target.value)}
+                    placeholder="VD: 221A010993"
+                    className="w-full px-3 py-2 text-sm rounded-lg border border-indigo-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
               </div>
             )}
           </div>
 
-          {/* Khối Biên bản ngoại quan & Chụp/Tải ảnh máy */}
-          <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl">
-            <label className="block text-sm font-semibold text-slate-700 mb-1">
-              📸 Ảnh chụp tình trạng máy lúc tiếp nhận (Chống tranh chấp khiếu nại)
-            </label>
-            <p className="text-xs text-slate-500 mb-3">Tải ảnh chụp vết trầy xước, nứt vỡ hoặc tem niêm phong nếu có.</p>
-            <input 
-              type="file" 
-              accept="image/*" 
-              multiple 
-              onChange={handlePhotoUpload} 
-              className="text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-brand-blue file:text-white hover:file:bg-blue-800 cursor-pointer"
-            />
+          {/* Khối Tải ảnh ngoại quan thiết bị lúc nhận (Chống khiếu nại) */}
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <label className="block text-sm font-bold text-slate-800">
+                  📸 Ảnh hiện trạng ngoại quan máy (Tùy chọn)
+                </label>
+                <p className="text-xs text-slate-500">
+                  Chụp/tải lên ảnh các góc máy, vết trầy xước hiện có để lưu biên bản đối chiếu minh bạch.
+                </p>
+              </div>
+              <label className="cursor-pointer shrink-0 rounded-lg bg-brand-blue px-3 py-2 text-xs font-bold text-white hover:bg-blue-800 transition">
+                + Chọn ảnh
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handlePhotoUpload}
+                  className="hidden"
+                />
+              </label>
+            </div>
+
             {photos.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-3">
-                {photos.map((p, idx) => (
-                  <div key={idx} className="relative group w-16 h-16 rounded-lg overflow-hidden border border-slate-300">
-                    <img src={p.duong_dan_anh} alt="Ngoại quan" className="w-full h-full object-cover" />
-                    <button 
-                      type="button" 
+              <div className="grid grid-cols-3 gap-2 pt-2">
+                {photos.map((photo, idx) => (
+                  <div key={idx} className="relative group rounded-lg overflow-hidden border border-slate-300 bg-white h-20">
+                    <img src={photo.duong_dan_anh} alt={`Ngoại quan ${idx + 1}`} className="w-full h-full object-cover" />
+                    <button
+                      type="button"
                       onClick={() => handleRemovePhoto(idx)}
-                      className="absolute top-0 right-0 bg-red-600 text-white rounded-bl p-0.5 text-xs opacity-80 hover:opacity-100"
+                      className="absolute top-1 right-1 bg-red-600 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center opacity-90 hover:opacity-100"
                     >
                       ×
                     </button>
@@ -201,10 +210,13 @@ function IntakeForm() {
             )}
           </div>
 
-          <SoftwarePackageSelector value={softwarePackage} onChange={setSoftwarePackage} />
+          <SoftwarePackageSelector
+            selectedPackage={softwarePackage}
+            onSelectPackage={setSoftwarePackage}
+          />
 
-          <button disabled={loading} type="submit" className="w-full py-4 bg-brand-orange hover:bg-orange-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-orange-500/30 flex justify-center items-center gap-2">
-            {loading ? 'Đang gửi...' : 'GỬI YÊU CẦU NGAY'}
+          <button disabled={loading} type="submit" className="w-full py-4 bg-gradient-to-r from-brand-orange to-orange-500 text-white font-bold rounded-xl shadow-lg hover:shadow-orange-500/30 transition-all transform hover:-translate-y-0.5 cursor-pointer">
+            {loading ? 'Đang khởi tạo Mã QR...' : 'Tạo Phiếu & Nhận Mã QR Theo Dõi →'}
           </button>
         </form>
       </div>

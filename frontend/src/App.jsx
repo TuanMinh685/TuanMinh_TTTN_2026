@@ -224,38 +224,33 @@ function AppContent() {
           {/* Logo */}
           <Link to="/" className="flex flex-col items-center justify-center">
             <img src="/img/logo-HHH-26.png" alt="HungHau Logo" className="h-10 md:h-12 object-contain" />
-            <span className="text-[10px] text-brand-orange font-bold tracking-widest leading-none mt-1">IT SUPPORT</span>
+            <span className="text-[10px] text-brand-orange font-bold tracking-widest leading-none mt-1">QR CSKH & SUPPORT</span>
           </Link>
 
-          {/* Menu máy tính để bàn (Desktop) */}
-          <nav className="hidden lg:flex items-center text-xs font-bold text-slate-600 uppercase h-full">
-            <Link to="/" className="px-3 xl:px-4 h-full flex items-center hover:text-brand-orange transition-colors">Trang chủ</Link>
-            <Link to="/tra-cuu" className="px-3 xl:px-4 h-full flex items-center hover:text-brand-orange transition-colors">Tra Cứu Tiến Độ</Link>
-            <Link to="/dat-lich" className="px-3 xl:px-4 h-full flex items-center hover:text-brand-orange transition-colors">Đặt Lịch Hẹn</Link>
-            <Link to="/bang-gia" className="px-3 xl:px-4 h-full flex items-center hover:text-brand-orange transition-colors">Bảng Giá</Link>
-            
-            {/* Dropdown: Dịch Vụ Máy Tính */}
-            <div className="relative group h-full flex items-center px-3 xl:px-4 cursor-pointer">
-              <span className="hover:text-brand-orange transition-colors flex items-center gap-1">Dịch vụ máy tính ▾</span>
-              <div className="absolute top-full left-0 bg-white text-slate-700 min-w-[240px] shadow-xl rounded-b-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 py-2 border-t-2 border-brand-orange z-50">
-                <Link to="/dat-lich?service=Sửa chữa máy tính - laptop" className="block px-5 py-2.5 hover:bg-slate-50 hover:text-brand-orange transition-colors normal-case font-semibold">Sửa chữa máy tính - laptop</Link>
-                <Link to="/online-intake" className="block px-5 py-2.5 hover:bg-slate-50 hover:text-brand-orange transition-colors normal-case font-semibold">Cứu dữ liệu online từ xa</Link>
-                <Link to="/dat-lich?service=Bảo trì & vệ sinh máy tính" className="block px-5 py-2.5 hover:bg-slate-50 hover:text-brand-orange transition-colors normal-case font-semibold">Bảo trì & vệ sinh máy tính</Link>
-                <Link to="/dat-lich?service=Dịch vụ cài Win & phần mềm&pkg=OFFICE" className="block px-5 py-2.5 hover:bg-slate-50 hover:text-brand-orange transition-colors normal-case font-semibold">Dịch vụ cài Win & phần mềm</Link>
-              </div>
-            </div>
-
-            {/* Dropdown: Dịch Vụ Laptop */}
-            <div className="relative group h-full flex items-center px-3 xl:px-4 cursor-pointer">
-              <span className="hover:text-brand-orange transition-colors flex items-center gap-1">Dịch vụ laptop ▾</span>
-              <div className="absolute top-full left-0 bg-white text-slate-700 min-w-[240px] shadow-xl rounded-b-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 py-2 border-t-2 border-brand-orange z-50">
-                <Link to="/dat-lich?service=Vệ sinh & tra keo tản nhiệt" className="block px-5 py-2.5 hover:bg-slate-50 hover:text-brand-orange transition-colors normal-case font-semibold">Vệ sinh & tra keo tản nhiệt</Link>
-                <Link to="/bang-gia?q=Pin, Sạc" className="block px-5 py-2.5 hover:bg-slate-50 hover:text-brand-orange transition-colors normal-case font-semibold">Bán sạc & pin laptop</Link>
-                <Link to="/bang-gia?q=Màn hình, Bàn phím" className="block px-5 py-2.5 hover:bg-slate-50 hover:text-brand-orange transition-colors normal-case font-semibold">Thay màn hình & bàn phím</Link>
-              </div>
-            </div>
-
-            <Link to="/intake" className="px-3 xl:px-4 h-full flex items-center hover:text-brand-orange transition-colors">Tạo Phiếu QR</Link>
+          {/* Menu máy tính để bàn (Desktop) - Tập trung trọng tâm Web Quét Mã QR Chăm Sóc Khách Hàng */}
+          <nav className="hidden lg:flex items-center gap-1 text-xs font-bold text-slate-600 uppercase h-full">
+            <Link to="/" className="px-3 xl:px-3.5 h-full flex items-center hover:text-brand-orange transition-colors">
+              Trang chủ
+            </Link>
+            <Link
+              to="/tra-cuu"
+              className="px-3.5 py-2 mx-1 rounded-full bg-orange-50 text-brand-orange border border-orange-200 hover:bg-brand-orange hover:text-white transition-all flex items-center gap-1.5 shadow-2xs"
+            >
+              <span>📷</span>
+              <span>Quét Mã QR & Tra Cứu</span>
+            </Link>
+            <Link to="/intake" className="px-3 xl:px-3.5 h-full flex items-center hover:text-brand-orange transition-colors">
+              📝 Tạo Phiếu QR
+            </Link>
+            <Link to="/dat-lich" className="px-3 xl:px-3.5 h-full flex items-center hover:text-brand-orange transition-colors">
+              📅 Đặt Lịch Hẹn CSKH
+            </Link>
+            <Link to="/bang-gia" className="px-3 xl:px-3.5 h-full flex items-center hover:text-brand-orange transition-colors">
+              🎓 Bảng Giá & Ưu Đãi SV
+            </Link>
+            <Link to="/online-intake" className="px-3 xl:px-3.5 h-full flex items-center hover:text-brand-orange transition-colors">
+              💻 Hỗ Trợ Từ Xa
+            </Link>
           </nav>
 
           {/* Cụm Điều Hành Người Dùng (User Cluster) & Nút Menu Mobile */}
@@ -380,22 +375,22 @@ function AppContent() {
           <div className="lg:hidden bg-white border-t border-slate-200 px-6 py-5 shadow-2xl animate-in slide-in-from-top-2 duration-200">
             <div className="flex flex-col gap-2 font-semibold text-slate-700" onClick={() => setMobileMenuOpen(false)}>
               <Link to="/" className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-slate-100 text-brand-blue font-bold">
-                <span className="text-xl">🏠</span> Trang chủ
+                <span className="text-xl">🏠</span> Trang chủ QR CSKH
               </Link>
-              <Link to="/tra-cuu" className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-slate-100 text-brand-orange font-bold">
-                <span className="text-xl">📷</span> Tra cứu tiến độ & Quét QR
+              <Link to="/tra-cuu" className="flex items-center gap-3 py-2.5 px-3 rounded-xl bg-orange-50 hover:bg-orange-100 text-brand-orange font-bold">
+                <span className="text-xl">📷</span> Quét Mã QR & Tra cứu tiến độ
               </Link>
               <Link to="/intake" className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-slate-100">
-                <span className="text-xl">📝</span> Tạo phiếu sửa chữa tại quầy
+                <span className="text-xl">📝</span> Quét QR Tạo phiếu tại quầy
               </Link>
               <Link to="/dat-lich" className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-slate-100">
-                <span className="text-xl">📅</span> Đặt lịch hẹn sửa chữa
+                <span className="text-xl">📅</span> Đặt lịch hẹn CSKH
               </Link>
               <Link to="/bang-gia" className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-slate-100">
-                <span className="text-xl">🏷️</span> Bảng giá dịch vụ & linh kiện
+                <span className="text-xl">🎓</span> Bảng giá & Ưu đãi Sinh viên (-15%)
               </Link>
               <Link to="/online-intake" className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-slate-100">
-                <span className="text-xl">💻</span> Cứu dữ liệu & Sửa online
+                <span className="text-xl">💻</span> Hỗ trợ kỹ thuật từ xa
               </Link>
               
               <div className="pt-3 mt-2 border-t border-slate-200 flex flex-col gap-3">

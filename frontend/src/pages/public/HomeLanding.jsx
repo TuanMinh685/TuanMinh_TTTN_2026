@@ -1,91 +1,338 @@
 import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import QRCode from 'qrcode';
 import api from '../../services/api';
-import { Link } from 'react-router-dom';
+import QrScannerModal from '../../components/QrScannerModal';
 
 function HomeLanding() {
+  const navigate = useNavigate();
   const [activeGuideTab, setActiveGuideTab] = useState('TAI_QUAY');
   const [topReviews, setTopReviews] = useState([]);
+  const [qrMode, setQrMode] = useState('INTAKE'); // 'INTAKE' | 'DEMO_TRACK'
+  const [qrDataUrl, setQrDataUrl] = useState('');
+  const [quickTicketCode, setQuickTicketCode] = useState('');
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
 
   useEffect(() => {
     api.get('/public/reviews/top')
-      .then(res => setTopReviews(res.data.data))
+      .then(res => setTopReviews(res.data.data || []))
       .catch(error => console.error('Không tải được đánh giá nổi bật:', error));
   }, []);
+
+  useEffect(() => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5173';
+    const targetUrl = qrMode === 'INTAKE'
+      ? `${origin}/intake`
+      : `${origin}/track/RP-839400`;
+
+    QRCode.toDataURL(targetUrl, {
+      width: 220,
+      margin: 1,
+      color: {
+        dark: '#0d457b',
+        light: '#ffffff'
+      }
+    })
+      .then(url => setQrDataUrl(url))
+      .catch(err => console.error('Lỗi tạo mã QR:', err));
+  }, [qrMode]);
+
+  const handleQuickLookup = (e) => {
+    e.preventDefault();
+    const code = quickTicketCode.trim().toUpperCase();
+    if (!code) return;
+    navigate(`/track/${code}`);
+  };
+
+  const handleScanSuccess = (scannedText) => {
+    setIsScannerOpen(false);
+    if (!scannedText) return;
+    // Nếu quét trúng URL đầy đủ có chứa /track/ hoặc /intake
+    if (scannedText.includes('/track/')) {
+      const code = scannedText.split('/track/')[1]?.split(/[?#]/)[0];
+      if (code) {
+        navigate(`/track/${code.toUpperCase()}`);
+        return;
+      }
+    }
+    if (scannedText.includes('/intake')) {
+      navigate('/intake');
+      return;
+    }
+    navigate(`/track/${scannedText.trim().toUpperCase()}`);
+  };
+
   return (
     <div className="font-sans text-slate-800 bg-white">
-      {/* SECTION 02: HERO BANNER */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-brand-blue to-[#1a7f45] py-20 lg:py-32">
+      {/* SECTION 02: HERO BANNER - TRUNG TÂM WEB QUÉT MÃ QR CHĂM SÓC KHÁCH HÀNG */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#0b3c6d] via-brand-blue to-[#146c3b] py-16 lg:py-24">
         <div className="container mx-auto px-6 relative z-10">
           <div className="flex flex-col lg:flex-row items-center gap-12">
-            <div className="w-full lg:w-1/2 text-white">
-              <h1 className="text-4xl lg:text-6xl font-bold leading-tight mb-6">
-                Sửa chữa thiết bị nhanh chóng – <br/>
-                <span className="text-brand-orange">Chỉ một lần quét mã!</span>
+            {/* Cột trái: Thông điệp trọng tâm Web Quét Mã QR CSKH */}
+            <div className="w-full lg:w-7/12 text-white">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 border border-white/25 text-amber-300 text-xs font-bold uppercase tracking-wider mb-5 backdrop-blur-xs">
+                <span>📷</span>
+                <span>Hệ Thống Web Quét Mã QR Chăm Sóc Khách Hàng • MYH Group</span>
+              </div>
+
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
+                Chăm Sóc Khách Hàng Thông Minh – <br />
+                <span className="text-brand-orange">Chỉ Một Lần Quét Mã QR!</span>
               </h1>
-              <p className="text-lg lg:text-xl text-blue-100 mb-8 opacity-90 max-w-lg">
-                Hệ thống tiếp nhận yêu cầu bảo hành/sửa chữa thiết bị thông minh. Không cần xếp hàng chờ đợi, hãy quét mã QR tại quầy Lễ tân để tạo phiếu ngay.
+
+              <p className="text-base sm:text-lg text-blue-100 mb-6 leading-relaxed max-w-2xl">
+                Nền tảng Web ứng dụng <strong>Mã QR định danh</strong> giúp khách hàng tự tạo phiếu tiếp nhận tại quầy không cần chờ đợi, quét QR theo dõi tiến độ thời gian thực, đối chiếu ảnh ngoại quan 4 góc, duyệt báo giá trực tuyến, tra cứu <strong>Sổ bảo hành điện tử (e-Warranty)</strong> và đánh giá chất lượng phục vụ 1–5 sao.
               </p>
-              <div className="flex flex-wrap gap-4 mt-8">
-                <a href="#how-it-works" className="px-8 py-4 bg-white text-brand-blue font-bold rounded-full hover:bg-slate-100 transition-all shadow-lg hover:shadow-xl">
-                  Xem hướng dẫn nộp phiếu
-                </a>
-                <Link to="/intake" className="px-8 py-4 bg-brand-green text-white font-bold rounded-full hover:brightness-110 transition-all shadow-lg hover:shadow-xl animate-pulse">
-                  Tạo Phiếu Ngay
+
+              {/* Thanh tra cứu & Mở Camera quét QR nhanh ngay trên trang chủ */}
+              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 mb-7 max-w-2xl">
+                <div className="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2.5 flex items-center justify-between">
+                  <span>🔍 Tra cứu nhanh hồ sơ CSKH hoặc Bật Camera quét mã QR</span>
+                  <button
+                    type="button"
+                    onClick={() => navigate('/track/RP-839400')}
+                    className="underline hover:text-white transition"
+                  >
+                    Xem phiếu mẫu: RP-839400 →
+                  </button>
+                </div>
+                <form onSubmit={handleQuickLookup} className="flex flex-col sm:flex-row gap-2.5">
+                  <input
+                    type="text"
+                    value={quickTicketCode}
+                    onChange={(e) => setQuickTicketCode(e.target.value)}
+                    placeholder="Nhập mã phiếu QR trên biên nhận (VD: RP-839400)..."
+                    className="flex-1 px-4 py-3 rounded-xl bg-white text-slate-800 font-semibold text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+                  />
+                  <button
+                    type="submit"
+                    className="px-5 py-3 rounded-xl bg-brand-blue hover:bg-blue-800 text-white font-bold text-sm transition shadow-md shrink-0 cursor-pointer"
+                  >
+                    Tra Cứu Ngay
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsScannerOpen(true)}
+                    className="px-5 py-3 rounded-xl bg-brand-orange hover:brightness-110 text-white font-bold text-sm transition shadow-md flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+                  >
+                    <span>📷</span>
+                    <span>Quét Camera QR</span>
+                  </button>
+                </form>
+              </div>
+
+              {/* Cụm nút điều hướng nghiệp vụ CSKH */}
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  to="/intake"
+                  className="px-6 py-3.5 bg-brand-green text-white font-bold rounded-full hover:brightness-110 transition-all shadow-lg text-sm flex items-center gap-2"
+                >
+                  <span>📝</span>
+                  <span>Quét QR Tạo Phiếu Tại Quầy</span>
                 </Link>
-                <Link to="/dat-lich" className="px-8 py-4 bg-brand-orange text-white font-bold rounded-full hover:brightness-110 transition-all shadow-lg hover:shadow-xl">
-                  Đặt Lịch Hẹn
+                <Link
+                  to="/dat-lich"
+                  className="px-6 py-3.5 bg-white text-brand-blue font-bold rounded-full hover:bg-slate-100 transition-all shadow-lg text-sm flex items-center gap-2"
+                >
+                  <span>📅</span>
+                  <span>Đặt Lịch Hẹn CSKH</span>
                 </Link>
-                <Link to="/bang-gia" className="px-8 py-4 bg-transparent border-2 border-white text-white font-bold rounded-full hover:bg-white hover:text-brand-blue transition-all shadow-lg hover:shadow-xl">
-                  Xem Bảng Giá
-                </Link>
-                <Link to="/tra-cuu" className="px-8 py-4 bg-slate-800 text-white font-bold rounded-full hover:bg-slate-700 transition-all shadow-lg hover:shadow-xl">
-                  Tra Cứu Tiến Độ
+                <Link
+                  to="/bang-gia"
+                  className="px-6 py-3.5 bg-transparent border-2 border-white/80 text-white font-bold rounded-full hover:bg-white hover:text-brand-blue transition-all text-sm flex items-center gap-2"
+                >
+                  <span>🎓</span>
+                  <span>Bảng Giá & Ưu Đãi SV (-15%)</span>
                 </Link>
               </div>
             </div>
-            <div className="w-full lg:w-1/2 flex justify-center relative">
-              {/* Abstract Visual for Mockup */}
-              <div className="w-72 h-[500px] bg-slate-800 rounded-[3rem] border-8 border-slate-900 shadow-2xl relative overflow-hidden flex flex-col">
-                <div className="w-full h-12 bg-slate-900 flex justify-center items-center">
-                  <div className="w-20 h-4 bg-slate-800 rounded-full"></div>
+
+            {/* Cột phải: Thẻ Mã QR Tương Tác Trực Tiếp Tại Quầy */}
+            <div className="w-full lg:w-5/12 flex justify-center">
+              <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl border-4 border-white/30 p-6 text-slate-800 relative">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                  <div>
+                    <span className="text-[11px] font-extrabold uppercase tracking-wider text-brand-green block">
+                      ● MÃ QR TRỰC TUYẾN TẠI QUẦY
+                    </span>
+                    <h3 className="font-extrabold text-base text-brand-blue">
+                      Cổng Quét QR Tự Phục Vụ (CSKH)
+                    </h3>
+                  </div>
+                  <span className="px-2.5 py-1 rounded-full bg-blue-50 text-brand-blue font-bold text-xs">
+                    615 Âu Cơ
+                  </span>
                 </div>
-                <div className="flex-1 bg-white flex flex-col items-center justify-center p-6 text-center">
-                   <div className="w-40 h-40 border-4 border-dashed border-brand-green flex items-center justify-center mb-6 rounded-xl relative">
-                     <div className="w-full h-1 bg-brand-green absolute top-1/2 animate-ping opacity-50"></div>
-                     <span className="text-4xl">📱</span>
-                   </div>
-                   <h3 className="font-bold text-lg text-brand-blue">Quét QR tại quầy</h3>
-                   <p className="text-sm text-slate-500 mt-2">Mở Camera và hướng vào mã QR của Lễ Tân</p>
+
+                {/* Chuyển đổi 2 chế độ mã QR thực tế */}
+                <div className="grid grid-cols-2 gap-1.5 bg-slate-100 p-1 rounded-xl mb-4 text-xs font-bold">
+                  <button
+                    type="button"
+                    onClick={() => setQrMode('INTAKE')}
+                    className={`py-2 px-2 rounded-lg transition cursor-pointer ${
+                      qrMode === 'INTAKE'
+                        ? 'bg-brand-blue text-white shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    📝 QR Tạo Phiếu Mới
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setQrMode('DEMO_TRACK')}
+                    className={`py-2 px-2 rounded-lg transition cursor-pointer ${
+                      qrMode === 'DEMO_TRACK'
+                        ? 'bg-brand-orange text-white shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    🛡️ QR Hồ Sơ CSKH Mẫu
+                  </button>
+                </div>
+
+                {/* Khung hiển thị ảnh Mã QR thật có thể quét bằng điện thoại */}
+                <div className="bg-slate-50 border-2 border-dashed border-brand-blue/30 rounded-2xl p-4 flex flex-col items-center justify-center mb-4">
+                  {qrDataUrl ? (
+                    <img
+                      src={qrDataUrl}
+                      alt="Mã QR Chăm Sóc Khách Hàng"
+                      className="w-48 h-48 object-contain rounded-xl bg-white p-2 shadow-sm"
+                    />
+                  ) : (
+                    <div className="w-48 h-48 flex items-center justify-center text-slate-400 text-sm">
+                      Đang tạo mã QR...
+                    </div>
+                  )}
+                  <span className="mt-2.5 inline-flex items-center gap-1.5 text-xs font-bold text-brand-blue bg-blue-50 px-3 py-1 rounded-full">
+                    {qrMode === 'INTAKE'
+                      ? 'Quét để mở Form Tiếp Nhận Tại Quầy (/intake)'
+                      : 'Quét để xem Hồ Sơ CSKH Mẫu (RP-839400)'}
+                  </span>
+                </div>
+
+                <p className="text-xs text-slate-500 text-center mb-4 leading-relaxed">
+                  {qrMode === 'INTAKE'
+                    ? 'Khách hàng đến quầy dùng Camera điện thoại quét mã này để tự điền thông tin & chụp ảnh ngoại quan máy.'
+                    : 'Quét mã hoặc bấm nút bên dưới để trải nghiệm trang theo dõi tiến độ, duyệt giá, bảo hành điện tử & đánh giá 5 sao.'}
+                </p>
+
+                <div className="grid grid-cols-2 gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setIsScannerOpen(true)}
+                    className="py-2.5 px-3 rounded-xl bg-brand-orange text-white font-bold text-xs hover:brightness-110 transition flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+                  >
+                    <span>📷</span>
+                    <span>Mở Máy Quét QR</span>
+                  </button>
+                  <Link
+                    to={qrMode === 'INTAKE' ? '/intake' : '/track/RP-839400'}
+                    className="py-2.5 px-3 rounded-xl bg-brand-blue text-white font-bold text-xs hover:bg-blue-800 transition flex items-center justify-center gap-1.5 shadow-sm text-center"
+                  >
+                    <span>🚀</span>
+                    <span>{qrMode === 'INTAKE' ? 'Mở Form Ngay' : 'Xem Hồ Sơ Mẫu'}</span>
+                  </Link>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
         {/* Background shapes */}
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-blue-500/20 blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-96 h-96 rounded-full bg-brand-green/20 blur-3xl"></div>
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-blue-500/20 blur-3xl pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-96 h-96 rounded-full bg-brand-green/20 blur-3xl pointer-events-none"></div>
       </section>
 
-      
-      {/* SECTION 03: QUY TRÌNH HOẠT ĐỘNG (HOW IT WORKS) */}
-      <section id="how-it-works" className="py-24 bg-slate-50">
+      {/* SECTION 02B: 4 TRỤ CỘT CHĂM SÓC KHÁCH HÀNG BẰNG MÃ QR */}
+      <section className="py-16 bg-white border-b border-slate-100">
         <div className="container mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold text-brand-blue">Hướng Dẫn Tạo Yêu Cầu Sửa Chữa</h2>
-            <p className="text-slate-500 mt-4 max-w-2xl mx-auto">Chọn phương thức phù hợp với bạn để xem hướng dẫn chi tiết.</p>
+            <span className="text-xs font-extrabold uppercase tracking-widest text-brand-orange">
+              GIẢI PHÁP CHUYỂN ĐỔI SỐ DỊCH VỤ KHÁCH HÀNG
+            </span>
+            <h2 className="text-2xl lg:text-4xl font-bold text-brand-blue mt-2">
+              4 Giá Trị Cốt Lõi Của Web Quét Mã QR Chăm Sóc Khách Hàng
+            </h2>
+            <p className="text-slate-500 mt-2 max-w-2xl mx-auto text-sm sm:text-base">
+              Mỗi khách hàng được cấp một mã QR định danh duy nhất xuyên suốt từ lúc tiếp nhận, theo dõi xử lý cho đến hết thời hạn bảo hành điện tử.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-6 hover:shadow-lg hover:border-brand-blue/40 transition">
+              <div className="w-12 h-12 rounded-xl bg-blue-100 text-brand-blue flex items-center justify-center text-2xl mb-4">
+                📸
+              </div>
+              <h3 className="font-bold text-lg text-slate-800 mb-2">
+                1. Quét QR Tiếp Nhận & Lưu Ảnh Ngoại Quan
+              </h3>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                Khách tự quét QR tại quầy điền thông tin lỗi trong 30 giây và tải lên ảnh chụp 4 góc máy lúc bàn giao, minh bạch tuyệt đối chống khiếu nại.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-6 hover:shadow-lg hover:border-brand-blue/40 transition">
+              <div className="w-12 h-12 rounded-xl bg-orange-100 text-brand-orange flex items-center justify-center text-2xl mb-4">
+                ⏱️
+              </div>
+              <h3 className="font-bold text-lg text-slate-800 mb-2">
+                2. Quét QR Theo Dõi Tiến Độ & Duyệt Báo Giá
+              </h3>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                Không cần gọi điện hỏi tổng đài. Khách quét mã QR trên biên nhận để xem tiến độ thời gian thực và bấm Đồng ý / Từ chối báo giá ngay trên điện thoại.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-6 hover:shadow-lg hover:border-brand-blue/40 transition">
+              <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-2xl mb-4">
+                🛡️
+              </div>
+              <h3 className="font-bold text-lg text-slate-800 mb-2">
+                3. Quét QR Sổ Bảo Hành Điện Tử (e-Warranty)
+              </h3>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                Thay thế hoàn toàn phiếu bảo hành giấy dễ rách mất. Tự động đếm ngược hạn bảo hành, tra cứu Serial linh kiện và gửi yêu cầu bảo hành lại bằng QR.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-6 hover:shadow-lg hover:border-brand-blue/40 transition">
+              <div className="w-12 h-12 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center text-2xl mb-4">
+                🎓
+              </div>
+              <h3 className="font-bold text-lg text-slate-800 mb-2">
+                4. Đánh Giá 5 Sao & Ưu Đãi Sinh Viên (-15%)
+              </h3>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                Khách hàng chấm điểm mức độ hài lòng (1–5 sao) sau khi nhận máy, tích điểm thành viên và hưởng trợ giá -15% dành cho Sinh viên toàn quốc.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 03: QUY TRÌNH HOẠT ĐỘNG (HOW IT WORKS) */}
+      <section id="how-it-works" className="py-20 bg-slate-50">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl lg:text-4xl font-bold text-brand-blue">Quy Trình Quét Mã QR Chăm Sóc Khách Hàng</h2>
+            <p className="text-slate-500 mt-3 max-w-2xl mx-auto">Chọn hình thức hỗ trợ phù hợp với bạn để xem hướng dẫn 3 bước đơn giản.</p>
           </div>
 
           {/* Các nút chuyển Tab */}
           <div className="flex flex-col sm:flex-row justify-center gap-4 mb-16">
-            <button 
+            <button
+              type="button"
               onClick={() => setActiveGuideTab('TAI_QUAY')}
-              className={`px-8 py-3 rounded-full font-bold transition-all shadow-md ${activeGuideTab === 'TAI_QUAY' ? 'bg-brand-green text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
-              🏢 Khách đến trực tiếp cửa hàng
+              className={`px-8 py-3 rounded-full font-bold transition-all shadow-md cursor-pointer ${activeGuideTab === 'TAI_QUAY' ? 'bg-brand-green text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
+            >
+              🏢 Luồng 1: Quét QR trực tiếp tại quầy (615 Âu Cơ)
             </button>
-            <button 
+            <button
+              type="button"
               onClick={() => setActiveGuideTab('TU_XA')}
-              className={`px-8 py-3 rounded-full font-bold transition-all shadow-md ${activeGuideTab === 'TU_XA' ? 'bg-brand-orange text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
-              🏠 Khách đặt lịch từ xa
+              className={`px-8 py-3 rounded-full font-bold transition-all shadow-md cursor-pointer ${activeGuideTab === 'TU_XA' ? 'bg-brand-orange text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
+            >
+              🏠 Luồng 2: Đặt lịch hẹn & Hỗ trợ từ xa
             </button>
           </div>
 
@@ -93,42 +340,37 @@ function HomeLanding() {
           {activeGuideTab === 'TAI_QUAY' && (
             <div className="animate-fade-in-up">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
-                {/* Connecting Line (Desktop) */}
                 <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-1 bg-slate-200 z-0"></div>
-                
-                {/* Step 1 */}
+
                 <div className="relative z-10 flex flex-col items-center text-center">
                   <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-brand-green text-4xl mb-6">
                     📷
                   </div>
-                  <h3 className="text-xl font-bold text-brand-blue mb-3">1. Quét QR tại quầy</h3>
-                  <p className="text-slate-600">Sử dụng điện thoại quét mã QR động tại quầy Lễ tân (Mã bảo mật thay đổi sau mỗi 15 phút).</p>
+                  <h3 className="text-xl font-bold text-brand-blue mb-3">1. Quét QR tạo phiếu tại quầy</h3>
+                  <p className="text-slate-600">Khách hàng quét mã QR tại quầy Lễ tân để điền thông tin liên hệ, mô tả sự cố và đính kèm ảnh ngoại quan máy.</p>
                 </div>
-                
-                {/* Step 2 */}
+
                 <div className="relative z-10 flex flex-col items-center text-center">
                   <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-brand-blue text-4xl mb-6">
-                    📝
+                    📲
                   </div>
-                  <h3 className="text-xl font-bold text-brand-blue mb-3">2. Điền Form thông tin</h3>
-                  <p className="text-slate-600">Nhập Họ tên, Số điện thoại và mô tả ngắn gọn lỗi của thiết bị ngay trên điện thoại của bạn.</p>
+                  <h3 className="text-xl font-bold text-brand-blue mb-3">2. Quét QR theo dõi & Duyệt giá</h3>
+                  <p className="text-slate-600">Nhận phiếu in nhiệt 80mm có mã QR riêng. Quét mã bất cứ lúc nào để xem tiến độ xử lý và bấm xác nhận báo giá online.</p>
                 </div>
-                
-                {/* Step 3 */}
+
                 <div className="relative z-10 flex flex-col items-center text-center">
                   <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-brand-green text-4xl mb-6">
-                    👨‍🔧
+                    🛡️
                   </div>
-                  <h3 className="text-xl font-bold text-brand-blue mb-3">3. Bàn giao thiết bị</h3>
-                  <p className="text-slate-600">Đưa thiết bị cho KTV. Phiếu của bạn sẽ ngay lập tức xuất hiện trên hệ thống với trạng thái Pending.</p>
+                  <h3 className="text-xl font-bold text-brand-blue mb-3">3. Nhận máy, Bảo hành QR & Đánh giá</h3>
+                  <p className="text-slate-600">Thanh toán tiện lợi qua VietQR, tự động kích hoạt Sổ bảo hành điện tử trên mã QR và chấm điểm đánh giá 1–5 sao.</p>
                 </div>
               </div>
 
-              {/* Thêm Nút Call to Action */}
               <div className="text-center mt-12">
-                 <Link to="/intake" className="inline-block px-8 py-4 bg-brand-green text-white font-bold rounded-full hover:brightness-110 shadow-lg animate-pulse">
-                    Tiến hành Quét Mã & Tạo Phiếu
-                 </Link>
+                <Link to="/intake" className="inline-block px-8 py-4 bg-brand-green text-white font-bold rounded-full hover:brightness-110 shadow-lg">
+                  Tiến hành Tạo Phiếu QR Ngay
+                </Link>
               </div>
             </div>
           )}
@@ -137,133 +379,81 @@ function HomeLanding() {
           {activeGuideTab === 'TU_XA' && (
             <div className="animate-fade-in-up">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
-                  <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-1 bg-slate-200 z-0"></div>
-                  {/* Bước 1 */}
-                  <div className="relative z-10 flex flex-col items-center text-center">
-                    <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-brand-orange text-4xl mb-6">📅</div>
-                    <h3 className="text-xl font-bold text-brand-blue mb-3">1. Đặt lịch online</h3>
-                    <p className="text-slate-600">Chọn ngày, giờ và mô tả lỗi thiết bị của bạn qua biểu mẫu trực tuyến.</p>
-                  </div>
-                  {/* Bước 2 */}
-                  <div className="relative z-10 flex flex-col items-center text-center">
-                    <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-brand-blue text-4xl mb-6">📞</div>
-                    <h3 className="text-xl font-bold text-brand-blue mb-3">2. Lễ tân gọi chốt lịch</h3>
-                    <p className="text-slate-600">Nhân viên sẽ gọi điện thoại xác nhận tình trạng lỗi và chốt giờ hẹn với bạn.</p>
-                  </div>
-                  {/* Bước 3 */}
-                  <div className="relative z-10 flex flex-col items-center text-center">
-                    <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-brand-green text-4xl mb-6">🏃‍♂️</div>
-                    <h3 className="text-xl font-bold text-brand-blue mb-3">3. Mang máy đến đúng hẹn</h3>
-                    <p className="text-slate-600">Đến cửa hàng theo lịch hẹn, không cần chờ đợi. Kỹ thuật viên sẽ lập tức ưu tiên kiểm tra máy.</p>
-                  </div>
+                <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-1 bg-slate-200 z-0"></div>
+                <div className="relative z-10 flex flex-col items-center text-center">
+                  <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-brand-orange text-4xl mb-6">📅</div>
+                  <h3 className="text-xl font-bold text-brand-blue mb-3">1. Đặt lịch hoặc Gửi yêu cầu Online</h3>
+                  <p className="text-slate-600">Chọn khung giờ hẹn trước hoặc gửi ID UltraViewer để yêu cầu kỹ thuật viên hỗ trợ phần mềm từ xa.</p>
+                </div>
+                <div className="relative z-10 flex flex-col items-center text-center">
+                  <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-brand-blue text-4xl mb-6">📞</div>
+                  <h3 className="text-xl font-bold text-brand-blue mb-3">2. Nhân viên CSKH xác nhận</h3>
+                  <p className="text-slate-600">Bộ phận Lễ tân & CSKH tiếp nhận lịch hẹn trên hệ thống, xác nhận thông tin ưu đãi sinh viên và cấp mã phiếu QR.</p>
+                </div>
+                <div className="relative z-10 flex flex-col items-center text-center">
+                  <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-brand-green text-4xl mb-6">✅</div>
+                  <h3 className="text-xl font-bold text-brand-blue mb-3">3. Phục vụ ưu tiên & Chăm sóc hậu mãi</h3>
+                  <p className="text-slate-600">Khách hàng được phục vụ đúng giờ hẹn không cần xếp hàng và theo dõi toàn bộ lịch sử bảo hành qua mã QR.</p>
+                </div>
               </div>
-              {/* Thêm Nút Call to Action */}
               <div className="text-center mt-12">
-                 <Link to="/dat-lich" className="inline-block px-8 py-4 bg-brand-orange text-white font-bold rounded-full hover:brightness-110 shadow-lg">
-                    Đặt Lịch Hẹn Ngay
-                 </Link>
+                <Link to="/dat-lich" className="inline-block px-8 py-4 bg-brand-orange text-white font-bold rounded-full hover:brightness-110 shadow-lg">
+                  Đặt Lịch Hẹn CSKH Ngay
+                </Link>
               </div>
             </div>
           )}
         </div>
       </section>
 
-      {/* SECTION 04: DANH MỤC THIẾT BỊ HỖ TRỢ */}
-      <section className="py-16 bg-white overflow-hidden border-y border-slate-100">
-        <div className="container mx-auto px-6 text-center mb-10">
-          <h2 className="text-2xl font-bold text-brand-blue">Chuyên tiếp nhận các dòng thiết bị</h2>
-        </div>
-        {/* Auto-scrolling logo band mockup */}
-        <div className="relative w-full overflow-hidden">
-          <div className="flex gap-12 items-center w-max animate-[scroll_20s_linear_infinite]">
-            {['Dell', 'HP', 'Apple', 'Samsung', 'Asus', 'Acer', 'Lenovo', 'MSI', 'Dell', 'HP', 'Apple', 'Samsung'].map((brand, idx) => (
-              <div key={idx} className="text-3xl font-black text-slate-300 hover:text-brand-blue transition-colors uppercase tracking-widest cursor-pointer px-8">
-                {brand}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 05: ƯU ĐIỂM HỆ THỐNG BẢO MẬT */}
-      <section className="py-24 bg-slate-50">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold text-brand-blue">Nhanh chóng, An toàn và Bảo mật tuyệt đối</h2>
-          </div>
-          
-          <div className="flex flex-col md:flex-row items-center gap-12 mb-20">
-            <div className="w-full md:w-1/2 flex justify-center">
-              <div className="w-64 h-64 bg-green-100 rounded-full flex items-center justify-center text-6xl shadow-inner">
-                ⏳
-              </div>
-            </div>
-            <div className="w-full md:w-1/2">
-              <h3 className="text-2xl font-bold text-brand-blue mb-4">Mã QR Động 15 Phút</h3>
-              <p className="text-slate-600 text-lg leading-relaxed">
-                Hệ thống áp dụng công nghệ tạo phiên độc quyền. Mỗi mã QR tại quầy chỉ có hiệu lực trong vòng 15 phút. Sau thời gian này, mã sẽ tự động hủy và tạo mới, ngăn chặn hoàn toàn việc khách hàng copy mã mang về nhà gửi yêu cầu giả mạo.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-col md:flex-row-reverse items-center gap-12">
-            <div className="w-full md:w-1/2 flex justify-center">
-              <div className="w-64 h-64 bg-blue-100 rounded-full flex items-center justify-center text-6xl shadow-inner">
-                🛡️
-              </div>
-            </div>
-            <div className="w-full md:w-1/2 text-right">
-              <h3 className="text-2xl font-bold text-brand-blue mb-4">Tường Lửa Chống SPAM</h3>
-              <p className="text-slate-600 text-lg leading-relaxed">
-                Hệ thống Backend được bảo vệ bởi công nghệ Rate Limiting tiên tiến. Chúng tôi giới hạn số lượng tạo phiếu tối đa 10 lần / 10 phút từ cùng một thiết bị, đảm bảo cơ sở dữ liệu luôn sạch sẽ và nhân viên KTV không bị quá tải bởi các yêu cầu rác.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION REVIEWS */}
+      {/* SECTION REVIEWS: PHẢN HỒI KHÁCH HÀNG QUA MÃ QR */}
       {topReviews.length > 0 && (
-      <section className="py-20 bg-blue-50 border-t border-blue-100">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-brand-blue">Khách hàng nói gì về chúng tôi</h2>
-            <p className="text-slate-500 mt-2">Hàng ngàn thiết bị đã được cứu chữa thành công</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {topReviews.map((r, i) => (
-              <div key={i} className="bg-white p-6 rounded-2xl shadow-lg border border-slate-100">
-                <div className="flex text-yellow-400 mb-4 text-xl">
-                  {Array.from({ length: r.so_sao }).map((_, idx) => <span key={idx}>★</span>)}
+        <section className="py-20 bg-blue-50 border-t border-blue-100">
+          <div className="container mx-auto px-6">
+            <div className="text-center mb-12">
+              <span className="text-xs font-extrabold uppercase tracking-wider text-brand-blue">
+                ĐÁNH GIÁ TỪ KHÁCH HÀNG QUÉT MÃ QR
+              </span>
+              <h2 className="text-3xl font-bold text-brand-blue mt-1">Khách Hàng Nói Gì Về Dịch Vụ CSKH</h2>
+              <p className="text-slate-500 mt-2">Phản hồi thực tế được khách hàng gửi trực tiếp từ trang Quét mã QR sau khi nhận lại thiết bị</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {topReviews.map((r, i) => (
+                <div key={i} className="bg-white p-6 rounded-2xl shadow-lg border border-slate-100">
+                  <div className="flex text-yellow-400 mb-4 text-xl">
+                    {Array.from({ length: r.so_sao }).map((_, idx) => <span key={idx}>★</span>)}
+                  </div>
+                  <p className="text-slate-600 italic mb-4">"{r.nhan_xet}"</p>
+                  <p className="font-bold text-brand-blue text-sm">- {r.ho_ten}</p>
+                  <p className="text-xs text-slate-400 mt-1">{new Date(r.ngay_danh_gia).toLocaleDateString('vi-VN')}</p>
                 </div>
-                <p className="text-slate-600 italic mb-4">"{r.nhan_xet}"</p>
-                <p className="font-bold text-brand-blue text-sm">- {r.ho_ten}</p>
-                <p className="text-xs text-slate-400 mt-1">{new Date(r.ngay_danh_gia).toLocaleDateString('vi-VN')}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
       )}
 
-      {/* SECTION 06: KHU VỰC DÀNH CHO LỄ TÂN & KTV */}
-      <section className="py-24 bg-white relative">
+      {/* SECTION 06: KHU VỰC DÀNH CHO NHÂN VIÊN CSKH & KỸ THUẬT */}
+      <section className="py-20 bg-white relative">
         <div className="container mx-auto px-6 relative z-10">
-          <div className="max-w-4xl mx-auto bg-brand-blue rounded-3xl p-12 text-center text-white shadow-2xl relative overflow-hidden">
-             {/* Background decorative */}
-             <div className="absolute top-0 left-0 w-full h-full bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4xKSIvPjwvc3ZnPg==')] opacity-30"></div>
-             
-             <h2 className="text-3xl lg:text-4xl font-bold mb-6 relative z-10">Cổng quản lý dành cho nhân viên</h2>
-             <p className="text-blue-200 text-lg mb-10 max-w-2xl mx-auto relative z-10">
-               Khu vực nội bộ dành riêng cho Lễ Tân và Kỹ Thuật Viên của HungHau. Vui lòng sử dụng tài khoản được cấp để tiếp nhận vé yêu cầu (tickets) và cập nhật tiến độ.
-             </p>
-             <Link to="/admin" className="inline-block px-10 py-5 bg-brand-green text-white font-bold text-xl rounded-full hover:bg-green-600 transition-all shadow-lg hover:shadow-xl relative z-10 w-full md:w-auto">
-               Đăng nhập ca trực
-             </Link>
+          <div className="max-w-4xl mx-auto bg-brand-blue rounded-3xl p-10 sm:p-12 text-center text-white shadow-2xl relative overflow-hidden">
+            <h2 className="text-2xl lg:text-4xl font-bold mb-4 relative z-10">Cổng Điều Hành Nội Bộ (CSKH & Kỹ Thuật)</h2>
+            <p className="text-blue-200 text-base sm:text-lg mb-8 max-w-2xl mx-auto relative z-10">
+              Dành cho Lễ tân CSKH, Kỹ thuật viên và Quản lý tại cơ sở 615 Âu Cơ để tiếp nhận phiếu QR, cập nhật tiến độ sửa chữa, in phiếu nhiệt 80mm và theo dõi báo cáo.
+            </p>
+            <Link to="/admin" className="inline-block px-10 py-4 bg-brand-green text-white font-bold text-lg rounded-full hover:bg-green-600 transition-all shadow-lg hover:shadow-xl relative z-10 w-full md:w-auto">
+              🔐 Truy Cập Cổng Nội Bộ
+            </Link>
           </div>
         </div>
       </section>
 
+      {/* Modal Camera Quét Mã QR trực tiếp trên Trang chủ */}
+      <QrScannerModal
+        isOpen={isScannerOpen}
+        onClose={() => setIsScannerOpen(false)}
+        onScanSuccess={handleScanSuccess}
+      />
     </div>
   );
 }
