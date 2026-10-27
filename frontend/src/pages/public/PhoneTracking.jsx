@@ -54,11 +54,11 @@ function PhoneTracking() {
       <main className="flex-1 container mx-auto px-4 py-12 max-w-3xl">
         <div className="text-center mb-8">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 text-brand-orange text-xs font-bold uppercase tracking-wider mb-2">
-            📷 Cổng Tra Cứu Hồ Sơ Điện Tử Bằng Mã QR
+            📷 Cổng Tra Cứu Hồ Sơ QR – Mảng Sửa Chữa Máy Tính &amp; Phần Mềm
           </span>
           <h1 className="text-3xl font-bold text-brand-blue mb-3">Quét Mã QR &amp; Tra Cứu Hồ Sơ CSKH</h1>
           <p className="text-slate-500">
-            Quét mã QR trên biên nhận hoặc nhập Số điện thoại / Mã định danh để theo dõi tiến độ xử lý hồ sơ CSKH và tra cứu Sổ bảo hành điện tử (e-Warranty).
+            Quét mã QR trên biên nhận hoặc nhập Số điện thoại / Số Serial máy để theo dõi tiến độ kiểm tra, sửa chữa máy tính &amp; phần mềm và tra cứu Sổ bảo hành điện tử (e-Warranty).
           </p>
         </div>
 
@@ -140,15 +140,15 @@ function PhoneTracking() {
         {activeTab === 'PHONE' && (
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden border-t-8 border-brand-green p-6 sm:p-8 mb-8 animate-in fade-in duration-200">
             <div className="text-center mb-6">
-              <h2 className="text-xl font-bold text-slate-800 mb-1">Tra cứu theo Số điện thoại, IMEI hoặc Serial linh kiện</h2>
-              <p className="text-sm text-slate-500">Nhập SĐT khách hàng, Số Serial/IMEI máy hoặc Mã Serial linh kiện bảo hành (VD: <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-xs">0901234567</code>, <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-xs">C02X9082JG5H</code>, <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-xs">SN-SSD-982341</code>).</p>
+              <h2 className="text-xl font-bold text-slate-800 mb-1">Tra cứu theo Số điện thoại hoặc Số Serial / Service Tag thiết bị</h2>
+              <p className="text-sm text-slate-500">Nhập SĐT khách hàng hoặc Số Serial máy tính (VD: <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-xs">0901234567</code>, <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-xs">C02X9082JG5H</code>, <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-xs">DELL-XPS-8821</code>).</p>
             </div>
 
             <form onSubmit={handlePhoneSearch} className="flex flex-col sm:flex-row gap-4">
               <input
                 type="text"
                 required
-                placeholder="Nhập SĐT, Số IMEI/Serial máy hoặc Serial linh kiện..."
+                placeholder="Nhập SĐT khách hàng hoặc Số Serial / Service Tag máy..."
                 className="flex-1 px-4 py-3 rounded-lg border border-slate-300 focus:border-brand-green focus:ring focus:ring-green-200 outline-none text-lg"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}

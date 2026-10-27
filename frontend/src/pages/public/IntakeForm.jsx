@@ -72,11 +72,11 @@ function IntakeForm() {
         
         <div className="text-center mb-8 relative z-10">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-brand-blue text-xs font-bold uppercase tracking-wider mb-2">
-            📷 Cổng Tiếp Nhận Tự Phục Vụ Bằng Mã QR
+            📷 Cổng Tiếp Nhận QR – Mảng Sửa Chữa Máy Tính &amp; Phần Mềm
           </span>
-          <h1 className="text-2xl sm:text-3xl font-bold text-brand-blue mb-2">Tạo Phiếu Yêu Cầu Chăm Sóc Khách Hàng</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-brand-blue mb-2">Tạo Phiếu QR Chăm Sóc Khách Hàng</h1>
           <p className="text-slate-500 text-sm">
-            Điền thông tin yêu cầu để hệ thống cấp ngay <strong>Mã QR định danh</strong> theo dõi tiến độ xử lý, lưu minh chứng và kích hoạt bảo hành điện tử.
+            Điền thông tin thiết bị máy tính hoặc yêu cầu phần mềm để hệ thống cấp ngay <strong>Mã QR định danh</strong> theo dõi tiến độ kiểm tra, sửa chữa và kích hoạt bảo hành điện tử.
           </p>
         </div>
 
@@ -96,18 +96,18 @@ function IntakeForm() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">Sản phẩm / Dịch vụ cần hỗ trợ *</label>
-              <input required type="text" name="deviceName" onChange={handleChange} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/50" placeholder="VD: Sản phẩm / Thiết bị / Dịch vụ..." />
+              <label className="block text-sm font-semibold text-slate-700 mb-1">Thiết bị máy tính / Phần mềm cần hỗ trợ *</label>
+              <input required type="text" name="deviceName" onChange={handleChange} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/50" placeholder="VD: Laptop Dell XPS, MacBook M1, Windows 11..." />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">Mã định danh / Số Serial</label>
-              <input type="text" name="serialImei" onChange={handleChange} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/50" placeholder="(Không bắt buộc)" />
+              <label className="block text-sm font-semibold text-slate-700 mb-1">Số Serial / Service Tag máy</label>
+              <input type="text" name="serialImei" onChange={handleChange} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/50" placeholder="VD: C02X9082JG5H (Không bắt buộc)" />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">Nội dung yêu cầu hỗ trợ / Chăm sóc khách hàng *</label>
-            <textarea required name="issueDescription" onChange={handleChange} rows="3" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/50" placeholder="Mô tả chi tiết nội dung cần tư vấn, hỗ trợ, bảo hành hoặc phản hồi dịch vụ..."></textarea>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">Mô tả sự cố máy tính / Yêu cầu hỗ trợ phần mềm *</label>
+            <textarea required name="issueDescription" onChange={handleChange} rows="3" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/50" placeholder="Mô tả chi tiết tình trạng lỗi phần cứng máy tính hoặc sự cố phần mềm cần bộ phận CSKH & Kỹ thuật hỗ trợ..."></textarea>
           </div>
 
           {/* Khối Tải ảnh minh chứng hiện trạng lúc tiếp nhận */}
@@ -115,10 +115,10 @@ function IntakeForm() {
             <div className="flex items-center justify-between gap-2">
               <div>
                 <label className="block text-sm font-bold text-slate-800">
-                  📸 Ảnh đính kèm hiện trạng / Minh chứng (Tùy chọn)
+                  📸 Ảnh chụp ngoại quan máy / Màn hình lỗi phần mềm (Tùy chọn)
                 </label>
                 <p className="text-xs text-slate-500">
-                  Chụp hoặc tải lên hình ảnh sản phẩm/biên nhận để lưu hồ sơ đối chiếu minh bạch.
+                  Chụp hoặc tải lên hình ảnh ngoại quan máy tính lúc bàn giao hoặc màn hình báo lỗi để lưu hồ sơ CSKH minh bạch.
                 </p>
               </div>
               <label className="cursor-pointer shrink-0 rounded-lg bg-brand-blue px-3 py-2 text-xs font-bold text-white hover:bg-blue-800 transition">

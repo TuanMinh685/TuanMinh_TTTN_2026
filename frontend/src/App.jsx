@@ -206,7 +206,7 @@ function AppContent() {
           {/* Logo */}
           <Link to="/" className="flex flex-col items-center justify-center">
             <img src="/img/logo-HHH-26.png" alt="HungHau Logo" className="h-10 md:h-12 object-contain" />
-            <span className="text-[10px] text-brand-orange font-bold tracking-widest leading-none mt-1">QR CSKH & SUPPORT</span>
+            <span className="text-[10px] text-brand-orange font-bold tracking-widest leading-none mt-1">QR CSKH • MÁY TÍNH &amp; PHẦN MỀM</span>
           </Link>
 
           {/* Menu máy tính để bàn (Desktop) - Tập trung trọng tâm Web Quét Mã QR Chăm Sóc Khách Hàng */}
@@ -472,7 +472,7 @@ function AppContent() {
                 CÔNG TY CỔ PHẦN PHÁT TRIỂN HÙNG HẬU
               </h3>
               <p className="text-blue-200 text-sm leading-relaxed mb-4">
-                Hệ thống Web Quét Mã QR Chăm Sóc Khách Hàng – Nền tảng số hóa quy trình tiếp nhận yêu cầu, tra cứu tiến độ xử lý thời gian thực, sổ bảo hành điện tử (e-Warranty) và đánh giá chất lượng phục vụ thuộc Tập đoàn MYH Group (HungHau Holdings).
+                Hệ thống Web Quét Mã QR Chăm Sóc Khách Hàng Về Mảng Sửa Chữa Máy Tính Và Phần Mềm – Nền tảng số hóa quy trình tiếp nhận thiết bị &amp; yêu cầu phần mềm qua mã QR, theo dõi tiến độ kiểm tra - khắc phục sự cố thời gian thực, cấp sổ bảo hành điện tử (e-Warranty) và đánh giá chất lượng phục vụ thuộc Tập đoàn MYH Group (HungHau Holdings).
               </p>
             </div>
             

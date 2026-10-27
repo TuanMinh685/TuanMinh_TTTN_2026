@@ -72,16 +72,16 @@ function HomeLanding() {
             <div className="w-full lg:w-7/12 text-white">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 border border-white/25 text-amber-300 text-xs font-bold uppercase tracking-wider mb-5 backdrop-blur-xs">
                 <span>📷</span>
-                <span>Hệ Thống Web Quét Mã QR Chăm Sóc Khách Hàng • MYH Group</span>
+                <span>Web Quét Mã QR Chăm Sóc Khách Hàng • Sửa Chữa Máy Tính &amp; Phần Mềm</span>
               </div>
 
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
-                Chăm Sóc Khách Hàng Thông Minh – <br />
-                <span className="text-brand-orange">Chỉ Một Lần Quét Mã QR!</span>
+              <h1 className="text-3xl sm:text-5xl lg:text-5xl font-extrabold leading-tight mb-6">
+                Web Quét Mã QR Chăm Sóc Khách Hàng <br />
+                <span className="text-brand-orange">Mảng Sửa Chữa Máy Tính &amp; Phần Mềm</span>
               </h1>
 
               <p className="text-base sm:text-lg text-blue-100 mb-6 leading-relaxed max-w-2xl">
-                Nền tảng Web ứng dụng <strong>Mã QR định danh</strong> giúp khách hàng tự tạo phiếu yêu cầu tại quầy không cần chờ đợi, quét QR theo dõi tiến độ xử lý thời gian thực, lưu minh chứng hình ảnh hiện trạng, tra cứu <strong>Sổ bảo hành &amp; Hậu mãi điện tử (e-Warranty)</strong> và đánh giá chất lượng phục vụ 1–5 sao.
+                Nền tảng <strong>Chăm sóc khách hàng (CSKH) ứng dụng Mã QR định danh</strong> chuyên biệt cho lĩnh vực sửa chữa máy tính &amp; phần mềm: Quét QR tiếp nhận thiết bị tại quầy, lưu ảnh ngoại quan máy minh bạch, theo dõi tiến độ kiểm tra phần cứng &amp; xử lý phần mềm thời gian thực, kích hoạt <strong>Sổ bảo hành điện tử (e-Warranty)</strong> và đánh giá chất lượng phục vụ 1–5 sao.
               </p>
 
               {/* Thanh tra cứu & Mở Camera quét QR nhanh ngay trên trang chủ */}
@@ -248,26 +248,26 @@ function HomeLanding() {
         <div className="container mx-auto px-6">
           <div className="text-center mb-12">
             <span className="text-xs font-extrabold uppercase tracking-widest text-brand-orange">
-              GIẢI PHÁP CHUYỂN ĐỔI SỐ DỊCH VỤ KHÁCH HÀNG
+              GIẢI PHÁP CSKH SỐ HÓA MẢNG MÁY TÍNH &amp; PHẦN MỀM
             </span>
             <h2 className="text-2xl lg:text-4xl font-bold text-brand-blue mt-2">
-              4 Giá Trị Cốt Lõi Của Web Quét Mã QR Chăm Sóc Khách Hàng
+              4 Trụ Cột Chăm Sóc Khách Hàng Qua Mã QR (Máy Tính &amp; Phần Mềm)
             </h2>
             <p className="text-slate-500 mt-2 max-w-2xl mx-auto text-sm sm:text-base">
-              Mỗi khách hàng được cấp một mã QR định danh duy nhất xuyên suốt từ lúc tiếp nhận, theo dõi xử lý cho đến hết thời hạn bảo hành điện tử.
+              Mỗi thiết bị máy tính hoặc yêu cầu hỗ trợ phần mềm được cấp một mã QR định danh duy nhất xuyên suốt từ lúc tiếp nhận, kiểm tra, sửa chữa cho đến hết hạn bảo hành điện tử.
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-6 hover:shadow-lg hover:border-brand-blue/40 transition">
               <div className="w-12 h-12 rounded-xl bg-blue-100 text-brand-blue flex items-center justify-center text-2xl mb-4">
-                📸
+                💻
               </div>
               <h3 className="font-bold text-lg text-slate-800 mb-2">
-                1. Quét QR Tiếp Nhận &amp; Lưu Ảnh Hiện Trạng
+                1. Quét QR Tiếp Nhận Máy &amp; Ảnh Ngoại Quan
               </h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Khách tự quét QR tại quầy điền nội dung yêu cầu trong 30 giây và tải lên ảnh minh chứng hiện trạng lúc tiếp nhận, minh bạch tuyệt đối.
+                Khách tự quét QR tại quầy điền tình trạng lỗi máy tính / phần mềm trong 30 giây và tải lên ảnh chụp ngoại quan máy lúc gửi để đối chiếu minh bạch.
               </p>
             </div>
 
@@ -276,10 +276,10 @@ function HomeLanding() {
                 ⏱️
               </div>
               <h3 className="font-bold text-lg text-slate-800 mb-2">
-                2. Quét QR Theo Dõi Tiến Độ &amp; Phản Hồi
+                2. Quét QR Theo Dõi Tiến Độ Sửa Chữa &amp; Cài Đặt
               </h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Không cần gọi điện hỏi tổng đài. Khách quét mã QR trên biên nhận để xem nhật ký xử lý thời gian thực và xác nhận phương án hỗ trợ ngay trên điện thoại.
+                Không cần gọi điện chờ tổng đài. Khách quét mã QR trên biên nhận để xem trực tiếp nhật ký kiểm tra phần cứng &amp; khắc phục lỗi phần mềm thời gian thực.
               </p>
             </div>
 
@@ -291,7 +291,7 @@ function HomeLanding() {
                 3. Quét QR Sổ Bảo Hành Điện Tử (e-Warranty)
               </h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Thay thế hoàn toàn phiếu bảo hành giấy dễ thất lạc. Tự động đếm ngược hạn bảo hành, tra cứu định danh Serial và gửi yêu cầu hỗ trợ hậu mãi bằng QR.
+                Thay thế hoàn toàn phiếu bảo hành giấy sau khi sửa máy tính hoặc cài đặt phần mềm. Tự động đếm ngược hạn bảo hành 06 tháng và gửi yêu cầu hỗ trợ lại qua QR.
               </p>
             </div>
 
@@ -300,10 +300,10 @@ function HomeLanding() {
                 ⭐
               </div>
               <h3 className="font-bold text-lg text-slate-800 mb-2">
-                4. Quét QR Đánh Giá Dịch Vụ CSKH (1–5 Sao)
+                4. Quét QR Đánh Giá Chất Lượng CSKH (1–5 Sao)
               </h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Khách hàng chấm điểm mức độ hài lòng (1–5 sao) và gửi ý kiến đóng góp trực tiếp trên trang QR sau khi hoàn tất hồ sơ.
+                Sau khi nhận lại máy tính hoạt động ổn định, khách hàng quét mã QR chấm điểm 1–5 sao và gửi nhận xét về chất lượng hỗ trợ của Kỹ thuật viên &amp; CSKH.
               </p>
             </div>
           </div>

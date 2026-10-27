@@ -81,11 +81,11 @@ function BookingForm() {
           <div className="p-6 md:p-8">
             <div className="text-center mb-6">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 text-brand-orange text-xs font-bold uppercase tracking-wider mb-2">
-                📅 Đặt Lịch Hẹn Trước Qua Web QR
+                📅 Đặt Lịch Hẹn CSKH – Sửa Chữa Máy Tính &amp; Phần Mềm
               </span>
-              <h1 className="text-2xl font-bold text-brand-blue mb-1">Đặt Lịch Hẹn Tư Vấn & Chăm Sóc Khách Hàng</h1>
+              <h1 className="text-2xl font-bold text-brand-blue mb-1">Đặt Lịch Hẹn Kiểm Tra Máy Tính &amp; Hỗ Trợ Phần Mềm</h1>
               <p className="text-slate-500 text-xs md:text-sm">
-                Đặt lịch trước để được ưu tiên tiếp nhận và cấp phiếu QR nhanh chóng khi đến Trung tâm CSKH Tập đoàn MYH Group.
+                Đặt lịch trước để được ưu tiên tiếp nhận kiểm tra phần cứng, xử lý sự cố phần mềm và cấp Mã QR Hồ sơ CSKH ngay khi đến quầy.
               </p>
             </div>
 
@@ -113,14 +113,14 @@ function BookingForm() {
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Hình thức hẹn Chăm sóc khách hàng</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Hình thức hẹn Chăm sóc khách hàng (Máy tính &amp; Phần mềm)</label>
                 <select 
                   className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-brand-blue focus:ring focus:ring-blue-200 outline-none text-sm"
                   value={formData.loaiDichVu} onChange={e => setFormData({...formData, loaiDichVu: e.target.value})}
                 >
-                  <option value="TAI_CUA_HANG">Đến trực tiếp Trung tâm CSKH (615 Âu Cơ, Q. Tân Phú)</option>
-                  <option value="BAO_HANH_DINH_KY">Đặt lịch kiểm tra & bảo hành điện tử (e-Warranty)</option>
-                  <option value="TU_VAN_HO_TRO">Đặt lịch tư vấn & giải đáp yêu cầu khách hàng</option>
+                  <option value="TAI_CUA_HANG">Kiểm tra &amp; Sửa chữa phần cứng Máy tính / Laptop tại quầy (615 Âu Cơ)</option>
+                  <option value="TU_VAN_HO_TRO">Hỗ trợ cài đặt &amp; Khắc phục sự cố Phần mềm / Hệ điều hành</option>
+                  <option value="BAO_HANH_DINH_KY">Bảo hành định kỳ &amp; Chăm sóc sau sửa chữa (e-Warranty)</option>
                 </select>
               </div>
 
@@ -147,8 +147,8 @@ function BookingForm() {
                     value={formData.zaloId} onChange={e => setFormData({...formData, zaloId: e.target.value})} />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Sản phẩm / Dịch vụ cần hỗ trợ</label>
-                  <input type="text" placeholder="VD: Sản phẩm / Thiết bị / Dịch vụ cần CSKH..."
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Thiết bị máy tính / Phần mềm cần hỗ trợ</label>
+                  <input type="text" placeholder="VD: Laptop Dell XPS, MacBook Pro, Cài đặt Windows / Office..."
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-brand-blue focus:ring focus:ring-blue-200 outline-none text-sm"
                     value={formData.deviceName || ''} onChange={e => setFormData({...formData, deviceName: e.target.value})} />
                 </div>
@@ -170,8 +170,8 @@ function BookingForm() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Nội dung cần tư vấn / Yêu cầu hỗ trợ CSKH *</label>
-                <textarea required rows="3" placeholder="Mô tả chi tiết nội dung bạn cần bộ phận Chăm sóc khách hàng hỗ trợ..."
+                <label className="block text-xs font-bold text-slate-700 mb-1">Mô tả tình trạng máy tính / Sự cố phần mềm cần hỗ trợ *</label>
+                <textarea required rows="3" placeholder="Mô tả chi tiết lỗi phần cứng máy tính hoặc sự cố phần mềm bạn cần hỗ trợ..."
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-brand-blue focus:ring focus:ring-blue-200 outline-none text-sm"
                   value={formData.moTaLoi} onChange={e => setFormData({...formData, moTaLoi: e.target.value})}></textarea>
               </div>

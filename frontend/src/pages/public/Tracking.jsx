@@ -4,51 +4,51 @@ import QRCode from 'qrcode';
 import api from '../../services/api';
 
 const PROGRESS_STEPS = [
-  { id: 'TIEP_NHAN', label: 'Tiếp nhận yêu cầu', desc: 'Khởi tạo hồ sơ QR & lưu hiện trạng', icon: '📝' },
-  { id: 'CHAN_DOAN', label: 'Kiểm tra & Phân loại', desc: 'Chuyên viên tiếp nhận & đánh giá', icon: '🔍' },
-  { id: 'DANG_SUA', label: 'Đang xử lý hỗ trợ', desc: 'Thực hiện nghiệp vụ CSKH & hỗ trợ', icon: '🎧' },
-  { id: 'HOAN_TAT', label: 'Hoàn tất & Hậu mãi', desc: 'Bàn giao, e-Warranty & Đánh giá sao', icon: '✅' }
+  { id: 'TIEP_NHAN', label: 'Tiếp nhận máy & Yêu cầu', desc: 'Khởi tạo hồ sơ QR & lưu ảnh ngoại quan', icon: '💻' },
+  { id: 'CHAN_DOAN', label: 'Kiểm tra & Chẩn đoán lỗi', desc: 'KTV kiểm tra phần cứng / phần mềm', icon: '🔍' },
+  { id: 'DANG_SUA', label: 'Đang sửa chữa & Cài đặt', desc: 'Khắc phục sự cố máy tính & phần mềm', icon: '🔧' },
+  { id: 'HOAN_TAT', label: 'Hoàn tất & Bảo hành QR', desc: 'Bàn giao máy, e-Warranty & Đánh giá sao', icon: '✅' }
 ];
 
 const STATUS_META = {
   CHỜ_KHÁM: {
-    label: 'Đang chờ Chuyên viên CSKH tiếp nhận',
+    label: 'Đang chờ tiếp nhận kiểm tra máy tính / phần mềm',
     shortLabel: 'CHỜ TIẾP NHẬN',
     badgeClass: 'bg-amber-400/20 text-amber-200 border-amber-300/40',
     dotClass: 'bg-amber-400',
     lightBadge: 'bg-amber-50 text-amber-800 border-amber-200'
   },
   ĐANG_KIỂM_TRA: {
-    label: 'Chuyên viên đang kiểm tra hồ sơ yêu cầu',
+    label: 'Đang kiểm tra phần cứng & phần mềm thiết bị',
     shortLabel: 'ĐANG KIỂM TRA',
     badgeClass: 'bg-sky-400/20 text-sky-200 border-sky-300/40',
     dotClass: 'bg-sky-400',
     lightBadge: 'bg-sky-50 text-sky-800 border-sky-200'
   },
   ĐANG_CHUẨN_ĐOÁN: {
-    label: 'Đang kiểm tra & phân loại yêu cầu CSKH',
-    shortLabel: 'ĐANG PHÂN LOẠI',
+    label: 'Đang kiểm tra & chẩn đoán lỗi máy tính / phần mềm',
+    shortLabel: 'ĐANG CHẨN ĐOÁN',
     badgeClass: 'bg-sky-400/20 text-sky-200 border-sky-300/40',
     dotClass: 'bg-sky-400',
     lightBadge: 'bg-sky-50 text-sky-800 border-sky-200'
   },
   ĐANG_SỬA: {
-    label: 'Chuyên viên đang xử lý yêu cầu hỗ trợ CSKH',
-    shortLabel: 'ĐANG XỬ LÝ',
+    label: 'Đang sửa chữa máy tính & khắc phục sự cố phần mềm',
+    shortLabel: 'ĐANG SỬA CHỮA & CÀI ĐẶT',
     badgeClass: 'bg-indigo-400/25 text-indigo-100 border-indigo-300/40',
     dotClass: 'bg-indigo-300',
     lightBadge: 'bg-indigo-50 text-indigo-800 border-indigo-200'
   },
   ĐÃ_SỬA_XONG: {
-    label: 'Đã xử lý xong • Sẵn sàng bàn giao hồ sơ',
+    label: 'Đã khắc phục xong • Sẵn sàng bàn giao thiết bị',
     shortLabel: 'ĐÃ XỬ LÝ XONG',
     badgeClass: 'bg-emerald-400/25 text-emerald-200 border-emerald-300/40',
     dotClass: 'bg-emerald-400',
     lightBadge: 'bg-emerald-50 text-emerald-800 border-emerald-200'
   },
   ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN: {
-    label: 'Đã hoàn tất CSKH & Kích hoạt bảo hành điện tử',
-    shortLabel: 'HOÀN TẤT CSKH',
+    label: 'Đã bàn giao máy & Kích hoạt bảo hành điện tử (e-Warranty)',
+    shortLabel: 'HOÀN TẤT & BẢO HÀNH',
     badgeClass: 'bg-emerald-400/25 text-emerald-200 border-emerald-300/40',
     dotClass: 'bg-emerald-400',
     lightBadge: 'bg-emerald-50 text-emerald-800 border-emerald-200'

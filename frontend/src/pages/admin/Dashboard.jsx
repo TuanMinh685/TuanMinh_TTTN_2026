@@ -6,11 +6,11 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cel
 import QRCode from 'qrcode';
 
 const STATUS_LABELS = {
-  'CHỜ_KHÁM': 'Chờ tiếp nhận',
-  'ĐANG_CHUẨN_ĐOÁN': 'Đang kiểm tra & phân loại',
-  'ĐANG_SỬA': 'Đang xử lý hỗ trợ',
-  'ĐÃ_SỬA_XONG': 'Đã xử lý xong',
-  'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN': 'Hoàn tất CSKH & Bảo hành',
+  'CHỜ_KHÁM': 'Chờ tiếp nhận máy',
+  'ĐANG_CHUẨN_ĐOÁN': 'Đang kiểm tra & chẩn đoán',
+  'ĐANG_SỬA': 'Đang sửa chữa & xử lý PM',
+  'ĐÃ_SỬA_XONG': 'Đã khắc phục xong',
+  'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN': 'Hoàn tất & Bảo hành QR',
   'YÊU_CẦU_BẢO_HÀNH': 'Yêu cầu bảo hành'
 };
 
@@ -542,7 +542,7 @@ function Dashboard() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-900">Trung Tâm Điều Hành Chăm Sóc Khách Hàng Qua Mã QR</h2>
+          <h2 className="text-xl font-bold text-slate-900">Trung Tâm Điều Hành CSKH Qua Mã QR (Mảng Sửa Chữa Máy Tính &amp; Phần Mềm)</h2>
           <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
             <span className={`px-2 py-0.5 rounded-md font-semibold border ${currentRoleInfo.badgeClass}`}>
               {currentRoleInfo.badge}
@@ -610,9 +610,9 @@ function Dashboard() {
           <div className="mb-4 flex flex-col gap-3">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
               <div>
-                <h3 className="text-xl font-bold text-slate-800">Danh Sách Hồ Sơ Chăm Sóc Khách Hàng Qua Mã QR</h3>
+                <h3 className="text-xl font-bold text-slate-800">Danh Sách Hồ Sơ CSKH Qua Mã QR (Máy Tính &amp; Phần Mềm)</h3>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Quản lý tiếp nhận yêu cầu, phân loại xử lý, đính kèm ảnh hiện trạng và cấp Sổ bảo hành điện tử (e-Warranty) qua mã QR.
+                  Quản lý tiếp nhận thiết bị máy tính &amp; yêu cầu phần mềm, cập nhật nhật ký kiểm tra - sửa chữa, lưu ảnh ngoại quan và cấp Sổ bảo hành điện tử (e-Warranty).
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
@@ -718,8 +718,8 @@ function Dashboard() {
                 <tr className="border-b-2 border-slate-200 text-xs font-bold uppercase text-slate-500">
                   <th className="py-2.5 px-4">Mã Phiếu QR</th>
                   <th className="py-2.5 px-4">Khách Hàng &amp; SĐT</th>
-                  <th className="py-2.5 px-4">Sản Phẩm / Dịch Vụ &amp; Yêu Cầu CSKH</th>
-                  <th className="py-2.5 px-4">Trạng Thái Xử Lý</th>
+                  <th className="py-2.5 px-4">Thiết Bị Máy Tính / Phần Mềm &amp; Tình Trạng Lỗi</th>
+                  <th className="py-2.5 px-4">Trạng Thái Xử Lý CSKH</th>
                   <th className="py-2.5 px-4">Sổ Bảo Hành (e-Warranty)</th>
                   <th className="py-2.5 px-4 text-center">Thao Tác Điều Hành CSKH</th>
                 </tr>
@@ -789,25 +789,25 @@ function Dashboard() {
                           {canTechAction && (t.trang_thai === 'CHỜ_KHÁM' || t.trang_thai === 'YÊU_CẦU_BẢO_HÀNH') && (
                             <button
                               type="button"
-                              onClick={() => updateStatus(t.id, 'ĐANG_CHUẨN_ĐOÁN', 'Bộ phận CSKH đã tiếp nhận yêu cầu và đang kiểm tra, phân loại hỗ trợ.')}
+                              onClick={() => updateStatus(t.id, 'ĐANG_CHUẨN_ĐOÁN', 'Đã tiếp nhận thiết bị / yêu cầu phần mềm, Kỹ thuật viên đang kiểm tra và chẩn đoán lỗi.')}
                               className="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1 rounded text-xs font-bold shadow-xs"
                             >
-                              🔍 Tiếp nhận &amp; Phân loại
+                              🔍 Kiểm tra &amp; Chẩn đoán
                             </button>
                           )}
                           {canTechAction && (t.trang_thai === 'CHỜ_KHÁM' || t.trang_thai === 'ĐANG_CHUẨN_ĐOÁN') && (
                             <button
                               type="button"
-                              onClick={() => updateStatus(t.id, 'ĐANG_SỬA', 'Chuyên viên CSKH đang trực tiếp xử lý yêu cầu hỗ trợ của quý khách.')}
+                              onClick={() => updateStatus(t.id, 'ĐANG_SỬA', 'Kỹ thuật viên đang tiến hành sửa chữa máy tính và khắc phục sự cố phần mềm cho khách hàng.')}
                               className="bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1 rounded text-xs font-bold shadow-xs"
                             >
-                              🎧 Đang xử lý hỗ trợ
+                              🔧 Đang sửa chữa / Xử lý PM
                             </button>
                           )}
                           {(canTechAction || canReceptionAction) && t.trang_thai !== 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' && (
                             <button
                               type="button"
-                              onClick={() => updateStatus(t.id, 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN', 'Đã hoàn tất xử lý yêu cầu CSKH, bàn giao khách hàng và kích hoạt Sổ bảo hành điện tử (e-Warranty) 06 tháng.')}
+                              onClick={() => updateStatus(t.id, 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN', 'Đã hoàn tất sửa chữa máy tính / phần mềm, bàn giao khách hàng và kích hoạt Sổ bảo hành điện tử (e-Warranty) 06 tháng.')}
                               className="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded text-xs font-bold shadow-xs"
                             >
                               ✅ Hoàn tất &amp; Cấp e-Warranty
@@ -817,9 +817,9 @@ function Dashboard() {
                             type="button"
                             onClick={() => openPhotoModal(t)}
                             className="bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 px-2.5 py-1 rounded text-xs font-bold"
-                            title="Xem & Tải ảnh minh chứng hiện trạng"
+                            title="Xem & Tải ảnh ngoại quan thiết bị"
                           >
-                            📸 Ảnh hiện trạng
+                            📸 Ảnh ngoại quan
                           </button>
                           <button
                             type="button"
