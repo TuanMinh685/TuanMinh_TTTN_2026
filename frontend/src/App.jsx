@@ -6,9 +6,7 @@ const IntakeForm = lazy(() => import('./pages/public/IntakeForm'));
 const Tracking = lazy(() => import('./pages/public/Tracking'));
 const HomeLanding = lazy(() => import('./pages/public/HomeLanding'));
 const BookingForm = lazy(() => import('./pages/public/BookingForm'));
-const Pricing = lazy(() => import('./pages/public/Pricing'));
 const PhoneTracking = lazy(() => import('./pages/public/PhoneTracking'));
-const OnlineIntakeForm = lazy(() => import('./pages/public/OnlineIntakeForm'));
 const Payment = lazy(() => import('./pages/public/Payment'));
 const Login = lazy(() => import('./pages/admin/Login'));
 const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
@@ -228,28 +226,22 @@ function AppContent() {
           </Link>
 
           {/* Menu máy tính để bàn (Desktop) - Tập trung trọng tâm Web Quét Mã QR Chăm Sóc Khách Hàng */}
-          <nav className="hidden lg:flex items-center gap-1 text-xs font-bold text-slate-600 uppercase h-full">
-            <Link to="/" className="px-3 xl:px-3.5 h-full flex items-center hover:text-brand-orange transition-colors">
+          <nav className="hidden lg:flex items-center gap-2 text-xs font-bold text-slate-600 uppercase h-full">
+            <Link to="/" className="px-3.5 h-full flex items-center hover:text-brand-orange transition-colors">
               Trang chủ
             </Link>
             <Link
               to="/tra-cuu"
-              className="px-3.5 py-2 mx-1 rounded-full bg-orange-50 text-brand-orange border border-orange-200 hover:bg-brand-orange hover:text-white transition-all flex items-center gap-1.5 shadow-2xs"
+              className="px-4 py-2 mx-1 rounded-full bg-orange-50 text-brand-orange border border-orange-200 hover:bg-brand-orange hover:text-white transition-all flex items-center gap-1.5 shadow-2xs"
             >
               <span>📷</span>
               <span>Quét Mã QR & Tra Cứu</span>
             </Link>
-            <Link to="/intake" className="px-3 xl:px-3.5 h-full flex items-center hover:text-brand-orange transition-colors">
+            <Link to="/intake" className="px-3.5 h-full flex items-center hover:text-brand-orange transition-colors">
               📝 Tạo Phiếu QR
             </Link>
-            <Link to="/dat-lich" className="px-3 xl:px-3.5 h-full flex items-center hover:text-brand-orange transition-colors">
+            <Link to="/dat-lich" className="px-3.5 h-full flex items-center hover:text-brand-orange transition-colors">
               📅 Đặt Lịch Hẹn CSKH
-            </Link>
-            <Link to="/bang-gia" className="px-3 xl:px-3.5 h-full flex items-center hover:text-brand-orange transition-colors">
-              🎓 Bảng Giá & Ưu Đãi SV
-            </Link>
-            <Link to="/online-intake" className="px-3 xl:px-3.5 h-full flex items-center hover:text-brand-orange transition-colors">
-              💻 Hỗ Trợ Từ Xa
             </Link>
           </nav>
 
@@ -386,12 +378,6 @@ function AppContent() {
               <Link to="/dat-lich" className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-slate-100">
                 <span className="text-xl">📅</span> Đặt lịch hẹn CSKH
               </Link>
-              <Link to="/bang-gia" className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-slate-100">
-                <span className="text-xl">🎓</span> Bảng giá & Ưu đãi Sinh viên (-15%)
-              </Link>
-              <Link to="/online-intake" className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-slate-100">
-                <span className="text-xl">💻</span> Hỗ trợ kỹ thuật từ xa
-              </Link>
               
               <div className="pt-3 mt-2 border-t border-slate-200 flex flex-col gap-3">
                 <Link 
@@ -434,8 +420,6 @@ function AppContent() {
 
             {/* Public Pages */}
             <Route path="/dat-lich" element={<BookingForm />} />
-            <Route path="/bang-gia" element={<Pricing />} />
-            <Route path="/pricing" element={<Pricing />} />
             <Route path="/thanh-toan" element={<Payment />} />
             <Route path="/thanh-toan/:ticketCode" element={<Payment />} />
             <Route path="/payment" element={<Payment />} />
@@ -445,8 +429,6 @@ function AppContent() {
             <Route path="/intake" element={<IntakeForm />} />
             <Route path="/track/:ticketCode" element={<Tracking />} />
             <Route path="/tra-cuu/:ticketCode" element={<Tracking />} />
-            <Route path="/online-intake" element={<OnlineIntakeForm />} />
-            <Route path="/cap-cuu-online" element={<OnlineIntakeForm />} />
 
             {/* Admin Pages */}
             <Route path="/login" element={<Login />} />

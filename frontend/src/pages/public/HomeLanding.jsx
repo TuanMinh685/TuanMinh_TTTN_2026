@@ -131,18 +131,18 @@ function HomeLanding() {
                   <span>Quét QR Tạo Phiếu Tại Quầy</span>
                 </Link>
                 <Link
-                  to="/dat-lich"
+                  to="/tra-cuu"
                   className="px-6 py-3.5 bg-white text-brand-blue font-bold rounded-full hover:bg-slate-100 transition-all shadow-lg text-sm flex items-center gap-2"
+                >
+                  <span>📷</span>
+                  <span>Quét Mã QR & Tra Cứu</span>
+                </Link>
+                <Link
+                  to="/dat-lich"
+                  className="px-6 py-3.5 bg-transparent border-2 border-white/80 text-white font-bold rounded-full hover:bg-white hover:text-brand-blue transition-all text-sm flex items-center gap-2"
                 >
                   <span>📅</span>
                   <span>Đặt Lịch Hẹn CSKH</span>
-                </Link>
-                <Link
-                  to="/bang-gia"
-                  className="px-6 py-3.5 bg-transparent border-2 border-white/80 text-white font-bold rounded-full hover:bg-white hover:text-brand-blue transition-all text-sm flex items-center gap-2"
-                >
-                  <span>🎓</span>
-                  <span>Bảng Giá & Ưu Đãi SV (-15%)</span>
                 </Link>
               </div>
             </div>
@@ -297,13 +297,13 @@ function HomeLanding() {
 
             <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-6 hover:shadow-lg hover:border-brand-blue/40 transition">
               <div className="w-12 h-12 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center text-2xl mb-4">
-                🎓
+                ⭐
               </div>
               <h3 className="font-bold text-lg text-slate-800 mb-2">
-                4. Đánh Giá 5 Sao & Ưu Đãi Sinh Viên (-15%)
+                4. Quét QR Đánh Giá Dịch Vụ CSKH (1–5 Sao)
               </h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Khách hàng chấm điểm mức độ hài lòng (1–5 sao) sau khi nhận máy, tích điểm thành viên và hưởng trợ giá -15% dành cho Sinh viên toàn quốc.
+                Khách hàng chấm điểm mức độ hài lòng (1–5 sao) và gửi ý kiến phản hồi trực tiếp trên trang QR sau khi nhận lại thiết bị.
               </p>
             </div>
           </div>
@@ -315,7 +315,7 @@ function HomeLanding() {
         <div className="container mx-auto px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl lg:text-4xl font-bold text-brand-blue">Quy Trình Quét Mã QR Chăm Sóc Khách Hàng</h2>
-            <p className="text-slate-500 mt-3 max-w-2xl mx-auto">Chọn hình thức hỗ trợ phù hợp với bạn để xem hướng dẫn 3 bước đơn giản.</p>
+            <p className="text-slate-500 mt-3 max-w-2xl mx-auto">Chọn hình thức tiếp nhận phù hợp với bạn để xem hướng dẫn 3 bước đơn giản.</p>
           </div>
 
           {/* Các nút chuyển Tab */}
@@ -332,7 +332,7 @@ function HomeLanding() {
               onClick={() => setActiveGuideTab('TU_XA')}
               className={`px-8 py-3 rounded-full font-bold transition-all shadow-md cursor-pointer ${activeGuideTab === 'TU_XA' ? 'bg-brand-orange text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
             >
-              🏠 Luồng 2: Đặt lịch hẹn & Hỗ trợ từ xa
+              📅 Luồng 2: Đặt lịch hẹn CSKH trước qua Web
             </button>
           </div>
 
@@ -375,25 +375,25 @@ function HomeLanding() {
             </div>
           )}
 
-          {/* Nội dung Tab: TỪ XA */}
+          {/* Nội dung Tab: ĐẶT LỊCH HẸN TRƯỚC */}
           {activeGuideTab === 'TU_XA' && (
             <div className="animate-fade-in-up">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
                 <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-1 bg-slate-200 z-0"></div>
                 <div className="relative z-10 flex flex-col items-center text-center">
                   <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-brand-orange text-4xl mb-6">📅</div>
-                  <h3 className="text-xl font-bold text-brand-blue mb-3">1. Đặt lịch hoặc Gửi yêu cầu Online</h3>
-                  <p className="text-slate-600">Chọn khung giờ hẹn trước hoặc gửi ID UltraViewer để yêu cầu kỹ thuật viên hỗ trợ phần mềm từ xa.</p>
+                  <h3 className="text-xl font-bold text-brand-blue mb-3">1. Đặt lịch hẹn trực tuyến</h3>
+                  <p className="text-slate-600">Chọn khung giờ hẹn trước và mô tả tình trạng thiết bị qua biểu mẫu đặt lịch CSKH trực tuyến.</p>
                 </div>
                 <div className="relative z-10 flex flex-col items-center text-center">
                   <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-brand-blue text-4xl mb-6">📞</div>
-                  <h3 className="text-xl font-bold text-brand-blue mb-3">2. Nhân viên CSKH xác nhận</h3>
-                  <p className="text-slate-600">Bộ phận Lễ tân & CSKH tiếp nhận lịch hẹn trên hệ thống, xác nhận thông tin ưu đãi sinh viên và cấp mã phiếu QR.</p>
+                  <h3 className="text-xl font-bold text-brand-blue mb-3">2. Nhân viên CSKH xác nhận & Cấp QR</h3>
+                  <p className="text-slate-600">Bộ phận Lễ tân & CSKH tiếp nhận lịch hẹn trên hệ thống, xác nhận khung giờ và khởi tạo sẵn mã phiếu QR cho bạn.</p>
                 </div>
                 <div className="relative z-10 flex flex-col items-center text-center">
                   <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-brand-green text-4xl mb-6">✅</div>
                   <h3 className="text-xl font-bold text-brand-blue mb-3">3. Phục vụ ưu tiên & Chăm sóc hậu mãi</h3>
-                  <p className="text-slate-600">Khách hàng được phục vụ đúng giờ hẹn không cần xếp hàng và theo dõi toàn bộ lịch sử bảo hành qua mã QR.</p>
+                  <p className="text-slate-600">Khách hàng đến quầy được phục vụ đúng giờ hẹn không cần xếp hàng và theo dõi toàn bộ tiến độ, bảo hành qua mã QR.</p>
                 </div>
               </div>
               <div className="text-center mt-12">
