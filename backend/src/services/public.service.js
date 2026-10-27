@@ -1,11 +1,10 @@
 const { pool } = require('../config/db.config');
 
 const trackTicket = async (ticketCode) => {
-    // Lấy thông tin cơ bản
     const result = await pool.query(`
         SELECT 
-            p.id, p.ma_tra_cuu, p.trang_thai, p.loai_dich_vu, p.tong_tien, p.han_bao_hanh, p.phuong_thuc_thanh_toan, p.ngay_thanh_toan, p.ngay_tao, p.ngay_cap_nhat,
-            k.ho_ten, k.so_dien_thoai, k.la_sinh_vien, k.truong_hoc, k.ma_sinh_vien,
+            p.id, p.ma_tra_cuu, p.trang_thai, p.loai_dich_vu, p.han_bao_hanh, p.ngay_tao, p.ngay_cap_nhat,
+            k.ho_ten, k.so_dien_thoai,
             t.ten_may, t.so_imei_serial, t.tinh_trang_may,
             EXISTS (
                 SELECT 1
@@ -42,7 +41,7 @@ const trackTicket = async (ticketCode) => {
     ticket.ho_ten = maskName(ticket.ho_ten);
     ticket.so_dien_thoai = maskPhone(ticket.so_dien_thoai);
 
-    // Lấy ảnh ngoại quan
+    // Lấy ảnh minh chứng hiện trạng
     const photosRes = await pool.query(`
         SELECT id, duong_dan_anh, loai_anh, ghi_chu, ngay_tao
         FROM hinh_anh_phieu
@@ -51,17 +50,7 @@ const trackTicket = async (ticketCode) => {
     `, [ticket.id]);
     ticket.hinh_anh_ngoai_quan = photosRes.rows || [];
 
-    // Lấy danh sách linh kiện đã thay kèm số Serial
-    const partsRes = await pool.query(`
-        SELECT p.id, p.so_luong, p.don_gia, p.so_serial, l.ten_linh_kien, l.hinh_anh
-        FROM phieu_linh_kien p
-        JOIN linh_kien l ON p.linh_kien_id = l.id
-        WHERE p.phieu_sua_chua_id = $1
-        ORDER BY p.id ASC
-    `, [ticket.id]);
-    ticket.linh_kien = partsRes.rows || [];
-
-    // 1. Sổ bảo hành điện tử (e-Warranty)
+    // Sổ bảo hành điện tử (e-Warranty)
     if (ticket.han_bao_hanh) {
         const hanDate = new Date(ticket.han_bao_hanh);
         const now = new Date();
@@ -80,26 +69,7 @@ const trackTicket = async (ticketCode) => {
         ticket.bao_hanh = null;
     }
 
-    // 2. Chính sách ưu đãi Sinh viên toàn quốc (Giảm 15%)
-    if (ticket.la_sinh_vien) {
-        const discount = Math.round(Number(ticket.tong_tien || 0) * 0.15);
-        ticket.uu_dai_sinh_vien = {
-            la_sinh_vien: true,
-            truong_hoc: ticket.truong_hoc || 'Học sinh / Sinh viên',
-            ma_sinh_vien: ticket.ma_sinh_vien || '',
-            ty_le_giam: '15%',
-            so_tien_giam: discount,
-            tien_sau_giam: Math.max(0, Number(ticket.tong_tien || 0) - discount)
-        };
-    } else {
-        ticket.uu_dai_sinh_vien = {
-            la_sinh_vien: false,
-            so_tien_giam: 0,
-            tien_sau_giam: Number(ticket.tong_tien || 0)
-        };
-    }
-
-    // Lấy lịch sử nhật ký xử lý
+    // Lấy lịch sử nhật ký xử lý CSKH
     const historyResult = await pool.query(`
         SELECT trang_thai_moi, ghi_chu, ngay_tao
         FROM nhat_ky_sua_chua
@@ -117,14 +87,14 @@ const trackTicket = async (ticketCode) => {
 
 const claimWarranty = async (ticketCode, issueDescription) => {
     const res = await pool.query('SELECT id, thiet_bi_id, han_bao_hanh, trang_thai FROM phieu_sua_chua WHERE ma_tra_cuu = $1', [ticketCode]);
-    if (res.rows.length === 0) throw new Error('Không tìm thấy phiếu!');
+    if (res.rows.length === 0) throw new Error('Không tìm thấy hồ sơ phiếu CSKH!');
     const ticket = res.rows[0];
 
     if (ticket.han_bao_hanh && new Date(ticket.han_bao_hanh) < new Date()) {
-        throw new Error('Thiết bị này đã hết thời hạn bảo hành tiêu chuẩn!');
+        throw new Error('Hồ sơ này đã hết thời hạn bảo hành tiêu chuẩn!');
     }
 
-    const note = `Khách hàng yêu cầu bảo hành lại: ${issueDescription}`;
+    const note = `Khách hàng gửi yêu cầu hỗ trợ bảo hành: ${issueDescription}`;
     await pool.query(`
         UPDATE phieu_sua_chua
         SET trang_thai = $1, ngay_cap_nhat = CURRENT_TIMESTAMP
@@ -139,64 +109,6 @@ const claimWarranty = async (ticketCode, issueDescription) => {
     return { ticketCode, status: 'YÊU_CẦU_BẢO_HÀNH' };
 };
 
-const approveQuote = async (ticketCode, isApproved) => {
-    const client = await pool.connect();
-    try {
-        await client.query('BEGIN');
-        
-        const result = await client.query('SELECT id, trang_thai FROM phieu_sua_chua WHERE ma_tra_cuu = $1', [ticketCode]);
-        if (result.rows.length === 0) throw new Error('Không tìm thấy mã tra cứu');
-        
-        const ticket = result.rows[0];
-        if (ticket.trang_thai !== 'CHỜ_KHÁCH_CHỐT_GIÁ') {
-            throw new Error('Phiếu không ở trạng thái chờ báo giá!');
-        }
-
-        const newStatus = isApproved ? 'ĐANG_SỬA' : 'HỦY';
-        let note = isApproved ? 'Khách hàng ĐÃ ĐỒNG Ý báo giá.' : 'Khách hàng TỪ CHỐI báo giá.';
-
-        if (!isApproved) {
-            const attachedParts = await client.query(
-                'SELECT id, linh_kien_id, so_luong FROM phieu_linh_kien WHERE phieu_sua_chua_id = $1',
-                [ticket.id]
-            );
-            if (attachedParts.rows.length > 0) {
-                for (const item of attachedParts.rows) {
-                    await client.query(
-                        'UPDATE linh_kien SET so_luong = so_luong + $1 WHERE id = $2',
-                        [item.so_luong, item.linh_kien_id]
-                    );
-                }
-                await client.query('DELETE FROM phieu_linh_kien WHERE phieu_sua_chua_id = $1', [ticket.id]);
-                await client.query(
-                    'UPDATE phieu_sua_chua SET tong_tien = 0 WHERE id = $1',
-                    [ticket.id]
-                );
-                note = 'Khách hàng TỪ CHỐI báo giá. Hệ thống đã tự động hoàn trả linh kiện về kho.';
-            }
-        }
-
-        await client.query(`
-            UPDATE phieu_sua_chua 
-            SET trang_thai = $1, ngay_cap_nhat = CURRENT_TIMESTAMP
-            WHERE id = $2
-        `, [newStatus, ticket.id]);
-
-        await client.query(`
-            INSERT INTO nhat_ky_sua_chua (phieu_sua_chua_id, trang_thai_cu, trang_thai_moi, ghi_chu)
-            VALUES ($1, $2, $3, $4)
-        `, [ticket.id, ticket.trang_thai, newStatus, note]);
-
-        await client.query('COMMIT');
-        return { newStatus };
-    } catch (err) {
-        await client.query('ROLLBACK');
-        throw err;
-    } finally {
-        client.release();
-    }
-};
-
 const trackByPhone = async (phone) => {
     const query = `
         SELECT p.ma_tra_cuu, p.trang_thai, p.loai_dich_vu, p.han_bao_hanh, t.ten_may, t.so_imei_serial, t.tinh_trang_may, p.ngay_cap_nhat
@@ -206,10 +118,6 @@ const trackByPhone = async (phone) => {
         WHERE k.so_dien_thoai = $1
            OR UPPER(COALESCE(t.so_imei_serial, '')) = UPPER($1)
            OR UPPER(p.ma_tra_cuu) = UPPER($1)
-           OR EXISTS (
-               SELECT 1 FROM phieu_linh_kien pl
-               WHERE pl.phieu_sua_chua_id = p.id AND UPPER(COALESCE(pl.so_serial, '')) = UPPER($1)
-           )
         ORDER BY p.ngay_tao DESC
     `;
     const { rows } = await pool.query(query, [phone]);
@@ -223,10 +131,12 @@ const submitReview = async (ticketCode, so_sao, nhan_xet) => {
     const { rows } = await pool.query('SELECT id, trang_thai FROM phieu_sua_chua WHERE ma_tra_cuu = $1', [ticketCode]);
     if (rows.length === 0) throw new Error('Không tìm thấy phiếu!');
     const ticketId = rows[0].id;
-    if (rows[0].trang_thai !== 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN') throw new Error('Máy chưa giao khách, chưa thể đánh giá!');
+    if (rows[0].trang_thai !== 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' && rows[0].trang_thai !== 'ĐÃ_SỬA_XONG') {
+        throw new Error('Hồ sơ chưa hoàn tất xử lý, chưa thể đánh giá!');
+    }
     
     const reviewCheck = await pool.query('SELECT id FROM danh_gia WHERE phieu_sua_chua_id = $1', [ticketId]);
-    if (reviewCheck.rows.length > 0) throw new Error('Bạn đã đánh giá phiếu này rồi!');
+    if (reviewCheck.rows.length > 0) throw new Error('Bạn đã đánh giá hồ sơ này rồi!');
 
     const result = await pool.query(
         'INSERT INTO danh_gia (phieu_sua_chua_id, so_sao, nhan_xet) VALUES ($1, $2, $3) RETURNING *',
@@ -254,6 +164,5 @@ module.exports = {
     getTopReviews,
     trackByPhone,
     trackTicket,
-    approveQuote,
     claimWarranty
 };

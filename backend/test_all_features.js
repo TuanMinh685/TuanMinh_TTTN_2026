@@ -273,34 +273,23 @@ async function runTests() {
         }
     });
 
-    // 14. Kiểm tra Quản lý kho linh kiện (/tickets/parts)
-    await testCase('Kỹ thuật viên / Quản lý kiểm tra tồn kho linh kiện (/tickets/parts)', async () => {
-        const res = await fetch(`${baseUrl}/tickets/parts`, {
-            headers: { Authorization: `Bearer ${technicianToken}` }
-        });
-        const data = await res.json();
-        if (!data.success || !Array.isArray(data.data) || data.data.length === 0) {
-            throw new Error('Lỗi lấy tồn kho');
-        }
-    });
-
-    // 15. Kiểm tra Thống kê & Báo cáo doanh thu Admin (/admin/dashboard-stats)
-    await testCase('Admin tải biểu đồ doanh thu và phân bố trạng thái (/admin/dashboard-stats)', async () => {
+    // 14. Kiểm tra Thống kê & Chỉ số hài lòng CSKH Admin (/admin/dashboard-stats)
+    await testCase('Admin tải thống kê tiến độ xử lý & chỉ số hài lòng CSAT (/admin/dashboard-stats)', async () => {
         const res = await fetch(`${baseUrl}/admin/dashboard-stats?period=week`, {
             headers: { Authorization: `Bearer ${adminToken}` }
         });
         const data = await res.json();
-        if (!data.success || !data.data?.revenueData) throw new Error('Lỗi tải thống kê doanh thu');
+        if (!data.success || !Array.isArray(data.data?.statusData)) throw new Error('Lỗi tải thống kê CSKH');
     });
 
-    // 16. Kiểm tra Danh sách nhân viên 6 cấp bậc (/admin/employees)
-    await testCase('Admin xem danh sách nhân sự 6 cấp bậc (/admin/employees)', async () => {
+    // 15. Kiểm tra Danh sách nhân sự CSKH 4 vai trò (/admin/employees)
+    await testCase('Admin xem danh sách nhân sự CSKH 4 vai trò (/admin/employees)', async () => {
         const res = await fetch(`${baseUrl}/admin/employees`, {
             headers: { Authorization: `Bearer ${adminToken}` }
         });
         const data = await res.json();
-        if (!data.success || !Array.isArray(data.data) || data.data.length < 7) {
-            throw new Error('Lỗi tải nhân sự trên Supabase');
+        if (!data.success || !Array.isArray(data.data) || data.data.length < 4) {
+            throw new Error('Lỗi tải nhân sự CSKH trên Supabase');
         }
     });
 

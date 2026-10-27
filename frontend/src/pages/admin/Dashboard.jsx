@@ -8,12 +8,13 @@ import QRCode from 'qrcode';
 const STATUS_LABELS = {
   'CHỜ_KHÁM': 'Chờ tiếp nhận',
   'ĐANG_CHUẨN_ĐOÁN': 'Đang kiểm tra & phân loại',
-  'CHỜ_KHÁCH_CHỐT_GIÁ': 'Chờ khách xác nhận',
   'ĐANG_SỬA': 'Đang xử lý hỗ trợ',
   'ĐÃ_SỬA_XONG': 'Đã xử lý xong',
   'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN': 'Hoàn tất CSKH & Bảo hành',
   'YÊU_CẦU_BẢO_HÀNH': 'Yêu cầu bảo hành'
 };
+
+const CHART_COLORS = ['#1E3A8A', '#2563EB', '#F59E0B', '#10B981', '#EF4444', '#6366F1'];
 
 const isNotificationCorrupted = (item) => {
   if (!item) return false;
@@ -22,14 +23,14 @@ const isNotificationCorrupted = (item) => {
 };
 
 const ROLE_META = {
-  GIAM_DOC: {
+  ADMIN: {
     level: 100,
     title: 'Quản Trị Hệ Thống CSKH',
     badge: '🛡️ Quản Trị Hệ Thống CSKH',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     permissionsText: 'Toàn quyền quản trị hệ thống Web Quét Mã QR Chăm Sóc Khách Hàng và phân quyền nhân sự.'
   },
-  ADMIN: {
+  GIAM_DOC: {
     level: 100,
     title: 'Quản Trị Hệ Thống CSKH',
     badge: '🛡️ Quản Trị Hệ Thống CSKH',
@@ -40,35 +41,21 @@ const ROLE_META = {
     level: 80,
     title: 'Trưởng Bộ Phận CSKH',
     badge: '🏬 Trưởng Bộ Phận CSKH',
-    badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
+    badgeClass: 'bg-blue-50 text-brand-blue border-blue-200',
     permissionsText: 'Điều hành toàn bộ hoạt động Chăm sóc khách hàng, giám sát tiến độ xử lý hồ sơ QR và quản lý nhân sự CSKH.'
-  },
-  KE_TOAN: {
-    level: 60,
-    title: 'Chuyên Viên Thống Kê CSKH',
-    badge: '📊 Thống Kê CSKH',
-    badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
-    permissionsText: 'Theo dõi thống kê hồ sơ CSKH và xuất báo cáo Excel.'
-  },
-  THU_KHO: {
-    level: 50,
-    title: 'Quản Lý Bảo Hành (e-Warranty)',
-    badge: '🛡️ Quản Lý Bảo Hành',
-    badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
-    permissionsText: 'Quản lý danh mục hạng mục bảo hành điện tử (e-Warranty) và mã định danh Serial.'
   },
   KY_THUAT_VIEN: {
     level: 40,
     title: 'Chuyên Viên Hỗ Trợ CSKH',
     badge: '🎧 Chuyên Viên Hỗ Trợ CSKH',
-    badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
-    permissionsText: 'Tiếp nhận phân loại yêu cầu, cập nhật nhật ký xử lý, gắn hạng mục bảo hành Serial và hoàn tất hỗ trợ.'
+    badgeClass: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+    permissionsText: 'Tiếp nhận phân loại yêu cầu, cập nhật nhật ký xử lý tiến độ thời gian thực và kích hoạt bảo hành điện tử (e-Warranty).'
   },
   LE_TAN: {
     level: 30,
     title: 'Lễ Tân & Tiếp Nhận QR',
     badge: '👩‍💼 Lễ Tân & Tiếp Nhận QR',
-    badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
+    badgeClass: 'bg-amber-50 text-amber-800 border-amber-200',
     permissionsText: 'Khởi tạo hồ sơ QR tại quầy, lưu biên bản ảnh hiện trạng, tiếp nhận lịch hẹn và in phiếu nhiệt QR 80mm.'
   }
 };
@@ -83,50 +70,38 @@ function Dashboard() {
   const isManagerOrAbove = isExecutive || role === 'QUAN_LY';
   const canReceptionAction = isManagerOrAbove || role === 'LE_TAN';
   const canTechAction = isManagerOrAbove || role === 'KY_THUAT_VIEN';
-  const canCashierAction = isManagerOrAbove || role === 'LE_TAN' || role === 'KE_TOAN';
-  const canViewInventory = isManagerOrAbove || role === 'THU_KHO' || role === 'KY_THUAT_VIEN';
-  const canManageInventory = isManagerOrAbove || role === 'THU_KHO';
-  const canViewStats = isManagerOrAbove || role === 'KE_TOAN';
+  const canViewStats = isManagerOrAbove;
   const canManageEmployees = isManagerOrAbove;
   const currentRoleLevel = ROLE_META[role]?.level || 30;
+  const currentRoleInfo = ROLE_META[role] || ROLE_META.LE_TAN;
 
   const [tickets, setTickets] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [activeTab, setActiveTab] = useState('TICKETS');
-  const [cashierTicket, setCashierTicket] = useState(null);
-  const [cashierMethod, setCashierMethod] = useState('TIEN_MAT');
-  const [cashierReceived, setCashierReceived] = useState('');
-  const [cashierNote, setCashierNote] = useState('');
-  const [cashierProcessing, setCashierProcessing] = useState(false);
-  const [cashierSearch, setCashierSearch] = useState('');
-  const [cashierFilter, setCashierFilter] = useState('PENDING');
-  const [stats, setStats] = useState({ revenueData: [], statusData: [], totalRevenue: 0, completedTickets: 0, totalPartsRevenue: 0 });
+  const [stats, setStats] = useState({
+    statusData: [],
+    totalTickets: 0,
+    completedTickets: 0,
+    avgRating: 5.0,
+    totalReviews: 0
+  });
   const [ticketSearch, setTicketSearch] = useState('');
-  const [parts, setParts] = useState([]);
-  const [showPartModal, setShowPartModal] = useState(false);
-  const [selectedTicketId, setSelectedTicketId] = useState(null);
-  const [selectedPartId, setSelectedPartId] = useState('');
-  const [partQuantity, setPartQuantity] = useState(1);
-  const [partSerial, setPartSerial] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [statusNote, setStatusNote] = useState('');
+  const [reportPeriod, setReportPeriod] = useState('week');
+
+  // Photo evidence modal state
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [photoTicket, setPhotoTicket] = useState(null);
   const [ticketPhotos, setTicketPhotos] = useState([]);
   const [newPhotoNote, setNewPhotoNote] = useState('');
   const [savingPhoto, setSavingPhoto] = useState(false);
-  const [partForm, setPartForm] = useState({ ten_linh_kien: '', gia_ban: '', so_luong: '0', hinh_anh: '' });
-  const [editingPartId, setEditingPartId] = useState(null);
-  const [partFormError, setPartFormError] = useState('');
-  const [savingPart, setSavingPart] = useState(false);
-  const [partSearch, setPartSearch] = useState('');
-  const [stockFilter, setStockFilter] = useState('ALL');
-  const [lowStockThreshold, setLowStockThreshold] = useState('5');
-  const [showInventoryForm, setShowInventoryForm] = useState(false);
+
+  // 80mm QR thermal receipt modal state
   const [receiptTicket, setReceiptTicket] = useState(null);
   const [receiptQr, setReceiptQr] = useState('');
-  const [receiptParts, setReceiptParts] = useState([]);
-  const [receiptPartsLoading, setReceiptPartsLoading] = useState(false);
-  const [receiptPartsError, setReceiptPartsError] = useState('');
-  const [reportPeriod, setReportPeriod] = useState('week');
+
+  // Notifications state
   const [notifications, setNotifications] = useState(() => {
     try {
       const saved = localStorage.getItem('ticketNotifications');
@@ -134,25 +109,16 @@ function Dashboard() {
       const parsed = JSON.parse(saved);
       if (!Array.isArray(parsed)) return [];
       const clean = parsed.filter(item => !isNotificationCorrupted(item));
-      if (clean.length !== parsed.length) {
-        if (clean.length > 0) {
-          localStorage.setItem('ticketNotifications', JSON.stringify(clean.slice(0, 50)));
-        } else {
-          localStorage.removeItem('ticketNotifications');
-        }
-      }
       return clean.slice(0, 50).map(item => ({ ...item, read: item.read ?? true }));
-    } catch (error) {
-      console.error('Không đọc được thông báo đã lưu:', error);
+    } catch {
       localStorage.removeItem('ticketNotifications');
       return [];
     }
   });
   const [notificationFilter, setNotificationFilter] = useState('ALL');
   const [latestNotice, setLatestNotice] = useState(null);
-  const [statusFilter, setStatusFilter] = useState('ALL');
-  const [statusNote, setStatusNote] = useState('');
-  const [modalTicketParts, setModalTicketParts] = useState([]);
+
+  // Employee management state
   const [employees, setEmployees] = useState([]);
   const [showEmployeeModal, setShowEmployeeModal] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState(null);
@@ -165,6 +131,8 @@ function Dashboard() {
     vai_tro: 'LE_TAN',
     trang_thai: 'HOAT_DONG'
   });
+
+  // POS Walk-in QR Intake modal state
   const [showPosModal, setShowPosModal] = useState(false);
   const [savingPos, setSavingPos] = useState(false);
   const [posForm, setPosForm] = useState({
@@ -173,90 +141,215 @@ function Dashboard() {
     deviceName: '',
     serialImei: '',
     issueDescription: '',
-    isStudent: false,
-    schoolName: '',
-    studentId: '',
     photoBase64: '',
     photoNote: ''
   });
+
   const knownStatuses = useRef(null);
   const knownBookingStatuses = useRef(null);
-  const knownStock = useRef(null);
-
   const toastTimeoutRef = useRef(null);
+
   const showToast = (message) => {
     if (!message) return;
     if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
-    setLatestNotice({
-      title: message,
-      description: message
-    });
+    setLatestNotice({ title: message, description: message });
     toastTimeoutRef.current = setTimeout(() => {
       setLatestNotice(null);
     }, 2500);
   };
 
-  
-  const fetchStats = useCallback(async () => {
-    const res = await api.get(`/admin/dashboard-stats?period=${reportPeriod}`);
-    return res.data.data;
-  }, [reportPeriod]);
-
-  const fetchParts = useCallback(async () => {
-    const res = await api.get('/tickets/parts');
+  const fetchTickets = useCallback(async () => {
+    const res = await api.get('/tickets');
     return res.data.data || [];
   }, []);
+
+  const fetchBookings = useCallback(async () => {
+    const res = await api.get('/tickets/booking');
+    return res.data.data || [];
+  }, []);
+
+  const fetchStats = useCallback(async () => {
+    const res = await api.get(`/admin/dashboard-stats?period=${reportPeriod}`);
+    return res.data.data || {};
+  }, [reportPeriod]);
 
   const fetchEmployees = useCallback(async () => {
     const res = await api.get('/admin/employees');
     return res.data.data || [];
   }, []);
 
-  const openPartModal = async (ticketId) => {
-    setSelectedTicketId(ticketId);
-    setShowPartModal(true);
-    setPartSerial('');
+  useEffect(() => {
+    let active = true;
+    const load = (request, setData, description) => {
+      request()
+        .then(data => {
+          if (active) setData(data);
+        })
+        .catch(error => console.error(`Không tải được ${description}:`, error));
+    };
+
+    load(fetchTickets, setTickets, 'danh sách hồ sơ QR');
+    if (canReceptionAction) {
+      load(fetchBookings, setBookings, 'danh sách lịch hẹn CSKH');
+    }
+    if (canViewStats) {
+      load(fetchStats, setStats, 'thống kê CSKH');
+    }
+    if (canManageEmployees) {
+      load(fetchEmployees, setEmployees, 'danh sách nhân sự CSKH');
+    }
+
+    return () => {
+      active = false;
+    };
+  }, [canReceptionAction, canViewStats, canManageEmployees, fetchTickets, fetchBookings, fetchStats, fetchEmployees]);
+
+  useEffect(() => {
     try {
-      const res = await api.get(`/tickets/${ticketId}/parts`);
-      setModalTicketParts(res.data.data || []);
-    } catch {
-      setModalTicketParts([]);
+      localStorage.setItem('ticketNotifications', JSON.stringify(notifications.slice(0, 50)));
+    } catch (error) {
+      console.error('Không lưu được lịch sử thông báo:', error);
+    }
+  }, [notifications]);
+
+  useEffect(() => {
+    let active = true;
+    const pushNotifications = (updates) => {
+      if (updates.length === 0) return;
+      setNotifications(previous => [...updates, ...previous].slice(0, 50));
+      setLatestNotice(updates[0]);
+    };
+
+    const pollDashboardEvents = async () => {
+      try {
+        const [latestTickets, latestBookings] = await Promise.all([
+          fetchTickets(),
+          canReceptionAction ? fetchBookings() : Promise.resolve(null)
+        ]);
+        if (!active) return;
+        setTickets(latestTickets);
+
+        const now = new Date().toLocaleString('vi-VN');
+        const updates = [];
+        const currentStatuses = new Map(latestTickets.map(ticket => [ticket.id, ticket.trang_thai]));
+        if (knownStatuses.current) {
+          latestTickets.forEach(ticket => {
+            const previousStatus = knownStatuses.current.get(ticket.id);
+            const isNewTicket = !knownStatuses.current.has(ticket.id);
+            if (isNewTicket || previousStatus !== ticket.trang_thai) {
+              updates.push({
+                id: `ticket-${ticket.id}-${Date.now()}-${updates.length}`,
+                type: 'ticket',
+                ticketCode: ticket.ma_phieu,
+                status: ticket.trang_thai,
+                title: isNewTicket ? 'Hồ sơ QR CSKH mới' : 'Hồ sơ QR đã cập nhật trạng thái',
+                description: `Phiếu ${ticket.ma_phieu} — ${STATUS_LABELS[ticket.trang_thai] || ticket.trang_thai}`,
+                createdAt: now,
+                read: false
+              });
+            }
+          });
+        }
+        knownStatuses.current = currentStatuses;
+
+        if (latestBookings) {
+          setBookings(latestBookings);
+          const currentBookingStatuses = new Map(latestBookings.map(booking => [booking.id, booking.trang_thai]));
+          if (knownBookingStatuses.current) {
+            latestBookings.forEach(booking => {
+              const previousStatus = knownBookingStatuses.current.get(booking.id);
+              const isNewBooking = !knownBookingStatuses.current.has(booking.id);
+              if (isNewBooking || previousStatus !== booking.trang_thai) {
+                updates.push({
+                  id: `booking-${booking.id}-${Date.now()}-${updates.length}`,
+                  type: 'booking',
+                  title: isNewBooking ? 'Lịch hẹn CSKH mới' : 'Lịch hẹn CSKH được cập nhật',
+                  description: `${booking.ho_ten_khach} — ${booking.trang_thai.replace(/_/g, ' ')}`,
+                  createdAt: now,
+                  read: false
+                });
+              }
+            });
+          }
+          knownBookingStatuses.current = currentBookingStatuses;
+        }
+
+        pushNotifications(updates);
+      } catch (error) {
+        if (active) console.error('Không kiểm tra được cập nhật hồ sơ CSKH:', error);
+      }
+    };
+
+    pollDashboardEvents();
+    const intervalId = window.setInterval(pollDashboardEvents, 30000);
+    return () => {
+      active = false;
+      window.clearInterval(intervalId);
+    };
+  }, [fetchTickets, fetchBookings, canReceptionAction]);
+
+  useEffect(() => {
+    if (!receiptTicket) return;
+    let active = true;
+    QRCode.toDataURL(`${window.location.origin}/track/${receiptTicket.ma_phieu}`, {
+      width: 180,
+      margin: 1
+    }).then(dataUrl => {
+      if (active) setReceiptQr(dataUrl);
+    }).catch(error => {
+      console.error('Không tạo được mã QR trên phiếu in:', error);
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [receiptTicket]);
+
+  const refreshTickets = async () => {
+    try {
+      setTickets(await fetchTickets());
+    } catch (error) {
+      console.error('Không tải lại được danh sách phiếu:', error);
     }
   };
 
-  const addPartToTicket = async () => {
-    if (!selectedPartId || partQuantity < 1) return showToast('⚠️ Vui lòng chọn linh kiện và số lượng hợp lệ');
+  const refreshBookings = async () => {
     try {
-      await api.post(`/tickets/${selectedTicketId}/parts`, { 
-        partId: selectedPartId, 
-        quantity: partQuantity,
-        so_serial: partSerial.trim() || undefined
-      });
-      showToast('✅ Thêm linh kiện và lưu mã Serial thành công!');
-      setPartSerial('');
-      const res = await api.get(`/tickets/${selectedTicketId}/parts`);
-      setModalTicketParts(res.data.data || []);
-      await refreshTickets();
-      if (canViewInventory) {
-        setParts(await fetchParts());
-      }
-    } catch (err) {
-      showToast(`❌ ${err.response?.data?.message || 'Lỗi thêm linh kiện'}`);
+      setBookings(await fetchBookings());
+    } catch (error) {
+      console.error('Không tải lại được danh sách lịch hẹn:', error);
     }
   };
 
-  const removePartFromTicket = async (partRecordId) => {
+  const updateStatus = async (id, status, defaultNote = '') => {
+    const customNote = statusNote.trim();
+    const noteToSave = customNote || defaultNote || `Chuyển sang trạng thái: ${STATUS_LABELS[status] || status}`;
     try {
-      await api.delete(`/tickets/${selectedTicketId}/parts/${partRecordId}`);
-      showToast('🔄 Đã gỡ linh kiện khỏi phiếu và hoàn trả tồn kho!');
-      const res = await api.get(`/tickets/${selectedTicketId}/parts`);
-      setModalTicketParts(res.data.data || []);
+      await api.patch(`/tickets/${id}/status`, { status, note: noteToSave });
+      setStatusNote('');
       await refreshTickets();
-      if (canViewInventory) {
-        setParts(await fetchParts());
+      if (canViewStats) {
+        setStats(await fetchStats());
+      }
+      showToast(`✅ Đã cập nhật trạng thái: ${STATUS_LABELS[status] || status}`);
+    } catch (err) {
+      showToast(`❌ ${err.response?.data?.message || 'Lỗi cập nhật trạng thái hồ sơ'}`);
+    }
+  };
+
+  const updateBookingStatus = async (id, status) => {
+    try {
+      const res = await api.patch(`/tickets/booking/${id}/status`, { status });
+      await refreshBookings();
+      await refreshTickets();
+      const autoTicketCode = res.data?.data?.autoCreatedTicketCode;
+      if (autoTicketCode) {
+        showToast(`🎉 Đã tiếp nhận khách & tự động khởi tạo Hồ sơ QR: ${autoTicketCode}`);
+      } else {
+        showToast('✅ Đã cập nhật trạng thái lịch hẹn CSKH');
       }
     } catch (err) {
-      showToast(`❌ ${err.response?.data?.message || 'Lỗi gỡ linh kiện'}`);
+      showToast(`❌ ${err.response?.data?.message || 'Lỗi cập nhật lịch hẹn'}`);
     }
   };
 
@@ -280,11 +373,8 @@ function Dashboard() {
         deviceName: posForm.deviceName.trim(),
         serialImei: posForm.serialImei.trim() || undefined,
         issueDescription: posForm.issueDescription.trim(),
-        isStudent: posForm.isStudent,
-        schoolName: posForm.isStudent ? posForm.schoolName.trim() : '',
-        studentId: posForm.isStudent ? posForm.studentId.trim() : '',
         photos: posForm.photoBase64
-          ? [{ duong_dan_anh: posForm.photoBase64, loai_anh: 'NGOAI_QUAN', ghi_chu: posForm.photoNote.trim() || 'Ảnh chụp tại quầy POS' }]
+          ? [{ duong_dan_anh: posForm.photoBase64, loai_anh: 'NGOAI_QUAN', ghi_chu: posForm.photoNote.trim() || 'Ảnh hiện trạng chụp tại quầy CSKH' }]
           : []
       };
       const res = await api.post('/tickets/intake', payload);
@@ -294,19 +384,16 @@ function Dashboard() {
       setShowPosModal(false);
       setPosForm({
         fullName: '', phone: '', deviceName: '', serialImei: '', issueDescription: '',
-        isStudent: false, schoolName: '', studentId: '', photoBase64: '', photoNote: ''
+        photoBase64: '', photoNote: ''
       });
-      showToast(`🎉 Đã tạo phiếu tại quầy ${newCode || ''} thành công! Mở cửa sổ in phiếu 80mm...`);
+      showToast(`🎉 Đã tạo hồ sơ QR tại quầy ${newCode || ''} thành công! Mở cửa sổ in phiếu 80mm...`);
       const createdTicket = latestList.find(t => t.ma_phieu === newCode);
       if (createdTicket) {
         setReceiptQr('');
-        setReceiptParts([]);
-        setReceiptPartsLoading(true);
-        setReceiptPartsError('');
         setReceiptTicket(createdTicket);
       }
     } catch (err) {
-      showToast(`❌ ${err.response?.data?.message || 'Không tạo được phiếu tại quầy'}`);
+      showToast(`❌ ${err.response?.data?.message || 'Không tạo được hồ sơ tại quầy'}`);
     } finally {
       setSavingPos(false);
     }
@@ -339,7 +426,7 @@ function Dashboard() {
         });
         setTicketPhotos(prev => [...prev, res.data.data]);
         setNewPhotoNote('');
-        showToast('📸 Đã lưu ảnh ngoại quan máy thành công!');
+        showToast('📸 Đã lưu ảnh minh chứng hiện trạng thành công!');
       } catch (err) {
         showToast(`❌ ${err.response?.data?.message || 'Lỗi lưu ảnh'}`);
       } finally {
@@ -349,196 +436,9 @@ function Dashboard() {
     reader.readAsDataURL(file);
   };
 
-  const fetchTickets = useCallback(async () => {
-    const res = await api.get('/tickets');
-    return res.data.data || [];
-  }, []);
-
-  const fetchBookings = useCallback(async () => {
-    const res = await api.get('/tickets/booking');
-    return res.data.data || [];
-  }, []);
-
-  useEffect(() => {
-    let active = true;
-    const load = (request, setData, description) => {
-      request()
-        .then(data => {
-          if (active) setData(data);
-        })
-        .catch(error => console.error(`Không tải được ${description}:`, error));
-    };
-
-    load(fetchTickets, setTickets, 'danh sách phiếu');
-    if (canReceptionAction) {
-      load(fetchBookings, setBookings, 'danh sách lịch hẹn');
-    }
-    if (canViewStats) {
-      load(fetchStats, setStats, 'thống kê dashboard');
-    }
-    if (canManageEmployees) {
-      load(fetchEmployees, setEmployees, 'danh sách nhân sự');
-    }
-    if (canViewInventory) {
-      load(fetchParts, setParts, 'danh sách linh kiện');
-    }
-
-    return () => {
-      active = false;
-    };
-  }, [canReceptionAction, canViewStats, canManageEmployees, canViewInventory, fetchTickets, fetchBookings, fetchStats, fetchParts, fetchEmployees]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('ticketNotifications', JSON.stringify(notifications.slice(0, 50)));
-    } catch (error) {
-      console.error('Không lưu được lịch sử thông báo:', error);
-    }
-  }, [notifications]);
-
-  useEffect(() => {
-    let active = true;
-    const pushNotifications = (updates) => {
-      if (updates.length === 0) return;
-      setNotifications(previous => [...updates, ...previous].slice(0, 50));
-      setLatestNotice(updates[0]);
-    };
-    const pollDashboardEvents = async () => {
-      try {
-        const [latestTickets, latestBookings, latestParts] = await Promise.all([
-          fetchTickets(),
-          canReceptionAction ? fetchBookings() : Promise.resolve(null),
-          canViewInventory ? fetchParts() : Promise.resolve(null)
-        ]);
-        if (!active) return;
-        setTickets(latestTickets);
-
-        const now = new Date().toLocaleString('vi-VN');
-        const updates = [];
-        const currentStatuses = new Map(latestTickets.map(ticket => [ticket.id, ticket.trang_thai]));
-        if (knownStatuses.current) {
-          latestTickets.forEach(ticket => {
-            const previousStatus = knownStatuses.current.get(ticket.id);
-            const isNewTicket = !knownStatuses.current.has(ticket.id);
-            if (isNewTicket || previousStatus !== ticket.trang_thai) {
-              updates.push({
-                id: `ticket-${ticket.id}-${Date.now()}-${updates.length}`,
-                type: 'ticket',
-                ticketCode: ticket.ma_phieu,
-                status: ticket.trang_thai,
-                title: isNewTicket ? 'Phiếu sửa chữa mới' : 'Phiếu đã cập nhật trạng thái',
-                description: `Phiếu ${ticket.ma_phieu} — ${STATUS_LABELS[ticket.trang_thai] || ticket.trang_thai}`,
-                createdAt: now,
-                read: false
-              });
-            }
-          });
-        }
-        knownStatuses.current = currentStatuses;
-
-        if (latestBookings) {
-          setBookings(latestBookings);
-          const currentBookingStatuses = new Map(latestBookings.map(booking => [booking.id, booking.trang_thai]));
-          if (knownBookingStatuses.current) {
-            latestBookings.forEach(booking => {
-              const previousStatus = knownBookingStatuses.current.get(booking.id);
-              const isNewBooking = !knownBookingStatuses.current.has(booking.id);
-              if (isNewBooking || previousStatus !== booking.trang_thai) {
-                updates.push({
-                  id: `booking-${booking.id}-${Date.now()}-${updates.length}`,
-                  type: 'booking',
-                  title: isNewBooking ? 'Lịch hẹn mới được tiếp nhận' : 'Lịch hẹn được cập nhật',
-                  description: `${booking.ho_ten_khach} — ${booking.trang_thai.replace(/_/g, ' ')}`,
-                  createdAt: now,
-                  read: false
-                });
-              }
-            });
-          }
-          knownBookingStatuses.current = currentBookingStatuses;
-        }
-
-        if (latestParts) {
-          setParts(latestParts);
-          const currentStock = new Map(latestParts.map(part => [part.id, Number(part.so_luong)]));
-          if (knownStock.current) {
-            latestParts.forEach(part => {
-              const quantity = Number(part.so_luong);
-              const previousQuantity = knownStock.current.get(part.id);
-              if (previousQuantity !== undefined && previousQuantity >= Number(lowStockThreshold || 5) &&
-                  quantity < Number(lowStockThreshold || 5)) {
-                updates.push({
-                  id: `stock-${part.id}-${Date.now()}-${updates.length}`,
-                  type: 'stock',
-                  title: quantity <= 0 ? 'Linh kiện đã hết hàng' : 'Cảnh báo linh kiện sắp hết',
-                  description: `${part.ten_linh_kien} — còn ${quantity} chiếc`,
-                  createdAt: now,
-                  read: false
-                });
-              }
-            });
-          }
-          knownStock.current = currentStock;
-        }
-        pushNotifications(updates);
-      } catch (error) {
-        if (active) console.error('Không kiểm tra được cập nhật phiếu, lịch hẹn và tồn kho:', error);
-      }
-    };
-
-    pollDashboardEvents();
-    const intervalId = window.setInterval(pollDashboardEvents, 30000);
-    return () => {
-      active = false;
-      window.clearInterval(intervalId);
-    };
-  }, [fetchTickets, fetchBookings, fetchParts, lowStockThreshold, canReceptionAction, canViewInventory]);
-
-  useEffect(() => {
-    if (!receiptTicket) {
-      return;
-    }
-
-    let active = true;
-    QRCode.toDataURL(`${window.location.origin}/track/${receiptTicket.ma_phieu}`, {
-      width: 180,
-      margin: 1
-    }).then(dataUrl => {
-      if (active) setReceiptQr(dataUrl);
-    }).catch(error => {
-      console.error('Không tạo được mã QR trên phiếu in:', error);
-    });
-    api.get(`/tickets/${receiptTicket.id}/parts`)
-      .then(response => {
-        if (active) setReceiptParts(response.data.data || []);
-      })
-      .catch(error => {
-        console.error('Không tải được chi tiết linh kiện trên phiếu in:', error);
-        if (active) setReceiptPartsError('Không tải được chi tiết linh kiện. Vui lòng đóng phiếu và thử lại.');
-      })
-      .finally(() => {
-        if (active) setReceiptPartsLoading(false);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [receiptTicket]);
-
-  const refreshTickets = async () => {
-    try {
-      setTickets(await fetchTickets());
-    } catch (error) {
-      console.error('Không tải lại được danh sách phiếu:', error);
-    }
-  };
-
-  const refreshBookings = async () => {
-    try {
-      setBookings(await fetchBookings());
-    } catch (error) {
-      console.error('Không tải lại được danh sách lịch hẹn:', error);
-    }
+  const openReceipt = (ticket) => {
+    setReceiptQr('');
+    setReceiptTicket(ticket);
   };
 
   const openCreateEmployeeModal = () => {
@@ -579,7 +479,7 @@ function Dashboard() {
           trang_thai: employeeForm.trang_thai,
           mat_khau: employeeForm.mat_khau.trim() || undefined
         });
-        showToast(`✅ ${res.data?.message || 'Đã cập nhật tài khoản nhân viên!'}`);
+        showToast(`✅ ${res.data?.message || 'Đã cập nhật tài khoản nhân sự!'}`);
       } else {
         const res = await api.post('/admin/employees', {
           ho_ten: employeeForm.ho_ten.trim(),
@@ -587,12 +487,12 @@ function Dashboard() {
           mat_khau: employeeForm.mat_khau.trim(),
           vai_tro: employeeForm.vai_tro
         });
-        showToast(`🎉 ${res.data?.message || 'Đã tạo tài khoản nhân viên mới!'}`);
+        showToast(`🎉 ${res.data?.message || 'Đã tạo tài khoản nhân sự mới!'}`);
       }
       setEmployees(await fetchEmployees());
       setShowEmployeeModal(false);
     } catch (err) {
-      setEmployeeError(err.response?.data?.message || 'Không lưu được thông tin nhân viên.');
+      setEmployeeError(err.response?.data?.message || 'Không lưu được thông tin nhân sự.');
     } finally {
       setSavingEmployee(false);
     }
@@ -601,23 +501,19 @@ function Dashboard() {
   const toggleEmployeeLock = async (emp) => {
     const nextStatus = emp.trang_thai === 'HOAT_DONG' ? 'KHOA' : 'HOAT_DONG';
     try {
-      const res = await api.patch(`/admin/employees/${emp.id}`, {
-        ho_ten: emp.ho_ten,
-        vai_tro: emp.vai_tro,
-        trang_thai: nextStatus
-      });
-      showToast(`🔒 ${res.data?.message || 'Đã cập nhật trạng thái tài khoản!'}`);
+      await api.patch(`/admin/employees/${emp.id}`, { trang_thai: nextStatus });
+      showToast(nextStatus === 'KHOA' ? `🔒 Đã khóa tài khoản @${emp.ten_dang_nhap}` : `🔓 Đã mở khóa tài khoản @${emp.ten_dang_nhap}`);
       setEmployees(await fetchEmployees());
     } catch (err) {
-      showToast(`❌ ${err.response?.data?.message || 'Không đổi được trạng thái tài khoản'}`);
+      showToast(`❌ ${err.response?.data?.message || 'Không cập nhật được trạng thái tài khoản'}`);
     }
   };
 
   const removeEmployee = async (emp) => {
-    if (!window.confirm(`Bạn có chắc chắn muốn xóa tài khoản "${emp.ho_ten}" (@${emp.ten_dang_nhap})?`)) return;
+    if (!window.confirm(`Xác nhận xóa tài khoản @${emp.ten_dang_nhap} (${emp.ho_ten})?`)) return;
     try {
-      const res = await api.delete(`/admin/employees/${emp.id}`);
-      showToast(`🗑️ ${res.data?.message || 'Đã xóa tài khoản nhân viên!'}`);
+      await api.delete(`/admin/employees/${emp.id}`);
+      showToast(`🗑️ Đã xóa tài khoản @${emp.ten_dang_nhap}`);
       setEmployees(await fetchEmployees());
     } catch (err) {
       showToast(`❌ ${err.response?.data?.message || 'Không xóa được tài khoản'}`);
@@ -625,984 +521,520 @@ function Dashboard() {
   };
 
   const markAllNotificationsRead = () => {
-    setNotifications(previous => previous.map(notification => ({ ...notification, read: true })));
-  };
-
-  const clearNotifications = () => {
-    setNotifications([]);
+    setNotifications(previous => previous.map(item => ({ ...item, read: true })));
     setLatestNotice(null);
-    localStorage.removeItem('ticketNotifications');
   };
 
-  const resetPartForm = () => {
-    setPartForm({ ten_linh_kien: '', gia_ban: '', so_luong: '0', hinh_anh: '' });
-    setEditingPartId(null);
-    setPartFormError('');
-    setShowInventoryForm(false);
-  };
+  const unreadNotificationCount = notifications.filter(item => !isNotificationCorrupted(item) && !item.read).length;
 
-  const editPart = (part) => {
-    setEditingPartId(part.id);
-    setPartForm({
-      ten_linh_kien: part.ten_linh_kien,
-      gia_ban: String(part.gia_ban),
-      so_luong: String(part.so_luong),
-      hinh_anh: part.hinh_anh || ''
-    });
-    setPartFormError('');
-    setShowInventoryForm(true);
-  };
-
-  const savePart = async (event) => {
-    event.preventDefault();
-    const price = Number(partForm.gia_ban);
-    const quantity = Number(partForm.so_luong);
-    if (!partForm.ten_linh_kien.trim() || partForm.ten_linh_kien.trim().length > 150) {
-      setPartFormError('Tên linh kiện cần có từ 1 đến 150 ký tự.');
-      return;
-    }
-    if (!Number.isFinite(price) || price < 0) {
-      setPartFormError('Giá bán phải là số không âm.');
-      return;
-    }
-    if (!Number.isSafeInteger(quantity) || quantity < 0) {
-      setPartFormError('Số lượng tồn phải là số nguyên không âm.');
-      return;
-    }
-
-    setSavingPart(true);
-    setPartFormError('');
-    const payload = {
-      ten_linh_kien: partForm.ten_linh_kien.trim(),
-      gia_ban: price,
-      so_luong: quantity,
-      hinh_anh: partForm.hinh_anh?.trim() || null
-    };
-
-    try {
-      if (editingPartId) {
-        await api.patch(`/tickets/parts/${editingPartId}`, payload);
-      } else {
-        await api.post('/tickets/parts', payload);
-      }
-      setParts(await fetchParts());
-      resetPartForm();
-    } catch (err) {
-      setPartFormError(err.response?.data?.message || 'Không lưu được linh kiện. Vui lòng thử lại.');
-    } finally {
-      setSavingPart(false);
-    }
-  };
-
-  const updateStatus = async (id, status, customNote = '', paymentMethod = null, tongTien = null) => {
-    try {
-      await api.patch(`/tickets/${id}/status`, {
-        trang_thai: status,
-        ghi_chu: (customNote || statusNote).trim() || undefined,
-        phuong_thuc_thanh_toan: paymentMethod || undefined,
-        tong_tien: tongTien !== null && Number(tongTien) > 0 ? Number(tongTien) : undefined
-      });
-      setStatusNote('');
-      showToast(`✅ Đã chuyển trạng thái sang: ${status.replace(/_/g, ' ')}`);
-      await refreshTickets();
-      if (canViewStats) {
-        setStats(await fetchStats());
-      }
-    } catch (err) {
-      console.error('Không cập nhật được trạng thái phiếu:', err);
-      showToast(`❌ ${err.response?.data?.message || 'Lỗi cập nhật trạng thái'}`);
-    }
-  };
-
-  const handleConfirmRepairDone = async (ticket) => {
-    let finalTongTien = Number(ticket.tong_tien || 0);
-    // Nếu phiếu chưa có giá trị (0đ), cho phép nhập chi phí/công kỹ thuật để doanh thu nhảy lên ngay
-    if (finalTongTien <= 0) {
-      const input = window.prompt(
-        `Phiếu ${ticket.ma_phieu || ticket.ma_tra_cuu} hiện có tổng tiền là 0đ.\nNhập tiền công sửa chữa/dịch vụ (VNĐ) để ghi nhận vào báo cáo doanh thu:`,
-        '150000'
-      );
-      if (input !== null) {
-        const val = parseInt(input.replace(/\D/g, ''), 10);
-        finalTongTien = !isNaN(val) && val > 0 ? val : 150000;
-      }
-    }
-    await updateStatus(ticket.id, 'ĐÃ_SỬA_XONG', null, null, finalTongTien);
-  };
-
-  const openCashierModal = (ticket) => {
-    const isStudent = Boolean(ticket.la_sinh_vien || ticket.mssv);
-    const finalAmount = isStudent ? Math.round(Number(ticket.tong_tien || 0) * 0.85) : Number(ticket.tong_tien || 0);
-    setCashierTicket(ticket);
-    setCashierMethod('TIEN_MAT');
-    setCashierReceived(String(finalAmount));
-    setCashierNote('');
-  };
-
-  const confirmCashierPayment = async () => {
-    if (!cashierTicket) return;
-    setCashierProcessing(true);
-    try {
-      const isStudent = Boolean(cashierTicket.la_sinh_vien || cashierTicket.mssv);
-      const finalAmount = isStudent ? Math.round(Number(cashierTicket.tong_tien || 0) * 0.85) : Number(cashierTicket.tong_tien || 0);
-      const methodName = cashierMethod === 'TIEN_MAT' ? 'Tiền mặt' : cashierMethod === 'CHUYEN_KHOAN_VIETQR' ? 'Chuyển khoản VietQR' : 'Quẹt thẻ POS';
-      const note = `[Thu ngân đã thu ${finalAmount.toLocaleString('vi-VN')} đ qua ${methodName}] ${cashierNote.trim()}`;
-      
-      await api.patch(`/tickets/${cashierTicket.id}/status`, {
-        trang_thai: 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN',
-        ghi_chu: note,
-        phuong_thuc_thanh_toan: cashierMethod
-      });
-      showToast(`🎉 Đã thu tiền thành công phiếu ${cashierTicket.ma_phieu || cashierTicket.ma_tra_cuu}! Mở cửa sổ in hóa đơn...`);
-      const targetTicket = cashierTicket;
-      setCashierTicket(null);
-      await refreshTickets();
-      if (canViewStats) setStats(await fetchStats());
-      setReceiptTicket(targetTicket);
-    } catch (err) {
-      showToast(`❌ ${err.response?.data?.message || 'Lỗi xử lý thanh toán'}`);
-    } finally {
-      setCashierProcessing(false);
-    }
-  };
-
-  const updateBookingStatus = async (id, status) => {
-    try {
-      const res = await api.patch(`/tickets/booking/${id}/status`, { trang_thai: status });
-      await refreshBookings();
-      await refreshTickets();
-      if (status === 'KHACH_DA_DEN') {
-        const createdCode = res.data?.ticketCode;
-        showToast(`🎉 Đã tiếp nhận khách & tự động tạo phiếu sửa chữa ${createdCode ? `(${createdCode})` : ''}!`);
-        setActiveTab('TICKETS');
-      } else {
-        showToast(`✅ Đã cập nhật trạng thái lịch hẹn: ${status}`);
-      }
-    } catch (err) {
-      console.error('Không cập nhật được trạng thái lịch hẹn:', err);
-      showToast(`❌ ${err.response?.data?.message || 'Lỗi cập nhật lịch hẹn'}`);
-    }
-  };
-
-  const matchesStatusFilter = (ticket) => {
-    if (statusFilter === 'ALL') return true;
-    if (statusFilter === 'CHO_KHAM') return ticket.trang_thai === 'CHỜ_KHÁM';
-    if (statusFilter === 'DANG_XU_LY') return ticket.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' || ticket.trang_thai === 'ĐANG_SỬA';
-    if (statusFilter === 'CHO_CHOT_GIA') return ticket.trang_thai === 'CHỜ_KHÁCH_CHỐT_GIÁ';
-    if (statusFilter === 'BAO_HANH') return ticket.trang_thai === 'YÊU_CẦU_BẢO_HÀNH';
-    if (statusFilter === 'HOAN_TAT') return ticket.trang_thai === 'ĐÃ_SỬA_XONG' || ticket.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN';
-    return true;
-  };
-
-  const unreadNotificationCount = notifications.filter(notification => !notification.read).length;
-  const filteredTickets = tickets.filter(ticket => matchesStatusFilter(ticket) && [
-    ticket.ma_phieu,
-    ticket.ho_ten_khach,
-    ticket.so_dien_thoai,
-    ticket.ten_thiet_bi,
-    ticket.trang_thai
-  ].some(value => String(value || '').toLocaleLowerCase('vi').includes(ticketSearch.trim().toLocaleLowerCase('vi'))));
-
-  const filteredCashierTickets = tickets
-    .filter(t => {
-      if (!cashierSearch.trim()) return true;
-      const q = cashierSearch.trim().toLowerCase();
-      const code = (t.ma_phieu || t.ma_tra_cuu || '').toLowerCase();
-      const name = (t.ho_ten_khach || t.fullName || '').toLowerCase();
-      const phone = (t.so_dien_thoai || t.phone || '').toLowerCase();
-      const device = (t.ten_thiet_bi || t.deviceName || '').toLowerCase();
-      return code.includes(q) || name.includes(q) || phone.includes(q) || device.includes(q);
-    })
-    .filter(t => {
-      const isPaid = t.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN';
-      if (cashierFilter === 'PENDING') return !isPaid && Number(t.tong_tien || 0) > 0;
-      if (cashierFilter === 'PAID') return isPaid;
-      return true;
-    });
-  const receiptTotal = Number(receiptTicket?.tong_tien || 0);
-  const receiptPartsTotal = receiptParts.reduce((total, item) => total + Number(item.so_luong) * Number(item.don_gia), 0);
-  const receiptServiceTotal = Math.max(receiptTotal - receiptPartsTotal, 0);
-  const currentRoleInfo = ROLE_META[role] || ROLE_META.LE_TAN;
+  const filteredTickets = tickets.filter(t => {
+    const q = ticketSearch.toLowerCase();
+    const matchesSearch = !q ||
+      (t.ma_phieu && t.ma_phieu.toLowerCase().includes(q)) ||
+      (t.so_dien_thoai && t.so_dien_thoai.includes(q)) ||
+      (t.ho_ten_khach && t.ho_ten_khach.toLowerCase().includes(q)) ||
+      (t.ten_thiet_bi && t.ten_thiet_bi.toLowerCase().includes(q));
+    const matchesStatus = statusFilter === 'ALL' || t.trang_thai === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
 
   return (
-    <div className="p-6 md:p-8 bg-slate-50 min-h-screen">
-      {/* Tiêu đề & Điều hướng Vận Hành CSKH */}
-      <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-4">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">
-            Cổng Điều Hành Hồ Sơ Quét Mã QR Chăm Sóc Khách Hàng
-          </h1>
-          <p className="text-slate-500 text-xs mt-1">
-            Xin chào <strong className="text-slate-700">{fullName ? fullName.replace(/\s*\(.*?\)/, '') : 'Chuyên viên CSKH'}</strong> • Tập đoàn MYH Group (615 Âu Cơ)
-          </p>
-        </div>
-
-        {(isExecutive || isManagerOrAbove || canManageEmployees) && (
-          <div className="flex flex-wrap items-center gap-2">
-            {isManagerOrAbove && (
-              <Link
-                to="/admin/quan-ly"
-                className="flex items-center gap-1.5 rounded-xl bg-white border border-slate-200 px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 transition shadow-2xs"
-              >
-                <span>🏬</span> Tổng Quan Bộ Phận CSKH
-              </Link>
-            )}
-            {canManageEmployees && (
-              <Link
-                to="/admin/nhan-su"
-                className="flex items-center gap-1.5 rounded-xl bg-white border border-slate-200 px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 transition shadow-2xs"
-              >
-                <span>👥</span> Nhân Sự &amp; Phân Quyền CSKH
-              </Link>
-            )}
+          <h2 className="text-xl font-bold text-slate-900">Trung Tâm Điều Hành Chăm Sóc Khách Hàng Qua Mã QR</h2>
+          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+            <span className={`px-2 py-0.5 rounded-md font-semibold border ${currentRoleInfo.badgeClass}`}>
+              {currentRoleInfo.badge}
+            </span>
+            <span>Nhân sự: <strong className="text-slate-700">{fullName}</strong></span>
           </div>
-        )}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setActiveTab('TICKETS')}
+            className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'TICKETS' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
+          >
+            Hồ Sơ Phiếu QR ({tickets.length})
+          </button>
+          {canReceptionAction && (
+            <button
+              onClick={() => setActiveTab('BOOKINGS')}
+              className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'BOOKINGS' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
+            >
+              Lịch Hẹn CSKH ({bookings.filter(b => b.trang_thai === 'CHO_XAC_NHAN').length})
+            </button>
+          )}
+          {canViewStats && (
+            <button
+              onClick={() => setActiveTab('STATS')}
+              className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'STATS' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
+            >
+              Thống Kê &amp; Đánh Giá CSKH
+            </button>
+          )}
+          {canManageEmployees && (
+            <button
+              onClick={() => setActiveTab('EMPLOYEES')}
+              className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'EMPLOYEES' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
+            >
+              Nhân Sự CSKH ({employees.length})
+            </button>
+          )}
+          <button
+            onClick={() => {
+              setActiveTab('NOTIFICATIONS');
+              markAllNotificationsRead();
+            }}
+            className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'NOTIFICATIONS' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
+          >
+            Thông Báo ({unreadNotificationCount})
+          </button>
+        </div>
       </div>
 
-
       {latestNotice && (
-        <div role="status" className="fixed bottom-5 right-5 z-50 flex items-center gap-2 rounded-xl bg-slate-800 px-4 py-2.5 text-xs text-white shadow-lg transition-all animate-fade-in-up">
-          <p className="font-medium">{latestNotice.description || latestNotice.title}</p>
-          <button type="button" onClick={() => setLatestNotice(null)} aria-label="Đóng thông báo" className="ml-2 text-slate-400 hover:text-white text-sm">×</button>
+        <div role="status" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-brand-blue">
+          <span>
+            <strong>Thông báo:</strong> {latestNotice.description || latestNotice.title}
+          </span>
+          <button type="button" onClick={() => setLatestNotice(null)} className="font-bold underline">
+            Đã hiểu
+          </button>
         </div>
       )}
 
-      {/* Thanh Tab Nghiệp Vụ Trọng Tâm Web Quét Mã QR Chăm Sóc Khách Hàng */}
-      <div className="mb-6 flex flex-wrap gap-2 border-b border-slate-200">
-        <button 
-          onClick={() => setActiveTab('TICKETS')}
-          className={`rounded-t-lg px-4 py-2.5 text-xs font-medium cursor-pointer ${activeTab === 'TICKETS' ? 'bg-brand-blue text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
-          📋 Hồ sơ Yêu cầu CSKH (QR)
-        </button>
-        {canReceptionAction && (
-          <button 
-            onClick={() => setActiveTab('BOOKINGS')}
-            className={`rounded-t-lg px-4 py-2.5 text-xs font-medium cursor-pointer ${activeTab === 'BOOKINGS' ? 'bg-brand-blue text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
-            📅 Lịch hẹn CSKH
-          </button>
-        )}
-        {canViewStats && (
-          <button
-            onClick={() => setActiveTab('STATS')}
-            className={`rounded-t-lg px-4 py-2.5 text-xs font-medium cursor-pointer ${activeTab === 'STATS' ? 'bg-brand-blue text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
-            📊 Thống kê Hiệu suất CSKH
-          </button>
-        )}
-        {canManageEmployees && (
-          <button
-            onClick={() => setActiveTab('EMPLOYEES')}
-            className={`rounded-t-lg px-4 py-2.5 text-xs font-medium cursor-pointer ${activeTab === 'EMPLOYEES' ? 'bg-brand-blue text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
-            👥 Nhân sự &amp; Phân quyền ({employees.length})
-          </button>
-        )}
-        <button
-          onClick={() => setActiveTab('NOTIFICATIONS')}
-          className={`rounded-t-lg px-4 py-2.5 text-xs font-medium cursor-pointer ${activeTab === 'NOTIFICATIONS' ? 'bg-brand-blue text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
-          🔔 Thông báo{notifications.length > 0 ? ` (${notifications.length})` : ''}
-        </button>
-      </div>
-
+      {/* TAB 1: DANH SÁCH HỒ SƠ PHIẾU QR CSKH */}
       {activeTab === 'TICKETS' && (
-        <div className="rounded-xl border-t-4 border-brand-blue bg-white p-5 shadow sm:p-6">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <h3 className="text-lg font-bold text-slate-800">Danh sách Hồ sơ Yêu cầu Chăm sóc khách hàng (QR)</h3>
-            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-              <input
-                type="search"
-                value={ticketSearch}
-                onChange={event => setTicketSearch(event.target.value)}
-                placeholder="Tìm mã phiếu QR, khách hàng, số điện thoại..."
-                aria-label="Tìm mã phiếu, khách hàng hoặc số điện thoại"
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm sm:w-64"
-              />
-              {canReceptionAction && (
+        <div className="bg-white p-6 rounded-xl shadow border-t-4 border-brand-blue">
+          <div className="mb-4 flex flex-col gap-3">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+              <div>
+                <h3 className="text-xl font-bold text-slate-800">Danh Sách Hồ Sơ Chăm Sóc Khách Hàng Qua Mã QR</h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Quản lý tiếp nhận yêu cầu, phân loại xử lý, đính kèm ảnh hiện trạng và cấp Sổ bảo hành điện tử (e-Warranty) qua mã QR.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                {canReceptionAction && (
+                  <button
+                    type="button"
+                    onClick={() => setShowPosModal(true)}
+                    className="rounded-lg bg-brand-orange px-3.5 py-2 text-xs font-extrabold text-white shadow-sm hover:bg-orange-600 whitespace-nowrap flex items-center gap-1.5"
+                  >
+                    <span>📷</span> + Tiếp Nhận Nhanh Tại Quầy (POS)
+                  </button>
+                )}
                 <button
                   type="button"
-                  onClick={() => setShowPosModal(true)}
-                  className="rounded-lg bg-brand-blue px-3.5 py-2 text-xs font-medium text-white hover:bg-blue-900 shadow-xs whitespace-nowrap cursor-pointer"
-                >
-                  + Tạo Phiếu QR Tại Quầy
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={() => {
-                  const rows = filteredTickets.map((t, idx) => {
-                    const raw = Number(t.tong_tien || 0);
-                    const finalAmt = t.la_sinh_vien ? Math.round(raw * 0.85) : raw;
-                    return [
+                  onClick={() => {
+                    const rows = filteredTickets.map((t, idx) => [
                       idx + 1,
                       t.ma_phieu,
                       t.ho_ten_khach,
                       t.so_dien_thoai,
-                      t.ten_thiet_bi || '—',
-                      t.mo_ta_loi || '—',
-                      t.la_sinh_vien ? 'Sinh viên (-15%)' : 'Khách vãng lai',
-                      t.truong_hoc || '—',
+                      t.ten_thiet_bi || 'Sản phẩm / Dịch vụ CSKH',
+                      t.so_imei_serial || 'N/A',
+                      t.mo_ta_loi || '',
                       STATUS_LABELS[t.trang_thai] || t.trang_thai,
-                      raw,
-                      finalAmt,
-                      t.han_bao_hanh ? new Date(t.han_bao_hanh).toLocaleDateString('vi-VN') : 'Chưa cấp',
+                      t.han_bao_hanh ? new Date(t.han_bao_hanh).toLocaleDateString('vi-VN') : 'Chưa kích hoạt',
                       t.ngay_tao ? new Date(t.ngay_tao).toLocaleString('vi-VN') : ''
-                    ];
-                  });
-                  const totalRaw = filteredTickets.reduce((acc, t) => acc + Number(t.tong_tien || 0), 0);
-                  const totalFinal = filteredTickets.reduce((acc, t) => acc + (t.la_sinh_vien ? Math.round(Number(t.tong_tien || 0) * 0.85) : Number(t.tong_tien || 0)), 0);
-                  const summaryRow = ['', 'TỔNG CỘNG', '', '', '', '', '', '', `${filteredTickets.length} phiếu`, totalRaw, totalFinal, '', ''];
-                  exportEnterpriseExcel({
-                    filename: `Bao_Cao_Phieu_Sua_Chua_${new Date().toISOString().slice(0, 10)}.xlsx`,
-                    sheetName: 'DS Phiếu Sửa Chữa',
-                    title: 'BÁO CÁO TỔNG HỢP PHIẾU TIẾP NHẬN & TIẾN ĐỘ SỬA CHỮA',
-                    headers: ['STT', 'Mã Phiếu', 'Khách Hàng', 'Số Điện Thoại', 'Tên Thiết Bị', 'Mô Tả Sự Cố', 'Đối Tượng', 'Trường Học', 'Trạng Thái', 'Chi Phí Gốc (VNĐ)', 'Thực Thu (VNĐ)', 'Hạn Bảo Hành', 'Thời Điểm Tiếp Nhận'],
-                    rows,
-                    summaryRow,
-                    signRole: 'KẾ TOÁN / THU NGÂN'
-                  });
-                                  }}
-                className="rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 shadow-xs whitespace-nowrap"
-              >
-                📊 Xuất Báo Cáo Excel (.xlsx)
-              </button>
+                    ]);
+                    const summaryRow = ['', 'TỔNG SỐ HỒ SƠ CSKH', `${filteredTickets.length} hồ sơ`, '', '', '', '', '', '', ''];
+                    exportEnterpriseExcel({
+                      filename: `Danh_Sach_Ho_So_CSKH_QR_${new Date().toISOString().slice(0, 10)}.xlsx`,
+                      sheetName: 'Hồ Sơ CSKH QR',
+                      title: 'DANH SÁCH HỒ SƠ CHĂM SÓC KHÁCH HÀNG QUA MÃ QR - MYH GROUP',
+                      headers: ['STT', 'Mã Phiếu QR', 'Họ Tên Khách Hàng', 'Số Điện Thoại', 'Sản Phẩm / Dịch Vụ', 'Mã Serial / IMEI', 'Nội Dung Yêu Cầu CSKH', 'Trạng Thái Xử Lý', 'Hạn Bảo Hành (e-Warranty)', 'Thời Gian Tiếp Nhận'],
+                      rows,
+                      summaryRow,
+                      signRole: 'TRƯỞNG BỘ PHẬN CSKH'
+                    });
+                  }}
+                  className="rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 whitespace-nowrap"
+                >
+                  📊 Xuất Danh Sách Hồ Sơ (.xlsx)
+                </button>
+                <div className="relative w-full sm:w-64">
+                  <input
+                    type="text"
+                    placeholder="🔍 Tìm mã QR, SĐT, tên KH..."
+                    value={ticketSearch}
+                    onChange={(e) => setTicketSearch(e.target.value)}
+                    className="w-full pl-3 pr-8 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-brand-blue"
+                  />
+                  {ticketSearch && (
+                    <button
+                      onClick={() => setTicketSearch('')}
+                      className="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 text-sm font-bold"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
 
-          {/* Quick Status Filter Pills */}
-          <div className="mb-4 flex flex-wrap gap-2">
-            {[
-              { id: 'ALL', label: 'Tất cả hồ sơ', count: tickets.length },
-              { id: 'CHO_KHAM', label: 'Chờ tiếp nhận', count: tickets.filter(t => t.trang_thai === 'CHỜ_KHÁM').length },
-              { id: 'DANG_XU_LY', label: 'Đang kiểm tra / xử lý', count: tickets.filter(t => t.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' || t.trang_thai === 'ĐANG_SỬA').length },
-              { id: 'CHO_CHOT_GIA', label: 'Chờ khách xác nhận', count: tickets.filter(t => t.trang_thai === 'CHỜ_KHÁCH_CHỐT_GIÁ').length },
-              { id: 'BAO_HANH', label: 'Yêu cầu bảo hành', count: tickets.filter(t => t.trang_thai === 'YÊU_CẦU_BẢO_HÀNH').length },
-              { id: 'HOAN_TAT', label: 'Đã hoàn tất CSKH', count: tickets.filter(t => t.trang_thai === 'ĐÃ_SỬA_XONG' || t.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN').length },
-            ].map(tab => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setStatusFilter(tab.id)}
-                className={`rounded-full px-3 py-1 text-xs transition ${
-                  statusFilter === tab.id ? 'bg-brand-blue text-white font-medium shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 font-normal'
-                }`}
-              >
-                {tab.label} ({tab.count})
-              </button>
-            ))}
-          </div>
-
-          {/* Optional Custom Technician Note for Timeline */}
-          <div className="mb-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 rounded-lg bg-slate-50 p-3 border border-slate-200">
-            <span className="text-xs font-bold text-slate-600 whitespace-nowrap">📝 Ghi chú nhật ký cho khách:</span>
-            <input
-              type="text"
-              value={statusNote}
-              onChange={e => setStatusNote(e.target.value)}
-              placeholder="Nhập ghi chú (VD: Đã vệ sinh keo tản nhiệt, đang test nhiệt độ GPU...) trước khi bấm nút đổi trạng thái"
-              className="flex-1 rounded border border-slate-300 bg-white px-3 py-1.5 text-xs focus:border-brand-blue focus:outline-none"
-            />
+            {/* Bộ lọc nhanh theo trạng thái CSKH & ô nhập ghi chú nhật ký */}
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  { key: 'ALL', label: 'Tất cả' },
+                  { key: 'CHỜ_KHÁM', label: 'Chờ tiếp nhận' },
+                  { key: 'ĐANG_CHUẨN_ĐOÁN', label: 'Đang kiểm tra & phân loại' },
+                  { key: 'ĐANG_SỬA', label: 'Đang xử lý hỗ trợ' },
+                  { key: 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN', label: 'Hoàn tất CSKH & Bảo hành' },
+                  { key: 'YÊU_CẦU_BẢO_HÀNH', label: '🛡️ Yêu cầu bảo hành' }
+                ].map(tab => (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    onClick={() => setStatusFilter(tab.key)}
+                    className={`px-3 py-1 rounded-full text-xs font-bold transition ${
+                      statusFilter === tab.key
+                        ? 'bg-brand-blue text-white shadow-xs'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+              <div className="w-full sm:w-80">
+                <input
+                  type="text"
+                  value={statusNote}
+                  onChange={e => setStatusNote(e.target.value)}
+                  placeholder="✍️ Ghi chú nhật ký CSKH (hiển thị khi khách quét QR)..."
+                  className="w-full px-3 py-1.5 text-xs border border-blue-200 bg-blue-50/40 rounded-lg focus:outline-none focus:border-brand-blue"
+                />
+              </div>
+            </div>
           </div>
 
           <div className="overflow-x-auto">
-          <table className="w-full min-w-[900px] text-left border-collapse">
-            <thead>
-              <tr className="border-b border-slate-200 bg-slate-50/70 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                <th className="py-2.5 px-4 font-medium">Mã Phiếu</th>
-                <th className="py-2.5 px-4 font-medium">Khách hàng</th>
-                <th className="py-2.5 px-4 font-medium">Lỗi mô tả</th>
-                <th className="py-2.5 px-4 font-medium">Trạng thái</th>
-                <th className="py-2.5 px-4 font-medium text-right">Tổng Tiền</th>
-                <th className="py-2.5 px-4 font-medium text-center">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredTickets.map(ticket => {
-                const rawTotal = Number(ticket.tong_tien || 0);
-                const finalTotal = ticket.la_sinh_vien ? Math.round(rawTotal * 0.85) : rawTotal;
-                return (
-                <tr key={ticket.id} className="border-b hover:bg-slate-50">
-                  <td className="py-3 px-4">
-                    <div className="font-bold text-brand-blue">{ticket.ma_phieu}</div>
-                    {ticket.ten_thiet_bi && (
-                      <div className="text-xs font-semibold text-slate-600 mt-0.5">{ticket.ten_thiet_bi}</div>
-                    )}
-                    {ticket.so_imei_serial && (
-                      <div className="text-[10px] font-mono text-slate-400">S/N: {ticket.so_imei_serial}</div>
-                    )}
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="font-medium text-slate-800 text-sm">{ticket.ho_ten_khach}</div>
-                    <div className="text-xs text-slate-400">{ticket.so_dien_thoai}</div>
-                    {ticket.la_sinh_vien && (
-                      <div className="mt-1">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
-                          🎓 {ticket.truong_hoc || 'Sinh viên'} (-15%)
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b-2 border-slate-200 text-xs font-bold uppercase text-slate-500">
+                  <th className="py-2.5 px-4">Mã Phiếu QR</th>
+                  <th className="py-2.5 px-4">Khách Hàng &amp; SĐT</th>
+                  <th className="py-2.5 px-4">Sản Phẩm / Dịch Vụ &amp; Yêu Cầu CSKH</th>
+                  <th className="py-2.5 px-4">Trạng Thái Xử Lý</th>
+                  <th className="py-2.5 px-4">Sổ Bảo Hành (e-Warranty)</th>
+                  <th className="py-2.5 px-4 text-center">Thao Tác Điều Hành CSKH</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredTickets.map(t => {
+                  const warrantyRemainingDays = t.han_bao_hanh
+                    ? Math.ceil((new Date(t.han_bao_hanh).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+                    : 0;
+                  return (
+                    <tr key={t.id} className="border-b hover:bg-slate-50 text-sm">
+                      <td className="py-3 px-4 font-bold text-brand-blue">
+                        <Link to={`/track/${t.ma_phieu}`} target="_blank" className="hover:underline flex items-center gap-1" title="Mở trang khách hàng quét QR">
+                          <span>{t.ma_phieu}</span>
+                          <span className="text-xs">↗</span>
+                        </Link>
+                        <div className="text-[11px] font-normal text-slate-400 mt-0.5">
+                          {t.ngay_tao ? new Date(t.ngay_tao).toLocaleDateString('vi-VN') : ''}
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="font-semibold text-slate-800">{t.ho_ten_khach}</div>
+                        <div className="text-xs font-mono text-slate-500">{t.so_dien_thoai}</div>
+                      </td>
+                      <td className="py-3 px-4 max-w-xs">
+                        <div className="font-bold text-slate-800 flex flex-wrap items-center gap-1.5">
+                          <span>{t.ten_thiet_bi}</span>
+                          {t.so_imei_serial && (
+                            <span className="text-[10px] font-mono bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded border border-slate-200">
+                              S/N: {t.so_imei_serial}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-slate-600 mt-0.5">{t.mo_ta_loi}</div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-bold ${
+                          t.trang_thai === 'CHỜ_KHÁM' ? 'bg-amber-100 text-amber-800' :
+                          t.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' ? 'bg-blue-100 text-blue-800' :
+                          t.trang_thai === 'ĐANG_SỬA' ? 'bg-indigo-100 text-indigo-800' :
+                          t.trang_thai === 'YÊU_CẦU_BẢO_HÀNH' ? 'bg-rose-100 text-rose-800' :
+                          'bg-emerald-100 text-emerald-800'
+                        }`}>
+                          {STATUS_LABELS[t.trang_thai] || t.trang_thai.replace(/_/g, ' ')}
                         </span>
-                      </div>
-                    )}
-                  </td>
-                  <td className="py-3 px-4">{ticket.mo_ta_loi}</td>
-                  <td className="py-3 px-4">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-                      ticket.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' || ticket.trang_thai === 'ĐÃ_SỬA_XONG'
-                        ? 'bg-slate-100 text-slate-700 border-slate-200'
-                        : 'bg-blue-50 text-brand-blue border-blue-200'
-                    }`}>
-                      {(ticket.trang_thai && (STATUS_LABELS[ticket.trang_thai] || ticket.trang_thai.replace(/_/g, ' '))) || '—'}
-                    </span>
-                    {ticket.han_bao_hanh && (
-                      <div className="mt-1">
-                        <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-                          🛡️ Đã cấp BH điện tử
-                        </span>
-                      </div>
-                    )}
-                  </td>
-                  <td className="py-3 px-4 text-right">
-                    {ticket.la_sinh_vien && rawTotal > 0 ? (
-                      <div>
-                        <div className="text-xs text-slate-400 line-through">{rawTotal.toLocaleString('vi-VN')} đ</div>
-                        <div className="font-extrabold text-brand-blue">{finalTotal.toLocaleString('vi-VN')} đ</div>
-                      </div>
-                    ) : rawTotal > 0 ? (
-                      <span className="font-extrabold text-slate-800">{rawTotal.toLocaleString('vi-VN')} đ</span>
-                    ) : (
-                      <span className="font-semibold text-slate-400">0 đ</span>
-                    )}
-                  </td>
-                  <td className="py-3 px-4 text-center">
-                    <div className="flex flex-col gap-1.5 w-36 mx-auto">
-                      {/* Nút hành động chính dịu nhẹ */}
-                      {canReceptionAction && ticket.trang_thai === 'CHỜ_KHÁM' && (
-                        <button onClick={() => updateStatus(ticket.id, 'ĐANG_CHUẨN_ĐOÁN')} className="w-full bg-brand-blue text-white hover:bg-blue-900 px-2 py-1.5 rounded-lg font-medium text-xs transition shadow-2xs">
-                          Chuyển Kỹ Thuật
-                        </button>
-                      )}
-                      {(canReceptionAction || canTechAction) && ticket.trang_thai === 'YÊU_CẦU_BẢO_HÀNH' && (
-                        <button onClick={() => updateStatus(ticket.id, 'ĐANG_SỬA')} className="w-full bg-brand-blue text-white hover:bg-blue-900 px-2 py-1.5 rounded-lg font-medium text-xs transition shadow-2xs">
-                          Tiếp Nhận Bảo Hành
-                        </button>
-                      )}
-                      {canTechAction && ticket.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' && (
-                        <button onClick={() => updateStatus(ticket.id, 'ĐANG_SỬA')} className="w-full bg-brand-blue text-white hover:bg-blue-900 px-2 py-1.5 rounded-lg font-medium text-xs transition shadow-2xs">
-                          Tiến hành Sửa
-                        </button>
-                      )}
-                      {(canReceptionAction || canTechAction) && ticket.trang_thai === 'CHỜ_KHÁCH_CHỐT_GIÁ' && (
-                        <button onClick={() => updateStatus(ticket.id, 'ĐANG_SỬA')} className="w-full bg-brand-blue text-white hover:bg-blue-900 px-2 py-1.5 rounded-lg font-medium text-xs transition shadow-2xs">
-                          Khách Chốt (Sửa)
-                        </button>
-                      )}
-                      {canTechAction && ticket.trang_thai === 'ĐANG_SỬA' && (
-                        <button onClick={() => handleConfirmRepairDone(ticket)} className="w-full bg-brand-blue text-white hover:bg-blue-900 px-2 py-1.5 rounded-lg font-medium text-xs transition shadow-2xs">
-                          ✓ Sửa Xong
-                        </button>
-                      )}
-                      {canCashierAction && ticket.trang_thai === 'ĐÃ_SỬA_XONG' && (
-                        <button onClick={() => updateStatus(ticket.id, 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN')} className="w-full bg-brand-blue text-white hover:bg-blue-900 px-2 py-1.5 rounded-lg font-medium text-xs transition shadow-2xs">
-                          Giao Khách & Thu Tiền
-                        </button>
-                      )}
-
-                      {/* Nhóm nút tác vụ linh kiện & báo giá */}
-                      {canTechAction && (ticket.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' || ticket.trang_thai === 'ĐANG_SỬA') && (
-                        <div className="grid grid-cols-2 gap-1">
-                          <button onClick={() => openPartModal(ticket.id)} className="bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 px-1 py-1 rounded-lg font-normal text-xs transition" title="Thêm linh kiện">
-                            + Linh kiện
+                      </td>
+                      <td className="py-3 px-4">
+                        {t.trang_thai === 'YÊU_CẦU_BẢO_HÀNH' ? (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-red-100 text-red-700 border border-red-300 animate-pulse">
+                            🚨 Khách yêu cầu BH qua QR
+                          </span>
+                        ) : warrantyRemainingDays > 0 ? (
+                          <div>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                              🛡️ Còn {warrantyRemainingDays} ngày BH
+                            </span>
+                            <div className="text-[10px] text-slate-400 mt-0.5">
+                              Hạn: {new Date(t.han_bao_hanh).toLocaleDateString('vi-VN')}
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-slate-400">Chưa kích hoạt</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        <div className="flex flex-wrap items-center justify-center gap-1.5">
+                          {canTechAction && (t.trang_thai === 'CHỜ_KHÁM' || t.trang_thai === 'YÊU_CẦU_BẢO_HÀNH') && (
+                            <button
+                              type="button"
+                              onClick={() => updateStatus(t.id, 'ĐANG_CHUẨN_ĐOÁN', 'Bộ phận CSKH đã tiếp nhận yêu cầu và đang kiểm tra, phân loại hỗ trợ.')}
+                              className="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1 rounded text-xs font-bold shadow-xs"
+                            >
+                              🔍 Tiếp nhận &amp; Phân loại
+                            </button>
+                          )}
+                          {canTechAction && (t.trang_thai === 'CHỜ_KHÁM' || t.trang_thai === 'ĐANG_CHUẨN_ĐOÁN') && (
+                            <button
+                              type="button"
+                              onClick={() => updateStatus(t.id, 'ĐANG_SỬA', 'Chuyên viên CSKH đang trực tiếp xử lý yêu cầu hỗ trợ của quý khách.')}
+                              className="bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1 rounded text-xs font-bold shadow-xs"
+                            >
+                              🎧 Đang xử lý hỗ trợ
+                            </button>
+                          )}
+                          {(canTechAction || canReceptionAction) && t.trang_thai !== 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' && (
+                            <button
+                              type="button"
+                              onClick={() => updateStatus(t.id, 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN', 'Đã hoàn tất xử lý yêu cầu CSKH, bàn giao khách hàng và kích hoạt Sổ bảo hành điện tử (e-Warranty) 06 tháng.')}
+                              className="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded text-xs font-bold shadow-xs"
+                            >
+                              ✅ Hoàn tất &amp; Cấp e-Warranty
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => openPhotoModal(t)}
+                            className="bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 px-2.5 py-1 rounded text-xs font-bold"
+                            title="Xem & Tải ảnh minh chứng hiện trạng"
+                          >
+                            📸 Ảnh hiện trạng
                           </button>
-                          <button onClick={() => updateStatus(ticket.id, 'CHỜ_KHÁCH_CHỐT_GIÁ')} className="bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 px-1 py-1 rounded-lg font-normal text-xs transition" title="Gửi báo giá">
-                            Báo giá
+                          <button
+                            type="button"
+                            onClick={() => openReceipt(t)}
+                            className="bg-slate-700 hover:bg-slate-800 text-white px-2.5 py-1 rounded text-xs font-bold"
+                          >
+                            🖨️ In Phiếu QR (80mm)
                           </button>
                         </div>
-                      )}
-
-                      {/* Tiện ích in ấn & ảnh ngoại quan */}
-                      <div className="grid grid-cols-2 gap-1">
-                        <button
-                          type="button"
-                          onClick={() => openPhotoModal(ticket)}
-                          className="rounded-lg bg-white px-1 py-1 text-[11px] font-medium text-slate-600 border border-slate-200 hover:bg-slate-50 transition"
-                          title="Xem / chụp ảnh ngoại quan"
-                        >
-                          📸 Ảnh
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setReceiptQr('');
-                            setReceiptParts([]);
-                            setReceiptPartsLoading(true);
-                            setReceiptPartsError('');
-                            setReceiptTicket(ticket);
-                          }}
-                          className="rounded-lg bg-white px-1 py-1 text-[11px] font-medium text-slate-700 border border-slate-200 hover:bg-slate-50 transition"
-                          title="In hóa đơn nhiệt 80mm"
-                        >
-                          🖨️ In 80mm
-                        </button>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              );
-              })}
-              {filteredTickets.length === 0 && (
-                <tr><td colSpan="6" className="text-center py-8 text-slate-400">
-                  {tickets.length === 0 ? 'Không có phiếu nào.' : 'Không tìm thấy phiếu phù hợp.'}
-                </td></tr>
-              )}
-            </tbody>
-          </table>
-          </div>
-        </div>
-      )}
-
-      {/* TAB: THU NGÂN & XÁC NHẬN THANH TOÁN (CASHIER) */}
-      {activeTab === 'CASHIER' && canCashierAction && (
-        <div className="space-y-6">
-          {/* Cashier Stats & Overview */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-amber-600">Chờ thu tiền</span>
-                <span className="p-2 rounded-xl bg-amber-50 text-amber-600 text-lg">⏳</span>
-              </div>
-              <p className="text-2xl font-black text-slate-800 mt-2">
-                {tickets.filter(t => t.trang_thai !== 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' && Number(t.tong_tien || 0) > 0).length} ca
-              </p>
-              <p className="text-[11px] text-slate-400 mt-1">Đã có báo giá &amp; sẵn sàng thu tiền</p>
-            </div>
-
-            <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">Đã thu &amp; giao máy</span>
-                <span className="p-2 rounded-xl bg-emerald-50 text-emerald-600 text-lg">✓</span>
-              </div>
-              <p className="text-2xl font-black text-slate-800 mt-2">
-                {tickets.filter(t => t.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN').length} ca
-              </p>
-              <p className="text-[11px] text-slate-400 mt-1">Hoàn tất quy trình thu ngân</p>
-            </div>
-
-            <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-brand-blue">Doanh số hoàn tất</span>
-                <span className="p-2 rounded-xl bg-blue-50 text-brand-blue text-lg">💰</span>
-              </div>
-              <p className="text-2xl font-black text-brand-blue mt-2">
-                {tickets
-                  .filter(t => t.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' || t.trang_thai === 'ĐÃ_SỬA_XONG')
-                  .reduce((sum, t) => sum + (t.la_sinh_vien ? Math.round(Number(t.tong_tien || 0) * 0.85) : Number(t.tong_tien || 0)), 0)
-                  .toLocaleString('vi-VN')} đ
-              </p>
-              <p className="text-[11px] text-slate-400 mt-1">Gồm các ca sửa xong &amp; đã thu tiền</p>
-            </div>
-          </div>
-
-          {/* Cashier Table Section */}
-          <div className="bg-white p-5 md:p-6 rounded-2xl border border-slate-200/90 shadow-2xs">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-              <div>
-                <h3 className="text-lg font-bold text-brand-blue flex items-center gap-2">
-                  <span>💳</span> Bàn Thu Ngân &amp; Quản Lý Hóa Đơn
-                </h3>
-                <p className="text-xs text-slate-500 mt-0.5">Xác nhận thu tiền mặt, tạo mã VietQR tức thì và in hóa đơn nhiệt 80mm cho khách.</p>
-              </div>
-
-              {/* Search & Filter */}
-              <div className="flex flex-wrap items-center gap-2">
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">🔍</span>
-                  <input
-                    type="text"
-                    placeholder="Tìm mã phiếu, SĐT, tên khách..."
-                    value={cashierSearch}
-                    onChange={(e) => setCashierSearch(e.target.value)}
-                    className="pl-8 pr-3 py-1.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-brand-blue w-56"
-                  />
-                </div>
-                <select
-                  value={cashierFilter}
-                  onChange={(e) => setCashierFilter(e.target.value)}
-                  className="py-1.5 px-3 rounded-xl border border-slate-200 text-xs font-semibold bg-white text-slate-700 outline-none"
-                >
-                  <option value="PENDING">⏳ Chờ thu tiền</option>
-                  <option value="PAID">✓ Đã thu tiền</option>
-                  <option value="ALL">📋 Tất cả phiếu</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Table */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs min-w-[750px]">
-                <thead>
-                  <tr className="border-b border-slate-200 text-slate-500 uppercase tracking-wider text-[11px]">
-                    <th className="py-3 px-3">Mã phiếu / Ngày</th>
-                    <th className="py-3 px-3">Khách hàng</th>
-                    <th className="py-3 px-3">Thiết bị</th>
-                    <th className="py-3 px-3 text-right">Tổng thanh toán</th>
-                    <th className="py-3 px-3 text-center">Trạng thái</th>
-                    <th className="py-3 px-3 text-center">PT Thanh toán</th>
-                    <th className="py-3 px-3 text-right">Thao tác thu ngân</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {filteredCashierTickets.map(t => {
-                    const rawAmount = Number(t.tong_tien || 0);
-                    const isSv = Boolean(t.la_sinh_vien || t.mssv);
-                    const finalPay = isSv ? Math.round(rawAmount * 0.85) : rawAmount;
-                    const ticketIsPaid = t.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN';
-
-                    return (
-                      <tr key={t.id} className="hover:bg-slate-50/80 transition-colors">
-                        <td className="py-3 px-3">
-                          <strong className="font-mono text-brand-blue text-xs">{t.ma_phieu || t.ma_tra_cuu}</strong>
-                          <p className="text-[10px] text-slate-400 mt-0.5">{t.ngay_tao ? new Date(t.ngay_tao).toLocaleDateString('vi-VN') : ''}</p>
-                        </td>
-                        <td className="py-3 px-3 font-semibold text-slate-800">
-                          {t.ho_ten_khach || t.fullName}
-                          <p className="text-[10px] text-slate-500 font-normal">{t.so_dien_thoai || t.phone}</p>
-                        </td>
-                        <td className="py-3 px-3 text-slate-700">
-                          {t.ten_thiet_bi || t.deviceName}
-                          {t.so_imei_serial && <p className="text-[10px] text-slate-400 font-mono">S/N: {t.so_imei_serial}</p>}
-                        </td>
-                        <td className="py-3 px-3 text-right">
-                          <strong className="text-sm font-black text-slate-900">{finalPay.toLocaleString('vi-VN')} đ</strong>
-                          {isSv && (
-                            <span className="block text-[10px] text-emerald-600 font-bold">🎓 Trợ giá SV (-15%)</span>
-                          )}
-                        </td>
-                        <td className="py-3 px-3 text-center">
-                          <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
-                            ticketIsPaid
-                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                              : 'bg-amber-50 text-amber-700 border-amber-200'
-                          }`}>
-                            {ticketIsPaid ? '✓ Đã thu tiền' : '⏳ Chờ thu tiền'}
-                          </span>
-                        </td>
-                        <td className="py-3 px-3 text-center text-slate-600">
-                          {ticketIsPaid ? (
-                            <span className="text-[11px] font-semibold">
-                              {t.phuong_thuc_thanh_toan === 'CHUYEN_KHOAN_VIETQR' ? '📱 VietQR' : t.phuong_thuc_thanh_toan === 'THE_POS' ? '💳 Thẻ POS' : '💵 Tiền mặt'}
-                            </span>
-                          ) : (
-                            <span className="text-slate-400 text-[11px]">—</span>
-                          )}
-                        </td>
-                        <td className="py-3 px-3 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
-                            {!ticketIsPaid ? (
-                              <button
-                                type="button"
-                                onClick={() => openCashierModal(t)}
-                                className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-2xs transition flex items-center gap-1"
-                              >
-                                <span>💵</span> Thu tiền
-                              </button>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={() => setReceiptTicket(t)}
-                                className="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs border border-slate-200 transition"
-                              >
-                                🖨️ In (80mm)
-                              </button>
-                            )}
-                            <a
-                              href={`/thanh-toan/${t.ma_phieu || t.ma_tra_cuu}`}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="px-2 py-1.5 rounded-lg text-brand-blue hover:bg-blue-50 font-bold text-xs"
-                              title="Xem trang thanh toán công khai của khách"
-                            >
-                              🔗
-                            </a>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                  {filteredCashierTickets.length === 0 && (
-                    <tr>
-                      <td colSpan="7" className="py-12 text-center text-slate-400">
-                        Không có phiếu sửa chữa nào trong danh sách thu ngân.
                       </td>
                     </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal Xác Nhận Thu Tiền & Chọn Phương Thức Thanh Toán */}
-      {cashierTicket && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-lg max-h-[92vh] overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div>
-                <h3 className="text-lg font-bold text-brand-blue flex items-center gap-2">
-                  <span>💵</span> Thu Ngân Phiếu {cashierTicket.ma_phieu || cashierTicket.ma_tra_cuu}
-                </h3>
-                <p className="text-xs text-slate-500">
-                  Khách: <strong>{cashierTicket.ho_ten_khach || cashierTicket.fullName}</strong> ({cashierTicket.so_dien_thoai || cashierTicket.phone})
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setCashierTicket(null)}
-                className="text-slate-400 hover:text-slate-600 text-2xl font-bold"
-              >
-                ×
-              </button>
-            </div>
-
-            {/* Chi tiết số tiền */}
-            <div className="my-4 p-4 rounded-2xl bg-blue-50/70 border border-blue-200">
-              <div className="flex justify-between items-center text-xs text-slate-600 mb-1">
-                <span>Thiết bị:</span>
-                <strong className="text-slate-800">{cashierTicket.ten_thiet_bi || cashierTicket.deviceName}</strong>
-              </div>
-              <div className="flex justify-between items-center text-xs text-slate-600 mb-1">
-                <span>Tổng chi phí gốc:</span>
-                <span className={cashierTicket.la_sinh_vien ? 'line-through text-slate-400' : 'font-bold text-slate-800'}>
-                  {Number(cashierTicket.tong_tien || 0).toLocaleString('vi-VN')} đ
-                </span>
-              </div>
-              {cashierTicket.la_sinh_vien && (
-                <div className="flex justify-between items-center text-xs text-emerald-700 font-bold mb-1">
-                  <span>🎓 Trợ giá sinh viên (-15%):</span>
-                  <span>-{Math.round(Number(cashierTicket.tong_tien || 0) * 0.15).toLocaleString('vi-VN')} đ</span>
-                </div>
-              )}
-              <div className="flex justify-between items-center text-sm font-black text-slate-900 pt-2 border-t border-blue-200/80">
-                <span>Số tiền cần thu:</span>
-                <span className="text-xl font-black text-brand-blue">
-                  {(cashierTicket.la_sinh_vien
-                    ? Math.round(Number(cashierTicket.tong_tien || 0) * 0.85)
-                    : Number(cashierTicket.tong_tien || 0)
-                  ).toLocaleString('vi-VN')} đ
-                </span>
-              </div>
-            </div>
-
-            {/* Chọn hình thức thanh toán */}
-            <div className="mb-4">
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                Phương thức khách thanh toán *
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setCashierMethod('TIEN_MAT')}
-                  className={`p-3 rounded-xl border text-xs font-bold transition flex flex-col items-center gap-1 ${
-                    cashierMethod === 'TIEN_MAT'
-                      ? 'border-emerald-600 bg-emerald-50 text-emerald-800 shadow-xs'
-                      : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                  }`}
-                >
-                  <span className="text-xl">💵</span>
-                  <span>Tiền mặt</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setCashierMethod('CHUYEN_KHOAN_VIETQR')}
-                  className={`p-3 rounded-xl border text-xs font-bold transition flex flex-col items-center gap-1 ${
-                    cashierMethod === 'CHUYEN_KHOAN_VIETQR'
-                      ? 'border-blue-600 bg-blue-50 text-blue-800 shadow-xs'
-                      : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                  }`}
-                >
-                  <span className="text-xl">📱</span>
-                  <span>VietQR</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setCashierMethod('THE_POS')}
-                  className={`p-3 rounded-xl border text-xs font-bold transition flex flex-col items-center gap-1 ${
-                    cashierMethod === 'THE_POS'
-                      ? 'border-purple-600 bg-purple-50 text-purple-800 shadow-xs'
-                      : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                  }`}
-                >
-                  <span className="text-xl">💳</span>
-                  <span>Thẻ POS</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Nếu là Tiền mặt: Máy tính tiền thừa */}
-            {cashierMethod === 'TIEN_MAT' && (
-              <div className="mb-4 p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <label htmlFor="cash-received" className="font-bold text-slate-700">Tiền khách đưa (VNĐ):</label>
-                  <input
-                    id="cash-received"
-                    type="number"
-                    min="0"
-                    step="1000"
-                    value={cashierReceived}
-                    onChange={(e) => setCashierReceived(e.target.value)}
-                    className="w-36 px-2.5 py-1.5 rounded-lg border border-slate-300 text-right font-bold text-slate-800"
-                  />
-                </div>
-                {Number(cashierReceived) > 0 && (
-                  <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-200">
-                    <span className="text-slate-500">Tiền thối lại cho khách:</span>
-                    <strong className={`text-sm font-black ${
-                      Number(cashierReceived) - (cashierTicket.la_sinh_vien ? Math.round(Number(cashierTicket.tong_tien || 0) * 0.85) : Number(cashierTicket.tong_tien || 0)) >= 0
-                        ? 'text-emerald-700'
-                        : 'text-red-600'
-                    }`}>
-                      {Math.max(
-                        0,
-                        Number(cashierReceived) - (cashierTicket.la_sinh_vien ? Math.round(Number(cashierTicket.tong_tien || 0) * 0.85) : Number(cashierTicket.tong_tien || 0))
-                      ).toLocaleString('vi-VN')} đ
-                    </strong>
-                  </div>
+                  );
+                })}
+                {filteredTickets.length === 0 && (
+                  <tr>
+                    <td colSpan="6" className="text-center py-8 text-slate-400">
+                      Không tìm thấy hồ sơ phiếu QR nào phù hợp.
+                    </td>
+                  </tr>
                 )}
-              </div>
-            )}
-
-            {/* Nếu là VietQR: Hiển thị mã QR ngân hàng trực tiếp cho khách quét tại quầy */}
-            {cashierMethod === 'CHUYEN_KHOAN_VIETQR' && (
-              <div className="mb-4 p-3.5 rounded-2xl bg-blue-50/70 border border-blue-200 text-center">
-                <p className="text-xs font-bold text-brand-blue mb-2">Đưa mã QR này cho khách quét bằng App Ngân Hàng</p>
-                <img
-                  src={`https://img.vietqr.io/image/MB-02838604999-compact2.png?amount=${
-                    cashierTicket.la_sinh_vien ? Math.round(Number(cashierTicket.tong_tien || 0) * 0.85) : Number(cashierTicket.tong_tien || 0)
-                  }&addInfo=${encodeURIComponent(`TT ${cashierTicket.ma_phieu || cashierTicket.ma_tra_cuu}`)}&accountName=${encodeURIComponent('HUNGHAU IT SUPPORT')}`}
-                  alt="VietQR"
-                  className="w-40 h-auto mx-auto rounded-xl border border-slate-200 bg-white p-1"
-                />
-                <p className="text-[11px] text-slate-500 mt-2">Nội dung: <strong>TT {cashierTicket.ma_phieu || cashierTicket.ma_tra_cuu}</strong></p>
-              </div>
-            )}
-
-            {/* Ghi chú */}
-            <div className="mb-5">
-              <label htmlFor="cashier-note" className="block text-xs font-bold text-slate-700 mb-1">Ghi chú thu ngân (tùy chọn)</label>
-              <input
-                id="cashier-note"
-                type="text"
-                placeholder="VD: Khách chuyển khoản MB, đã xuất hóa đơn kèm phụ kiện..."
-                value={cashierNote}
-                onChange={(e) => setCashierNote(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-brand-blue"
-              />
-            </div>
-
-            {/* Actions */}
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => setCashierTicket(null)}
-                className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition"
-              >
-                Hủy
-              </button>
-              <button
-                type="button"
-                disabled={cashierProcessing}
-                onClick={confirmCashierPayment}
-                className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-md transition disabled:opacity-50"
-              >
-                {cashierProcessing ? 'Đang ghi nhận...' : '✓ Xác Nhận Đã Thu & Bàn Giao'}
-              </button>
-            </div>
+              </tbody>
+            </table>
           </div>
         </div>
       )}
 
-      {activeTab === 'STATS' && canViewStats && (
-        <div className="rounded-xl border-t-4 border-brand-blue bg-white p-5 shadow sm:p-6">
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+      {/* TAB 2: QUẢN LÝ LỊCH HẸN TƯ VẤN & CSKH */}
+      {activeTab === 'BOOKINGS' && canReceptionAction && (
+        <div className="bg-white p-6 rounded-xl shadow border-t-4 border-brand-orange">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
             <div>
-              <h3 className="text-xl font-bold text-brand-blue">Báo cáo doanh thu &amp; hiệu suất</h3>
-              <p className="mt-1 text-sm text-slate-500">Doanh thu ghi nhận các phiếu đã sửa xong và đã thu tiền hoàn tất.</p>
+              <h3 className="text-xl font-bold text-slate-800">Lịch Hẹn Tư Vấn &amp; Chăm Sóc Khách Hàng Qua Web QR</h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                💡 Khi bấm <b>Khách Đã Đến (Tạo Phiếu QR)</b>, hệ thống sẽ tự động khởi tạo Hồ sơ phiếu QR CSKH cho khách hàng.
+              </p>
             </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                Khoảng thời gian
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b-2 border-slate-200 text-xs font-bold uppercase text-slate-500">
+                  <th className="py-2.5 px-4">Ngày / Giờ Hẹn</th>
+                  <th className="py-2.5 px-4">Khách Hàng &amp; SĐT</th>
+                  <th className="py-2.5 px-4">Nội Dung Yêu Cầu Tư Vấn / Hỗ Trợ</th>
+                  <th className="py-2.5 px-4">Trạng Thái</th>
+                  <th className="py-2.5 px-4 text-center">Thao Tác</th>
+                </tr>
+              </thead>
+              <tbody>
+                {bookings.map(bk => (
+                  <tr key={bk.id} className="border-b hover:bg-slate-50 text-sm">
+                    <td className="py-3 px-4 font-bold text-brand-blue">
+                      {new Date(bk.ngay_hen).toLocaleDateString('vi-VN')} <br />
+                      <span className="text-red-500">{bk.gio_hen}</span>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="font-semibold text-slate-800">{bk.ho_ten_khach}</div>
+                      <div className="text-xs font-mono text-slate-500">{bk.so_dien_thoai}</div>
+                    </td>
+                    <td className="py-3 px-4 text-slate-700">{bk.mo_ta_loi}</td>
+                    <td className="py-3 px-4">
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+                        bk.trang_thai === 'CHO_XAC_NHAN' ? 'bg-yellow-100 text-yellow-800' :
+                        bk.trang_thai === 'DA_XAC_NHAN' ? 'bg-blue-100 text-blue-800' :
+                        bk.trang_thai === 'KHACH_DA_DEN' ? 'bg-emerald-100 text-emerald-800' :
+                        'bg-red-100 text-red-700'
+                      }`}>
+                        {bk.trang_thai === 'CHO_XAC_NHAN' ? 'CHỜ XÁC NHẬN' :
+                         bk.trang_thai === 'DA_XAC_NHAN' ? 'ĐÃ XÁC NHẬN' :
+                         bk.trang_thai === 'KHACH_DA_DEN' ? 'KHÁCH ĐÃ ĐẾN' : 'ĐÃ HỦY'}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      <div className="flex flex-wrap items-center justify-center gap-1.5">
+                        {bk.trang_thai === 'CHO_XAC_NHAN' && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => updateBookingStatus(bk.id, 'DA_XAC_NHAN')}
+                              className="bg-brand-blue hover:bg-blue-800 text-white px-3 py-1 rounded font-bold text-xs"
+                            >
+                              📞 Xác Nhận Lịch Hẹn
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => updateBookingStatus(bk.id, 'HUY')}
+                              className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded font-bold text-xs"
+                            >
+                              Hủy Lịch
+                            </button>
+                          </>
+                        )}
+                        {bk.trang_thai === 'DA_XAC_NHAN' && (
+                          <button
+                            type="button"
+                            onClick={() => updateBookingStatus(bk.id, 'KHACH_DA_DEN')}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded font-bold text-xs shadow-xs"
+                          >
+                            ✅ Khách Đã Đến (Tạo Phiếu QR)
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {bookings.length === 0 && (
+                  <tr>
+                    <td colSpan="5" className="text-center py-8 text-slate-400">
+                      Chưa có lịch hẹn CSKH nào.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 3: THỐNG KÊ HIỆU SUẤT CSKH & ĐÁNH GIÁ HÀI LÒNG (CSAT) */}
+      {activeTab === 'STATS' && canViewStats && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
+              <p className="text-xs font-bold uppercase tracking-wide text-slate-400">Tổng Hồ Sơ QR Tiếp Nhận</p>
+              <p className="mt-2 text-3xl font-extrabold text-brand-blue">{stats.totalTickets || tickets.length}</p>
+              <p className="mt-1 text-xs text-slate-500">Hồ sơ khởi tạo qua QR &amp; tại quầy</p>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
+              <p className="text-xs font-bold uppercase tracking-wide text-slate-400">Đã Hoàn Tất &amp; Cấp e-Warranty</p>
+              <p className="mt-2 text-3xl font-extrabold text-emerald-600">{stats.completedTickets || 0}</p>
+              <p className="mt-1 text-xs text-slate-500">Khách hàng đã nhận bàn giao &amp; sổ BH</p>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
+              <p className="text-xs font-bold uppercase tracking-wide text-slate-400">Chỉ Số Hài Lòng (CSAT)</p>
+              <p className="mt-2 text-3xl font-extrabold text-amber-500">{stats.avgRating || '5.0'} / 5.0 ⭐</p>
+              <p className="mt-1 text-xs text-slate-500">Đánh giá trực tiếp sau khi quét mã QR</p>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
+              <p className="text-xs font-bold uppercase tracking-wide text-slate-400">Tổng Lượt Đánh Giá QR</p>
+              <p className="mt-2 text-3xl font-extrabold text-indigo-600">{stats.totalReviews || 0} lượt</p>
+              <p className="mt-1 text-xs text-slate-500">Phản hồi chất lượng phục vụ CSKH</p>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h3 className="text-lg font-bold text-slate-800">Biểu Đồ Phân Bổ Trạng Thái Hồ Sơ Chăm Sóc Khách Hàng</h3>
+                <p className="text-xs text-slate-500">Thống kê trực quan tiến độ xử lý các phiếu yêu cầu hỗ trợ qua mã QR.</p>
+              </div>
+              <div className="flex items-center gap-2">
                 <select
                   value={reportPeriod}
-                  onChange={event => setReportPeriod(event.target.value)}
-                  aria-label="Khoảng thời gian báo cáo"
-                  className="rounded-lg border border-slate-300 px-3 py-2"
+                  onChange={e => setReportPeriod(e.target.value)}
+                  className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700"
                 >
                   <option value="week">7 ngày gần nhất</option>
-                  <option value="month">Tháng này</option>
+                  <option value="month">30 ngày gần nhất</option>
+                  <option value="year">12 tháng gần nhất</option>
                 </select>
-              </label>
-              <button
-                type="button"
-                onClick={() => {
-                  const revRows = (stats.revenueData || []).map((row, idx) => [
-                    idx + 1,
-                    row.date,
-                    Number(row.total_revenue || 0),
-                    stats.totalRevenue || 0,
-                    stats.totalPartsRevenue || 0,
-                    stats.completedTickets || 0
-                  ]);
-                  const summaryRow = ['', 'TỔNG DOANH THU KỲ', '', stats.totalRevenue || 0, stats.totalPartsRevenue || 0, stats.completedTickets || 0];
-                  exportEnterpriseExcel({
-                    filename: `Bao_Cao_Doanh_Thu_Tai_Chinh_${reportPeriod}.xlsx`,
-                    sheetName: 'Doanh Thu Tài Chính',
-                    title: `BÁO CÁO TỔNG HỢP DOANH THU & HIỆU SUẤT TÀI CHÍNH KINH DOANH (${reportPeriod === 'month' ? 'THEO THÁNG' : 'THEO TUẦN'})`,
-                    headers: ['STT', 'Ngày Ghi Nhận', 'Doanh Thu Ngày (VNĐ)', 'Tổng Doanh Thu Lũy Kế (VNĐ)', 'Doanh Thu Linh Kiện (VNĐ)', 'Số Ca Hoàn Tất'],
-                    rows: revRows,
-                    summaryRow,
-                    signRole: 'KẾ TOÁN TRƯỞNG'
-                  });
-                                  }}
-                className="rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-sm"
-              >
-                📊 Xuất Báo Cáo Doanh Thu (.xlsx)
-              </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const rows = (stats.statusData || []).map((item, idx) => [
+                      idx + 1,
+                      STATUS_LABELS[item.name] || item.name,
+                      Number(item.value || 0)
+                    ]);
+                    const summaryRow = ['', 'TỔNG CỘNG HỒ SƠ QR', stats.totalTickets || tickets.length];
+                    exportEnterpriseExcel({
+                      filename: `Bao_Cao_Thong_Ke_CSKH_QR_${new Date().toISOString().slice(0, 10)}.xlsx`,
+                      sheetName: 'Thống Kê CSKH',
+                      title: 'BÁO CÁO THỐNG KÊ HIỆU SUẤT CHĂM SÓC KHÁCH HÀNG QUA MÃ QR - MYH GROUP',
+                      headers: ['STT', 'Trạng Thái Hồ Sơ CSKH', 'Số Lượng Hồ Sơ (Phiếu)'],
+                      rows,
+                      summaryRow,
+                      signRole: 'TRƯỞNG BỘ PHẬN CSKH'
+                    });
+                  }}
+                  className="rounded-lg bg-brand-blue px-4 py-2 text-xs font-bold text-white hover:bg-blue-900"
+                >
+                  📊 Xuất Báo Cáo Thống Kê (.xlsx)
+                </button>
+              </div>
             </div>
-          </div>
-          <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <article className="rounded-xl bg-blue-50 p-5">
-              <p className="text-sm font-semibold text-slate-600">Doanh thu trong kỳ</p>
-              <p className="mt-2 text-2xl font-extrabold text-brand-blue">{Number(stats.totalRevenue || 0).toLocaleString('vi-VN')} đ</p>
-              <p className="mt-1 text-xs text-slate-500">{reportPeriod === 'week' ? '7 ngày gần nhất' : 'Từ đầu tháng đến hiện tại'}</p>
-            </article>
-            <article className="rounded-xl bg-green-50 p-5">
-              <p className="text-sm font-semibold text-slate-600">Phiếu đã hoàn tất</p>
-              <p className="mt-2 text-2xl font-extrabold text-green-800">{Number(stats.completedTickets || 0)} phiếu</p>
-              <p className="mt-1 text-xs text-slate-500">Đã hoàn tất sửa xong / giao khách trong kỳ</p>
-            </article>
-          </div>
-          <div className="mb-5 rounded-lg bg-slate-50 px-4 py-3">
-            <span className="text-sm text-slate-600">Doanh thu linh kiện trong kỳ: </span>
-            <strong className="text-brand-blue">{Number(stats.totalPartsRevenue || 0).toLocaleString('vi-VN')} đ</strong>
-          </div>
-          <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
-            <div className="min-w-0 rounded-xl border border-slate-200 p-4">
-              <h4 className="mb-4 font-bold text-slate-700">{reportPeriod === 'week' ? 'Doanh thu từng ngày — 7 ngày qua' : 'Doanh thu từng ngày — tháng này'}</h4>
-              <div className="h-[300px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={stats.revenueData} margin={{ top: 8, right: 12, left: 8, bottom: 8 }}>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="h-72 rounded-xl border border-slate-100 p-4">
+                <p className="mb-3 text-xs font-bold uppercase text-slate-500">Số lượng hồ sơ theo trạng thái</p>
+                <ResponsiveContainer width="100%" height="90%">
+                  <BarChart data={(stats.statusData || []).map(d => ({ ...d, label: STATUS_LABELS[d.name] || d.name }))}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" tickFormatter={tick => new Date(`${tick}T12:00:00`).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })} />
-                    <YAxis tickFormatter={value => Number(value).toLocaleString('vi-VN')} width={72} />
-                    <Tooltip labelFormatter={label => new Date(`${label}T12:00:00`).toLocaleDateString('vi-VN')} formatter={value => `${Number(value).toLocaleString('vi-VN')} đ`} />
-                    <Bar dataKey="total_revenue" name="Doanh thu" fill="#1a7f45" radius={[5, 5, 0, 0]} />
+                    <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+                    <YAxis allowDecimals={false} />
+                    <Tooltip />
+                    <Bar dataKey="value" name="Số hồ sơ" fill="#1E3A8A" radius={[6, 6, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-            </div>
-            <div className="min-w-0 rounded-xl border border-slate-200 p-4">
-              <h4 className="mb-4 font-bold text-slate-700">Phân bổ trạng thái phiếu</h4>
-              <div className="h-[300px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
+
+              <div className="h-72 rounded-xl border border-slate-100 p-4">
+                <p className="mb-3 text-xs font-bold uppercase text-slate-500">Tỷ trọng xử lý hồ sơ QR</p>
+                <ResponsiveContainer width="100%" height="90%">
                   <PieChart>
-                    <Pie data={stats.statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={98} fill="#8884d8" label>
-                      {stats.statusData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#a855f7', '#64748b'][index % 6]} />
+                    <Pie
+                      data={(stats.statusData || []).map(d => ({ ...d, label: STATUS_LABELS[d.name] || d.name }))}
+                      dataKey="value"
+                      nameKey="label"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={85}
+                      label={({ label, value }) => `${label}: ${value}`}
+                    >
+                      {(stats.statusData || []).map((entry, index) => (
+                        <Cell key={`cell-${entry.name}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                       ))}
                     </Pie>
                     <Tooltip />
@@ -1611,459 +1043,20 @@ function Dashboard() {
               </div>
             </div>
           </div>
-          <p className="mt-4 rounded-lg bg-amber-50 p-3 text-xs text-amber-900">
-            Báo cáo tính doanh thu từ các phiếu đã thanh toán và phân loại số lượng phiếu theo trạng thái hiện tại.
-          </p>
         </div>
       )}
 
-      {activeTab === 'NOTIFICATIONS' && (
-        <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h3 className="text-xl font-bold text-brand-blue">Trung tâm thông báo</h3>
-              <p className="mt-1 text-sm text-slate-500">Theo dõi phiếu sửa chữa, lịch hẹn và cảnh báo kho.</p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={markAllNotificationsRead}
-                disabled={unreadNotificationCount === 0}
-                className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Đánh dấu đã đọc
-              </button>
-              <button
-                type="button"
-                onClick={clearNotifications}
-                disabled={notifications.length === 0}
-                className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Xóa tất cả
-              </button>
-            </div>
-          </div>
-          <label className="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-600">
-            Hiển thị
-            <select
-              value={notificationFilter}
-              onChange={event => setNotificationFilter(event.target.value)}
-              className="rounded-lg border border-slate-300 px-3 py-2"
-            >
-              <option value="ALL">Tất cả thông báo</option>
-              <option value="UNREAD">Chưa đọc</option>
-            </select>
-            <span className="ml-auto text-xs font-normal">{unreadNotificationCount} chưa đọc</span>
-          </label>
-          <div className="space-y-2">
-            {notifications
-              .filter(item => !isNotificationCorrupted(item))
-              .filter(notification => notificationFilter !== 'UNREAD' || !notification.read)
-              .map(notification => (
-              <article key={notification.id} className={`rounded-lg border p-4 ${notification.read ? 'border-slate-100 bg-white' : 'border-blue-100 bg-blue-50'}`}>
-                <p className="font-medium text-sm text-slate-800">{notification.title || `Phiếu ${notification.ticketCode}: ${notification.status}`}</p>
-                {notification.description && <p className="mt-1 text-xs text-slate-500 font-normal">{notification.description}</p>}
-                <p className="mt-1 text-xs text-slate-500">{notification.createdAt}</p>
-              </article>
-            ))}
-            {notifications.filter(item => !isNotificationCorrupted(item)).filter(notification => notificationFilter !== 'UNREAD' || !notification.read).length === 0 && (
-              <p className="py-8 text-center text-sm text-slate-500">
-                {notificationFilter === 'UNREAD' ? 'Không có thông báo chưa đọc.' : 'Chưa có thông báo mới.'}
-              </p>
-            )}
-          </div>
-        </section>
-      )}
-
-      {activeTab === 'INVENTORY' && canViewInventory && (
-        <div className="space-y-5">
-          <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-            <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <h3 className="text-xl font-bold text-brand-blue">Kho linh kiện &amp; vật tư</h3>
-                <p className="mt-1 text-sm text-slate-500">
-                  {canManageInventory
-                    ? 'Quản lý danh mục, nhập thêm số lượng tồn kho và cập nhật giá niêm yết.'
-                    : 'Chế độ Kỹ thuật viên: Tra cứu tồn kho linh kiện (Quyền sửa giá & nhập hàng thuộc về Thủ kho / Quản lý).'}
-                </p>
-              </div>
-              <div className="flex flex-wrap items-center gap-3">
-                <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-800">
-                  Cảnh báo: {parts.filter(part => Number(part.so_luong) < Number(lowStockThreshold || 5)).length} linh kiện cần nhập hàng
-                </p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    let totalQty = 0;
-                    let totalValue = 0;
-                    const rows = parts.map((p, idx) => {
-                      const qty = Number(p.so_luong || 0);
-                      const price = Number(p.gia_ban || 0);
-                      const itemTotal = qty * price;
-                      totalQty += qty;
-                      totalValue += itemTotal;
-                      const status = qty <= 0 ? 'HẾT HÀNG' : qty < Number(lowStockThreshold || 5) ? 'CẢNH BÁO: SẮP HẾT' : 'ĐỦ TỒN KHO';
-                      return [
-                        idx + 1,
-                        `LK-${String(p.id).padStart(4, '0')}`,
-                        p.ten_linh_kien,
-                        price,
-                        qty,
-                        status,
-                        itemTotal
-                      ];
-                    });
-                    const summaryRow = ['', 'TỔNG CỘNG TOÀN KHO', `Tổng số mặt hàng: ${parts.length}`, '', totalQty, '', totalValue];
-                    exportEnterpriseExcel({
-                      filename: `Bao_Cao_Ton_Kho_Linh_Kien_${new Date().toISOString().slice(0, 10)}.xlsx`,
-                      sheetName: 'Kiểm Kê Tồn Kho',
-                      title: 'BÁO CÁO KIỂM KÊ TỒN KHO LINH KIỆN & VẬT TƯ SỬA CHỮA',
-                      headers: ['STT', 'Mã Linh Kiện', 'Tên Linh Kiện & Thông Số', 'Đơn Giá Bán (VNĐ)', 'Số Lượng Tồn Kho', 'Tình Trạng Kho', 'Tổng Giá Trị Tồn (VNĐ)'],
-                      rows,
-                      summaryRow,
-                      signRole: 'THỦ KHO LINH KIỆN'
-                    });
-                                      }}
-                  className="rounded-lg bg-brand-blue px-4 py-2 text-sm font-bold text-white hover:bg-blue-900"
-                >
-                  📊 Xuất Báo Cáo Tồn Kho (.xlsx)
-                </button>
-                {canManageInventory && (
-                  <button
-                    type="button"
-                    onClick={() => { resetPartForm(); setShowInventoryForm(true); }}
-                    className="rounded-lg bg-brand-blue px-4 py-2 text-sm font-bold text-white hover:bg-blue-800"
-                  >
-                    + Thêm linh kiện
-                  </button>
-                )}
-              </div>
-            </div>
-
-            <div className="mb-5 grid grid-cols-1 gap-3 md:grid-cols-[minmax(220px,1fr)_auto_auto]">
-              <input
-                type="search"
-                value={partSearch}
-                onChange={event => setPartSearch(event.target.value)}
-                placeholder="Tìm theo tên linh kiện..."
-                aria-label="Tìm theo tên linh kiện"
-                className="min-w-0 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-blue-100"
-              />
-              <label className="flex items-center gap-2 whitespace-nowrap text-sm text-slate-600">
-                Cảnh báo dưới
-                <input
-                  type="number"
-                  min="1"
-                  max="9999"
-                  value={lowStockThreshold}
-                  onChange={event => {
-                    const value = event.target.value;
-                    if (value === '' || Number(value) >= 1) setLowStockThreshold(value);
-                  }}
-                  aria-label="Ngưỡng cảnh báo tồn kho thấp"
-                  className="w-20 rounded-lg border border-slate-300 px-3 py-2"
-                />
-                chiếc
-              </label>
-              <select
-                value={stockFilter}
-                onChange={event => setStockFilter(event.target.value)}
-                aria-label="Lọc tình trạng linh kiện"
-                className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-              >
-                <option value="ALL">Tất cả linh kiện</option>
-                <option value="LOW">Sắp hết</option>
-                <option value="OUT">Hết hàng</option>
-                <option value="AVAILABLE">Còn hàng</option>
-              </select>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[680px] text-left">
-                <thead>
-                  <tr className="border-b border-slate-200 text-xs font-bold uppercase tracking-wide text-slate-500">
-                    <th className="px-3 py-3 w-16 text-center">Ảnh</th>
-                    <th className="px-3 py-3">Tên linh kiện</th>
-                    <th className="px-3 py-3 text-right">Giá bán</th>
-                    <th className="px-3 py-3 text-center">Tồn kho</th>
-                    <th className="px-3 py-3 text-center">Tình trạng</th>
-                    <th className="px-3 py-3 text-right">Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {parts
-                    .filter(part => part.ten_linh_kien.toLowerCase().includes(partSearch.toLowerCase()))
-                    .filter(part => {
-                      const quantity = Number(part.so_luong);
-                      const threshold = Number(lowStockThreshold || 5);
-                      if (stockFilter === 'LOW') return quantity > 0 && quantity < threshold;
-                      if (stockFilter === 'OUT') return quantity <= 0;
-                      if (stockFilter === 'AVAILABLE') return quantity >= threshold;
-                      return true;
-                    })
-                    .map(part => {
-                      const quantity = Number(part.so_luong);
-                      const threshold = Number(lowStockThreshold || 5);
-                      const outOfStock = quantity <= 0;
-                      const lowStock = !outOfStock && quantity < threshold;
-                      return (
-                        <tr key={part.id} className="border-b border-slate-100 text-sm last:border-0 hover:bg-slate-50">
-                          <td className="px-3 py-3 text-center">
-                            <div className="h-12 w-12 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center mx-auto shrink-0 shadow-sm">
-                              {part.hinh_anh ? (
-                                <img
-                                  src={part.hinh_anh}
-                                  alt={part.ten_linh_kien}
-                                  className="h-full w-full object-cover transition-transform duration-200 hover:scale-125"
-                                  onError={(e) => {
-                                    e.currentTarget.onerror = null;
-                                    e.currentTarget.style.display = 'none';
-                                    const next = e.currentTarget.nextElementSibling;
-                                    if (next) next.classList.remove('hidden');
-                                  }}
-                                />
-                              ) : null}
-                              <span className={`text-xl ${part.hinh_anh ? 'hidden' : ''}`}>⚙️</span>
-                            </div>
-                          </td>
-                          <td className="px-3 py-3 font-semibold text-slate-700">{part.ten_linh_kien}</td>
-                          <td className="px-3 py-3 text-right tabular-nums font-semibold text-brand-blue">{Number(part.gia_ban).toLocaleString('vi-VN')} đ</td>
-                          <td className="px-3 py-3 text-center font-semibold tabular-nums">{quantity}</td>
-                          <td className="px-3 py-3 text-center">
-                            <span className={`inline-block rounded-full px-3 py-1 text-xs font-bold ${
-                              outOfStock ? 'bg-red-50 text-red-700 border border-red-200' : lowStock ? 'bg-amber-50 text-amber-800 border border-amber-200' : 'bg-green-50 text-green-700 border border-green-200'
-                            }`}>
-                              {outOfStock ? 'Hết hàng' : lowStock ? 'Sắp hết' : 'Còn hàng'}
-                            </span>
-                          </td>
-                          <td className="px-3 py-3 text-right">
-                            {canManageInventory ? (
-                              <button
-                                type="button"
-                                onClick={() => editPart(part)}
-                                className="rounded-md px-3 py-1.5 text-sm font-semibold text-brand-blue hover:bg-blue-50"
-                              >
-                                Sửa giá / Nhập kho
-                              </button>
-                            ) : (
-                              <span className="text-xs text-slate-400">Chỉ xem tồn kho</span>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  {parts.length === 0 && (
-                    <tr><td colSpan="6" className="py-10 text-center text-sm text-slate-400">Chưa có linh kiện trong kho.</td></tr>
-                  )}
-                  {parts.length > 0 && parts.filter(part =>
-                    part.ten_linh_kien.toLowerCase().includes(partSearch.toLowerCase())
-                  ).filter(part => {
-                    const quantity = Number(part.so_luong);
-                    const threshold = Number(lowStockThreshold || 5);
-                    if (stockFilter === 'LOW') return quantity > 0 && quantity < threshold;
-                    if (stockFilter === 'OUT') return quantity <= 0;
-                    if (stockFilter === 'AVAILABLE') return quantity >= threshold;
-                    return true;
-                  }).length === 0 && (
-                    <tr><td colSpan="6" className="py-10 text-center text-sm text-slate-400">Không tìm thấy linh kiện phù hợp.</td></tr>
-                  )}
-
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          {showInventoryForm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">
-          <section role="dialog" aria-modal="true" aria-labelledby="inventory-form-title" className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white p-6 shadow-2xl">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h3 id="inventory-form-title" className="text-xl font-bold text-brand-blue">
-                  {editingPartId ? 'Cập nhật linh kiện' : 'Thêm linh kiện'}
-                </h3>
-                <p className="mt-1 text-sm text-slate-500">Giá và số lượng được dùng cho kho và bảng giá công khai.</p>
-              </div>
-              <button type="button" onClick={resetPartForm} aria-label="Đóng" className="rounded px-2 py-1 text-xl text-slate-500 hover:bg-slate-100">×</button>
-            </div>
-
-            {partFormError && (
-              <p role="alert" className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{partFormError}</p>
-            )}
-
-            <form onSubmit={savePart} className="mt-5 space-y-4">
-              <div>
-                <label htmlFor="part-name" className="mb-1 block text-sm font-semibold text-slate-700">Tên linh kiện *</label>
-                <input
-                  id="part-name"
-                  required
-                  maxLength={150}
-                  value={partForm.ten_linh_kien}
-                  onChange={event => setPartForm({ ...partForm, ten_linh_kien: event.target.value })}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2"
-                />
-              </div>
-              <div>
-                <label htmlFor="part-price" className="mb-1 block text-sm font-semibold text-slate-700">Giá bán (VNĐ) *</label>
-                <input
-                  id="part-price"
-                  type="number"
-                  required
-                  min="0"
-                  step="1"
-                  value={partForm.gia_ban}
-                  onChange={event => setPartForm({ ...partForm, gia_ban: event.target.value })}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2"
-                />
-              </div>
-              <div>
-                <label htmlFor="part-stock" className="mb-1 block text-sm font-semibold text-slate-700">Số lượng tồn *</label>
-                <input
-                  id="part-stock"
-                  type="number"
-                  required
-                  min="0"
-                  step="1"
-                  value={partForm.so_luong}
-                  onChange={event => setPartForm({ ...partForm, so_luong: event.target.value })}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2"
-                />
-              </div>
-              <div>
-                <label htmlFor="part-image" className="mb-1 block text-sm font-semibold text-slate-700">Link hình ảnh linh kiện (URL)</label>
-                <input
-                  id="part-image"
-                  type="url"
-                  placeholder="https://images.unsplash.com/... hoặc link ảnh sản phẩm"
-                  value={partForm.hinh_anh}
-                  onChange={event => setPartForm({ ...partForm, hinh_anh: event.target.value })}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                />
-                {partForm.hinh_anh && (
-                  <div className="mt-2 flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 p-2">
-                    <img
-                      src={partForm.hinh_anh}
-                      alt="Xem trước"
-                      className="h-12 w-12 rounded-lg object-cover border border-slate-200 shrink-0"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                        const fallback = e.currentTarget.parentElement?.querySelector('.preview-fallback');
-                        if (fallback) fallback.classList.remove('hidden');
-                      }}
-                    />
-                    <div className="preview-fallback hidden h-12 w-12 rounded-lg bg-amber-50 border border-amber-200 items-center justify-center text-amber-700 text-xs font-bold shrink-0">
-                      Lỗi ảnh
-                    </div>
-                    <div className="min-w-0 flex-1 text-xs text-slate-600">
-                      <p className="font-semibold text-slate-800">Ảnh xem trước</p>
-                      <p className="truncate text-[11px] text-slate-500">{partForm.hinh_anh}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-              <div className="flex gap-3">
-                <button
-                  type="submit"
-                  disabled={savingPart}
-                  className="flex-1 rounded-lg bg-brand-blue px-4 py-3 font-bold text-white hover:bg-blue-800 disabled:opacity-60"
-                >
-                  {savingPart ? 'Đang lưu...' : editingPartId ? 'Lưu thay đổi' : 'Thêm vào kho'}
-                </button>
-                <button
-                  type="button"
-                  onClick={resetPartForm}
-                  className="rounded-lg bg-slate-100 px-4 py-3 font-bold text-slate-700 hover:bg-slate-200"
-                >
-                  Hủy
-                </button>
-              </div>
-            </form>
-          </section>
-          </div>
-          )}
-        </div>
-      )}
-      
-      {activeTab === 'BOOKINGS' && canReceptionAction && (
-        <div className="bg-white p-6 rounded-xl shadow border-t-4 border-brand-orange">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-            <h3 className="text-xl font-bold">Lịch hẹn chưa xử lý / Sắp tới</h3>
-            <span className="text-xs font-medium text-slate-500">
-              💡 Khi bấm <b>Khách Đã Đến</b>, hệ thống sẽ tự động khởi tạo Phiếu sửa chữa QR &amp; đồng bộ ưu đãi sinh viên.
-            </span>
-          </div>
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b-2 border-slate-200">
-                <th className="py-2.5 px-4 font-medium">Ngày / Giờ Hẹn</th>
-                <th className="py-2.5 px-4 font-medium">Khách hàng</th>
-                <th className="py-2.5 px-4 font-medium">Lỗi mô tả</th>
-                <th className="py-2.5 px-4 font-medium">Trạng thái</th>
-                <th className="py-2.5 px-4 font-medium text-center">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bookings.map(bk => (
-                <tr key={bk.id} className="border-b hover:bg-slate-50">
-                  <td className="py-3 px-4 font-bold text-brand-blue">
-                    {new Date(bk.ngay_hen).toLocaleDateString('vi-VN')} <br/>
-                    <span className="text-red-500">{bk.gio_hen}</span>
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="font-semibold text-slate-800">{bk.ho_ten_khach}</div>
-                    <div className="text-xs text-slate-400">{bk.so_dien_thoai}</div>
-                    {bk.la_sinh_vien && (
-                      <div className="mt-1">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
-                          🎓 {bk.truong_hoc || 'Sinh viên'} (-15%)
-                        </span>
-                      </div>
-                    )}
-                  </td>
-                  <td className="py-3 px-4">{bk.mo_ta_loi}</td>
-                  <td className="py-3 px-4">
-                    <span className={`px-2 py-1 rounded text-xs font-bold ${
-                      bk.trang_thai === 'CHO_XAC_NHAN' ? 'bg-yellow-100 text-yellow-700' :
-                      bk.trang_thai === 'DA_XAC_NHAN' ? 'bg-blue-100 text-blue-700' :
-                      bk.trang_thai === 'KHACH_DA_DEN' ? 'bg-green-100 text-green-700' : 
-                      'bg-red-100 text-red-700'
-                    }`}>
-                      {bk.trang_thai === 'CHO_XAC_NHAN' ? 'CHỜ XÁC NHẬN' : 
-                       bk.trang_thai === 'DA_XAC_NHAN' ? 'ĐÃ XÁC NHẬN' : 
-                       bk.trang_thai === 'KHACH_DA_DEN' ? 'KHÁCH ĐÃ ĐẾN' : 'ĐÃ HỦY'}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-center space-y-2 flex flex-col items-center">
-                    {bk.trang_thai === 'CHO_XAC_NHAN' && (
-                      <>
-                        <button onClick={() => updateBookingStatus(bk.id, 'DA_XAC_NHAN')} className="bg-brand-blue text-white px-3 py-1 rounded font-bold text-sm w-full">Gọi & Chốt</button>
-                        <button onClick={() => updateBookingStatus(bk.id, 'HUY')} className="bg-red-500 text-white px-3 py-1 rounded font-bold text-sm w-full">Hủy Lịch</button>
-                      </>
-                    )}
-                    {bk.trang_thai === 'DA_XAC_NHAN' && (
-                      <button onClick={() => updateBookingStatus(bk.id, 'KHACH_DA_DEN')} className="bg-brand-green text-white px-3 py-1 rounded font-bold text-sm w-full">Khách Đã Đến (Tạo Phiếu QR)</button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-              {bookings.length === 0 && (
-                <tr><td colSpan="5" className="text-center py-8 text-slate-400">Không có lịch hẹn nào.</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
-
+      {/* TAB 4: QUẢN LÝ & PHÂN QUYỀN NHÂN SỰ CSKH */}
       {activeTab === 'EMPLOYEES' && canManageEmployees && (
         <div className="space-y-6">
-          {/* Sơ đồ Ma trận Phân quyền 6 Cấp bậc Từ Trên Xuống (Top-Down RBAC Hierarchy) */}
           <div className="bg-white p-6 rounded-2xl shadow-xs border border-slate-200/90">
             <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
               <div>
                 <h3 className="text-lg font-extrabold text-brand-blue flex items-center gap-2">
-                  <span>🏛️</span> Tháp Phân Quyền 6 Cấp Bậc Từ Trên Xuống (Top-Down RBAC)
+                  <span>🏛️</span> Phân Quyền Nhân Sự Hệ Thống Web Quét Mã QR CSKH (RBAC)
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Cấp trên quản lý cấp dưới: Giám Đốc (Level 100) cấp phát mọi quyền; Quản Lý (Level 80) chỉ cấp phát và điều hành nhân sự cấp dưới (&lt; Level 80).
+                  Quản trị viên (ADMIN) và Trưởng bộ phận CSKH (QUAN_LY) cấp phát tài khoản và phân quyền vận hành cho nhân sự.
                 </p>
               </div>
               <button
@@ -2071,18 +1064,16 @@ function Dashboard() {
                 onClick={openCreateEmployeeModal}
                 className="rounded-xl bg-brand-blue hover:bg-blue-800 px-4 py-2.5 text-xs font-extrabold text-white shadow-sm transition flex items-center gap-1.5"
               >
-                <span>+</span> Tạo Tài Khoản Nhân Viên Mới
+                <span>+</span> Tạo Tài Khoản Nhân Sự Mới
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
               {[
-                { key: 'GIAM_DOC', pages: 'Tất cả 6 trang + Quản trị tối cao' },
-                { key: 'QUAN_LY', pages: 'Tất cả 6 trang (Quản lý nhân sự cấp dưới)' },
-                { key: 'KE_TOAN', pages: 'Phiếu sửa chữa • Báo cáo doanh thu • Thu ngân' },
-                { key: 'THU_KHO', pages: 'Kho linh kiện (Nhập/Sửa giá) • Đối chiếu phiếu' },
-                { key: 'KY_THUAT_VIEN', pages: 'Phiếu sửa chữa • Chẩn đoán • Xem kho' },
-                { key: 'LE_TAN', pages: 'Phiếu sửa chữa (POS) • Lịch hẹn • Bàn giao máy' }
+                { key: 'ADMIN', pages: 'Toàn quyền hệ thống • Phân quyền nhân sự' },
+                { key: 'QUAN_LY', pages: 'Giám sát CSKH • Thống kê • Nhân sự cấp dưới' },
+                { key: 'KY_THUAT_VIEN', pages: 'Tiếp nhận phân loại • Xử lý hỗ trợ • Cấp e-Warranty' },
+                { key: 'LE_TAN', pages: 'Khởi tạo phiếu QR tại quầy • Lịch hẹn • In phiếu 80mm' }
               ].map((item) => {
                 const meta = ROLE_META[item.key];
                 return (
@@ -2092,12 +1083,11 @@ function Dashboard() {
                         <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-extrabold border ${meta.badgeClass}`}>
                           {meta.badge}
                         </span>
-                        <span className="text-[11px] font-mono font-bold text-slate-500"></span>
                       </div>
                       <p className="text-xs text-slate-600 leading-relaxed mt-1">{meta.permissionsText}</p>
                     </div>
                     <p className="text-[11px] font-bold text-brand-blue mt-2 pt-2 border-t border-slate-200/70">
-                      📌 Trang truy cập: <span className="font-semibold text-slate-700">{item.pages}</span>
+                      📌 Nghiệp vụ: <span className="font-semibold text-slate-700">{item.pages}</span>
                     </p>
                   </div>
                 );
@@ -2105,35 +1095,34 @@ function Dashboard() {
             </div>
           </div>
 
-          {/* Danh sách Tài khoản Nhân sự & Công cụ Cấp phát / Khóa / Đổi chức vụ */}
           <div className="bg-white p-6 rounded-2xl shadow-xs border-t-4 border-brand-blue">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h3 className="text-xl font-extrabold text-slate-800">Danh Sách Tài Khoản Nhân Sự ({employees.length})</h3>
+                <h3 className="text-xl font-extrabold text-slate-800">Danh Sách Tài Khoản Nhân Sự CSKH ({employees.length})</h3>
                 <p className="text-xs text-slate-500 mt-1">
-                  Đang đăng nhập với quyền: <strong>{currentRoleInfo.title} (Level {currentRoleLevel})</strong> — {isExecutive ? 'Bạn có toàn quyền tạo, đổi chức vụ và khóa mọi tài khoản.' : 'Bạn chỉ được phép tạo, sửa hoặc khóa tài khoản nhân sự cấp dưới (< Level 80).'}
+                  Đang đăng nhập với quyền: <strong>{currentRoleInfo.title}</strong>
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <span className="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-bold text-brand-blue border border-blue-200">
-                  👨‍🔧 Đang xử lý: {tickets.filter(t => t.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' || t.trang_thai === 'ĐANG_SỬA').length} máy
+                  🎧 Đang xử lý: {tickets.filter(t => t.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' || t.trang_thai === 'ĐANG_SỬA').length} hồ sơ
                 </span>
                 <span className="rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 border border-emerald-200">
-                  ✅ Đã hoàn tất: {tickets.filter(t => t.trang_thai === 'ĐÃ_SỬA_XONG' || t.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN').length} máy
+                  ✅ Đã hoàn tất: {tickets.filter(t => t.trang_thai === 'ĐÃ_SỬA_XONG' || t.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN').length} hồ sơ
                 </span>
               </div>
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[820px] text-left border-collapse">
+              <table className="w-full min-w-[780px] text-left border-collapse">
                 <thead>
                   <tr className="border-b-2 border-slate-200 text-xs font-bold uppercase text-slate-500">
-                    <th className="py-2.5 px-4 font-medium">Mã NV</th>
-                    <th className="py-2.5 px-4 font-medium">Họ và Tên</th>
-                    <th className="py-2.5 px-4 font-medium">Tài khoản</th>
-                    <th className="py-2.5 px-4 font-medium">Chức vụ &amp; Cấp bậc</th>
-                    <th className="py-2.5 px-4 font-medium text-center">Trạng thái</th>
-                    <th className="py-2.5 px-4 font-medium text-right">Thao tác phân quyền</th>
+                    <th className="py-2.5 px-4">Mã NV</th>
+                    <th className="py-2.5 px-4">Họ và Tên</th>
+                    <th className="py-2.5 px-4">Tài Khoản</th>
+                    <th className="py-2.5 px-4">Vai Trò CSKH</th>
+                    <th className="py-2.5 px-4 text-center">Trạng Thái</th>
+                    <th className="py-2.5 px-4 text-right">Thao Tác Phân Quyền</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2209,9 +1198,6 @@ function Dashboard() {
                       </tr>
                     );
                   })}
-                  {employees.length === 0 && (
-                    <tr><td colSpan="6" className="text-center py-8 text-slate-400">Chưa có dữ liệu nhân sự.</td></tr>
-                  )}
                 </tbody>
               </table>
             </div>
@@ -2219,19 +1205,78 @@ function Dashboard() {
         </div>
       )}
 
-      {/* Modal Tạo mới / Phân quyền & Đặt lại mật khẩu Nhân viên */}
+      {/* TAB 5: THÔNG BÁO THỜI GIAN THỰC */}
+      {activeTab === 'NOTIFICATIONS' && (
+        <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h3 className="text-lg font-bold text-slate-900">Thông Báo Hoạt Động CSKH Thời Gian Thực</h3>
+              <p className="text-xs text-slate-500">Tự động ghi nhận khi có hồ sơ QR mới, thay đổi trạng thái xử lý hoặc lịch hẹn mới.</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={markAllNotificationsRead}
+                className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+              >
+                Đánh dấu đã đọc
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setNotifications([]);
+                  setLatestNotice(null);
+                  localStorage.removeItem('ticketNotifications');
+                }}
+                className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
+              >
+                Xóa lịch sử
+              </button>
+            </div>
+          </div>
+          <label className="flex items-center gap-2 text-sm font-semibold text-slate-600">
+            Hiển thị
+            <select
+              value={notificationFilter}
+              onChange={event => setNotificationFilter(event.target.value)}
+              className="rounded-lg border border-slate-300 px-3 py-2"
+            >
+              <option value="ALL">Tất cả thông báo</option>
+              <option value="UNREAD">Chưa đọc</option>
+            </select>
+            <span className="ml-auto text-xs font-normal">{unreadNotificationCount} chưa đọc</span>
+          </label>
+          <div className="space-y-2">
+            {notifications
+              .filter(item => !isNotificationCorrupted(item))
+              .filter(notification => notificationFilter !== 'UNREAD' || !notification.read)
+              .map(notification => (
+                <article key={notification.id} className={`rounded-lg border p-4 ${notification.read ? 'border-slate-100 bg-white' : 'border-blue-100 bg-blue-50'}`}>
+                  <p className="font-medium text-sm text-slate-800">{notification.title || `Phiếu ${notification.ticketCode}: ${notification.status}`}</p>
+                  {notification.description && <p className="mt-1 text-xs text-slate-500 font-normal">{notification.description}</p>}
+                  <p className="mt-1 text-xs text-slate-500">{notification.createdAt}</p>
+                </article>
+              ))}
+            {notifications.filter(item => !isNotificationCorrupted(item)).filter(notification => notificationFilter !== 'UNREAD' || !notification.read).length === 0 && (
+              <p className="py-8 text-center text-sm text-slate-500">
+                {notificationFilter === 'UNREAD' ? 'Không có thông báo chưa đọc.' : 'Chưa có thông báo mới.'}
+              </p>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* MODAL 1: TẠO MỚI / PHÂN QUYỀN NHÂN VIÊN */}
       {showEmployeeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
           <div className="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl">
             <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-200">
               <div>
                 <h3 className="text-lg font-extrabold text-brand-blue">
-                  {editingEmployee ? `✏️ Phân Quyền Nhân Viên: ${editingEmployee.ho_ten}` : '👤 Tạo Tài Khoản Nhân Sự Mới'}
+                  {editingEmployee ? `✏️ Phân Quyền Nhân Sự: ${editingEmployee.ho_ten}` : '👤 Tạo Tài Khoản Nhân Sự CSKH Mới'}
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  {isExecutive
-                    ? 'Quyền Giám Đốc (Level 100): Được phép gán mọi chức vụ trong hệ thống.'
-                    : 'Quyền Quản Lý (Level 80): Chỉ được phép gán chức vụ nhân viên cấp dưới (< Level 80).'}
+                  Cấp phát tài khoản vận hành hệ thống Web Quét Mã QR Chăm Sóc Khách Hàng.
                 </p>
               </div>
               <button
@@ -2251,7 +1296,7 @@ function Dashboard() {
 
             <form onSubmit={saveEmployee} className="space-y-4 text-sm">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Họ và tên nhân viên *</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Họ và tên nhân sự *</label>
                 <input
                   type="text"
                   required
@@ -2271,7 +1316,7 @@ function Dashboard() {
                     disabled={Boolean(editingEmployee)}
                     value={employeeForm.ten_dang_nhap}
                     onChange={(e) => setEmployeeForm({ ...employeeForm, ten_dang_nhap: e.target.value })}
-                    placeholder="VD: ktv_minh"
+                    placeholder="VD: cskh_minh"
                     className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 font-mono focus:border-brand-blue outline-none disabled:bg-slate-100 disabled:text-slate-500"
                   />
                 </div>
@@ -2291,7 +1336,7 @@ function Dashboard() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Chức vụ &amp; Cấp bậc Phân quyền *</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Vai trò &amp; Cấp bậc Phân quyền CSKH *</label>
                 <select
                   value={employeeForm.vai_tro}
                   onChange={(e) => setEmployeeForm({ ...employeeForm, vai_tro: e.target.value })}
@@ -2299,14 +1344,12 @@ function Dashboard() {
                 >
                   {isExecutive && (
                     <>
-                      <option value="GIAM_DOC">👑 Giám Đốc Điều Hành</option>
-                      <option value="QUAN_LY">🛡️ Quản Lý Cửa Hàng</option>
+                      <option value="ADMIN">🛡️ Quản Trị Hệ Thống CSKH (ADMIN)</option>
+                      <option value="QUAN_LY">🏬 Trưởng Bộ Phận CSKH (QUAN_LY)</option>
                     </>
                   )}
-                  <option value="KE_TOAN">💰 Kế Toán / Thu Ngân</option>
-                  <option value="THU_KHO">📦 Thủ Kho Linh Kiện</option>
-                  <option value="KY_THUAT_VIEN">🔧 Kỹ Thuật Viên Sửa Chữa</option>
-                  <option value="LE_TAN">💁 Lễ Tân &amp; CSKH</option>
+                  <option value="KY_THUAT_VIEN">🎧 Chuyên Viên Hỗ Trợ CSKH (KY_THUAT_VIEN)</option>
+                  <option value="LE_TAN">👩‍💼 Lễ Tân &amp; Tiếp Nhận QR (LE_TAN)</option>
                 </select>
                 <p className="mt-1.5 text-[11px] text-slate-500 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
                   {ROLE_META[employeeForm.vai_tro]?.permissionsText}
@@ -2347,230 +1390,62 @@ function Dashboard() {
           </div>
         </div>
       )}
-    
+
+      {/* MODAL 2: IN PHIẾU TIẾP NHẬN & TRA CỨU MÃ QR CSKH (80MM) */}
       {receiptTicket && (
         <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 p-4">
           <div className="max-h-[95vh] w-full max-w-md overflow-y-auto rounded-xl bg-white p-5 shadow-2xl">
             <div className="mb-4 flex items-center justify-between print:hidden">
-              <h3 className="text-lg font-bold text-brand-blue">Phiếu tiếp nhận / hóa đơn</h3>
+              <h3 className="text-lg font-bold text-brand-blue">Phiếu Tiếp Nhận &amp; Tra Cứu Mã QR (80mm)</h3>
               <button type="button" onClick={() => setReceiptTicket(null)} className="rounded px-3 py-1 text-slate-600 hover:bg-slate-100">
                 Đóng
               </button>
             </div>
             <div id="thermal-receipt" className="mx-auto w-full max-w-[72mm] border border-dashed border-slate-300 p-4 text-sm text-slate-900">
               <div className="text-center">
-                <h1 className="text-base font-extrabold">HUNGHAU IT SUPPORT</h1>
+                <h1 className="text-base font-extrabold">MYH GROUP - CSKH QR</h1>
                 <p className="text-[10px] text-slate-600">615 Âu Cơ, P. Phú Trung, Q. Tân Phú, TP.HCM</p>
-                <p className="text-[10px] text-slate-600">Hotline: (028) 3860 4999</p>
-                <p className="mt-1 text-xs font-bold uppercase tracking-wider">PHIẾU TIẾP NHẬN / THANH TOÁN</p>
-                <p className="mt-2 text-lg font-bold">{receiptTicket.ma_phieu}</p>
+                <p className="text-[10px] text-slate-600">Hotline CSKH: (028) 3860 4999</p>
+                <p className="mt-1 text-xs font-bold uppercase tracking-wider">PHIẾU TIẾP NHẬN &amp; TRA CỨU QR</p>
+                <p className="mt-2 text-lg font-bold text-brand-blue">{receiptTicket.ma_phieu}</p>
               </div>
               <hr className="my-3 border-dashed border-slate-400" />
-              <p><strong>Ngày nhận:</strong> {receiptTicket.ngay_tao ? new Date(receiptTicket.ngay_tao).toLocaleString('vi-VN') : 'Chưa cập nhật'}</p>
+              <p><strong>Ngày tiếp nhận:</strong> {receiptTicket.ngay_tao ? new Date(receiptTicket.ngay_tao).toLocaleString('vi-VN') : 'Chưa cập nhật'}</p>
               <p className="mt-1"><strong>Khách hàng:</strong> {receiptTicket.ho_ten_khach}</p>
               <p className="mt-1"><strong>Điện thoại:</strong> {receiptTicket.so_dien_thoai}</p>
-              <p className="mt-1"><strong>Thiết bị:</strong> {receiptTicket.ten_thiet_bi || 'Không có thông tin'}</p>
-              <p className="mt-1"><strong>Mô tả lỗi:</strong> {receiptTicket.mo_ta_loi}</p>
-              {receiptTicket.la_sinh_vien && (
-                <div className="mt-1 rounded bg-emerald-50 p-1.5 text-xs text-emerald-800">
-                  <p><strong>🎓 Sinh viên:</strong> {receiptTicket.truong_hoc}</p>
-                  <p><strong>MSSV:</strong> {receiptTicket.mssv || 'Đã xác thực'}</p>
-                </div>
+              <p className="mt-1"><strong>Sản phẩm / Dịch vụ:</strong> {receiptTicket.ten_thiet_bi || 'Không có thông tin'}</p>
+              {receiptTicket.so_imei_serial && (
+                <p className="mt-1"><strong>Mã định danh (S/N):</strong> {receiptTicket.so_imei_serial}</p>
               )}
-              <p className="mt-1"><strong>Trạng thái:</strong> {receiptTicket.trang_thai.replace(/_/g, ' ')}</p>
+              <p className="mt-1"><strong>Nội dung yêu cầu CSKH:</strong> {receiptTicket.mo_ta_loi}</p>
+              <p className="mt-1"><strong>Trạng thái hiện tại:</strong> {STATUS_LABELS[receiptTicket.trang_thai] || receiptTicket.trang_thai}</p>
               <hr className="my-3 border-dashed border-slate-400" />
-              <p className="mb-2 text-xs font-bold uppercase">Chi tiết thanh toán</p>
-              {receiptPartsLoading && <p className="text-xs">Đang tải chi tiết linh kiện...</p>}
-              {receiptPartsError && <p className="text-xs font-semibold">{receiptPartsError}</p>}
-              {!receiptPartsLoading && !receiptPartsError && (
-                <>
-                  {receiptServiceTotal > 0 && (
-                    <div className="mb-2 flex justify-between gap-2">
-                      <span>Phí sửa chữa / dịch vụ</span>
-                      <span className="whitespace-nowrap">{receiptServiceTotal.toLocaleString('vi-VN')} đ</span>
-                    </div>
-                  )}
-                  {receiptParts.map((item, index) => (
-                    <div key={`${item.id}-${index}`} className="mb-2">
-                      <div className="flex justify-between gap-2">
-                        <span>{item.ten_linh_kien}</span>
-                        <span className="whitespace-nowrap">{(Number(item.so_luong) * Number(item.don_gia)).toLocaleString('vi-VN')} đ</span>
-                      </div>
-                      <div className="flex justify-between text-[10px] text-slate-600">
-                        <span>{item.so_luong} x {Number(item.don_gia).toLocaleString('vi-VN')} đ</span>
-                        {item.so_serial && <span className="font-mono text-blue-700">S/N: {item.so_serial}</span>}
-                      </div>
-                    </div>
-                  ))}
-                  {receiptParts.length === 0 && receiptServiceTotal === 0 && (
-                    <p className="mb-2 text-xs">Chưa có chi tiết thanh toán.</p>
-                  )}
-                </>
-              )}
-              <hr className="my-3 border-dashed border-slate-400" />
-              {receiptTicket.la_sinh_vien ? (
-                <>
-                  <div className="flex justify-between gap-2 text-xs text-slate-600">
-                    <span>Tổng chi phí gốc</span>
-                    <span className="line-through">{receiptTotal.toLocaleString('vi-VN')} đ</span>
-                  </div>
-                  <div className="flex justify-between gap-2 text-xs font-semibold text-emerald-700">
-                    <span>Trợ giá Sinh viên toàn quốc (-15%)</span>
-                    <span>-{Math.round(receiptTotal * 0.15).toLocaleString('vi-VN')} đ</span>
-                  </div>
-                  <div className="flex justify-between gap-2 text-base font-extrabold text-brand-orange mt-1">
-                    <span>Tổng thanh toán</span>
-                    <span className="whitespace-nowrap">{Math.round(receiptTotal * 0.85).toLocaleString('vi-VN')} đ</span>
-                  </div>
-                </>
-              ) : (
-                <div className="flex justify-between gap-2 text-base font-extrabold">
-                  <span>Tổng tiền</span>
-                  <span className="whitespace-nowrap">{receiptTotal.toLocaleString('vi-VN')} đ</span>
-                </div>
-              )}
-              <p className="mt-2 text-[10px] text-slate-600 border border-slate-200 p-1.5 rounded text-center">
-                🛡️ Sổ bảo hành điện tử (e-Warranty): Kích hoạt 06 tháng (180 ngày). Quét QR bên dưới để tra cứu hoặc yêu cầu bảo hành.
+              <p className="mt-2 text-[10px] text-slate-600 border border-slate-200 p-2 rounded text-center">
+                🛡️ <strong>Sổ bảo hành điện tử (e-Warranty):</strong> Kích hoạt 06 tháng (180 ngày) sau khi hoàn tất hỗ trợ. Quý khách quét mã QR bên dưới để theo dõi tiến độ xử lý thời gian thực hoặc gửi yêu cầu bảo hành.
               </p>
               {receiptQr && (
                 <div className="mt-4 text-center">
                   <img src={receiptQr} alt={`QR tra cứu phiếu ${receiptTicket.ma_phieu}`} className="mx-auto h-32 w-32" />
-                  <p className="mt-1 break-all text-[10px]">{window.location.origin}/track/{receiptTicket.ma_phieu}</p>
+                  <p className="mt-1 break-all text-[10px] font-mono">{window.location.origin}/track/{receiptTicket.ma_phieu}</p>
                 </div>
               )}
-              {receiptTotal > 0 && (
-                <div className="mt-3 pt-3 border-t border-dashed border-slate-300 text-center">
-                  <p className="text-[10px] font-bold uppercase text-brand-blue mb-1">💳 Quét VietQR Chuyển khoản Ngân hàng</p>
-                  <img
-                    src={`https://img.vietqr.io/image/MB-02838604999-compact2.png?amount=${receiptTicket.la_sinh_vien ? Math.round(receiptTotal * 0.85) : receiptTotal}&addInfo=${encodeURIComponent(`TT ${receiptTicket.ma_phieu}`)}&accountName=${encodeURIComponent('HUNGHAU IT SUPPORT')}`}
-                    alt="VietQR Thanh toán"
-                    className="mx-auto w-36 h-auto rounded border border-slate-200"
-                  />
-                  <p className="text-[10px] text-slate-600 mt-1">Nội dung CK: <strong>TT {receiptTicket.ma_phieu}</strong></p>
-                </div>
-              )}
-              <p className="mt-4 text-center text-xs">Cảm ơn quý khách đã sử dụng dịch vụ!</p>
+              <p className="mt-4 text-center text-xs font-semibold">Cảm ơn quý khách đã tin tưởng Tập đoàn MYH Group!</p>
             </div>
             <div className="mt-4 flex justify-end print:hidden">
               <button
                 type="button"
                 onClick={() => window.print()}
-                disabled={!receiptQr || receiptPartsLoading || Boolean(receiptPartsError)}
+                disabled={!receiptQr}
                 className="rounded-lg bg-brand-blue px-5 py-2 font-bold text-white hover:bg-blue-800 disabled:opacity-50"
               >
-                In hóa đơn (80mm)
+                🖨️ In Phiếu QR (80mm)
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Modal Thêm & Quản Lý Linh Kiện Trên Phiếu */}
-      {showPartModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white p-6 rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-brand-blue">Linh Kiện &amp; Dịch Vụ Của Phiếu</h3>
-              <button type="button" onClick={() => setShowPartModal(false)} className="text-slate-400 hover:text-slate-600 text-xl font-bold">×</button>
-            </div>
-
-            {/* Danh sách linh kiện đã gắn trên phiếu (Cho phép gỡ nếu nhập nhầm) */}
-            {modalTicketParts.length > 0 && (
-              <div className="mb-4 rounded-xl border border-slate-200 bg-slate-50 p-3">
-                <p className="text-xs font-bold text-slate-700 mb-2">🔧 Linh kiện đã gắn ({modalTicketParts.length}):</p>
-                <div className="space-y-2 max-h-40 overflow-y-auto">
-                  {modalTicketParts.map(item => (
-                    <div key={item.id} className="flex items-center justify-between gap-2 bg-white p-2 rounded-lg border border-slate-200 text-xs">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <div className="h-9 w-9 rounded-md bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0">
-                          {item.hinh_anh ? (
-                            <img
-                              src={item.hinh_anh}
-                              alt=""
-                              className="h-full w-full object-cover"
-                              onError={(e) => {
-                                e.currentTarget.style.display = 'none';
-                                const next = e.currentTarget.nextElementSibling;
-                                if (next) next.classList.remove('hidden');
-                              }}
-                            />
-                          ) : null}
-                          <span className={`text-sm ${item.hinh_anh ? 'hidden' : ''}`}>⚙️</span>
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-bold text-slate-800 truncate">{item.ten_linh_kien} (x{item.so_luong})</p>
-                          <p className="text-[10px] text-slate-500">
-                            {(Number(item.don_gia) * Number(item.so_luong)).toLocaleString('vi-VN')} đ
-                            {item.so_serial ? ` • S/N: ${item.so_serial}` : ''}
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => removePartFromTicket(item.id)}
-                        className="rounded bg-red-50 px-2 py-1 text-[11px] font-bold text-red-600 border border-red-200 hover:bg-red-100 whitespace-nowrap"
-                      >
-                        Gỡ &amp; Hoàn kho
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div className="mb-4">
-              <label className="block text-sm font-bold text-slate-700 mb-2">Chọn linh kiện thêm mới:</label>
-              <select 
-                value={selectedPartId} 
-                onChange={(e) => setSelectedPartId(e.target.value)}
-                className="w-full px-4 py-2 border border-slate-300 rounded focus:border-brand-blue outline-none"
-              >
-                <option value="">-- Chọn --</option>
-                {parts.map(p => (
-                  <option key={p.id} value={p.id} disabled={Number(p.so_luong) <= 0}>
-                    {p.ten_linh_kien} - {Number(p.gia_ban).toLocaleString('vi-VN')}đ ({Number(p.so_luong) <= 0 ? 'HẾT HÀNG' : `Tồn: ${p.so_luong}`})
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="mb-4">
-              <div className="flex justify-between items-center mb-1">
-                <label className="block text-sm font-bold text-slate-700">Mã Serial / IMEI linh kiện:</label>
-                <button
-                  type="button"
-                  onClick={() => setPartSerial(`SN-${Date.now().toString().slice(-6)}`)}
-                  className="text-xs text-brand-blue hover:underline font-semibold"
-                >
-                  + Tạo mã nhanh
-                </button>
-              </div>
-              <input 
-                type="text" 
-                value={partSerial} 
-                onChange={(e) => setPartSerial(e.target.value)}
-                placeholder="VD: SN-SAM-980PRO-2026..."
-                className="w-full px-4 py-2 border border-slate-300 rounded focus:border-brand-blue outline-none font-mono text-sm"
-              />
-            </div>
-            <div className="mb-6">
-              <label className="block text-sm font-bold text-slate-700 mb-2">Số lượng:</label>
-              <input 
-                type="number" 
-                min="1" 
-                value={partQuantity} 
-                onChange={(e) => setPartQuantity(Number(e.target.value))}
-                className="w-full px-4 py-2 border border-slate-300 rounded focus:border-brand-blue outline-none"
-              />
-            </div>
-            <div className="flex gap-4">
-              <button onClick={() => setShowPartModal(false)} className="flex-1 py-2 bg-slate-200 text-slate-700 font-bold rounded hover:bg-slate-300">Đóng</button>
-              <button onClick={addPartToTicket} className="flex-1 py-2 bg-brand-blue text-white font-bold rounded hover:bg-blue-700">Xác Nhận Thêm</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal Tiếp Nhận Nhanh Tại Quầy (POS Walk-in) */}
+      {/* MODAL 3: TIẾP NHẬN NHANH TẠI QUẦY (POS WALK-IN) */}
       {showPosModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-xl max-h-[92vh] overflow-y-auto shadow-2xl p-6">
@@ -2644,7 +1519,6 @@ function Dashboard() {
                 />
               </div>
 
-              {/* Ảnh hiện trạng tại quầy */}
               <div className="rounded-xl bg-amber-50/70 p-3.5 border border-amber-200">
                 <label className="block text-xs font-bold text-amber-900 mb-2">📸 Đính kèm ảnh minh chứng hiện trạng lúc tiếp nhận (Tùy chọn):</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -2677,7 +1551,7 @@ function Dashboard() {
                   disabled={savingPos}
                   className="rounded-xl bg-brand-blue px-5 py-2.5 font-bold text-white hover:bg-blue-900 shadow-md disabled:opacity-60"
                 >
-                  {savingPos ? 'Đang tạo phiếu...' : 'Tạo Phiếu & In Mã QR 80mm →'}
+                  {savingPos ? 'Đang tạo hồ sơ...' : 'Tạo Hồ Sơ & In Mã QR 80mm →'}
                 </button>
               </div>
             </form>
@@ -2685,19 +1559,19 @@ function Dashboard() {
         </div>
       )}
 
-      {/* Modal Quản lý Ảnh Ngoại Quan Lúc Nhận Máy */}
+      {/* MODAL 4: QUẢN LÝ ẢNH MINH CHỨNG HIỆN TRẠNG ĐÍNH KÈM HỒ SƠ QR */}
       {showPhotoModal && photoTicket && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
             <div className="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
               <div>
                 <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                  <span>📸</span> Ảnh Ngoại Quan Tiếp Nhận - Phiếu {photoTicket.ma_phieu}
+                  <span>📸</span> Ảnh Minh Chứng Hiện Trạng — Hồ Sơ {photoTicket.ma_phieu}
                 </h3>
                 <p className="text-xs text-slate-500">{photoTicket.ten_thiet_bi} • Khách hàng: {photoTicket.ho_ten_khach}</p>
               </div>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={() => setShowPhotoModal(false)}
                 className="text-slate-400 hover:text-slate-700 text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-200"
               >
@@ -2706,17 +1580,16 @@ function Dashboard() {
             </div>
 
             <div className="p-6 overflow-y-auto flex-1 space-y-6">
-              {/* Form tải ảnh mới */}
               <div className="p-4 bg-blue-50/60 rounded-xl border border-blue-200">
-                <h4 className="text-sm font-bold text-brand-blue mb-2">Chụp hoặc Tải Thêm Ảnh Ngoại Quan:</h4>
+                <h4 className="text-sm font-bold text-brand-blue mb-2">Chụp hoặc Tải Thêm Ảnh Minh Chứng Hiện Trạng:</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
                   <div className="sm:col-span-2">
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Ghi chú (vết trầy, cấn móp, tem...):</label>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1">Ghi chú hiện trạng đính kèm ảnh:</label>
                     <input
                       type="text"
                       value={newPhotoNote}
                       onChange={(e) => setNewPhotoNote(e.target.value)}
-                      placeholder="VD: Cấn góc trái màn hình, rách tem ốc đáy..."
+                      placeholder="VD: Ảnh hiện trạng sản phẩm lúc tiếp nhận tại quầy..."
                       className="w-full px-3 py-1.5 text-sm border border-slate-300 rounded focus:border-brand-blue outline-none bg-white"
                     />
                   </div>
@@ -2736,12 +1609,11 @@ function Dashboard() {
                 </div>
               </div>
 
-              {/* Danh sách ảnh */}
               <div>
-                <h4 className="text-sm font-bold text-slate-700 mb-3">Hình ảnh ngoại quan đã lưu ({ticketPhotos.length}):</h4>
+                <h4 className="text-sm font-bold text-slate-700 mb-3">Hình ảnh minh chứng đã lưu ({ticketPhotos.length}):</h4>
                 {ticketPhotos.length === 0 ? (
                   <div className="text-center py-10 bg-slate-50 border border-dashed border-slate-300 rounded-xl text-slate-500 text-sm">
-                    Chưa có ảnh ngoại quan nào được tải lên cho phiếu này.
+                    Chưa có ảnh minh chứng nào được tải lên cho hồ sơ này.
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -2756,7 +1628,7 @@ function Dashboard() {
                           />
                         </div>
                         <div className="p-2.5 text-xs flex-1 flex flex-col justify-between">
-                          <p className="font-semibold text-slate-800 line-clamp-2">{img.ghi_chu || 'Ảnh ngoại quan'}</p>
+                          <p className="font-semibold text-slate-800 line-clamp-2">{img.ghi_chu || 'Ảnh hiện trạng tiếp nhận'}</p>
                           <p className="text-[10px] text-slate-400 mt-1">
                             {img.thoi_gian_tao ? new Date(img.thoi_gian_tao).toLocaleString('vi-VN') : 'Lúc tiếp nhận'}
                           </p>

@@ -3,15 +3,20 @@ import { Link } from 'react-router-dom';
 import AdminNav from '../../components/AdminNav';
 import api from '../../services/api';
 
-export default function ManagerDashboard() {
-  const currentRole = localStorage.getItem('role') || 'LE_TAN';
-  const isExecutive = currentRole === 'GIAM_DOC' || currentRole === 'ADMIN';
+const STATUS_LABELS = {
+  'CHỜ_KHÁM': 'Chờ tiếp nhận',
+  'ĐANG_CHUẨN_ĐOÁN': 'Đang kiểm tra & phân loại',
+  'ĐANG_SỬA': 'Đang xử lý hỗ trợ',
+  'ĐÃ_SỬA_XONG': 'Đã xử lý xong',
+  'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN': 'Hoàn tất CSKH & Bảo hành',
+  'YÊU_CẦU_BẢO_HÀNH': 'Yêu cầu bảo hành'
+};
 
+export default function ManagerDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [tickets, setTickets] = useState([]);
   const [bookings, setBookings] = useState([]);
-  const [lowStockParts, setLowStockParts] = useState([]);
   const [subordinateCount, setSubordinateCount] = useState(0);
 
   useEffect(() => {
@@ -19,23 +24,18 @@ export default function ManagerDashboard() {
     Promise.all([
       api.get('/tickets'),
       api.get('/tickets/booking'),
-      api.get('/tickets/parts'),
       api.get('/admin/employees')
     ])
-      .then(([ticketsRes, bookingsRes, partsRes, employeesRes]) => {
+      .then(([ticketsRes, bookingsRes, employeesRes]) => {
         if (!ignore) {
           if (ticketsRes.data.success) setTickets(ticketsRes.data.data || []);
           if (bookingsRes.data.success) setBookings(bookingsRes.data.data || []);
-          if (partsRes.data.success) {
-            const parts = partsRes.data.data || [];
-            setLowStockParts(parts.filter(p => Number(p.so_luong_ton || 0) <= 5));
-          }
           if (employeesRes.data.success) setSubordinateCount(employeesRes.data.data?.length || 0);
         }
       })
       .catch(err => {
         if (!ignore) {
-          setError(err.response?.data?.message || 'Không thể tải dữ liệu điều hành cửa hàng.');
+          setError(err.response?.data?.message || 'Không thể tải dữ liệu điều hành bộ phận CSKH.');
         }
       })
       .finally(() => {
@@ -49,11 +49,11 @@ export default function ManagerDashboard() {
     };
   }, []);
 
-  // Operational metrics
-  const pendingIntake = tickets.filter(t => t.trang_thai === 'TIẾP_NHẬN' || t.trang_thai === 'ĐANG_CHUẨN_ĐOÁN').length;
-  const waitingApproval = tickets.filter(t => t.trang_thai === 'CHỜ_KHÁCH_CHỐT_GIÁ').length;
-  const inRepair = tickets.filter(t => t.trang_thai === 'ĐANG_SỬA' || t.trang_thai === 'KHÁCH_ĐÃ_ĐỒNG_Ý').length;
-  const pendingBookings = bookings.filter(b => b.trang_thai === 'CHỜ_XÁC_NHẬN' || b.trang_thai === 'PENDING').length;
+  // CSKH Operational metrics
+  const pendingIntake = tickets.filter(t => t.trang_thai === 'CHỜ_KHÁM' || t.trang_thai === 'ĐANG_CHUẨN_ĐOÁN').length;
+  const inProcessing = tickets.filter(t => t.trang_thai === 'ĐANG_SỬA' || t.trang_thai === 'YÊU_CẦU_BẢO_HÀNH').length;
+  const completedCount = tickets.filter(t => t.trang_thai === 'ĐÃ_SỬA_XONG' || t.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN').length;
+  const pendingBookings = bookings.filter(b => b.trang_thai === 'CHO_XAC_NHAN' || b.trang_thai === 'CHỜ_XÁC_NHẬN').length;
 
   return (
     <div className="min-h-screen bg-slate-50 p-6 md:p-8">
@@ -71,14 +71,14 @@ export default function ManagerDashboard() {
                 </h2>
               </div>
               <p className="mt-2 text-sm text-blue-100 max-w-2xl leading-relaxed">
-                Trực tiếp điều phối ca trực CSKH, giám sát tiến độ xử lý hồ sơ QR của khách hàng, phê duyệt lịch hẹn và quản lý phân quyền nhân sự bộ phận CSKH.
+                Giám sát toàn bộ quy trình tiếp nhận hồ sơ QR, phân loại yêu cầu hỗ trợ, kích hoạt bảo hành điện tử (e-Warranty), duyệt lịch hẹn và quản lý nhân sự bộ phận CSKH.
               </p>
               <div className="mt-3 flex flex-wrap gap-2 text-xs">
                 <span className="rounded-full bg-white/10 border border-white/20 px-3 py-1 font-bold">
                   Trụ sở: Tập đoàn MYH Group • 615 Âu Cơ, Q. Tân Phú
                 </span>
                 <span className="rounded-full bg-white/10 border border-white/20 px-3 py-1 font-bold">
-                  Tổng nhân lực CSKH: {subordinateCount} nhân sự
+                  Nhân sự bộ phận CSKH: {subordinateCount} nhân viên
                 </span>
               </div>
             </div>
@@ -110,51 +110,51 @@ export default function ManagerDashboard() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Đang Chuẩn Đoán & Tiếp Nhận</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Mới Tiếp Nhận &amp; Phân Loại</span>
               <span className="text-xl">🔍</span>
             </div>
             <p className="mt-3 text-3xl font-bold text-slate-800">{pendingIntake}</p>
-            <p className="mt-1 text-xs text-slate-500">Cần KTV hoàn tất chẩn đoán</p>
+            <p className="mt-1 text-xs text-slate-500">Hồ sơ QR chờ chuyên viên kiểm tra</p>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Chờ Khách Chốt Báo Giá</span>
-              <span className="text-xl">⏳</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Đang Xử Lý Hỗ Trợ CSKH</span>
+              <span className="text-xl">🎧</span>
             </div>
-            <p className="mt-3 text-3xl font-bold text-slate-800">{waitingApproval}</p>
-            <p className="mt-1 text-xs text-slate-500">Đã gửi báo giá qua cổng QR</p>
+            <p className="mt-3 text-3xl font-bold text-slate-800">{inProcessing}</p>
+            <p className="mt-1 text-xs text-slate-500">Chuyên viên đang hỗ trợ khách hàng</p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+          <div className="rounded-2xl border border-emerald-200 bg-white p-5 shadow-xs">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Đang Trong Quá Trình Sửa</span>
-              <span className="text-xl">🔧</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">Đã Hoàn Tất &amp; Cấp e-Warranty</span>
+              <span className="text-xl">🛡️</span>
             </div>
-            <p className="mt-3 text-3xl font-bold text-slate-800">{inRepair}</p>
-            <p className="mt-1 text-xs text-slate-500">Khách đã duyệt tiến hành</p>
+            <p className="mt-3 text-3xl font-bold text-emerald-800">{completedCount}</p>
+            <p className="mt-1 text-xs text-slate-500">Đã hoàn tất CSKH &amp; bảo hành điện tử</p>
           </div>
 
           <div className="rounded-2xl border border-blue-200 bg-white p-5 shadow-xs">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-blue-700">Lịch Hẹn Cần Duyệt Gấp</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-blue-700">Lịch Hẹn CSKH Chờ Duyệt</span>
               <span className="text-xl">📅</span>
             </div>
             <p className="mt-3 text-3xl font-bold text-blue-900">{pendingBookings}</p>
-            <p className="mt-1 text-xs text-slate-500">Khách đặt online chờ xếp ca</p>
+            <p className="mt-1 text-xs text-slate-500">Khách đặt lịch hẹn tư vấn qua Web</p>
           </div>
         </div>
 
-        {/* Live Operational Feeds: Tickets & Stock Warnings */}
+        {/* Live Operational Feeds: Tickets & Bookings */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Feed 1: Ca Sửa Cần Điều Phối */}
+          {/* Feed 1: Tiến Độ Hồ Sơ QR CSKH */}
           <section className="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-base font-semibold text-slate-800">
-                  Tiến Độ Các Phiếu Sửa Chữa Mới Nhất
+                  Tiến Độ Các Hồ Sơ Yêu Cầu CSKH (QR) Mới Nhất
                 </h3>
-                <p className="text-xs text-slate-500">Giám sát trạng thái điều phối giữa Lễ tân và Kỹ thuật viên</p>
+                <p className="text-xs text-slate-500">Giám sát trạng thái tiếp nhận và xử lý hỗ trợ giữa Lễ tân và Chuyên viên CSKH</p>
               </div>
               <Link to="/admin" className="text-xs font-bold text-brand-blue hover:underline">
                 Xem tất cả ({tickets.length}) →
@@ -168,38 +168,38 @@ export default function ManagerDashboard() {
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
                     <tr className="border-b border-slate-200 bg-slate-50 text-[11px] font-semibold uppercase text-slate-500">
-                      <th className="py-2.5 px-3">Mã phiếu</th>
+                      <th className="py-2.5 px-3">Mã phiếu QR</th>
                       <th className="py-2.5 px-3">Khách hàng</th>
-                      <th className="py-2.5 px-3">Thiết bị</th>
-                      <th className="py-2.5 px-3">Trạng thái</th>
-                      <th className="py-2.5 px-3 text-right">Chi phí</th>
+                      <th className="py-2.5 px-3">Sản phẩm / Dịch vụ</th>
+                      <th className="py-2.5 px-3">Trạng thái CSKH</th>
+                      <th className="py-2.5 px-3 text-right">Bảo hành (e-Warranty)</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {tickets.slice(0, 6).map(t => (
                       <tr key={t.id} className="hover:bg-slate-50/80">
                         <td className="py-2.5 px-3 font-mono font-bold text-brand-blue">
-                          {t.ma_tra_cuu}
+                          {t.ma_tra_cuu || t.ma_phieu}
                         </td>
                         <td className="py-2.5 px-3 font-medium text-slate-800">
-                          {t.ho_ten}
+                          {t.ho_ten_khach || t.ho_ten}
                         </td>
                         <td className="py-2.5 px-3 text-slate-600">
-                          {t.ten_may || 'Laptop / PC'}
+                          {t.ten_thiet_bi || t.ten_may || 'Hồ sơ CSKH'}
                         </td>
                         <td className="py-2.5 px-3">
-                          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-700">
-                            {t.trang_thai?.replace(/_/g, ' ')}
+                          <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-bold text-slate-700">
+                            {STATUS_LABELS[t.trang_thai] || t.trang_thai?.replace(/_/g, ' ')}
                           </span>
                         </td>
-                        <td className="py-2.5 px-3 text-right font-bold text-slate-800">
-                          {Number(t.tong_tien || 0).toLocaleString('vi-VN')} đ
+                        <td className="py-2.5 px-3 text-right font-semibold text-emerald-700">
+                          {t.han_bao_hanh ? `Đến ${new Date(t.han_bao_hanh).toLocaleDateString('vi-VN')}` : 'Chờ kích hoạt'}
                         </td>
                       </tr>
                     ))}
                     {tickets.length === 0 && (
                       <tr>
-                        <td colSpan={5} className="py-6 text-center text-slate-400">Chưa có phiếu sửa chữa nào.</td>
+                        <td colSpan={5} className="py-6 text-center text-slate-400">Chưa có hồ sơ QR CSKH nào.</td>
                       </tr>
                     )}
                   </tbody>
@@ -208,34 +208,34 @@ export default function ManagerDashboard() {
             )}
           </section>
 
-          {/* Feed 2: Cảnh Báo Tồn Kho Linh Kiện (Dành cho Quản lý đôn đốc thủ kho) */}
+          {/* Feed 2: Lịch hẹn CSKH sắp tới */}
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs flex flex-col">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-base font-semibold text-slate-800">
-                  Cảnh Báo Linh Kiện (Sắp Hết)
+                  Lịch Hẹn CSKH Mới Nhất
                 </h3>
-                <p className="text-xs text-slate-500">Mức tồn kho &le; 5 cần nhập gấp</p>
+                <p className="text-xs text-slate-500">Khách đặt lịch tư vấn &amp; bảo hành qua Web</p>
               </div>
-              <span className="text-xl">⚠️</span>
+              <span className="text-xl">📅</span>
             </div>
 
             <div className="flex-1 space-y-3 overflow-y-auto max-h-80">
-              {lowStockParts.slice(0, 6).map(part => (
-                <div key={part.id} className="rounded-xl border border-slate-200 bg-amber-50/50 p-3 flex items-center justify-between">
-                  <div>
-                    <p className="font-bold text-slate-800 text-xs">{part.ten_linh_kien}</p>
-                    <p className="text-[11px] text-slate-500 mt-0.5">Mã: {part.ma_linh_kien} • Đơn giá: {Number(part.don_gia || 0).toLocaleString('vi-VN')} đ</p>
+              {bookings.slice(0, 5).map(b => (
+                <div key={b.id} className="rounded-xl border border-slate-200 bg-slate-50/70 p-3">
+                  <div className="flex items-center justify-between">
+                    <p className="font-bold text-slate-800 text-xs">{b.ho_ten_khach} ({b.so_dien_thoai})</p>
+                    <span className="rounded-md bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-brand-blue">
+                      {b.gio_hen} • {b.ngay_hen ? new Date(b.ngay_hen).toLocaleDateString('vi-VN') : ''}
+                    </span>
                   </div>
-                  <span className="rounded-lg bg-red-100 border border-red-300 px-2.5 py-1 text-xs font-bold text-red-700 shrink-0">
-                    Còn {part.so_luong_ton} cái
-                  </span>
+                  <p className="text-[11px] text-slate-600 mt-1 line-clamp-2">{b.mo_ta_loi}</p>
                 </div>
               ))}
 
-              {lowStockParts.length === 0 && (
-                <div className="py-12 text-center text-xs font-semibold text-emerald-600 bg-emerald-50 rounded-xl">
-                  ✅ Toàn bộ linh kiện đều đủ số lượng tồn kho an toàn!
+              {bookings.length === 0 && (
+                <div className="py-12 text-center text-xs font-semibold text-slate-500 bg-slate-50 rounded-xl">
+                  Chưa có lịch hẹn CSKH mới.
                 </div>
               )}
             </div>
@@ -245,48 +245,34 @@ export default function ManagerDashboard() {
                 to="/admin"
                 className="block text-center rounded-xl bg-slate-100 py-2 text-xs font-bold text-slate-700 hover:bg-slate-200 transition"
               >
-                Quản lý kho linh kiện toàn diện →
+                Mở Bàn Điều Hành Hồ Sơ QR →
               </Link>
             </div>
           </section>
         </div>
 
         {/* Manager Action Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Link
             to="/admin/nhan-su"
             className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-xs hover:border-brand-blue hover:shadow-md transition flex items-center justify-between"
           >
             <div>
-              <p className="text-xs font-bold text-brand-blue uppercase tracking-wider">Đội Ngũ Cửa Hàng</p>
-              <h4 className="text-base font-semibold text-slate-800 mt-1">Phân Quyền Nhân Sự</h4>
-              <p className="text-xs text-slate-500 mt-1">Cấp tài khoản & điều phối ca trực</p>
+              <p className="text-xs font-bold text-brand-blue uppercase tracking-wider">Nhân Sự Bộ Phận CSKH</p>
+              <h4 className="text-base font-semibold text-slate-800 mt-1">Quản Lý Nhân Sự &amp; Phân Quyền</h4>
+              <p className="text-xs text-slate-500 mt-1">Cấp tài khoản Lễ tân, Chuyên viên hỗ trợ &amp; điều phối ca trực</p>
             </div>
             <span className="text-2xl group-hover:translate-x-1 transition-transform">👥 →</span>
           </Link>
-
-          {isExecutive && (
-            <Link
-              to="/admin/giam-doc"
-              className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-xs hover:border-brand-blue hover:shadow-md transition flex items-center justify-between"
-            >
-              <div>
-                <p className="text-xs font-bold text-brand-blue uppercase tracking-wider">Chiến Lược C-Level</p>
-                <h4 className="text-base font-semibold text-slate-800 mt-1">Trang Giám Đốc</h4>
-                <p className="text-xs text-slate-500 mt-1">Báo cáo tài chính & chỉ số cấp cao</p>
-              </div>
-              <span className="text-2xl group-hover:translate-x-1 transition-transform">👑 →</span>
-            </Link>
-          )}
 
           <Link
             to="/admin"
             className="group rounded-2xl border border-blue-200 bg-white p-5 shadow-xs hover:border-blue-400 hover:shadow-md transition flex items-center justify-between"
           >
             <div>
-              <p className="text-xs font-bold text-blue-700 uppercase tracking-wider">Tác Nghiệp Thực Tế</p>
-              <h4 className="text-base font-semibold text-slate-800 mt-1">Bàn Vận Hành Kỹ Thuật</h4>
-              <p className="text-xs text-slate-500 mt-1">Duyệt phiếu, tạo QR và xuất hóa đơn</p>
+              <p className="text-xs font-bold text-blue-700 uppercase tracking-wider">Tác Nghiệp CSKH Thực Tế</p>
+              <h4 className="text-base font-semibold text-slate-800 mt-1">Bàn Điều Hành Hồ Sơ QR</h4>
+              <p className="text-xs text-slate-500 mt-1">Tiếp nhận phiếu QR, cập nhật tiến độ xử lý &amp; in phiếu nhiệt 80mm</p>
             </div>
             <span className="text-2xl group-hover:translate-x-1 transition-transform">📋 →</span>
           </Link>

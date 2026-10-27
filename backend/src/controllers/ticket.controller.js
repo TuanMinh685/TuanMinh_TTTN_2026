@@ -11,7 +11,7 @@ const initSession = async (req, res, next) => {
 
         res.status(201).json({
             success: true,
-            message: 'Khởi tạo phiên tiếp nhận mã QR thành công!',
+            message: 'Khởi tạo phiên tiếp nhận mã QR CSKH thành công!',
             data: sessionData
         });
     } catch (error) {
@@ -37,7 +37,7 @@ const checkSession = async (req, res, next) => {
                 success: false,
                 errorCode: 'SESSION_EXPIRED_OR_USED',
                 message: session.status === 'SUBMITTED'
-                    ? 'Mã QR này đã được sử dụng để gửi phiếu sửa chữa!'
+                    ? 'Mã QR này đã được sử dụng để gửi phiếu yêu cầu CSKH!'
                     : 'Mã QR tiếp nhận đã hết hạn (quá 15 phút). Vui lòng nhờ Lễ tân cấp mã mới!',
                 data: session
             });
@@ -90,13 +90,13 @@ const submitIntake = async (req, res, next) => {
         const fullName = req.body.fullName || req.body.ho_ten;
         const phone = req.body.phone || req.body.so_dien_thoai;
         const issueDescription = req.body.issueDescription || req.body.mo_ta_loi || req.body.tinh_trang_may;
-        const deviceName = req.body.deviceName || req.body.ten_may || req.body.ten_thiet_bi || 'Thiết bị tiếp nhận qua QR';
+        const deviceName = req.body.deviceName || req.body.ten_may || req.body.ten_thiet_bi || 'Sản phẩm / Dịch vụ cần CSKH';
 
         if (!fullName || !phone || !issueDescription) {
             return res.status(400).json({ 
                 success: false, 
                 errorCode: "VALIDATION_ERROR",
-                message: "Vui lòng nhập đầy đủ Họ tên (fullName), Số điện thoại (phone) và Mô tả sự cố (issueDescription)!" 
+                message: "Vui lòng nhập đầy đủ Họ tên (fullName), Số điện thoại (phone) và Nội dung yêu cầu CSKH (issueDescription)!" 
             });
         }
 
@@ -111,7 +111,7 @@ const submitIntake = async (req, res, next) => {
         
         res.status(201).json({
             success: true,
-            message: "Gửi yêu cầu tiếp nhận sửa chữa thành công!",
+            message: "Gửi yêu cầu Chăm sóc khách hàng thành công!",
             data: {
                 ticketId: result.ticketId,
                 ticketCode: result.ticketCode,
@@ -143,20 +143,17 @@ const STATUS_ALIAS_MAP = {
     PENDING: 'CHỜ_KHÁM',
     IN_PROGRESS: 'ĐANG_CHUẨN_ĐOÁN',
     DIAGNOSING: 'ĐANG_CHUẨN_ĐOÁN',
-    WAITING_QUOTE: 'CHỜ_KHÁCH_CHỐT_GIÁ',
     REPAIRING: 'ĐANG_SỬA',
     COMPLETED: 'ĐÃ_SỬA_XONG',
-    DELIVERED: 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN',
-    CANCELLED: 'KHÁCH_TỪ_CHỐI_SỬA'
+    DELIVERED: 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN'
 };
 
 const ROLE_ALLOWED_STATUSES = {
-    GIAM_DOC: null, // Toàn quyền mọi trạng thái
-    ADMIN: null,    // Toàn quyền mọi trạng thái
-    QUAN_LY: null,  // Toàn quyền mọi trạng thái
-    LE_TAN: ['CHỜ_KHÁM', 'ĐANG_CHUẨN_ĐOÁN', 'ĐANG_SỬA', 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN', 'KHÁCH_TỪ_CHỐI_SỬA'],
-    KY_THUAT_VIEN: ['ĐANG_CHUẨN_ĐOÁN', 'CHỜ_KHÁCH_CHỐT_GIÁ', 'ĐANG_SỬA', 'ĐÃ_SỬA_XONG'],
-    KE_TOAN: ['ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN']
+    GIAM_DOC: null,
+    ADMIN: null,
+    QUAN_LY: null,
+    LE_TAN: ['CHỜ_KHÁM', 'ĐANG_CHUẨN_ĐOÁN', 'ĐANG_SỬA', 'ĐÃ_SỬA_XONG', 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN'],
+    KY_THUAT_VIEN: ['CHỜ_KHÁM', 'ĐANG_CHUẨN_ĐOÁN', 'ĐANG_SỬA', 'ĐÃ_SỬA_XONG', 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN']
 };
 
 const updateTicketStatus = async (req, res, next) => {
@@ -164,8 +161,6 @@ const updateTicketStatus = async (req, res, next) => {
         const { id } = req.params;
         const rawStatus = req.body.trang_thai || req.body.status;
         const ghi_chu = req.body.ghi_chu || req.body.note || '';
-        const phuong_thuc_thanh_toan = req.body.phuong_thuc_thanh_toan || req.body.paymentMethod || null;
-        const customTongTien = req.body.tong_tien !== undefined ? req.body.tong_tien : req.body.amount;
         const userRole = req.user?.Role;
         const employeeId = req.user?.AccountID || null;
 
@@ -182,21 +177,21 @@ const updateTicketStatus = async (req, res, next) => {
         if (Array.isArray(allowedStatuses) && !allowedStatuses.includes(trang_thai)) {
             return res.status(403).json({
                 success: false,
-                message: `Phân quyền nghiệp vụ: Chức vụ (${userRole}) không được phép chuyển phiếu sang trạng thái "${trang_thai.replace(/_/g, ' ')}"!`
+                message: `Phân quyền nghiệp vụ: Chức vụ (${userRole}) không được phép chuyển hồ sơ sang trạng thái "${trang_thai.replace(/_/g, ' ')}"!`
             });
         }
 
-        const data = await ticketService.updateTicketStatus(id, trang_thai, ghi_chu, employeeId, phuong_thuc_thanh_toan, customTongTien);
+        const data = await ticketService.updateTicketStatus(id, trang_thai, ghi_chu, employeeId);
         if (!data) {
             return res.status(404).json({
                 success: false,
-                message: 'Không tìm thấy phiếu sửa chữa cần cập nhật!'
+                message: 'Không tìm thấy hồ sơ phiếu CSKH cần cập nhật!'
             });
         }
 
         res.status(200).json({
             success: true,
-            message: 'Cập nhật trạng thái thành công',
+            message: 'Cập nhật trạng thái hồ sơ CSKH thành công',
             data
         });
     } catch (error) {
@@ -206,12 +201,12 @@ const updateTicketStatus = async (req, res, next) => {
 
 const submitBooking = async (req, res, next) => {
     try {
-        const { fullName, phone, zaloId, ngayHen, gioHen, moTaLoi, loaiDichVu } = req.body;
+        const { fullName, phone, ngayHen, gioHen, moTaLoi } = req.body;
         if (!fullName || !phone || !ngayHen || !gioHen || !moTaLoi) {
-            return res.status(400).json({ success: false, message: "Vui lòng nhập đầy đủ thông tin đặt lịch!" });
+            return res.status(400).json({ success: false, message: "Vui lòng nhập đầy đủ thông tin đặt lịch hẹn CSKH!" });
         }
         await ticketService.submitBooking(req.body);
-        res.status(201).json({ success: true, message: "Đặt lịch thành công!" });
+        res.status(201).json({ success: true, message: "Đặt lịch hẹn CSKH thành công!" });
     } catch (error) {
         next(error);
     }
@@ -234,120 +229,12 @@ const updateBookingStatus = async (req, res, next) => {
         res.status(200).json({
             success: true,
             message: result?.ticketCode
-                ? `Đã tiếp nhận khách đến và tự động tạo phiếu ${result.ticketCode}!`
-                : 'Cập nhật lịch hẹn thành công',
+                ? `Đã tiếp nhận khách đến và tự động tạo phiếu QR CSKH ${result.ticketCode}!`
+                : 'Cập nhật lịch hẹn CSKH thành công',
             data: result
         });
     } catch (error) {
         next(error);
-    }
-};
-
-
-const getParts = async (req, res, next) => {
-    try {
-        const data = await ticketService.getParts();
-        res.status(200).json({ success: true, data });
-    } catch (err) {
-        next(err);
-    }
-};
-
-const validatePartInput = ({ ten_linh_kien, gia_ban, so_luong }) => {
-    if (typeof ten_linh_kien !== 'string' || ten_linh_kien.trim().length === 0 || ten_linh_kien.trim().length > 150) {
-        return 'Tên linh kiện phải có từ 1 đến 150 ký tự.';
-    }
-    if (!Number.isFinite(gia_ban) || gia_ban < 0) {
-        return 'Giá bán phải là số không âm.';
-    }
-    if (!Number.isSafeInteger(so_luong) || so_luong < 0) {
-        return 'Số lượng tồn phải là số nguyên không âm.';
-    }
-    return null;
-};
-
-const createPart = async (req, res, next) => {
-    try {
-        const name = req.body.ten_linh_kien;
-        const part = {
-            ten_linh_kien: typeof name === 'string' ? name.trim() : name,
-            gia_ban: req.body.gia_ban,
-            so_luong: req.body.so_luong,
-            hinh_anh: req.body.hinh_anh || null
-        };
-        const validationMessage = validatePartInput(part);
-        if (validationMessage) {
-            return res.status(400).json({ success: false, message: validationMessage });
-        }
-
-        const data = await ticketService.createPart(part);
-        res.status(201).json({ success: true, message: 'Đã thêm linh kiện vào kho.', data });
-    } catch (err) {
-        next(err);
-    }
-};
-
-const updatePart = async (req, res, next) => {
-    try {
-        const id = Number(req.params.id);
-        if (!Number.isSafeInteger(id) || id < 1) {
-            return res.status(400).json({ success: false, message: 'Mã linh kiện không hợp lệ.' });
-        }
-
-        const name = req.body.ten_linh_kien;
-        const part = {
-            ten_linh_kien: typeof name === 'string' ? name.trim() : name,
-            gia_ban: req.body.gia_ban,
-            so_luong: req.body.so_luong,
-            hinh_anh: req.body.hinh_anh || null
-        };
-        const validationMessage = validatePartInput(part);
-        if (validationMessage) {
-            return res.status(400).json({ success: false, message: validationMessage });
-        }
-
-        const data = await ticketService.updatePart(id, part);
-        if (!data) {
-            return res.status(404).json({ success: false, message: 'Không tìm thấy linh kiện.' });
-        }
-
-        res.status(200).json({ success: true, message: 'Đã cập nhật kho và bảng giá.', data });
-    } catch (err) {
-        next(err);
-    }
-};
-
-const getTicketParts = async (req, res, next) => {
-    try {
-        const { id } = req.params;
-        const data = await ticketService.getTicketParts(id);
-        res.status(200).json({ success: true, data });
-    } catch (err) {
-        next(err);
-    }
-};
-
-const addPartToTicket = async (req, res, next) => {
-    try {
-        const { id } = req.params;
-        const { partId, quantity, so_serial } = req.body;
-        if (!Number.isSafeInteger(Number(partId)) || Number(partId) < 1 || !Number.isSafeInteger(quantity) || quantity < 1) {
-            return res.status(400).json({ success: false, message: 'Linh kiện và số lượng phải hợp lệ.' });
-        }
-        const result = await ticketService.addPartToTicket(id, Number(partId), quantity, so_serial);
-        res.status(200).json({ success: true, message: 'Đã thêm linh kiện và lưu mã Serial thành công', data: result });
-    } catch (err) {
-        next(err);
-    }
-};
-
-const removePartFromTicket = async (req, res, next) => {
-    try {
-        const { id, partRecordId } = req.params;
-        const result = await ticketService.removePartFromTicket(id, partRecordId);
-        res.status(200).json({ success: true, message: 'Đã gỡ linh kiện khỏi phiếu và hoàn trả kho.', data: result });
-    } catch (err) {
-        next(err);
     }
 };
 
@@ -369,7 +256,7 @@ const addTicketPhoto = async (req, res, next) => {
             return res.status(400).json({ success: false, message: 'Vui lòng cung cấp đường dẫn hoặc dữ liệu ảnh.' });
         }
         const data = await ticketService.addTicketPhoto(id, { duong_dan_anh, loai_anh, ghi_chu });
-        res.status(201).json({ success: true, message: 'Đã lưu ảnh ngoại quan thành công', data });
+        res.status(201).json({ success: true, message: 'Đã lưu ảnh minh chứng thành công', data });
     } catch (err) {
         next(err);
     }
@@ -378,12 +265,6 @@ const addTicketPhoto = async (req, res, next) => {
 module.exports = {
     initSession,
     checkSession,
-    getParts,
-    createPart,
-    updatePart,
-    getTicketParts,
-    addPartToTicket,
-    removePartFromTicket,
     getTicketPhotos,
     addTicketPhoto,
     submitIntake,

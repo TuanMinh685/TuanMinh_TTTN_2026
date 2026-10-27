@@ -2,28 +2,35 @@ const { pool } = require('../config/db.config');
 const bcrypt = require('bcrypt');
 
 const getDashboardStats = async () => {
-    const revenueResult = await pool.query(`
-        SELECT COALESCE(SUM(tong_tien), 0) as total_revenue
-        FROM phieu_sua_chua
-        WHERE (trang_thai = 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' OR trang_thai = 'ĐÃ_SỬA_XONG')
-    `);
-
     const ticketStats = await pool.query(`
         SELECT trang_thai, COUNT(*) as count
         FROM phieu_sua_chua
         GROUP BY trang_thai
     `);
 
+    const reviewStats = await pool.query(`
+        SELECT COUNT(*) as total_reviews, COALESCE(ROUND(AVG(so_sao), 1), 5.0) as avg_rating
+        FROM danh_gia
+    `);
+
     const tickets = ticketStats.rows || [];
+    const totalTickets = tickets.reduce((sum, r) => sum + Number(r.count || 0), 0);
+    const completedTickets = tickets
+        .filter(r => r.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' || r.trang_thai === 'ĐÃ_SỬA_XONG')
+        .reduce((sum, r) => sum + Number(r.count || 0), 0);
+
     const statusDistribution = tickets.map((r) => ({
         name: r.trang_thai,
         value: Number(r.count || 0)
     }));
 
     return {
-        revenue: Number(revenueResult.rows[0]?.total_revenue || 0),
+        totalTickets,
+        completedTickets,
+        totalReviews: Number(reviewStats.rows[0]?.total_reviews || 0),
+        avgRating: Number(reviewStats.rows[0]?.avg_rating || 5.0),
         tickets,
-        revenueData: tickets,
+        statusData: statusDistribution,
         statusDistribution
     };
 };
