@@ -4,7 +4,6 @@ import api from '../../services/api';
 import { exportEnterpriseExcel } from '../../utils/excelExport';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import QRCode from 'qrcode';
-import { SOFTWARE_PACKAGE_GROUPS, SOFTWARE_PACKAGE_OPTIONS } from '../../components/softwarePackages';
 
 const STATUS_LABELS = {
   'CHỜ_KHÁM': 'Chờ khám',
@@ -63,7 +62,7 @@ const ROLE_META = {
     title: 'Kỹ Thuật Viên Sửa Chữa',
     badge: '🔧 Kỹ Thuật Viên Sửa Chữa',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
-    permissionsText: 'Chẩn đoán kỹ thuật, gắn/gỡ linh kiện kèm mã Serial (S/N), chọn gói phần mềm, gửi báo giá và xác nhận Sửa Xong.'
+    permissionsText: 'Chẩn đoán kỹ thuật, gắn/gỡ linh kiện kèm mã Serial (S/N), gửi báo giá và xác nhận Sửa Xong.'
   },
   LE_TAN: {
     level: 30,
@@ -180,11 +179,6 @@ function Dashboard() {
     photoBase64: '',
     photoNote: ''
   });
-  const [selectedSoftwareTicketId, setSelectedSoftwareTicketId] = useState('');
-  const [selectedSoftwareGroup, setSelectedSoftwareGroup] = useState('ALL');
-  const [selectedSoftwarePackages, setSelectedSoftwarePackages] = useState([]);
-  const [savingSoftwarePackages, setSavingSoftwarePackages] = useState(false);
-  const [softwarePackageError, setSoftwarePackageError] = useState('');
   const knownStatuses = useRef(null);
   const knownBookingStatuses = useRef(null);
   const knownStock = useRef(null);
@@ -630,70 +624,6 @@ function Dashboard() {
     }
   };
 
-  const selectSoftwareTicket = (ticketId) => {
-    setSelectedSoftwareTicketId(ticketId);
-    const ticket = tickets.find(item => String(item.id) === ticketId);
-    setSelectedSoftwarePackages(ticket?.software_packages || []);
-    setSoftwarePackageError('');
-  };
-
-  const toggleSoftwarePackage = (packageName) => {
-    let currentTicketId = selectedSoftwareTicketId;
-    if (!currentTicketId) {
-      if (tickets.length > 0) {
-        const activeTicket = tickets.find(t => t.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' || t.trang_thai === 'ĐANG_SỬA') || tickets[0];
-        currentTicketId = String(activeTicket.id);
-        setSelectedSoftwareTicketId(currentTicketId);
-        const initialPackages = activeTicket?.software_packages || [];
-        const nextPackages = initialPackages.includes(packageName)
-          ? initialPackages.filter(item => item !== packageName)
-          : [...initialPackages, packageName];
-        setSelectedSoftwarePackages(nextPackages);
-        setSoftwarePackageError('');
-        return;
-      } else {
-        setSoftwarePackageError('⚠️ Hiện chưa có phiếu sửa chữa nào trong hệ thống để gán phần mềm.');
-        return;
-      }
-    }
-    setSelectedSoftwarePackages(previous => previous.includes(packageName)
-      ? previous.filter(item => item !== packageName)
-      : [...previous, packageName]);
-  };
-
-  const saveSoftwarePackages = async () => {
-    if (!selectedSoftwareTicketId) {
-      setSoftwarePackageError('Vui lòng chọn phiếu sửa chữa.');
-      return;
-    }
-
-    setSavingSoftwarePackages(true);
-    setSoftwarePackageError('');
-    try {
-      const response = await api.patch(`/tickets/${selectedSoftwareTicketId}/software-packages`, {
-        packages: selectedSoftwarePackages
-      });
-      const savedPackages = response.data.data.softwarePackages || [];
-      setTickets(previous => previous.map(ticket => String(ticket.id) === selectedSoftwareTicketId
-        ? { ...ticket, software_packages: savedPackages }
-        : ticket));
-      setSelectedSoftwarePackages(savedPackages);
-      setNotifications(previous => [{
-        id: `software-${selectedSoftwareTicketId}-${Date.now()}`,
-        type: 'software',
-        title: 'Đã cập nhật gói phần mềm',
-        description: `Phiếu ${tickets.find(ticket => String(ticket.id) === selectedSoftwareTicketId)?.ma_phieu || ''} — ${savedPackages.length ? savedPackages.join(', ') : 'đã xóa lựa chọn gói'}`,
-        createdAt: new Date().toLocaleString('vi-VN'),
-        read: false
-      }, ...previous].slice(0, 50));
-    } catch (error) {
-      setSoftwarePackageError(error.response?.data?.message || 'Không lưu được các gói phần mềm. Vui lòng thử lại.');
-    } finally {
-      setSavingSoftwarePackages(false);
-      showToast('✅ Đã lưu danh sách gói phần mềm vào phiếu thành công!');
-    }
-  };
-
   const markAllNotificationsRead = () => {
     setNotifications(previous => previous.map(notification => ({ ...notification, read: true })));
   };
@@ -973,22 +903,6 @@ function Dashboard() {
             📦 Kho linh kiện
           </button>
         )}
-        {canTechAction && (
-          <button
-            onClick={() => {
-              setActiveTab('SOFTWARE');
-              if (!selectedSoftwareTicketId && tickets.length > 0) {
-                const target = tickets.find(t => t.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' || t.trang_thai === 'ĐANG_SỬA') || tickets[0];
-                if (target) {
-                  setSelectedSoftwareTicketId(String(target.id));
-                  setSelectedSoftwarePackages(target.software_packages || []);
-                }
-              }
-            }}
-            className={`rounded-t-lg px-4 py-2.5 text-xs font-medium ${activeTab === 'SOFTWARE' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
-            💿 Gói phần mềm
-          </button>
-        )}
         {canViewStats && (
           <button
             onClick={() => setActiveTab('STATS')}
@@ -1134,13 +1048,6 @@ function Dashboard() {
                     )}
                     {ticket.so_imei_serial && (
                       <div className="text-[10px] font-mono text-slate-400">S/N: {ticket.so_imei_serial}</div>
-                    )}
-                    {(ticket.loai_dich_vu === 'ONLINE' || ticket.ma_ultraviewer) && (
-                      <div className="mt-1">
-                        <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-200 font-mono">
-                          💻 Remote: {ticket.ma_ultraviewer || 'Online'}
-                        </span>
-                      </div>
                     )}
                   </td>
                   <td className="py-3 px-4">
@@ -1732,88 +1639,6 @@ function Dashboard() {
         </div>
       )}
 
-      {activeTab === 'SOFTWARE' && canTechAction && (
-        <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-          <h3 className="text-xl font-bold text-brand-blue">Gói phần mềm &amp; cài đặt</h3>
-          <p className="mt-1 text-sm text-slate-500">Chọn nhiều gói phần mềm cho cùng một phiếu sửa chữa.</p>
-          <p className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
-            Lựa chọn các gói khách yêu cầu; kỹ thuật viên xác nhận khả năng cài đặt và chi phí trước khi thực hiện.
-          </p>
-
-          <div className="mt-5 grid gap-4 md:grid-cols-2">
-            <label className="block text-sm font-semibold text-slate-700">
-              Phiếu sửa chữa
-              <select
-                value={selectedSoftwareTicketId}
-                onChange={event => selectSoftwareTicket(event.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-normal"
-              >
-                <option value="">-- Chọn phiếu sửa chữa để gán phần mềm --</option>
-                {tickets.map(ticket => (
-                  <option key={ticket.id} value={ticket.id}>
-                    {ticket.ma_phieu} — {ticket.ho_ten_khach} ({ticket.trang_thai.replace(/_/g, ' ')})
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="block text-sm font-semibold text-slate-700">
-              Nhóm phần mềm
-              <select
-                value={selectedSoftwareGroup}
-                onChange={event => setSelectedSoftwareGroup(event.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-normal"
-              >
-                <option value="ALL">Tất cả nhóm</option>
-                {Object.entries(SOFTWARE_PACKAGE_GROUPS).map(([key, groupName]) => (
-                  <option key={key} value={key}>{groupName}</option>
-                ))}
-              </select>
-            </label>
-          </div>
-
-          {softwarePackageError && <p role="alert" className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{softwarePackageError}</p>}
-
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            {SOFTWARE_PACKAGE_OPTIONS
-              .filter(option => selectedSoftwareGroup === 'ALL' || option.group === selectedSoftwareGroup)
-              .map(option => {
-                const checked = selectedSoftwarePackages.includes(option.name);
-                return (
-                  <label
-                    key={option.name}
-                    className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-colors ${
-                      checked ? 'border-brand-blue bg-blue-50' : 'border-slate-200 hover:border-blue-300 hover:bg-slate-50'
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={() => toggleSoftwarePackage(option.name)}
-                      className="mt-1 h-4 w-4 accent-[#0b5b9c]"
-                    />
-                    <span>
-                      <span className="block font-semibold text-slate-800">{option.name}</span>
-                      <span className="mt-1 block text-xs text-slate-500">{option.description}</span>
-                    </span>
-                  </label>
-                );
-              })}
-          </div>
-
-          <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
-            <p className="text-sm text-slate-600">Đã chọn {selectedSoftwarePackages.length} gói phần mềm.</p>
-            <button
-              type="button"
-              onClick={saveSoftwarePackages}
-              disabled={!selectedSoftwareTicketId || savingSoftwarePackages}
-              className="rounded-lg bg-brand-blue px-5 py-2.5 font-bold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {savingSoftwarePackages ? 'Đang lưu...' : 'Lưu gói cho phiếu'}
-            </button>
-          </div>
-        </section>
-      )}
-
       {activeTab === 'NOTIFICATIONS' && (
         <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -2278,7 +2103,7 @@ function Dashboard() {
                 { key: 'QUAN_LY', pages: 'Tất cả 6 trang (Quản lý nhân sự cấp dưới)' },
                 { key: 'KE_TOAN', pages: 'Phiếu sửa chữa • Báo cáo doanh thu • Thu ngân' },
                 { key: 'THU_KHO', pages: 'Kho linh kiện (Nhập/Sửa giá) • Đối chiếu phiếu' },
-                { key: 'KY_THUAT_VIEN', pages: 'Phiếu sửa chữa • Gói phần mềm • Xem kho' },
+                { key: 'KY_THUAT_VIEN', pages: 'Phiếu sửa chữa • Chẩn đoán • Xem kho' },
                 { key: 'LE_TAN', pages: 'Phiếu sửa chữa (POS) • Lịch hẹn • Bàn giao máy' }
               ].map((item) => {
                 const meta = ROLE_META[item.key];
@@ -2568,9 +2393,6 @@ function Dashboard() {
               <p className="mt-1"><strong>Điện thoại:</strong> {receiptTicket.so_dien_thoai}</p>
               <p className="mt-1"><strong>Thiết bị:</strong> {receiptTicket.ten_thiet_bi || 'Không có thông tin'}</p>
               <p className="mt-1"><strong>Mô tả lỗi:</strong> {receiptTicket.mo_ta_loi}</p>
-              {receiptTicket.software_packages?.length > 0 && (
-                <p className="mt-1"><strong>Gói phần mềm:</strong> {receiptTicket.software_packages.join(', ')}</p>
-              )}
               {receiptTicket.la_sinh_vien && (
                 <div className="mt-1 rounded bg-emerald-50 p-1.5 text-xs text-emerald-800">
                   <p><strong>🎓 Sinh viên:</strong> {receiptTicket.truong_hoc}</p>

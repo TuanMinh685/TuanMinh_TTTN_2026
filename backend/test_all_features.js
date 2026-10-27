@@ -235,12 +235,12 @@ async function runTests() {
         }
     });
 
-    // 11. Kiểm tra Xem danh mục linh kiện & bảng giá công khai (/public/pricing)
-    await testCase('Khách hàng xem bảng giá linh kiện công khai (/public/pricing)', async () => {
-        const res = await fetch(`${baseUrl}/public/pricing`);
+    // 11. Kiểm tra Xem đánh giá chất lượng dịch vụ CSKH (/public/reviews)
+    await testCase('Khách hàng xem đánh giá chất lượng dịch vụ CSKH (/public/reviews)', async () => {
+        const res = await fetch(`${baseUrl}/public/reviews`);
         const data = await res.json();
-        if (!data.success || !Array.isArray(data.data) || data.data.length === 0) {
-            throw new Error('Không lấy được bảng giá từ Supabase');
+        if (!data.success || !Array.isArray(data.data)) {
+            throw new Error('Không lấy được danh sách đánh giá CSKH từ Supabase');
         }
     });
 

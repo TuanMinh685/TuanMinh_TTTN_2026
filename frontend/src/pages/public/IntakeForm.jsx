@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
-import SoftwarePackageSelector from '../../components/SoftwarePackageSelector';
 
 function IntakeForm() {
   const navigate = useNavigate();
@@ -14,7 +13,6 @@ function IntakeForm() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [softwarePackage, setSoftwarePackage] = useState('');
   const [isStudent, setIsStudent] = useState(false);
   const [schoolName, setSchoolName] = useState('');
   const [studentId, setStudentId] = useState('');
@@ -54,19 +52,16 @@ function IntakeForm() {
     setError('');
     
     try {
-      // Gọi API Tiếp nhận máy
+      // Gọi API Tiếp nhận máy & cấp Mã QR
       const response = await api.post('/tickets/intake', {
         ...formData,
         isStudent,
         schoolName,
         studentId,
-        photos,
-        issueDescription: softwarePackage
-          ? `${formData.issueDescription}\nGói phần mềm yêu cầu: ${softwarePackage}`
-          : formData.issueDescription
+        photos
       });
       if (response.data.success) {
-        // Chuyển sang trang Tra cứu tiến độ ngay lập tức với mã phiếu
+        // Chuyển sang trang Hồ sơ QR & Tra cứu tiến độ ngay lập tức với mã phiếu
         navigate(`/track/${response.data.data.ticketCode}`);
       }
     } catch (err) {
@@ -79,7 +74,6 @@ function IntakeForm() {
   return (
     <div className="max-w-xl mx-auto my-10 px-4">
       <div className="bg-white/90 backdrop-blur-md rounded-2xl p-8 shadow-2xl border-t-4 border-brand-blue relative overflow-hidden">
-        {/* Họa tiết trang trí lục giác */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-brand-orange/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
         
         <div className="text-center mb-8 relative z-10">
@@ -118,8 +112,8 @@ function IntakeForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">Mô tả tình trạng cần hỗ trợ / sửa chữa *</label>
-            <textarea required name="issueDescription" onChange={handleChange} rows="3" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/50" placeholder="Máy sạc không vào pin, cần vệ sinh tra keo tản nhiệt..."></textarea>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">Mô tả tình trạng cần hỗ trợ / chăm sóc kỹ thuật *</label>
+            <textarea required name="issueDescription" onChange={handleChange} rows="3" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/50" placeholder="Mô tả chi tiết tình trạng thiết bị hoặc yêu cầu kiểm tra, bảo hành..."></textarea>
           </div>
 
           {/* Khối Ưu đãi Học sinh - Sinh viên toàn quốc */}
@@ -209,11 +203,6 @@ function IntakeForm() {
               </div>
             )}
           </div>
-
-          <SoftwarePackageSelector
-            selectedPackage={softwarePackage}
-            onSelectPackage={setSoftwarePackage}
-          />
 
           <button disabled={loading} type="submit" className="w-full py-4 bg-gradient-to-r from-brand-orange to-orange-500 text-white font-bold rounded-xl shadow-lg hover:shadow-orange-500/30 transition-all transform hover:-translate-y-0.5 cursor-pointer">
             {loading ? 'Đang khởi tạo Mã QR...' : 'Tạo Phiếu & Nhận Mã QR Theo Dõi →'}

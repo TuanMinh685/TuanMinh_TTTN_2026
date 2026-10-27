@@ -1,11 +1,10 @@
 const { pool } = require('../config/db.config');
-const { readSoftwarePackageRequest } = require('./ticket.service');
 
 const trackTicket = async (ticketCode) => {
     // Lấy thông tin cơ bản
     const result = await pool.query(`
         SELECT 
-            p.id, p.ma_tra_cuu, p.trang_thai, p.loai_dich_vu, p.ma_ultraviewer, p.tong_tien, p.han_bao_hanh, p.phuong_thuc_thanh_toan, p.ngay_thanh_toan, p.ngay_tao, p.ngay_cap_nhat,
+            p.id, p.ma_tra_cuu, p.trang_thai, p.loai_dich_vu, p.tong_tien, p.han_bao_hanh, p.phuong_thuc_thanh_toan, p.ngay_thanh_toan, p.ngay_tao, p.ngay_cap_nhat,
             k.ho_ten, k.so_dien_thoai, k.la_sinh_vien, k.truong_hoc, k.ma_sinh_vien,
             t.ten_may, t.so_imei_serial, t.tinh_trang_may,
             EXISTS (
@@ -22,13 +21,12 @@ const trackTicket = async (ticketCode) => {
     if (result.rows.length === 0) return null;
 
     const ticket = result.rows[0];
-    const softwareRequest = readSoftwarePackageRequest(ticket.tinh_trang_may);
-    ticket.tinh_trang_may = softwareRequest.issueDescription;
-    ticket.mo_ta_loi = softwareRequest.issueDescription;
+    const cleanIssue = String(ticket.tinh_trang_may || '').trim();
+    ticket.tinh_trang_may = cleanIssue;
+    ticket.mo_ta_loi = cleanIssue;
     ticket.ten_thiet_bi = ticket.ten_may;
-    ticket.goi_phan_mem = softwareRequest.packages;
 
-    // Che giấu dữ liệu (Masking)
+    // Che giấu dữ liệu cá nhân (Masking)
     const maskName = (name) => {
         if (!name) return '';
         const parts = name.split(' ');
@@ -69,7 +67,7 @@ const trackTicket = async (ticketCode) => {
         const now = new Date();
         const diffTime = hanDate - now;
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        const totalDays = 90;
+        const totalDays = 180;
         const remainPercent = Math.max(0, Math.min(100, Math.round((diffDays / totalDays) * 100)));
         ticket.bao_hanh = {
             han_bao_hanh: ticket.han_bao_hanh,
@@ -101,7 +99,7 @@ const trackTicket = async (ticketCode) => {
         };
     }
 
-    // Lấy lịch sử
+    // Lấy lịch sử nhật ký xử lý
     const historyResult = await pool.query(`
         SELECT trang_thai_moi, ghi_chu, ngay_tao
         FROM nhat_ky_sua_chua
@@ -158,7 +156,6 @@ const approveQuote = async (ticketCode, isApproved) => {
         let note = isApproved ? 'Khách hàng ĐÃ ĐỒNG Ý báo giá.' : 'Khách hàng TỪ CHỐI báo giá.';
 
         if (!isApproved) {
-            // Hoàn kho tự động cho các linh kiện đã tạm gắn vào phiếu báo giá
             const attachedParts = await client.query(
                 'SELECT id, linh_kien_id, so_luong FROM phieu_linh_kien WHERE phieu_sua_chua_id = $1',
                 [ticket.id]
@@ -200,7 +197,6 @@ const approveQuote = async (ticketCode, isApproved) => {
     }
 };
 
-
 const trackByPhone = async (phone) => {
     const query = `
         SELECT p.ma_tra_cuu, p.trang_thai, p.loai_dich_vu, p.han_bao_hanh, t.ten_may, t.so_imei_serial, t.tinh_trang_may, p.ngay_cap_nhat
@@ -217,10 +213,10 @@ const trackByPhone = async (phone) => {
         ORDER BY p.ngay_tao DESC
     `;
     const { rows } = await pool.query(query, [phone]);
-    return rows.map(row => {
-        const { issueDescription } = readSoftwarePackageRequest(row.tinh_trang_may);
-        return { ...row, tinh_trang_may: issueDescription };
-    });
+    return rows.map(row => ({
+        ...row,
+        tinh_trang_may: String(row.tinh_trang_may || '').trim()
+    }));
 };
 
 const submitReview = async (ticketCode, so_sao, nhan_xet) => {
@@ -229,7 +225,6 @@ const submitReview = async (ticketCode, so_sao, nhan_xet) => {
     const ticketId = rows[0].id;
     if (rows[0].trang_thai !== 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN') throw new Error('Máy chưa giao khách, chưa thể đánh giá!');
     
-    // Check if already reviewed
     const reviewCheck = await pool.query('SELECT id FROM danh_gia WHERE phieu_sua_chua_id = $1', [ticketId]);
     if (reviewCheck.rows.length > 0) throw new Error('Bạn đã đánh giá phiếu này rồi!');
 

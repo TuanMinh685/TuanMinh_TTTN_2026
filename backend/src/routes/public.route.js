@@ -1,21 +1,23 @@
 const express = require('express');
 const router = express.Router();
 const publicController = require('../controllers/public.controller');
-const rateLimit = require('express-rate-limit');
 
-const trackLimiter = rateLimit({
-    windowMs: 5 * 60 * 1000,
-    max: 20,
-    message: { success: false, message: 'Tra cứu quá nhiều lần, thử lại sau!' }
-});
+// Tra cứu thông tin sửa chữa theo Mã QR / Mã phiếu (RP-xxxxxx)
+router.get('/track/:ticketCode', publicController.trackTicket);
 
-router.get('/track/phone/:phone', trackLimiter, publicController.trackByPhone);
-router.get('/pricing', publicController.getPublicPricing);
-router.get('/track/:ticketCode', trackLimiter, publicController.trackTicket);
+// Khách hàng đồng ý hoặc từ chối báo giá ngay trên hồ sơ QR
 router.post('/track/:ticketCode/approve-quote', publicController.approveQuote);
 
+// Khách hàng tra cứu tất cả phiếu по Số điện thoại / IMEI / Serial
+router.get('/track/phone/:phone', publicController.trackByPhone);
+
+// Khách hàng gửi đánh giá dịch vụ CSKH sau khi hoàn tất
 router.post('/track/:ticketCode/review', publicController.submitReview);
+
+// Khách hàng gửi yêu cầu bảo hành điện tử (e-Warranty)
 router.post('/track/:ticketCode/warranty-claim', publicController.claimWarranty);
-router.get('/reviews/top', publicController.getTopReviews);
+
+// Lấy danh sách đánh giá chất lượng dịch vụ 5 sao
+router.get('/reviews', publicController.getTopReviews);
 
 module.exports = router;

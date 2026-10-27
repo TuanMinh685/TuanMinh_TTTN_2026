@@ -81,10 +81,9 @@ function getStepIndex(status) {
 function cleanIssueDescription(rawText) {
   if (typeof rawText !== 'string') return 'Chưa có mô tả chi tiết';
   const cleaned = rawText
-    .replace(/^Gói phần mềm yêu cầu:\s*.+$/gm, '')
     .replace(/^\[ƯU ĐÃI SINH VIÊN -15%\]:.*$/gm, '')
     .trim();
-  return cleaned || 'Kiểm tra tổng quát và cài đặt theo yêu cầu';
+  return cleaned || 'Kiểm tra tổng quát và chăm sóc kỹ thuật theo yêu cầu';
 }
 
 function formatLogStatusTitle(rawStatus) {
@@ -345,7 +344,7 @@ function Tracking() {
                 </span>
 
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 text-white/95 font-semibold text-xs border border-white/15 backdrop-blur-md">
-                  {ticket.loai_dich_vu === 'ONLINE' ? '💻 Cứu hộ Online từ xa' : '🏢 Tiếp nhận tại quầy 615 Âu Cơ'}
+                  🏢 Trung tâm CSKH 615 Âu Cơ
                 </span>
 
                 {ticket.uu_dai_sinh_vien?.la_sinh_vien && (
@@ -481,24 +480,6 @@ function Tracking() {
                     {cleanedIssue}
                   </p>
                 </div>
-
-                {ticket.goi_phan_mem?.length > 0 && (
-                  <div className="pt-3 border-t border-slate-200/70">
-                    <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
-                      Gói dịch vụ phần mềm đính kèm
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {ticket.goi_phan_mem.map((pkg, idx) => (
-                        <span
-                          key={idx}
-                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-blue-50 text-brand-blue border border-blue-200 text-xs font-bold"
-                        >
-                          <span>💿</span> {pkg}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
 
               {/* Thẻ Xác Thực Ưu đãi Học sinh - Sinh viên (-15%) */}

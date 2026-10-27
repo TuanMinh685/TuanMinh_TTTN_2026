@@ -1,5 +1,4 @@
 const publicService = require('../services/public.service');
-const ticketService = require('../services/ticket.service');
 const { getIo } = require('../config/socket.config');
 
 const trackTicket = async (req, res, next) => {
@@ -45,7 +44,6 @@ const approveQuote = async (req, res, next) => {
         next(err);
     }
 };
-
 
 const trackByPhone = async (req, res, next) => {
     try {
@@ -93,15 +91,6 @@ const getTopReviews = async (req, res, next) => {
     }
 };
 
-const getPublicPricing = async (req, res, next) => {
-    try {
-        const data = await ticketService.getPublicParts();
-        res.status(200).json({ success: true, data });
-    } catch (err) {
-        next(err);
-    }
-};
-
 const claimWarranty = async (req, res, next) => {
     try {
         const { ticketCode } = req.params;
@@ -122,6 +111,5 @@ module.exports = {
     trackByPhone,
     trackTicket,
     approveQuote,
-    getPublicPricing,
     claimWarranty
 };

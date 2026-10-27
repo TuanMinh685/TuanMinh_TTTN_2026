@@ -2,39 +2,6 @@ const { pool } = require('../config/db.config');
 const { getIo } = require('../config/socket.config');
 const { formatVietnamISO, markQrSessionSubmitted } = require('./ticket_session.service');
 
-const readSoftwarePackageRequest = (description) => {
-    const text = typeof description === 'string' ? description : '';
-    const marker = text.match(/\n\[SOFTWARE_PACKAGES:(\[[^\n]*\])\]$/);
-    let packages = [];
-    let issueDescription = text;
-
-    if (marker) {
-        try {
-            const parsed = JSON.parse(marker[1]);
-            if (Array.isArray(parsed)) packages = parsed;
-        } catch (error) {
-            console.error('Không đọc được danh sách gói phần mềm của phiếu:', error);
-        }
-        issueDescription = issueDescription.slice(0, marker.index);
-    } else {
-        const legacyPackageLines = [...text.matchAll(/^Gói phần mềm yêu cầu:\s*(.+)$/gm)];
-        packages = legacyPackageLines.map(match => match[1].trim()).filter(Boolean);
-    }
-
-    issueDescription = issueDescription
-        .replace(/^Gói phần mềm yêu cầu:\s*.+$/gm, '')
-        .replace(/^\[ƯU ĐÃI SINH VIÊN -15%\]:.*$/gm, '')
-        .trim();
-
-    return { issueDescription, packages };
-};
-
-const writeSoftwarePackageRequest = (description, packages) => {
-    const { issueDescription } = readSoftwarePackageRequest(description);
-    if (packages.length === 0) return issueDescription;
-    return `${issueDescription}\n[SOFTWARE_PACKAGES:${JSON.stringify(packages)}]`;
-};
-
 const submitIntake = async (customerData) => {
     const client = await pool.connect();
     
@@ -44,7 +11,7 @@ const submitIntake = async (customerData) => {
         const { 
             fullName, phone, zaloId, issueDescription,
             deviceName, serialImei, serialNumber,
-            loaiDichVu, serviceType, ultraviewerCode = null,
+            loaiDichVu, serviceType,
             isStudent = false, schoolName = '', studentId = '', photos = [],
             sessionToken = null
         } = customerData;
@@ -54,7 +21,7 @@ const submitIntake = async (customerData) => {
         const resolvedIssue = String(issueDescription || customerData.mo_ta_loi || customerData.tinh_trang_may || '').trim();
         const resolvedDeviceName = String(deviceName || customerData.ten_may || customerData.ten_thiet_bi || 'Thiết bị tiếp nhận qua QR').trim();
         const resolvedSerial = (serialImei || serialNumber || customerData.so_imei_serial || '').trim() || null;
-        const resolvedServiceType = (loaiDichVu || serviceType || 'OFFLINE').toUpperCase() === 'ONLINE' ? 'ONLINE' : 'OFFLINE';
+        const resolvedServiceType = (loaiDichVu || serviceType || 'OFFLINE').toUpperCase();
 
         let customerId = null;
         let deviceId = null;
@@ -92,16 +59,14 @@ const submitIntake = async (customerData) => {
         `, [customerId, resolvedDeviceName, resolvedSerial, resolvedIssue]);
         deviceId = newDevice.rows[0].id;
 
-        // 3. Tạo Phiếu sửa chữa
-        // Tạo mã ngẫu nhiên dạng RP-XXXXXX (Offline) hoặc ON-XXXXXX (Online)
-        const prefix = resolvedServiceType === 'ONLINE' ? 'ON-' : 'RP-';
-        const ticketCode = prefix + Math.floor(100000 + Math.random() * 900000);
+        // 3. Tạo Phiếu sửa chữa & cấp Mã QR định danh RP-XXXXXX
+        const ticketCode = 'RP-' + Math.floor(100000 + Math.random() * 900000);
         
         const newTicket = await client.query(`
-            INSERT INTO phieu_sua_chua (thiet_bi_id, ma_tra_cuu, loai_dich_vu, ma_ultraviewer, trang_thai, la_sinh_vien, truong_hoc, ma_sinh_vien)
-            VALUES ($1, $2, $3, $4, 'CHỜ_KHÁM', $5, $6, $7)
+            INSERT INTO phieu_sua_chua (thiet_bi_id, ma_tra_cuu, loai_dich_vu, trang_thai, la_sinh_vien, truong_hoc, ma_sinh_vien)
+            VALUES ($1, $2, $3, 'CHỜ_KHÁM', $4, $5, $6)
             RETURNING id, ma_tra_cuu, loai_dich_vu, trang_thai, ngay_tao
-        `, [deviceId, ticketCode, resolvedServiceType, ultraviewerCode, Boolean(isStudent), schoolName || '', studentId || '']);
+        `, [deviceId, ticketCode, resolvedServiceType, Boolean(isStudent), schoolName || '', studentId || '']);
 
         const ticket = newTicket.rows[0];
 
@@ -141,22 +106,14 @@ const submitIntake = async (customerData) => {
         // 5. Bắn thông báo Socket.io
         try {
             const io = getIo();
-            const room = resolvedServiceType === 'ONLINE' ? 'technician_room' : 'receptionist_room';
-            io.to(room).emit('new_ticket', {
+            io.to('receptionist_room').emit('new_ticket', {
                 ticketCode: ticket.ma_tra_cuu,
                 customerName: resolvedFullName,
                 deviceName: resolvedDeviceName,
                 issue: resolvedIssue,
-                isOnline: resolvedServiceType === 'ONLINE',
-                ultraviewerCode,
                 createdAt: createdAtVN
             });
-            console.log(`📡 Đã gửi thông báo Realtime cho phòng ${room} về đơn ${ticket.ma_tra_cuu}`);
-        } catch (socketErr) {
-            // Không chặn luồng trên môi trường Serverless
-        }
-
-        const cleanIssue = readSoftwarePackageRequest(resolvedIssue).issueDescription;
+        } catch (socketErr) {}
 
         return {
             ticketId: ticket.id,
@@ -166,7 +123,7 @@ const submitIntake = async (customerData) => {
             phone: resolvedPhone,
             deviceName: resolvedDeviceName,
             serialImei: resolvedSerial,
-            issueDescription: cleanIssue,
+            issueDescription: resolvedIssue,
             loaiDichVu: resolvedServiceType,
             status: ticket.trang_thai,
             createdAt: createdAtVN
@@ -181,7 +138,7 @@ const submitIntake = async (customerData) => {
 
 const getAllTickets = async () => {
     const query = `
-        SELECT p.id, p.ma_tra_cuu as ma_phieu, p.ma_tra_cuu, p.trang_thai, p.loai_dich_vu, p.ma_ultraviewer, p.tong_tien, p.han_bao_hanh, p.phuong_thuc_thanh_toan, p.ngay_thanh_toan, p.ngay_tao, p.ngay_cap_nhat,
+        SELECT p.id, p.ma_tra_cuu as ma_phieu, p.ma_tra_cuu, p.trang_thai, p.loai_dich_vu, p.tong_tien, p.han_bao_hanh, p.phuong_thuc_thanh_toan, p.ngay_thanh_toan, p.ngay_tao, p.ngay_cap_nhat,
             k.ho_ten as ho_ten_khach, k.so_dien_thoai, k.la_sinh_vien, k.truong_hoc, k.ma_sinh_vien as mssv,
             t.ten_may as ten_thiet_bi, t.so_imei_serial, t.tinh_trang_may as mo_ta_loi
         FROM phieu_sua_chua p
@@ -191,17 +148,15 @@ const getAllTickets = async () => {
     `;
     const { rows } = await pool.query(query);
     return rows.map((ticket) => {
-        const { issueDescription, packages } = readSoftwarePackageRequest(ticket.mo_ta_loi);
+        const issueDescription = String(ticket.mo_ta_loi || '').trim();
         const ngayTaoVN = ticket.ngay_tao ? formatVietnamISO(ticket.ngay_tao) : null;
         const ngayCapNhatVN = ticket.ngay_cap_nhat ? formatVietnamISO(ticket.ngay_cap_nhat) : ngayTaoVN;
         return {
             ...ticket,
             ma_tra_cuu: ticket.ma_tra_cuu || ticket.ma_phieu,
             mo_ta_loi: issueDescription,
-            software_packages: packages,
             ngay_tao: ngayTaoVN,
             ngay_cap_nhat: ngayCapNhatVN,
-            // Chuẩn hóa song song trường Tiếng Anh để đối soát CRUD không mất mát trường
             ticketCode: ticket.ma_tra_cuu || ticket.ma_phieu,
             fullName: ticket.ho_ten_khach,
             phone: ticket.so_dien_thoai,
@@ -215,44 +170,7 @@ const getAllTickets = async () => {
     });
 };
 
-const updateTicketSoftwarePackages = async (ticketId, packages) => {
-    const client = await pool.connect();
-    try {
-        await client.query('BEGIN');
-        const ticketResult = await client.query(`
-            SELECT p.id, t.id AS device_id, t.tinh_trang_may
-            FROM phieu_sua_chua p
-            JOIN thiet_bi t ON p.thiet_bi_id = t.id
-            WHERE p.id = $1
-            FOR UPDATE OF t
-        `, [ticketId]);
-
-        if (ticketResult.rows.length === 0) {
-            await client.query('ROLLBACK');
-            return null;
-        }
-
-        const ticket = ticketResult.rows[0];
-        const description = writeSoftwarePackageRequest(ticket.tinh_trang_may, packages);
-        await client.query(
-            'UPDATE thiet_bi SET tinh_trang_may = $1 WHERE id = $2',
-            [description || null, ticket.device_id]
-        );
-        await client.query('COMMIT');
-        return {
-            issueDescription: readSoftwarePackageRequest(description).issueDescription,
-            softwarePackages: packages
-        };
-    } catch (error) {
-        await client.query('ROLLBACK');
-        throw error;
-    } finally {
-        client.release();
-    }
-};
-
 const updateTicketStatus = async (idOrCode, status, ghiChu = '', employeeId = null, paymentMethod = null, customTongTien = null) => {
-    // Cho phép truyền ID số hoặc Mã phiếu (VD: RP-123456)
     const isNumericId = /^\d+$/.test(String(idOrCode).trim());
     const lookupRes = isNumericId
         ? await pool.query('SELECT id, ma_tra_cuu, trang_thai, tong_tien FROM phieu_sua_chua WHERE id = $1', [Number(idOrCode)])
@@ -308,7 +226,6 @@ const updateTicketStatus = async (idOrCode, status, ghiChu = '', employeeId = nu
             [ticketId, employeeId || null, previousStatus, status, noteText]
         );
 
-        // Emit event to update frontend
         try {
             const io = getIo();
             io.emit('ticket_status_changed', { ticketId, status });
@@ -340,7 +257,6 @@ const submitBooking = async (bookingData) => {
             isStudent = false, schoolName = '', studentId = ''
         } = bookingData;
         
-        // Find or create customer
         let customerId = null;
         const userResult = await client.query('SELECT id FROM khach_hang WHERE so_dien_thoai = $1', [phone]);
         if (userResult.rows.length > 0) {
@@ -367,7 +283,6 @@ const submitBooking = async (bookingData) => {
 
         await client.query('COMMIT');
         
-        // Notify receptionist
         try {
             const io = getIo();
             io.to('receptionist_room').emit('new_booking', {
@@ -404,7 +319,6 @@ const updateBookingStatus = async (id, status, deviceName = '') => {
     try {
         await client.query('BEGIN');
         
-        // Cập nhật trạng thái lịch hẹn
         const updateQuery = `
             UPDATE lich_hen 
             SET trang_thai = $1 
@@ -414,11 +328,9 @@ const updateBookingStatus = async (id, status, deviceName = '') => {
         const result = await client.query(updateQuery, [status, id]);
         let createdTicketCode = null;
         
-        // Nếu khách đã đến, tự động chuyển đổi thành Phiếu Yêu Cầu
         if (status === 'KHACH_DA_DEN' && result.rows.length > 0) {
             const booking = result.rows[0];
             
-            // 1. Thêm thiết bị mới
             const tenMay = (typeof deviceName === 'string' && deviceName.trim())
                 ? deviceName.trim()
                 : 'Thiết bị tiếp nhận theo lịch hẹn';
@@ -428,16 +340,14 @@ const updateBookingStatus = async (id, status, deviceName = '') => {
             );
             const deviceId = deviceResult.rows[0].id;
             
-            // 2. Tạo mã tra cứu ngẫu nhiên
             const maTraCuu = 'RP-' + Math.floor(100000 + Math.random() * 900000);
             createdTicketCode = maTraCuu;
             
-            // 3. Tạo phiếu sửa chữa
             const createdTicket = await client.query(`
                 INSERT INTO phieu_sua_chua (thiet_bi_id, ma_tra_cuu, loai_dich_vu, trang_thai)
-                VALUES ($1, $2, $3, 'CHỜ_KHÁM')
+                VALUES ($1, $2, 'OFFLINE', 'CHỜ_KHÁM')
                 RETURNING id
-            `, [deviceId, maTraCuu, booking.loai_dich_vu === 'ONLINE_TUXA' ? 'ONLINE' : 'OFFLINE']);
+            `, [deviceId, maTraCuu]);
 
             const newTicketId = createdTicket.rows[0]?.id;
             if (newTicketId) {
@@ -447,7 +357,6 @@ const updateBookingStatus = async (id, status, deviceName = '') => {
                 );
             }
             
-            // Emit sự kiện có phiếu mới
             try {
                 const io = getIo();
                 io.to('receptionist_room').emit('new_ticket_receptionist', { ma_phieu: maTraCuu });
@@ -470,18 +379,8 @@ const updateBookingStatus = async (id, status, deviceName = '') => {
     }
 };
 
-
 const getParts = async () => {
     const { rows } = await pool.query('SELECT * FROM linh_kien ORDER BY id ASC');
-    return rows;
-};
-
-const getPublicParts = async () => {
-    const { rows } = await pool.query(`
-        SELECT id, ten_linh_kien, gia_ban, hinh_anh
-        FROM linh_kien
-        ORDER BY ten_linh_kien ASC
-    `);
     return rows;
 };
 
@@ -521,26 +420,21 @@ const addPartToTicket = async (ticketId, partId, quantity, soSerial = null) => {
     try {
         await client.query('BEGIN');
         
-        // Kiểm tra tồn kho và lấy giá bán
         const partResult = await client.query('SELECT gia_ban, so_luong FROM linh_kien WHERE id = $1 FOR UPDATE', [partId]);
         if (partResult.rows.length === 0) throw new Error('Không tìm thấy linh kiện');
         
         const part = partResult.rows[0];
         if (part.so_luong < quantity) throw new Error('Số lượng linh kiện trong kho không đủ');
         
-        // Số Serial / IMEI (Serial Tracking)
         const serial = soSerial?.trim() || `SN-${partId}-${Math.floor(100000 + Math.random() * 900000)}`;
 
-        // Thêm vào phieu_linh_kien
         await client.query(
             'INSERT INTO phieu_linh_kien (phieu_sua_chua_id, linh_kien_id, so_luong, don_gia, so_serial) VALUES ($1, $2, $3, $4, $5)',
             [ticketId, partId, quantity, part.gia_ban, serial]
         );
         
-        // Trừ tồn kho
         await client.query('UPDATE linh_kien SET so_luong = so_luong - $1 WHERE id = $2', [quantity, partId]);
         
-        // Cộng dồn vào tong_tien của phieu_sua_chua
         const addAmount = part.gia_ban * quantity;
         await client.query('UPDATE phieu_sua_chua SET tong_tien = tong_tien + $1 WHERE id = $2', [addAmount, ticketId]);
         
@@ -603,7 +497,6 @@ const addTicketPhoto = async (ticketId, { duong_dan_anh, loai_anh, ghi_chu }) =>
 
 module.exports = {
     getParts,
-    getPublicParts,
     createPart,
     updatePart,
     getTicketParts,
@@ -613,8 +506,6 @@ module.exports = {
     addTicketPhoto,
     submitIntake,
     getAllTickets,
-    updateTicketSoftwarePackages,
-    readSoftwarePackageRequest,
     updateTicketStatus,
     submitBooking,
     getAllBookings,

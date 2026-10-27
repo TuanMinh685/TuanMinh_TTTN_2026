@@ -204,34 +204,6 @@ const updateTicketStatus = async (req, res, next) => {
     }
 };
 
-const updateTicketSoftwarePackages = async (req, res, next) => {
-    try {
-        const ticketId = Number(req.params.id);
-        const packages = req.body?.packages;
-        if (!Number.isSafeInteger(ticketId) || ticketId < 1) {
-            return res.status(400).json({ success: false, message: 'Mã phiếu không hợp lệ.' });
-        }
-        if (!Array.isArray(packages) || packages.length > 20 ||
-            packages.some((item) => typeof item !== 'string' || !item.trim() || item.trim().length > 120)) {
-            return res.status(400).json({ success: false, message: 'Danh sách gói phần mềm không hợp lệ.' });
-        }
-
-        const uniquePackages = [...new Set(packages.map(item => item.trim()))];
-        const result = await ticketService.updateTicketSoftwarePackages(ticketId, uniquePackages);
-        if (!result) {
-            return res.status(404).json({ success: false, message: 'Không tìm thấy phiếu sửa chữa.' });
-        }
-
-        res.status(200).json({
-            success: true,
-            message: 'Đã cập nhật các gói phần mềm cho phiếu.',
-            data: result
-        });
-    } catch (error) {
-        next(error);
-    }
-};
-
 const submitBooking = async (req, res, next) => {
     try {
         const { fullName, phone, zaloId, ngayHen, gioHen, moTaLoi, loaiDichVu } = req.body;
@@ -417,7 +389,6 @@ module.exports = {
     submitIntake,
     getTickets,
     updateTicketStatus,
-    updateTicketSoftwarePackages,
     submitBooking,
     getBookings,
     updateBookingStatus
