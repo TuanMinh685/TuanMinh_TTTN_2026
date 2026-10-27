@@ -1,84 +1,104 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
-const PAGE_TITLES = {
-  GIAM_DOC: 'Bảng Điều Khiển Giám Đốc',
-  QUAN_LY: 'Bảng Điều Khiển Quản Lý',
-  NHAN_SU: 'Quản Trị Nhân Sự & Phân Quyền'
+const ROLE_LABELS = {
+  GIAM_DOC: { name: 'Quản Trị Cấp Cao', badge: 'bg-slate-100 text-slate-800 border-slate-200', icon: '🛡️' },
+  ADMIN: { name: 'Quản Trị Hệ Thống CSKH', badge: 'bg-slate-100 text-slate-800 border-slate-200', icon: '🛡️' },
+  QUAN_LY: { name: 'Trưởng Bộ Phận CSKH', badge: 'bg-slate-100 text-slate-800 border-slate-200', icon: '🏬' },
+  KY_THUAT_VIEN: { name: 'Chuyên Viên Hỗ Trợ CSKH', badge: 'bg-slate-100 text-slate-800 border-slate-200', icon: '🎧' },
+  LE_TAN: { name: 'Chuyên Viên Tiếp Nhận QR', badge: 'bg-slate-100 text-slate-800 border-slate-200', icon: '👩‍💼' }
 };
 
-export default function AdminNav({ activeKey }) {
-  const location = useLocation();
+export default function AdminNav({ activeKey = 'VAN_HANH' }) {
+  const navigate = useNavigate();
   const role = localStorage.getItem('role') || 'LE_TAN';
-  const fullName = localStorage.getItem('fullName') || 'Nhân sự';
-  const cleanName = fullName.replace(/\s*\(.*?\)/, '').trim() || 'Nhân sự';
+  const fullName = localStorage.getItem('fullName') || 'Nhân viên CSKH';
 
-  const isExecutive = role === 'GIAM_DOC' || role === 'ADMIN';
-  const isManagerOrAbove = isExecutive || role === 'QUAN_LY';
+  const isManagerOrAbove = role === 'GIAM_DOC' || role === 'ADMIN' || role === 'QUAN_LY';
+  const roleInfo = ROLE_LABELS[role] || ROLE_LABELS.LE_TAN;
 
-  const pageTitle = PAGE_TITLES[activeKey] || 'Bảng Điều Khiển Quản Trị';
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    localStorage.removeItem('fullName');
+    localStorage.removeItem('username');
+    localStorage.removeItem('accountId');
+    navigate('/login');
+  };
+
+  const navItems = [
+    {
+      key: 'VAN_HANH',
+      label: '📋 Bàn Điều Hành Hồ Sơ QR',
+      path: '/admin',
+      visible: true
+    },
+    {
+      key: 'QUAN_LY',
+      label: '🏬 Tổng Quan Bộ Phận CSKH',
+      path: '/admin/quan-ly',
+      visible: isManagerOrAbove
+    },
+    {
+      key: 'NHAN_SU',
+      label: '👥 Nhân Sự & Phân Quyền CSKH',
+      path: '/admin/nhan-su',
+      visible: isManagerOrAbove
+    }
+  ];
 
   return (
-    <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <div>
-        <h1 className="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">
-          {pageTitle}
-        </h1>
-        <p className="text-slate-500 text-xs mt-1">
-          Xin chào <strong className="text-slate-700">{cleanName}</strong> • Chúc bạn một ngày làm việc hiệu quả!
-        </p>
+    <header className="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        {/* Left: Brand & User Role Info */}
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-blue text-xl text-white shadow-xs">
+            {roleInfo.icon}
+          </div>
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-base font-bold text-slate-800 tracking-tight">
+                HỆ THỐNG WEB QUÉT MÃ QR CHĂM SÓC KHÁCH HÀNG
+              </h1>
+              <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-bold ${roleInfo.badge}`}>
+                {roleInfo.icon} {roleInfo.name}
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Xin chào, <strong className="text-slate-700">{fullName}</strong> • Trung tâm CSKH 615 Âu Cơ
+            </p>
+          </div>
+        </div>
+
+        {/* Right: Navigation Links & Logout */}
+        <div className="flex flex-wrap items-center gap-2">
+          {navItems
+            .filter(item => item.visible)
+            .map(item => {
+              const isActive = activeKey === item.key;
+              return (
+                <Link
+                  key={item.key}
+                  to={item.path}
+                  className={`rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${
+                    isActive
+                      ? 'bg-brand-blue text-white shadow-sm'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="rounded-xl border border-red-200 bg-red-50 px-3.5 py-2 text-xs font-bold text-red-600 transition hover:bg-red-100 cursor-pointer"
+          >
+            Đăng xuất
+          </button>
+        </div>
       </div>
-
-      <nav className="flex flex-wrap items-center gap-2">
-        <Link
-          to="/admin"
-          className={`flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs transition shadow-2xs ${
-            location.pathname === '/admin' && !activeKey
-              ? 'bg-brand-blue text-white font-bold'
-              : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 font-medium'
-          }`}
-        >
-          <span>📋</span> Bàn Vận Hành Kỹ Thuật
-        </Link>
-
-        {isExecutive && (
-          <Link
-            to="/admin/giam-doc"
-            className={`flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs transition shadow-2xs ${
-              location.pathname === '/admin/giam-doc' || activeKey === 'GIAM_DOC'
-                ? 'bg-brand-blue text-white font-bold'
-                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 font-medium'
-            }`}
-          >
-            <span>👑</span> Trang Giám Đốc
-          </Link>
-        )}
-
-        {isManagerOrAbove && (
-          <Link
-            to="/admin/quan-ly"
-            className={`flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs transition shadow-2xs ${
-              location.pathname === '/admin/quan-ly' || activeKey === 'QUAN_LY'
-                ? 'bg-brand-blue text-white font-bold'
-                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 font-medium'
-            }`}
-          >
-            <span>🏬</span> Trang Quản Lý
-          </Link>
-        )}
-
-        {isManagerOrAbove && (
-          <Link
-            to="/admin/nhan-su"
-            className={`flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs transition shadow-2xs ${
-              location.pathname === '/admin/nhan-su' || activeKey === 'NHAN_SU'
-                ? 'bg-brand-blue text-white font-bold'
-                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 font-medium'
-            }`}
-          >
-            <span>👥</span> Quản Lý Nhân Sự & Phân Quyền
-          </Link>
-        )}
-      </nav>
-    </div>
+    </header>
   );
 }

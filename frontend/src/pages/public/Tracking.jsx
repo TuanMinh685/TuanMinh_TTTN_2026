@@ -4,66 +4,66 @@ import QRCode from 'qrcode';
 import api from '../../services/api';
 
 const PROGRESS_STEPS = [
-  { id: 'TIEP_NHAN', label: 'Tiếp nhận máy', desc: 'Tạo hồ sơ & kiểm ngoại quan', icon: '📝' },
-  { id: 'CHAN_DOAN', label: 'Chẩn đoán lỗi', desc: 'KTV kiểm tra chuyên sâu', icon: '🔍' },
-  { id: 'BAO_GIA', label: 'Báo giá & Duyệt', desc: 'Minh bạch chi phí trước sửa', icon: '💬' },
-  { id: 'DANG_SUA', label: 'Tiến hành sửa', desc: 'Thay thế & xử lý kỹ thuật', icon: '🔧' },
-  { id: 'HOAN_TAT', label: 'Hoàn tất & Bảo hành', desc: 'Bàn giao & kích hoạt e-Warranty', icon: '✅' }
+  { id: 'TIEP_NHAN', label: 'Tiếp nhận yêu cầu', desc: 'Khởi tạo hồ sơ QR & lưu hiện trạng', icon: '📝' },
+  { id: 'CHAN_DOAN', label: 'Kiểm tra & Phân loại', desc: 'Chuyên viên tiếp nhận & đánh giá', icon: '🔍' },
+  { id: 'BAO_GIA', label: 'Thông tin & Xác nhận', desc: 'Trao đổi phương án xử lý với KH', icon: '💬' },
+  { id: 'DANG_SUA', label: 'Đang xử lý hỗ trợ', desc: 'Thực hiện nghiệp vụ CSKH & hỗ trợ', icon: '🎧' },
+  { id: 'HOAN_TAT', label: 'Hoàn tất & Hậu mãi', desc: 'Bàn giao, e-Warranty & Đánh giá sao', icon: '✅' }
 ];
 
 const STATUS_META = {
   CHỜ_KHÁM: {
-    label: 'Đang chờ Kỹ thuật viên kiểm tra',
-    shortLabel: 'CHỜ KHÁM',
+    label: 'Đang chờ Chuyên viên CSKH tiếp nhận',
+    shortLabel: 'CHỜ TIẾP NHẬN',
     badgeClass: 'bg-amber-400/20 text-amber-200 border-amber-300/40',
     dotClass: 'bg-amber-400',
     lightBadge: 'bg-amber-50 text-amber-800 border-amber-200'
   },
   ĐANG_KIỂM_TRA: {
-    label: 'Kỹ thuật viên đang kiểm tra máy',
+    label: 'Chuyên viên đang kiểm tra hồ sơ yêu cầu',
     shortLabel: 'ĐANG KIỂM TRA',
     badgeClass: 'bg-sky-400/20 text-sky-200 border-sky-300/40',
     dotClass: 'bg-sky-400',
     lightBadge: 'bg-sky-50 text-sky-800 border-sky-200'
   },
   ĐANG_CHUẨN_ĐOÁN: {
-    label: 'Đang chẩn đoán kỹ thuật chuyên sâu',
-    shortLabel: 'ĐANG CHẨN ĐOÁN',
+    label: 'Đang kiểm tra & phân loại yêu cầu CSKH',
+    shortLabel: 'ĐANG PHÂN LOẠI',
     badgeClass: 'bg-sky-400/20 text-sky-200 border-sky-300/40',
     dotClass: 'bg-sky-400',
     lightBadge: 'bg-sky-50 text-sky-800 border-sky-200'
   },
   CHỜ_KHÁCH_CHỐT_GIÁ: {
-    label: 'Chờ bạn xác nhận báo giá sửa chữa',
-    shortLabel: 'CHỜ CHỐT GIÁ',
+    label: 'Chờ khách hàng xác nhận phương án xử lý',
+    shortLabel: 'CHỜ XÁC NHẬN',
     badgeClass: 'bg-orange-400/25 text-orange-200 border-orange-300/50',
     dotClass: 'bg-orange-400',
     lightBadge: 'bg-orange-50 text-orange-800 border-orange-200'
   },
   ĐANG_SỬA: {
-    label: 'Kỹ thuật viên đang tiến hành sửa chữa',
-    shortLabel: 'ĐANG SỬA CHỮA',
+    label: 'Chuyên viên đang xử lý yêu cầu hỗ trợ',
+    shortLabel: 'ĐANG XỬ LÝ',
     badgeClass: 'bg-indigo-400/25 text-indigo-100 border-indigo-300/40',
     dotClass: 'bg-indigo-300',
     lightBadge: 'bg-indigo-50 text-indigo-800 border-indigo-200'
   },
   ĐÃ_SỬA_XONG: {
-    label: 'Đã sửa xong • Sẵn sàng bàn giao máy',
-    shortLabel: 'ĐÃ SỬA XONG',
+    label: 'Đã xử lý xong • Sẵn sàng bàn giao hồ sơ',
+    shortLabel: 'ĐÃ XỬ LÝ XONG',
     badgeClass: 'bg-emerald-400/25 text-emerald-200 border-emerald-300/40',
     dotClass: 'bg-emerald-400',
     lightBadge: 'bg-emerald-50 text-emerald-800 border-emerald-200'
   },
   ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN: {
-    label: 'Đã hoàn tất bàn giao & Kích hoạt bảo hành',
-    shortLabel: 'ĐÃ BÀN GIAO',
+    label: 'Đã hoàn tất CSKH & Kích hoạt bảo hành điện tử',
+    shortLabel: 'HOÀN TẤT CSKH',
     badgeClass: 'bg-emerald-400/25 text-emerald-200 border-emerald-300/40',
     dotClass: 'bg-emerald-400',
     lightBadge: 'bg-emerald-50 text-emerald-800 border-emerald-200'
   },
   KHÁCH_TỪ_CHỐI_SỬA: {
-    label: 'Đã hủy sửa chữa theo yêu cầu khách hàng',
-    shortLabel: 'ĐÃ HỦY SỬA',
+    label: 'Đã đóng hồ sơ theo yêu cầu của khách hàng',
+    shortLabel: 'ĐÃ ĐÓNG HỒ SƠ',
     badgeClass: 'bg-rose-400/25 text-rose-200 border-rose-300/40',
     dotClass: 'bg-rose-400',
     lightBadge: 'bg-rose-50 text-rose-800 border-rose-200'
@@ -344,20 +344,14 @@ function Tracking() {
                 </span>
 
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 text-white/95 font-semibold text-xs border border-white/15 backdrop-blur-md">
-                  🏢 Trung tâm CSKH 615 Âu Cơ
+                  🏢 Trung tâm CSKH MYH Group (615 Âu Cơ)
                 </span>
-
-                {ticket.uu_dai_sinh_vien?.la_sinh_vien && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/30 text-indigo-100 font-bold text-xs border border-indigo-300/40">
-                    🎓 Ưu đãi Sinh viên -15%
-                  </span>
-                )}
               </div>
 
-              {/* Tên thiết bị & Mã phiếu */}
+              {/* Tên sản phẩm/dịch vụ & Mã phiếu */}
               <div className="flex flex-wrap items-baseline gap-3 mb-5">
                 <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white">
-                  Thiết bị: {deviceTitle}
+                  Hồ sơ CSKH: {deviceTitle}
                 </h1>
                 <div className="flex items-center gap-2">
                   <span className="bg-white/15 px-3 py-1 rounded-xl text-xs font-mono font-bold text-amber-300 border border-white/20">
@@ -468,43 +462,19 @@ function Tracking() {
             {/* Card 1: Chi tiết Tình trạng & Yêu cầu dịch vụ */}
             <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/90">
               <h3 className="text-base font-extrabold text-slate-800 mb-4 flex items-center gap-2">
-                <span>📋</span> Thông Tin Tình Trạng &amp; Yêu Cầu Dịch Vụ
+                <span>📋</span> Nội Dung Yêu Cầu Chăm Sóc Khách Hàng
               </h3>
 
               <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200/70 space-y-3">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">
-                    Mô tả tình trạng ban đầu của khách hàng
+                    Mô tả yêu cầu hỗ trợ ban đầu của khách hàng
                   </p>
                   <p className="text-sm font-semibold text-slate-800 whitespace-pre-line leading-relaxed">
                     {cleanedIssue}
                   </p>
                 </div>
               </div>
-
-              {/* Thẻ Xác Thực Ưu đãi Học sinh - Sinh viên (-15%) */}
-              {ticket.uu_dai_sinh_vien?.la_sinh_vien && (
-                <div className="mt-4 p-4 bg-gradient-to-r from-indigo-50/90 via-blue-50/90 to-emerald-50/70 border border-indigo-200/80 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="px-2.5 py-0.5 bg-indigo-600 text-white rounded-lg text-[11px] font-bold uppercase tracking-wider">
-                        🎓 Ưu đãi Sinh viên Toàn quốc (-15%)
-                      </span>
-                    </div>
-                    <p className="text-sm font-extrabold text-slate-800 pt-0.5">
-                      {ticket.uu_dai_sinh_vien.truong_hoc || 'Đã xác thực thẻ Sinh viên'}
-                    </p>
-                    <p className="text-xs text-slate-600">
-                      Mã số sinh viên (MSSV): <strong className="font-mono text-indigo-900">{ticket.uu_dai_sinh_vien.ma_sinh_vien || 'Đã đối chiếu'}</strong>
-                    </p>
-                  </div>
-                  <div className="sm:text-right shrink-0">
-                    <span className="inline-block px-3 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-extrabold">
-                      ✓ Tự động giảm 15% tổng hóa đơn
-                    </span>
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Card 2: Nhật ký Xử lý Thời gian thực (Live Timeline) */}
@@ -610,13 +580,13 @@ function Tracking() {
             </div>
           </div>
 
-          {/* CỘT PHẢI (5/12): BẢNG KÊ CHI PHÍ, DUYỆT GIÁ, LINH KIỆN SERIAL & BẢO HÀNH E-WARRANTY */}
+          {/* CỘT PHẢI (5/12): PHƯƠNG ÁN XỬ LÝ, HẠNG MỤC SERIAL & BẢO HÀNH E-WARRANTY */}
           <div className="lg:col-span-5 space-y-6">
-            {/* Card 1: Bảng kê Chi phí & Xác nhận Báo giá */}
+            {/* Card 1: Phương án xử lý & Xác nhận của khách hàng */}
             <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/90">
               <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
                 <h3 className="text-base font-extrabold text-slate-800 flex items-center gap-2">
-                  <span>💳</span> Bảng Kê Chi Phí &amp; Báo Giá
+                  <span>💬</span> Phương Án Xử Lý &amp; Xác Nhận
                 </h3>
                 <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${statusInfo.lightBadge}`}>
                   {statusInfo.shortLabel}
@@ -626,143 +596,79 @@ function Tracking() {
               {hasQuoteAmount ? (
                 <div className="space-y-3">
                   <div className="bg-orange-50/60 border border-orange-200/80 rounded-2xl p-4 space-y-2.5">
-                    <div className="flex justify-between text-sm text-slate-600">
-                      <span>Chi phí dịch vụ &amp; linh kiện:</span>
-                      <span className={ticket.uu_dai_sinh_vien?.la_sinh_vien ? 'line-through text-slate-400 font-medium' : 'font-bold text-slate-800'}>
+                    <div className="pt-1 flex justify-between items-baseline">
+                      <span className="font-extrabold text-slate-800 text-sm uppercase">Chi phí dịch vụ (nếu có):</span>
+                      <span className="text-2xl md:text-3xl font-black text-brand-orange">
                         {Number(ticket.tong_tien).toLocaleString('vi-VN')} ₫
                       </span>
                     </div>
 
-                    {ticket.uu_dai_sinh_vien?.la_sinh_vien && (
-                      <div className="flex justify-between text-sm font-bold text-emerald-700">
-                        <span>🎓 Trợ giá Sinh viên (-15%):</span>
-                        <span>-{Number(ticket.uu_dai_sinh_vien.so_tien_giam).toLocaleString('vi-VN')} ₫</span>
-                      </div>
-                    )}
-
-                    <div className="pt-2.5 border-t border-orange-200/80 flex justify-between items-baseline">
-                      <span className="font-extrabold text-slate-800 text-sm uppercase">Tổng thanh toán:</span>
-                      <span className="text-2xl md:text-3xl font-black text-brand-orange">
-                        {finalAmount.toLocaleString('vi-VN')} ₫
-                      </span>
-                    </div>
-
                     <p className="text-emerald-700 text-xs font-bold flex items-center gap-1 pt-1">
-                      ✓ Tích lũy +{Math.floor(finalAmount / 10000)} điểm thành viên HungHau IT
+                      ✓ Hồ sơ được ghi nhận minh bạch trên hệ thống QR CSKH MYH Group
                     </p>
                   </div>
 
-                  {/* Nút Phê duyệt Báo giá khi đang ở trạng thái CHỜ_KHÁCH_CHỐT_GIÁ */}
+                  {/* Nút Phê duyệt Phương án khi đang ở trạng thái CHỜ_KHÁCH_CHỐT_GIÁ */}
                   {ticket.trang_thai === 'CHỜ_KHÁCH_CHỐT_GIÁ' && (
                     <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 space-y-3">
                       <p className="text-xs font-bold text-amber-900">
-                        ⚡ Kỹ thuật viên đã gửi báo giá chi tiết. Vui lòng xác nhận để trung tâm tiến hành sửa chữa:
+                        ⚡ Chuyên viên CSKH đã cập nhật phương án xử lý. Vui lòng xác nhận để bộ phận hỗ trợ tiếp tục thực hiện:
                       </p>
                       <div className="flex gap-3">
                         <button
                           type="button"
                           onClick={() => handleApproveQuote(true)}
                           disabled={loading}
-                          className="flex-1 py-3.5 bg-brand-orange hover:bg-orange-500 text-white font-extrabold rounded-xl transition-all shadow-md shadow-orange-500/20 text-sm uppercase"
+                          className="flex-1 py-3.5 bg-brand-orange hover:bg-orange-500 text-white font-extrabold rounded-xl transition-all shadow-md shadow-orange-500/20 text-sm uppercase cursor-pointer"
                         >
-                          ✓ Đồng Ý Sửa Ngay
+                          ✓ Đồng Ý Phương Án
                         </button>
                         <button
                           type="button"
                           onClick={() => handleApproveQuote(false)}
                           disabled={loading}
-                          className="px-4 py-3.5 bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 font-bold rounded-xl transition-all text-xs uppercase"
+                          className="px-4 py-3.5 bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 font-bold rounded-xl transition-all text-xs uppercase cursor-pointer"
                         >
                           Từ chối
                         </button>
                       </div>
                     </div>
                   )}
-
-                  {/* Nút bật/tắt mã VietQR chuyển khoản ngân hàng */}
-                  <div className="pt-2">
-                    <button
-                      type="button"
-                      onClick={() => setShowVietQr(prev => !prev)}
-                      className="w-full py-3 px-4 bg-blue-50/80 hover:bg-blue-100/80 text-brand-blue border border-blue-200 font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition"
-                    >
-                      <span>🏦</span>
-                      {showVietQr ? 'Ẩn mã QR chuyển khoản ngân hàng (VietQR)' : 'Thanh toán chuyển khoản nhanh qua mã VietQR'}
-                    </button>
-
-                    {showVietQr && (
-                      <div className="mt-3 p-4 bg-slate-50 rounded-2xl border border-blue-200 text-center">
-                        <p className="text-xs font-extrabold text-brand-blue uppercase tracking-wider mb-1">
-                          Quét mã VietQR bằng mọi App Ngân hàng
-                        </p>
-                        <p className="text-[11px] text-slate-500 mb-3">
-                          Tự động điền sẵn số tiền <strong>{finalAmount.toLocaleString('vi-VN')} ₫</strong> &amp; nội dung <code className="font-bold">TT {ticketCode}</code>
-                        </p>
-                        <img
-                          src={`https://img.vietqr.io/image/MB-02838604999-compact2.png?amount=${finalAmount}&addInfo=${encodeURIComponent(`TT ${ticketCode}`)}&accountName=${encodeURIComponent('HUNGHAU IT SUPPORT')}`}
-                          alt="Mã thanh toán VietQR"
-                          className="mx-auto w-48 h-auto rounded-xl border border-slate-200 bg-white p-1.5 shadow-xs"
-                        />
-                        <div className="mt-3 text-[11px] text-slate-600 bg-white rounded-xl p-2.5 text-left space-y-1 border border-slate-200/80">
-                          <div><strong>Ngân hàng:</strong> MB Bank (Quân Đội)</div>
-                          <div><strong>Chủ tài khoản:</strong> HUNGHAU IT SUPPORT</div>
-                          <div><strong>Nội dung CK:</strong> <code className="font-bold text-brand-blue">TT {ticketCode}</code></div>
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="mt-3">
-                      <Link
-                        to={`/thanh-toan/${ticketCode}`}
-                        className="w-full py-3 px-4 bg-brand-blue hover:bg-blue-800 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-md shadow-blue-900/10 text-center"
-                      >
-                        <span>💳</span>
-                        <span>Mở Cổng Thanh Toán &amp; Hóa Đơn Trực Tuyến</span>
-                      </Link>
-                    </div>
-                  </div>
                 </div>
               ) : (
-                /* Trạng thái khi chưa có báo giá (tong_tien === 0) - Thiết kế chuyên nghiệp, không để trống */
-                <div className="rounded-2xl bg-gradient-to-b from-amber-50/80 to-slate-50 border border-amber-200/80 p-5">
+                <div className="rounded-2xl bg-gradient-to-b from-blue-50/80 to-slate-50 border border-blue-200/80 p-5">
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-amber-400/20 text-amber-700 flex items-center justify-center text-xl shrink-0 font-bold">
-                      ⏳
+                    <div className="w-10 h-10 rounded-xl bg-brand-blue/15 text-brand-blue flex items-center justify-center text-xl shrink-0 font-bold">
+                      🎧
                     </div>
                     <div>
                       <h4 className="text-sm font-extrabold text-slate-800">
-                        Đang chờ Kỹ thuật viên kiểm tra &amp; lập báo giá
+                        Hồ sơ Chăm sóc khách hàng &amp; Hỗ trợ miễn phí
                       </h4>
                       <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                        Chi phí sửa chữa sẽ hiển thị chi tiết tại đây ngay sau khi Kỹ thuật viên chẩn đoán chính xác nguyên nhân lỗi.
+                        Mọi cập nhật từ chuyên viên phụ trách sẽ được hiển thị trực tiếp tại đây để bạn theo dõi và xác nhận phương án xử lý.
                       </p>
                     </div>
                   </div>
 
-                  <div className="mt-4 pt-3.5 border-t border-amber-200/60 space-y-2 text-xs text-slate-700">
+                  <div className="mt-4 pt-3.5 border-t border-blue-200/60 space-y-2 text-xs text-slate-700">
                     <div className="flex items-center gap-2">
                       <span className="text-emerald-600 font-bold">✓</span>
-                      <span>Miễn phí 100% công kiểm tra &amp; chẩn đoán lỗi ban đầu</span>
+                      <span>Tiếp nhận &amp; tư vấn chăm sóc khách hàng hoàn toàn miễn phí</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-emerald-600 font-bold">✓</span>
-                      <span>Chỉ tiến hành sửa chữa khi bạn bấm <strong>Đồng Ý Báo Giá</strong></span>
+                      <span>Minh bạch tiến độ xử lý &amp; bảo hành điện tử qua mã QR</span>
                     </div>
-                    {ticket.uu_dai_sinh_vien?.la_sinh_vien && (
-                      <div className="flex items-center gap-2 text-indigo-700 font-semibold">
-                        <span>🎓</span>
-                        <span>Đã kích hoạt sẵn quyền lợi giảm 15% cho Sinh viên</span>
-                      </div>
-                    )}
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Card 2: Linh kiện Thay thế Chính hãng (Serial Tracking) */}
+            {/* Card 2: Hạng mục Hỗ trợ / Bảo hành kèm theo (Serial Tracking) */}
             <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/90">
               <h3 className="text-base font-extrabold text-slate-800 mb-3 flex items-center gap-2">
-                <span>🔧</span> Linh Kiện Thay Thế (Serial Tracking)
+                <span>🔖</span> Hạng Mục Hỗ Trợ &amp; Mã Định Danh (Serial Tracking)
               </h3>
 
               {ticket.linh_kien && ticket.linh_kien.length > 0 ? (

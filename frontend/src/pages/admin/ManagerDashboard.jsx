@@ -60,25 +60,25 @@ export default function ManagerDashboard() {
       <AdminNav activeKey="QUAN_LY" />
 
       <div className="space-y-6">
-        {/* Store Manager Banner */}
+        {/* CSKH Manager Banner */}
         <section className="rounded-2xl border border-slate-200 bg-brand-blue p-6 text-white shadow-lg">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <div className="flex items-center gap-2.5">
                 <span className="text-3xl">🏬</span>
                 <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
-                  Cổng Điều Hành Vận Hành — Quản Lý Cửa Hàng
+                  Tổng Quan Điều Hành — Bộ Phận Chăm Sóc Khách Hàng (QR)
                 </h2>
               </div>
               <p className="mt-2 text-sm text-blue-100 max-w-2xl leading-relaxed">
-                Trực tiếp điều phối ca làm việc, kiểm soát tiến độ sửa chữa quầy & kỹ thuật, xử lý lịch hẹn khách và quản lý phân quyền nhân sự cấp dưới (Level &lt; 80).
+                Trực tiếp điều phối ca trực CSKH, giám sát tiến độ xử lý hồ sơ QR của khách hàng, phê duyệt lịch hẹn và quản lý phân quyền nhân sự bộ phận CSKH.
               </p>
               <div className="mt-3 flex flex-wrap gap-2 text-xs">
                 <span className="rounded-full bg-white/10 border border-white/20 px-3 py-1 font-bold">
-                  Trụ sở: 615 Âu Cơ, P. Phú Trung, Q. Tân Phú
+                  Trụ sở: Tập đoàn MYH Group • 615 Âu Cơ, Q. Tân Phú
                 </span>
                 <span className="rounded-full bg-white/10 border border-white/20 px-3 py-1 font-bold">
-                  Tổng nhân lực cửa hàng: {subordinateCount} nhân sự
+                  Tổng nhân lực CSKH: {subordinateCount} nhân sự
                 </span>
               </div>
             </div>
@@ -88,13 +88,13 @@ export default function ManagerDashboard() {
                 to="/admin/nhan-su"
                 className="rounded-xl bg-white px-4 py-2.5 text-xs font-semibold text-blue-900 shadow-sm transition hover:bg-blue-50"
               >
-                👥 Quản Lý Nhân Sự
+                👥 Nhân Sự &amp; Phân Quyền CSKH
               </Link>
               <Link
                 to="/admin"
                 className="rounded-xl bg-white/10 border border-white/20 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-white/20"
               >
-                📋 Mở Bàn Vận Hành
+                📋 Bàn Điều Hành Hồ Sơ QR
               </Link>
             </div>
           </div>

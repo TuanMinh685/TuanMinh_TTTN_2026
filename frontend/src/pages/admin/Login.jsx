@@ -33,9 +33,7 @@ function Login() {
         if (accountId) localStorage.setItem('accountId', String(accountId));
         if (username) localStorage.setItem('username', username);
 
-        if (role === 'GIAM_DOC' || role === 'ADMIN') {
-          navigate('/admin/giam-doc');
-        } else if (role === 'QUAN_LY') {
+        if (role === 'QUAN_LY' || role === 'ADMIN' || role === 'GIAM_DOC') {
           navigate('/admin/quan-ly');
         } else {
           navigate('/admin');
@@ -49,24 +47,27 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50/40 to-slate-100 flex items-center justify-center p-4 py-12">
+    <div className="min-h-[calc(100vh-5rem)] bg-gradient-to-br from-slate-100 via-blue-50/40 to-slate-100 flex items-center justify-center p-4 py-10">
       <div className="bg-white max-w-md w-full rounded-3xl shadow-xl overflow-hidden border border-slate-200/80">
         <div className="h-2 bg-gradient-to-r from-brand-blue via-brand-orange to-brand-blue"></div>
 
-        <div className="p-8 sm:p-10">
-          <div className="text-center mb-8">
+        <div className="p-7 sm:p-9">
+          <div className="text-center mb-6">
             <Link to="/" className="inline-block">
               <img
                 src="/img/logo-HHH-26.png"
                 alt="HungHau Logo"
-                className="h-16 object-contain mx-auto mb-3 bg-brand-blue rounded-2xl p-2.5 shadow-md shadow-blue-900/10"
+                className="h-14 object-contain mx-auto mb-3 bg-brand-blue rounded-2xl p-2 shadow-md shadow-blue-900/10"
               />
             </Link>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-brand-blue text-[11px] font-bold uppercase tracking-wider mb-2">
+              📷 Hệ Thống Quản Trị QR CSKH
+            </span>
             <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">
-              Cổng Điều Hành Nội Bộ
+              Cổng Điều Hành CSKH Nội Bộ
             </h1>
-            <p className="text-slate-500 text-xs mt-1.5 font-medium">
-              Hệ thống Tiếp Nhận & Sửa Chữa Thiết Bị • 615 Âu Cơ
+            <p className="text-slate-500 text-xs mt-1 font-medium">
+              Web Quét Mã QR Chăm Sóc Khách Hàng • Tập đoàn MYH Group
             </p>
           </div>
 
@@ -80,7 +81,7 @@ function Login() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                Tên đăng nhập
+                Tài khoản nhân viên CSKH
               </label>
               <input
                 type="text"
@@ -125,72 +126,72 @@ function Login() {
               disabled={loading}
               className="w-full mt-2 py-3.5 bg-brand-blue hover:bg-blue-800 active:scale-[0.99] text-white font-extrabold rounded-xl transition-all shadow-lg shadow-blue-900/20 text-sm uppercase tracking-wider disabled:opacity-50 cursor-pointer"
             >
-              {loading ? 'Đang xác thực thông tin...' : 'ĐĂNG NHẬP HỆ THỐNG'}
+              {loading ? 'Đang xác thực thông tin...' : 'ĐĂNG NHẬP HỆ THỐNG CSKH'}
             </button>
           </form>
 
-          {/* Gợi ý tài khoản & Đăng nhập nhanh */}
+          {/* Gợi ý tài khoản bộ phận CSKH */}
           <div className="mt-6 rounded-2xl border border-slate-200/90 bg-slate-50/80 p-4">
             <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2.5 text-center">
-              🔑 Chọn tài khoản đăng nhập nhanh (Mật khẩu: 123456)
+              🔑 Chọn nhanh vai trò Bộ phận CSKH (Mật khẩu: 123456)
             </p>
             <div className="grid grid-cols-2 gap-2 text-xs">
               <button
                 type="button"
-                onClick={() => setFormData({ username: 'giamdoc', password: '123456' })}
-                className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-2 font-semibold text-slate-700 hover:bg-slate-100 hover:border-slate-300 transition shadow-2xs text-left"
+                onClick={() => setFormData({ username: 'admin', password: '123456' })}
+                className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-2.5 font-semibold text-slate-700 hover:bg-blue-50 hover:border-blue-200 transition shadow-2xs text-left cursor-pointer"
               >
-                <span className="text-lg">👑</span>
+                <span className="text-lg">🛡️</span>
                 <div>
-                  <p className="text-[11px] font-bold text-slate-800 leading-tight">Giám Đốc</p>
-                  <p className="text-[10px] text-slate-400">@giamdoc</p>
+                  <p className="text-[11px] font-bold text-slate-800 leading-tight">Quản Trị Hệ Thống</p>
+                  <p className="text-[10px] text-slate-400">@admin</p>
                 </div>
               </button>
               <button
                 type="button"
                 onClick={() => setFormData({ username: 'quanly', password: '123456' })}
-                className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-2 font-semibold text-slate-700 hover:bg-slate-100 hover:border-slate-300 transition shadow-2xs text-left"
+                className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-2.5 font-semibold text-slate-700 hover:bg-blue-50 hover:border-blue-200 transition shadow-2xs text-left cursor-pointer"
               >
                 <span className="text-lg">🏬</span>
                 <div>
-                  <p className="text-[11px] font-bold text-slate-800 leading-tight">Quản Lý</p>
+                  <p className="text-[11px] font-bold text-slate-800 leading-tight">Trưởng BP CSKH</p>
                   <p className="text-[10px] text-slate-400">@quanly</p>
                 </div>
               </button>
               <button
                 type="button"
-                onClick={() => setFormData({ username: 'kythuat', password: '123456' })}
-                className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-2 font-semibold text-slate-700 hover:bg-slate-100 hover:border-slate-300 transition shadow-2xs text-left"
+                onClick={() => setFormData({ username: 'letan', password: '123456' })}
+                className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-2.5 font-semibold text-slate-700 hover:bg-blue-50 hover:border-blue-200 transition shadow-2xs text-left cursor-pointer"
               >
-                <span className="text-lg">🔧</span>
+                <span className="text-lg">👩‍💼</span>
                 <div>
-                  <p className="text-[11px] font-bold text-slate-800 leading-tight">Kỹ Thuật Viên</p>
-                  <p className="text-[10px] text-slate-400">@kythuat</p>
+                  <p className="text-[11px] font-bold text-slate-800 leading-tight">Lễ Tân & Tiếp Nhận</p>
+                  <p className="text-[10px] text-slate-400">@letan</p>
                 </div>
               </button>
               <button
                 type="button"
-                onClick={() => setFormData({ username: 'letan', password: '123456' })}
-                className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-2 font-semibold text-slate-700 hover:bg-slate-100 hover:border-slate-300 transition shadow-2xs text-left"
+                onClick={() => setFormData({ username: 'kythuat', password: '123456' })}
+                className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-2.5 font-semibold text-slate-700 hover:bg-blue-50 hover:border-blue-200 transition shadow-2xs text-left cursor-pointer"
               >
-                <span className="text-lg">👩‍💼</span>
+                <span className="text-lg">🎧</span>
                 <div>
-                  <p className="text-[11px] font-bold text-slate-800 leading-tight">Lễ Tân</p>
-                  <p className="text-[10px] text-slate-400">@letan</p>
+                  <p className="text-[11px] font-bold text-slate-800 leading-tight">Chuyên Viên Hỗ Trợ</p>
+                  <p className="text-[10px] text-slate-400">@kythuat</p>
                 </div>
               </button>
             </div>
           </div>
 
-          <div className="mt-8 pt-6 border-t border-slate-100 flex flex-col items-center gap-3">
+          <div className="mt-6 pt-5 border-t border-slate-100 flex flex-col items-center gap-2.5">
             <Link
               to="/"
               className="text-xs font-bold text-slate-500 hover:text-brand-blue transition flex items-center gap-1.5"
             >
-              <span>←</span> Về Trang Chủ Khách Hàng
+              <span>←</span> Về Trang Chủ Quét Mã QR
             </Link>
             <p className="text-[11px] text-slate-400 text-center">
-              Bản quyền © {CURRENT_YEAR} HungHau IT Support. Mọi quyền được bảo lưu.
+              Bản quyền © {CURRENT_YEAR} MYH Group (HungHau Holdings).
             </p>
           </div>
         </div>

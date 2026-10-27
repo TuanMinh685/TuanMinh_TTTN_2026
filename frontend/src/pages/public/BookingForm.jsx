@@ -20,25 +20,13 @@ function BookingForm() {
   const [selectedServiceBanner, setSelectedServiceBanner] = useState(targetService);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [isStudent, setIsStudent] = useState(false);
-  const [schoolName, setSchoolName] = useState('');
-  const [studentId, setStudentId] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('TAI_QUAY'); // 'TAI_QUAY' | 'VIETQR'
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const paymentDesc = paymentMethod === 'VIETQR'
-        ? '\n[Hình thức thanh toán dự kiến: Chuyển khoản VietQR]'
-        : '\n[Hình thức thanh toán dự kiến: Tiền mặt / Quẹt thẻ tại quầy]';
-
       await api.post('/tickets/booking', {
-        ...formData,
-        isStudent,
-        schoolName,
-        studentId,
-        moTaLoi: `${formData.moTaLoi}${paymentDesc}`
+        ...formData
       });
       setSuccess(true);
     } catch (err) {
@@ -47,8 +35,6 @@ function BookingForm() {
       setLoading(false);
     }
   };
-
-  const vietQrBookingUrl = `https://img.vietqr.io/image/MB-02838604999-compact2.png?amount=150000&addInfo=${encodeURIComponent(`LH ${formData.phone.slice(-4) || 'CSKH'}`)}&accountName=${encodeURIComponent('HUNGHAU IT SUPPORT')}`;
 
   if (success) {
     return (
@@ -59,38 +45,15 @@ function BookingForm() {
           </div>
           <h2 className="text-2xl font-bold text-brand-blue mb-2">Đặt lịch hẹn CSKH thành công!</h2>
           <p className="text-slate-600 text-xs md:text-sm mb-6">
-            Cảm ơn bạn <strong>{formData.fullName}</strong> đã đặt hẹn trước. Khi bạn đến quầy lễ tân tại <strong>615 Âu Cơ</strong>, nhân viên sẽ chuyển lịch hẹn thành <strong>Mã QR Hồ Sơ CSKH</strong> ngay lập tức!
+            Cảm ơn bạn <strong>{formData.fullName}</strong> đã đặt hẹn trước. Khi bạn đến quầy lễ tân tại <strong>Tập đoàn MYH Group (615 Âu Cơ)</strong>, nhân viên sẽ xác nhận lịch hẹn và khởi tạo <strong>Mã QR Hồ Sơ CSKH</strong> ngay lập tức!
           </p>
 
-          {paymentMethod === 'VIETQR' ? (
-            <div className="mb-6 p-4 rounded-2xl bg-blue-50/70 border border-blue-200 text-left">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-xl">📱</span>
-                <span className="font-bold text-xs uppercase tracking-wider text-brand-blue">
-                  Mã QR Thanh Toán / Đặt Cọc VietQR
-                </span>
-              </div>
-              <div className="flex flex-col sm:flex-row items-center gap-4">
-                <img
-                  src={vietQrBookingUrl}
-                  alt="Mã QR VietQR"
-                  className="w-36 h-auto rounded-xl border border-slate-200 bg-white p-1.5 shadow-2xs"
-                />
-                <div className="text-xs space-y-1 text-slate-600">
-                  <p><strong>Ngân hàng:</strong> MB Bank (Quân Đội)</p>
-                  <p><strong>Số tài khoản:</strong> <code className="font-bold text-slate-800">02838604999</code></p>
-                  <p><strong>Chủ tài khoản:</strong> HUNGHAU IT SUPPORT</p>
-                  <p><strong>Nội dung CK:</strong> <code className="font-bold text-brand-blue">LH {formData.phone.slice(-4) || 'CSKH'}</code></p>
-                  <p className="text-[11px] text-slate-400 mt-1">Bạn có thể chuyển khoản trước hoặc chờ KTV báo giá chính xác trên hồ sơ QR.</p>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="mb-6 p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-600">
-              <span className="font-bold text-slate-800 block mb-1">🏢 Thanh toán tại quầy</span>
-              Bạn sẽ kiểm tra thiết bị ưng ý và thanh toán trực tiếp bằng tiền mặt hoặc quẹt thẻ tại quầy 615 Âu Cơ sau khi nhận máy.
-            </div>
-          )}
+          <div className="mb-6 p-4 rounded-2xl bg-blue-50/70 border border-blue-200 text-xs text-slate-600 text-left space-y-1">
+            <span className="font-bold text-brand-blue block mb-1">📋 Thông tin lịch hẹn đã ghi nhận:</span>
+            <p>• <strong>Khách hàng:</strong> {formData.fullName} ({formData.phone})</p>
+            <p>• <strong>Thời gian hẹn:</strong> {formData.gioHen} - Ngày {formData.ngayHen}</p>
+            <p>• <strong>Địa điểm:</strong> Trung tâm CSKH 615 Âu Cơ, P. Phú Trung, Q. Tân Phú, TP.HCM</p>
+          </div>
 
           <div className="flex flex-col sm:flex-row justify-center gap-3">
             <Link
@@ -120,9 +83,9 @@ function BookingForm() {
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 text-brand-orange text-xs font-bold uppercase tracking-wider mb-2">
                 📅 Đặt Lịch Hẹn Trước Qua Web QR
               </span>
-              <h1 className="text-2xl font-bold text-brand-blue mb-1">Đặt Lịch Hẹn Chăm Sóc Khách Hàng</h1>
+              <h1 className="text-2xl font-bold text-brand-blue mb-1">Đặt Lịch Hẹn Tư Vấn & Chăm Sóc Khách Hàng</h1>
               <p className="text-slate-500 text-xs md:text-sm">
-                Đặt lịch trước để được ưu tiên tiếp nhận và cấp phiếu QR nhanh chóng khi đến trung tâm 615 Âu Cơ.
+                Đặt lịch trước để được ưu tiên tiếp nhận và cấp phiếu QR nhanh chóng khi đến Trung tâm CSKH Tập đoàn MYH Group.
               </p>
             </div>
 
@@ -150,25 +113,26 @@ function BookingForm() {
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Hình thức tiếp nhận tại trung tâm CSKH</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Hình thức hẹn Chăm sóc khách hàng</label>
                 <select 
                   className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-brand-blue focus:ring focus:ring-blue-200 outline-none text-sm"
                   value={formData.loaiDichVu} onChange={e => setFormData({...formData, loaiDichVu: e.target.value})}
                 >
-                  <option value="TAI_CUA_HANG">Mang thiết bị đến Trung tâm CSKH (615 Âu Cơ, Q. Tân Phú)</option>
+                  <option value="TAI_CUA_HANG">Đến trực tiếp Trung tâm CSKH (615 Âu Cơ, Q. Tân Phú)</option>
                   <option value="BAO_HANH_DINH_KY">Đặt lịch kiểm tra & bảo hành điện tử (e-Warranty)</option>
+                  <option value="TU_VAN_HO_TRO">Đặt lịch tư vấn & giải đáp yêu cầu khách hàng</option>
                 </select>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Họ và tên *</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Họ và tên khách hàng *</label>
                   <input type="text" required placeholder="Ví dụ: Nguyễn Văn A"
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-brand-blue focus:ring focus:ring-blue-200 outline-none text-sm"
                     value={formData.fullName} onChange={e => setFormData({...formData, fullName: e.target.value})} />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Số điện thoại *</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Số điện thoại liên hệ *</label>
                   <input type="tel" required placeholder="0901234567"
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-brand-blue focus:ring focus:ring-blue-200 outline-none text-sm"
                     value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
@@ -183,67 +147,11 @@ function BookingForm() {
                     value={formData.zaloId} onChange={e => setFormData({...formData, zaloId: e.target.value})} />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Thiết bị mang theo</label>
-                  <input type="text" placeholder="VD: Laptop Asus Zenbook, PC Dell..."
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Sản phẩm / Dịch vụ cần hỗ trợ</label>
+                  <input type="text" placeholder="VD: Sản phẩm / Thiết bị / Dịch vụ cần CSKH..."
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-brand-blue focus:ring focus:ring-blue-200 outline-none text-sm"
                     value={formData.deviceName || ''} onChange={e => setFormData({...formData, deviceName: e.target.value})} />
                 </div>
-              </div>
-
-              {/* Ưu đãi Sinh viên toàn quốc */}
-              <div className="p-4 bg-indigo-50/70 rounded-2xl border border-indigo-200">
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    checked={isStudent} 
-                    onChange={e => setIsStudent(e.target.checked)}
-                    className="w-4 h-4 text-brand-blue rounded focus:ring-brand-blue cursor-pointer"
-                  />
-                  <div>
-                    <span className="text-xs font-extrabold text-indigo-900 block">🎓 Tôi là Học sinh / Sinh viên (Ưu đãi -15% tổng hóa đơn)</span>
-                    <span className="text-[11px] text-indigo-700">Áp dụng cho học sinh, sinh viên các trường toàn quốc.</span>
-                  </div>
-                </label>
-
-                {isStudent && (
-                  <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 pt-3 border-t border-indigo-100">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">Trường đang theo học *</label>
-                      <input 
-                        type="text" 
-                        required={isStudent}
-                        list="school-suggestions"
-                        placeholder="VD: Đại học Văn Hiến (VHU)..."
-                        value={schoolName}
-                        onChange={e => setSchoolName(e.target.value)}
-                        className="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:border-brand-blue outline-none bg-white"
-                      />
-                      <datalist id="school-suggestions">
-                        <option value="Trường Đại học Văn Hiến (VHU)" />
-                        <option value="Trường Đại học Bách Khoa TP.HCM" />
-                        <option value="Trường Đại học Công nghệ Thông tin (UIT)" />
-                        <option value="Trường Đại học Sư phạm Kỹ thuật TP.HCM" />
-                        <option value="Trường Đại học Kinh tế TP.HCM (UEH)" />
-                        <option value="Trường Đại học Tài chính - Marketing (UFM)" />
-                        <option value="Trường Đại học Sài Gòn" />
-                        <option value="Trường Đại học Mở TP.HCM" />
-                        <option value="Trường Đại học FPT TP.HCM" />
-                        <option value="Học sinh / Sinh viên trường khác trên toàn quốc" />
-                      </datalist>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">Mã số sinh viên (MSSV) *</label>
-                      <input 
-                        type="text" 
-                        required={isStudent}
-                        placeholder="VD: 221A010123"
-                        value={studentId}
-                        onChange={e => setStudentId(e.target.value)}
-                        className="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:border-brand-blue outline-none bg-white"
-                      />
-                    </div>
-                  </div>
-                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -262,64 +170,14 @@ function BookingForm() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Mô tả chi tiết tình trạng / Yêu cầu hỗ trợ *</label>
-                <textarea required rows="3" placeholder="Ví dụ: Máy bật không lên nguồn, cần kiểm tra tổng quát và vệ sinh bảo dưỡng..."
+                <label className="block text-xs font-bold text-slate-700 mb-1">Nội dung cần tư vấn / Yêu cầu hỗ trợ CSKH *</label>
+                <textarea required rows="3" placeholder="Mô tả chi tiết nội dung bạn cần bộ phận Chăm sóc khách hàng hỗ trợ..."
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-brand-blue focus:ring focus:ring-blue-200 outline-none text-sm"
                   value={formData.moTaLoi} onChange={e => setFormData({...formData, moTaLoi: e.target.value})}></textarea>
               </div>
 
-              {/* KHỐI CHỌN PHƯƠNG THỨC THANH TOÁN DỰ KIẾN */}
-              <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50/80">
-                <label className="block text-xs font-bold text-slate-800 mb-2.5">
-                  💳 Phương thức thanh toán dự kiến sau khi hoàn tất:
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div
-                    onClick={() => setPaymentMethod('TAI_QUAY')}
-                    className={`p-3 rounded-xl border cursor-pointer transition flex items-start gap-2.5 ${
-                      paymentMethod === 'TAI_QUAY'
-                        ? 'border-brand-blue bg-white shadow-xs text-brand-blue font-bold ring-2 ring-blue-500/20'
-                        : 'border-slate-200 bg-white hover:border-slate-300 text-slate-700'
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      checked={paymentMethod === 'TAI_QUAY'}
-                      onChange={() => setPaymentMethod('TAI_QUAY')}
-                      className="mt-0.5"
-                    />
-                    <div>
-                      <div className="text-xs font-bold text-slate-800">🏢 Thanh toán tại quầy</div>
-                      <div className="text-[11px] text-slate-500 font-normal mt-0.5">Tiền mặt hoặc quẹt thẻ khi nhận máy tại 615 Âu Cơ</div>
-                    </div>
-                  </div>
-
-                  <div
-                    onClick={() => setPaymentMethod('VIETQR')}
-                    className={`p-3 rounded-xl border cursor-pointer transition flex items-start gap-2.5 ${
-                      paymentMethod === 'VIETQR'
-                        ? 'border-brand-blue bg-white shadow-xs text-brand-blue font-bold ring-2 ring-blue-500/20'
-                        : 'border-slate-200 bg-white hover:border-slate-300 text-slate-700'
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      checked={paymentMethod === 'VIETQR'}
-                      onChange={() => setPaymentMethod('VIETQR')}
-                      className="mt-0.5"
-                    />
-                    <div>
-                      <div className="text-xs font-bold text-slate-800">📱 Chuyển khoản VietQR</div>
-                      <div className="text-[11px] text-slate-500 font-normal mt-0.5">Quét mã QR ngân hàng thanh toán nhanh 24/7</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
               <button type="submit" disabled={loading}
-                className="w-full py-3.5 bg-brand-orange text-white font-bold text-base rounded-xl hover:brightness-110 shadow-lg hover:shadow-xl transition-all mt-4 disabled:opacity-50">
+                className="w-full py-3.5 bg-brand-orange text-white font-bold text-base rounded-xl hover:brightness-110 shadow-lg hover:shadow-xl transition-all mt-4 disabled:opacity-50 cursor-pointer">
                 {loading ? 'Đang gửi thông tin...' : 'XÁC NHẬN ĐẶT LỊCH HẸN CSKH'}
               </button>
             </form>

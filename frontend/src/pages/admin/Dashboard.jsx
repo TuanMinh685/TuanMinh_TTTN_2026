@@ -6,12 +6,12 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cel
 import QRCode from 'qrcode';
 
 const STATUS_LABELS = {
-  'CHỜ_KHÁM': 'Chờ khám',
-  'ĐANG_CHUẨN_ĐOÁN': 'Đang chuẩn đoán',
-  'CHỜ_KHÁCH_CHỐT_GIÁ': 'Chờ khách chốt giá',
-  'ĐANG_SỬA': 'Đang sửa chữa',
-  'ĐÃ_SỬA_XONG': 'Đã sửa xong',
-  'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN': 'Đã giao khách & thu tiền',
+  'CHỜ_KHÁM': 'Chờ tiếp nhận',
+  'ĐANG_CHUẨN_ĐOÁN': 'Đang kiểm tra & phân loại',
+  'CHỜ_KHÁCH_CHỐT_GIÁ': 'Chờ khách xác nhận',
+  'ĐANG_SỬA': 'Đang xử lý hỗ trợ',
+  'ĐÃ_SỬA_XONG': 'Đã xử lý xong',
+  'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN': 'Hoàn tất CSKH & Bảo hành',
   'YÊU_CẦU_BẢO_HÀNH': 'Yêu cầu bảo hành'
 };
 
@@ -24,52 +24,52 @@ const isNotificationCorrupted = (item) => {
 const ROLE_META = {
   GIAM_DOC: {
     level: 100,
-    title: 'Giám Đốc Điều Hành',
-    badge: '👑 Giám Đốc Điều Hành',
+    title: 'Quản Trị Hệ Thống CSKH',
+    badge: '🛡️ Quản Trị Hệ Thống CSKH',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
-    permissionsText: 'Toàn quyền tối cao: Tất cả các trang, duyệt mọi trạng thái, tạo/khóa/phân quyền mọi cấp kể cả Quản lý.'
+    permissionsText: 'Toàn quyền quản trị hệ thống Web Quét Mã QR Chăm Sóc Khách Hàng và phân quyền nhân sự.'
   },
   ADMIN: {
     level: 100,
-    title: 'Tổng Quản Trị Hệ Thống',
-    badge: '👑 Tổng Quản Trị Hệ Thống',
+    title: 'Quản Trị Hệ Thống CSKH',
+    badge: '🛡️ Quản Trị Hệ Thống CSKH',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
-    permissionsText: 'Toàn quyền tối cao: Tất cả các trang, duyệt mọi trạng thái, tạo/khóa/phân quyền mọi cấp kể cả Quản lý.'
+    permissionsText: 'Toàn quyền quản trị hệ thống Web Quét Mã QR Chăm Sóc Khách Hàng và phân quyền nhân sự.'
   },
   QUAN_LY: {
     level: 80,
-    title: 'Quản Lý Cửa Hàng',
-    badge: '🛡️ Quản Lý Cửa Hàng',
+    title: 'Trưởng Bộ Phận CSKH',
+    badge: '🏬 Trưởng Bộ Phận CSKH',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
-    permissionsText: 'Điều hành toàn bộ các trang nghiệp vụ & báo cáo; được tạo/sửa/khóa tài khoản nhân sự cấp dưới (Kế toán, Thủ kho, KTV, Lễ tân).'
+    permissionsText: 'Điều hành toàn bộ hoạt động Chăm sóc khách hàng, giám sát tiến độ xử lý hồ sơ QR và quản lý nhân sự CSKH.'
   },
   KE_TOAN: {
     level: 60,
-    title: 'Kế Toán & Thu Ngân',
-    badge: '💰 Kế Toán / Thu Ngân',
+    title: 'Chuyên Viên Thống Kê CSKH',
+    badge: '📊 Thống Kê CSKH',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
-    permissionsText: 'Truy cập Phiếu sửa chữa & Báo cáo tài chính; xác nhận thu tiền bàn giao máy, in hóa đơn 80mm VietQR & xuất báo cáo Excel.'
+    permissionsText: 'Theo dõi thống kê hồ sơ CSKH và xuất báo cáo Excel.'
   },
   THU_KHO: {
     level: 50,
-    title: 'Thủ Kho Linh Kiện',
-    badge: '📦 Thủ Kho Linh Kiện',
+    title: 'Quản Lý Bảo Hành (e-Warranty)',
+    badge: '🛡️ Quản Lý Bảo Hành',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
-    permissionsText: 'Quản lý toàn diện Kho linh kiện (thêm mới, sửa giá bán, nhập tồn kho, xuất báo cáo tồn kho) & đối chiếu phiếu xuất.'
+    permissionsText: 'Quản lý danh mục hạng mục bảo hành điện tử (e-Warranty) và mã định danh Serial.'
   },
   KY_THUAT_VIEN: {
     level: 40,
-    title: 'Kỹ Thuật Viên Sửa Chữa',
-    badge: '🔧 Kỹ Thuật Viên Sửa Chữa',
+    title: 'Chuyên Viên Hỗ Trợ CSKH',
+    badge: '🎧 Chuyên Viên Hỗ Trợ CSKH',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
-    permissionsText: 'Chẩn đoán kỹ thuật, gắn/gỡ linh kiện kèm mã Serial (S/N), gửi báo giá và xác nhận Sửa Xong.'
+    permissionsText: 'Tiếp nhận phân loại yêu cầu, cập nhật nhật ký xử lý, gắn hạng mục bảo hành Serial và hoàn tất hỗ trợ.'
   },
   LE_TAN: {
     level: 30,
-    title: 'Lễ Tân & CSKH',
-    badge: '💁 Lễ Tân & CSKH',
+    title: 'Lễ Tân & Tiếp Nhận QR',
+    badge: '👩‍💼 Lễ Tân & Tiếp Nhận QR',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
-    permissionsText: 'Tiếp nhận máy trực tiếp tại quầy (POS), chụp biên bản ảnh ngoại quan, xử lý lịch hẹn, bàn giao máy & thu tiền.'
+    permissionsText: 'Khởi tạo hồ sơ QR tại quầy, lưu biên bản ảnh hiện trạng, tiếp nhận lịch hẹn và in phiếu nhiệt QR 80mm.'
   }
 };
 
@@ -92,7 +92,7 @@ function Dashboard() {
 
   const [tickets, setTickets] = useState([]);
   const [bookings, setBookings] = useState([]);
-  const [activeTab, setActiveTab] = useState(() => (role === 'THU_KHO' ? 'INVENTORY' : role === 'KE_TOAN' ? 'CASHIER' : 'TICKETS'));
+  const [activeTab, setActiveTab] = useState('TICKETS');
   const [cashierTicket, setCashierTicket] = useState(null);
   const [cashierMethod, setCashierMethod] = useState('TIEN_MAT');
   const [cashierReceived, setCashierReceived] = useState('');
@@ -826,33 +826,25 @@ function Dashboard() {
 
   return (
     <div className="p-6 md:p-8 bg-slate-50 min-h-screen">
-      {/* Tiêu đề & Điều hướng Vận Hành */}
+      {/* Tiêu đề & Điều hướng Vận Hành CSKH */}
       <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">
-            Bảng Điều Khiển Vận Hành
+            Cổng Điều Hành Hồ Sơ Quét Mã QR Chăm Sóc Khách Hàng
           </h1>
           <p className="text-slate-500 text-xs mt-1">
-            Xin chào <strong className="text-slate-700">{fullName ? fullName.replace(/\s*\(.*?\)/, '') : 'Kỹ thuật viên'}</strong> • Chúc bạn một ngày làm việc hiệu quả!
+            Xin chào <strong className="text-slate-700">{fullName ? fullName.replace(/\s*\(.*?\)/, '') : 'Chuyên viên CSKH'}</strong> • Tập đoàn MYH Group (615 Âu Cơ)
           </p>
         </div>
 
         {(isExecutive || isManagerOrAbove || canManageEmployees) && (
           <div className="flex flex-wrap items-center gap-2">
-            {isExecutive && (
-              <Link
-                to="/admin/giam-doc"
-                className="flex items-center gap-1.5 rounded-xl bg-white border border-slate-200 px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 transition shadow-2xs"
-              >
-                <span>👑</span> Trang Giám Đốc
-              </Link>
-            )}
             {isManagerOrAbove && (
               <Link
                 to="/admin/quan-ly"
                 className="flex items-center gap-1.5 rounded-xl bg-white border border-slate-200 px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 transition shadow-2xs"
               >
-                <span>🏬</span> Trang Quản Lý
+                <span>🏬</span> Tổng Quan Bộ Phận CSKH
               </Link>
             )}
             {canManageEmployees && (
@@ -860,7 +852,7 @@ function Dashboard() {
                 to="/admin/nhan-su"
                 className="flex items-center gap-1.5 rounded-xl bg-white border border-slate-200 px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 transition shadow-2xs"
               >
-                <span>👥</span> Quản Lý Nhân Sự & Phân Quyền
+                <span>👥</span> Nhân Sự &amp; Phân Quyền CSKH
               </Link>
             )}
           </div>
@@ -875,51 +867,37 @@ function Dashboard() {
         </div>
       )}
 
-      {/* Thanh Tab Nghiệp Vụ (Hiển thị tự động theo Cấp Bậc Phân Quyền) */}
+      {/* Thanh Tab Nghiệp Vụ Trọng Tâm Web Quét Mã QR Chăm Sóc Khách Hàng */}
       <div className="mb-6 flex flex-wrap gap-2 border-b border-slate-200">
         <button 
           onClick={() => setActiveTab('TICKETS')}
-          className={`rounded-t-lg px-4 py-2.5 text-xs font-medium ${activeTab === 'TICKETS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
-          📋 Phiếu sửa chữa
+          className={`rounded-t-lg px-4 py-2.5 text-xs font-medium cursor-pointer ${activeTab === 'TICKETS' ? 'bg-brand-blue text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
+          📋 Hồ sơ Yêu cầu CSKH (QR)
         </button>
         {canReceptionAction && (
           <button 
             onClick={() => setActiveTab('BOOKINGS')}
-            className={`rounded-t-lg px-4 py-2.5 text-xs font-medium ${activeTab === 'BOOKINGS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
-            📅 Lịch hẹn
-          </button>
-        )}
-        {canCashierAction && (
-          <button 
-            onClick={() => setActiveTab('CASHIER')}
-            className={`rounded-t-lg px-4 py-2.5 text-xs font-medium ${activeTab === 'CASHIER' ? 'bg-brand-blue text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
-            💳 Thu ngân &amp; Thanh toán
-          </button>
-        )}
-        {canViewInventory && (
-          <button
-            onClick={() => setActiveTab('INVENTORY')}
-            className={`rounded-t-lg px-4 py-2.5 text-xs font-medium ${activeTab === 'INVENTORY' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
-            📦 Kho linh kiện
+            className={`rounded-t-lg px-4 py-2.5 text-xs font-medium cursor-pointer ${activeTab === 'BOOKINGS' ? 'bg-brand-blue text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
+            📅 Lịch hẹn CSKH
           </button>
         )}
         {canViewStats && (
           <button
             onClick={() => setActiveTab('STATS')}
-            className={`rounded-t-lg px-4 py-2.5 text-xs font-medium ${activeTab === 'STATS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
-            📊 Báo cáo doanh thu
+            className={`rounded-t-lg px-4 py-2.5 text-xs font-medium cursor-pointer ${activeTab === 'STATS' ? 'bg-brand-blue text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
+            📊 Thống kê Hiệu suất CSKH
           </button>
         )}
         {canManageEmployees && (
           <button
             onClick={() => setActiveTab('EMPLOYEES')}
-            className={`rounded-t-lg px-4 py-2.5 text-xs font-medium ${activeTab === 'EMPLOYEES' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
+            className={`rounded-t-lg px-4 py-2.5 text-xs font-medium cursor-pointer ${activeTab === 'EMPLOYEES' ? 'bg-brand-blue text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
             👥 Nhân sự &amp; Phân quyền ({employees.length})
           </button>
         )}
         <button
           onClick={() => setActiveTab('NOTIFICATIONS')}
-          className={`rounded-t-lg px-4 py-2.5 text-xs font-medium ${activeTab === 'NOTIFICATIONS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
+          className={`rounded-t-lg px-4 py-2.5 text-xs font-medium cursor-pointer ${activeTab === 'NOTIFICATIONS' ? 'bg-brand-blue text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'}`}>
           🔔 Thông báo{notifications.length > 0 ? ` (${notifications.length})` : ''}
         </button>
       </div>
@@ -927,13 +905,13 @@ function Dashboard() {
       {activeTab === 'TICKETS' && (
         <div className="rounded-xl border-t-4 border-brand-blue bg-white p-5 shadow sm:p-6">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <h3 className="text-lg font-bold text-slate-800">Danh sách phiếu sửa chữa</h3>
+            <h3 className="text-lg font-bold text-slate-800">Danh sách Hồ sơ Yêu cầu Chăm sóc khách hàng (QR)</h3>
             <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
               <input
                 type="search"
                 value={ticketSearch}
                 onChange={event => setTicketSearch(event.target.value)}
-                placeholder="Tìm mã phiếu, khách hàng, số điện thoại..."
+                placeholder="Tìm mã phiếu QR, khách hàng, số điện thoại..."
                 aria-label="Tìm mã phiếu, khách hàng hoặc số điện thoại"
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm sm:w-64"
               />
@@ -941,9 +919,9 @@ function Dashboard() {
                 <button
                   type="button"
                   onClick={() => setShowPosModal(true)}
-                  className="rounded-lg bg-brand-blue px-3.5 py-2 text-xs font-medium text-white hover:bg-blue-900 shadow-xs whitespace-nowrap"
+                  className="rounded-lg bg-brand-blue px-3.5 py-2 text-xs font-medium text-white hover:bg-blue-900 shadow-xs whitespace-nowrap cursor-pointer"
                 >
-                  + Tiếp Nhận Tại Quầy (POS)
+                  + Tạo Phiếu QR Tại Quầy
                 </button>
               )}
               <button
@@ -991,12 +969,12 @@ function Dashboard() {
           {/* Quick Status Filter Pills */}
           <div className="mb-4 flex flex-wrap gap-2">
             {[
-              { id: 'ALL', label: 'Tất cả', count: tickets.length },
-              { id: 'CHO_KHAM', label: 'Chờ khám', count: tickets.filter(t => t.trang_thai === 'CHỜ_KHÁM').length },
-              { id: 'DANG_XU_LY', label: 'Đang kiểm tra / sửa', count: tickets.filter(t => t.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' || t.trang_thai === 'ĐANG_SỬA').length },
-              { id: 'CHO_CHOT_GIA', label: 'Chờ khách chốt giá', count: tickets.filter(t => t.trang_thai === 'CHỜ_KHÁCH_CHỐT_GIÁ').length },
+              { id: 'ALL', label: 'Tất cả hồ sơ', count: tickets.length },
+              { id: 'CHO_KHAM', label: 'Chờ tiếp nhận', count: tickets.filter(t => t.trang_thai === 'CHỜ_KHÁM').length },
+              { id: 'DANG_XU_LY', label: 'Đang kiểm tra / xử lý', count: tickets.filter(t => t.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' || t.trang_thai === 'ĐANG_SỬA').length },
+              { id: 'CHO_CHOT_GIA', label: 'Chờ khách xác nhận', count: tickets.filter(t => t.trang_thai === 'CHỜ_KHÁCH_CHỐT_GIÁ').length },
               { id: 'BAO_HANH', label: 'Yêu cầu bảo hành', count: tickets.filter(t => t.trang_thai === 'YÊU_CẦU_BẢO_HÀNH').length },
-              { id: 'HOAN_TAT', label: 'Đã hoàn tất', count: tickets.filter(t => t.trang_thai === 'ĐÃ_SỬA_XONG' || t.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN').length },
+              { id: 'HOAN_TAT', label: 'Đã hoàn tất CSKH', count: tickets.filter(t => t.trang_thai === 'ĐÃ_SỬA_XONG' || t.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN').length },
             ].map(tab => (
               <button
                 key={tab.id}
@@ -2598,8 +2576,8 @@ function Dashboard() {
           <div className="bg-white rounded-2xl w-full max-w-xl max-h-[92vh] overflow-y-auto shadow-2xl p-6">
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-200">
               <div>
-                <h3 className="text-lg font-extrabold text-brand-blue">🖥️ Tiếp Nhận Máy Trực Tiếp Tại Quầy (POS)</h3>
-                <p className="text-xs text-slate-500">Tạo phiếu nhanh cho khách vãng lai &amp; tự động bật cửa sổ in phiếu nhiệt 80mm.</p>
+                <h3 className="text-lg font-extrabold text-brand-blue">📷 Khởi Tạo Hồ Sơ QR Tại Quầy (CSKH)</h3>
+                <p className="text-xs text-slate-500">Tạo nhanh phiếu yêu cầu CSKH &amp; tự động bật cửa sổ in phiếu nhiệt QR 80mm.</p>
               </div>
               <button type="button" onClick={() => setShowPosModal(false)} className="text-slate-400 hover:text-slate-700 text-2xl font-bold">×</button>
             </div>
@@ -2632,82 +2610,49 @@ function Dashboard() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Tên máy / Model thiết bị *</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Sản phẩm / Dịch vụ cần hỗ trợ *</label>
                   <input
                     type="text"
                     required
                     value={posForm.deviceName}
                     onChange={e => setPosForm({ ...posForm, deviceName: e.target.value })}
-                    placeholder="VD: Laptop Dell Inspiron 15 / MacBook Air M2"
+                    placeholder="VD: Sản phẩm / Thiết bị / Dịch vụ cần CSKH..."
                     className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-brand-blue outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Số Serial / Service Tag máy</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Mã định danh / Số Serial</label>
                   <input
                     type="text"
                     value={posForm.serialImei}
                     onChange={e => setPosForm({ ...posForm, serialImei: e.target.value })}
-                    placeholder="VD: ST-89234X"
+                    placeholder="VD: SN-89234X"
                     className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-brand-blue outline-none font-mono"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Mô tả tình trạng lỗi &amp; yêu cầu của khách *</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Nội dung yêu cầu Chăm sóc khách hàng *</label>
                 <textarea
                   required
                   rows={2}
                   value={posForm.issueDescription}
                   onChange={e => setPosForm({ ...posForm, issueDescription: e.target.value })}
-                  placeholder="VD: Máy bật không lên nguồn, khách yêu cầu kiểm tra IC nguồn và vệ sinh máy..."
+                  placeholder="Mô tả chi tiết nội dung cần tư vấn, hỗ trợ, bảo hành của khách hàng..."
                   className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-brand-blue outline-none"
                 />
               </div>
 
-              {/* Ưu đãi Sinh viên */}
-              <div className="rounded-xl bg-indigo-50/70 p-3.5 border border-indigo-200">
-                <label className="flex items-center gap-2 cursor-pointer font-bold text-indigo-900 text-xs">
-                  <input
-                    type="checkbox"
-                    checked={posForm.isStudent}
-                    onChange={e => setPosForm({ ...posForm, isStudent: e.target.checked })}
-                    className="h-4 w-4 rounded text-indigo-600"
-                  />
-                  🎓 Khách hàng là Học sinh / Sinh viên Toàn quốc (Áp dụng giảm 15% tổng hóa đơn)
-                </label>
-                {posForm.isStudent && (
-                  <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <input
-                      type="text"
-                      required
-                      value={posForm.schoolName}
-                      onChange={e => setPosForm({ ...posForm, schoolName: e.target.value })}
-                      placeholder="Tên trường Đại học / Cao đẳng / THPT *"
-                      className="rounded-lg border border-indigo-300 bg-white px-3 py-1.5 text-xs"
-                    />
-                    <input
-                      type="text"
-                      required
-                      value={posForm.studentId}
-                      onChange={e => setPosForm({ ...posForm, studentId: e.target.value })}
-                      placeholder="Mã số sinh viên (MSSV) *"
-                      className="rounded-lg border border-indigo-300 bg-white px-3 py-1.5 text-xs"
-                    />
-                  </div>
-                )}
-              </div>
-
-              {/* Ảnh ngoại quan tại quầy */}
+              {/* Ảnh hiện trạng tại quầy */}
               <div className="rounded-xl bg-amber-50/70 p-3.5 border border-amber-200">
-                <label className="block text-xs font-bold text-amber-900 mb-2">📸 Đính kèm ảnh ngoại quan lúc nhận máy (Tùy chọn):</label>
+                <label className="block text-xs font-bold text-amber-900 mb-2">📸 Đính kèm ảnh minh chứng hiện trạng lúc tiếp nhận (Tùy chọn):</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <input
                     type="text"
                     value={posForm.photoNote}
                     onChange={e => setPosForm({ ...posForm, photoNote: e.target.value })}
-                    placeholder="Ghi chú ngoại quan (VD: Trầy nắp lưng...)"
+                    placeholder="Ghi chú hiện trạng..."
                     className="rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs"
                   />
                   <input
@@ -2732,7 +2677,7 @@ function Dashboard() {
                   disabled={savingPos}
                   className="rounded-xl bg-brand-blue px-5 py-2.5 font-bold text-white hover:bg-blue-900 shadow-md disabled:opacity-60"
                 >
-                  {savingPos ? 'Đang tạo phiếu...' : 'Tạo Phiếu & In Hóa Đơn 80mm →'}
+                  {savingPos ? 'Đang tạo phiếu...' : 'Tạo Phiếu & In Mã QR 80mm →'}
                 </button>
               </div>
             </form>

@@ -81,7 +81,7 @@ function HomeLanding() {
               </h1>
 
               <p className="text-base sm:text-lg text-blue-100 mb-6 leading-relaxed max-w-2xl">
-                Nền tảng Web ứng dụng <strong>Mã QR định danh</strong> giúp khách hàng tự tạo phiếu tiếp nhận tại quầy không cần chờ đợi, quét QR theo dõi tiến độ thời gian thực, đối chiếu ảnh ngoại quan 4 góc, duyệt báo giá trực tuyến, tra cứu <strong>Sổ bảo hành điện tử (e-Warranty)</strong> và đánh giá chất lượng phục vụ 1–5 sao.
+                Nền tảng Web ứng dụng <strong>Mã QR định danh</strong> giúp khách hàng tự tạo phiếu yêu cầu tại quầy không cần chờ đợi, quét QR theo dõi tiến độ xử lý thời gian thực, lưu minh chứng hình ảnh hiện trạng, tra cứu <strong>Sổ bảo hành &amp; Hậu mãi điện tử (e-Warranty)</strong> và đánh giá chất lượng phục vụ 1–5 sao.
               </p>
 
               {/* Thanh tra cứu & Mở Camera quét QR nhanh ngay trên trang chủ */}
@@ -212,8 +212,8 @@ function HomeLanding() {
 
                 <p className="text-xs text-slate-500 text-center mb-4 leading-relaxed">
                   {qrMode === 'INTAKE'
-                    ? 'Khách hàng đến quầy dùng Camera điện thoại quét mã này để tự điền thông tin & chụp ảnh ngoại quan máy.'
-                    : 'Quét mã hoặc bấm nút bên dưới để trải nghiệm trang theo dõi tiến độ, duyệt giá, bảo hành điện tử & đánh giá 5 sao.'}
+                    ? 'Khách hàng đến quầy dùng Camera điện thoại quét mã này để tự điền thông tin yêu cầu & đính kèm ảnh hiện trạng.'
+                    : 'Quét mã hoặc bấm nút bên dưới để trải nghiệm trang theo dõi tiến độ xử lý, bảo hành điện tử & đánh giá 5 sao.'}
                 </p>
 
                 <div className="grid grid-cols-2 gap-2.5">
@@ -264,10 +264,10 @@ function HomeLanding() {
                 📸
               </div>
               <h3 className="font-bold text-lg text-slate-800 mb-2">
-                1. Quét QR Tiếp Nhận & Lưu Ảnh Ngoại Quan
+                1. Quét QR Tiếp Nhận &amp; Lưu Ảnh Hiện Trạng
               </h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Khách tự quét QR tại quầy điền thông tin lỗi trong 30 giây và tải lên ảnh chụp 4 góc máy lúc bàn giao, minh bạch tuyệt đối chống khiếu nại.
+                Khách tự quét QR tại quầy điền nội dung yêu cầu trong 30 giây và tải lên ảnh minh chứng hiện trạng lúc tiếp nhận, minh bạch tuyệt đối.
               </p>
             </div>
 
@@ -276,10 +276,10 @@ function HomeLanding() {
                 ⏱️
               </div>
               <h3 className="font-bold text-lg text-slate-800 mb-2">
-                2. Quét QR Theo Dõi Tiến Độ & Duyệt Báo Giá
+                2. Quét QR Theo Dõi Tiến Độ &amp; Phản Hồi
               </h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Không cần gọi điện hỏi tổng đài. Khách quét mã QR trên biên nhận để xem tiến độ thời gian thực và bấm Đồng ý / Từ chối báo giá ngay trên điện thoại.
+                Không cần gọi điện hỏi tổng đài. Khách quét mã QR trên biên nhận để xem nhật ký xử lý thời gian thực và xác nhận phương án hỗ trợ ngay trên điện thoại.
               </p>
             </div>
 
@@ -291,7 +291,7 @@ function HomeLanding() {
                 3. Quét QR Sổ Bảo Hành Điện Tử (e-Warranty)
               </h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Thay thế hoàn toàn phiếu bảo hành giấy dễ rách mất. Tự động đếm ngược hạn bảo hành, tra cứu Serial linh kiện và gửi yêu cầu bảo hành lại bằng QR.
+                Thay thế hoàn toàn phiếu bảo hành giấy dễ thất lạc. Tự động đếm ngược hạn bảo hành, tra cứu định danh Serial và gửi yêu cầu hỗ trợ hậu mãi bằng QR.
               </p>
             </div>
 
@@ -303,7 +303,7 @@ function HomeLanding() {
                 4. Quét QR Đánh Giá Dịch Vụ CSKH (1–5 Sao)
               </h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Khách hàng chấm điểm mức độ hài lòng (1–5 sao) và gửi ý kiến phản hồi trực tiếp trên trang QR sau khi nhận lại thiết bị.
+                Khách hàng chấm điểm mức độ hài lòng (1–5 sao) và gửi ý kiến đóng góp trực tiếp trên trang QR sau khi hoàn tất hồ sơ.
               </p>
             </div>
           </div>
@@ -347,23 +347,23 @@ function HomeLanding() {
                     📷
                   </div>
                   <h3 className="text-xl font-bold text-brand-blue mb-3">1. Quét QR tạo phiếu tại quầy</h3>
-                  <p className="text-slate-600">Khách hàng quét mã QR tại quầy Lễ tân để điền thông tin liên hệ, mô tả sự cố và đính kèm ảnh ngoại quan máy.</p>
+                  <p className="text-slate-600">Khách hàng quét mã QR tại quầy Lễ tân để điền thông tin liên hệ, nội dung cần hỗ trợ và đính kèm hình ảnh minh chứng.</p>
                 </div>
 
                 <div className="relative z-10 flex flex-col items-center text-center">
                   <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-brand-blue text-4xl mb-6">
                     📲
                   </div>
-                  <h3 className="text-xl font-bold text-brand-blue mb-3">2. Quét QR theo dõi & Duyệt giá</h3>
-                  <p className="text-slate-600">Nhận phiếu in nhiệt 80mm có mã QR riêng. Quét mã bất cứ lúc nào để xem tiến độ xử lý và bấm xác nhận báo giá online.</p>
+                  <h3 className="text-xl font-bold text-brand-blue mb-3">2. Quét QR theo dõi &amp; Xác nhận</h3>
+                  <p className="text-slate-600">Nhận phiếu in nhiệt 80mm có mã QR riêng. Quét mã bất cứ lúc nào để xem nhật ký xử lý và xác nhận phương án hỗ trợ online.</p>
                 </div>
 
                 <div className="relative z-10 flex flex-col items-center text-center">
                   <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-brand-green text-4xl mb-6">
                     🛡️
                   </div>
-                  <h3 className="text-xl font-bold text-brand-blue mb-3">3. Nhận máy, Bảo hành QR & Đánh giá</h3>
-                  <p className="text-slate-600">Thanh toán tiện lợi qua VietQR, tự động kích hoạt Sổ bảo hành điện tử trên mã QR và chấm điểm đánh giá 1–5 sao.</p>
+                  <h3 className="text-xl font-bold text-brand-blue mb-3">3. Hoàn tất, Bảo hành QR &amp; Đánh giá</h3>
+                  <p className="text-slate-600">Hoàn tất hồ sơ hỗ trợ, tự động kích hoạt Sổ bảo hành điện tử (e-Warranty) trên mã QR và chấm điểm đánh giá 1–5 sao.</p>
                 </div>
               </div>
 
@@ -433,16 +433,16 @@ function HomeLanding() {
         </section>
       )}
 
-      {/* SECTION 06: KHU VỰC DÀNH CHO NHÂN VIÊN CSKH & KỸ THUẬT */}
+      {/* SECTION 06: KHU VỰC DÀNH CHO NHÂN VIÊN CSKH */}
       <section className="py-20 bg-white relative">
         <div className="container mx-auto px-6 relative z-10">
           <div className="max-w-4xl mx-auto bg-brand-blue rounded-3xl p-10 sm:p-12 text-center text-white shadow-2xl relative overflow-hidden">
-            <h2 className="text-2xl lg:text-4xl font-bold mb-4 relative z-10">Cổng Điều Hành Nội Bộ (CSKH & Kỹ Thuật)</h2>
+            <h2 className="text-2xl lg:text-4xl font-bold mb-4 relative z-10">Cổng Điều Hành Chăm Sóc Khách Hàng Nội Bộ</h2>
             <p className="text-blue-200 text-base sm:text-lg mb-8 max-w-2xl mx-auto relative z-10">
-              Dành cho Lễ tân CSKH, Kỹ thuật viên và Quản lý tại cơ sở 615 Âu Cơ để tiếp nhận phiếu QR, cập nhật tiến độ sửa chữa, in phiếu nhiệt 80mm và theo dõi báo cáo.
+              Dành cho Lễ tân tiếp nhận, Chuyên viên hỗ trợ và Trưởng bộ phận CSKH tại Tập đoàn MYH Group để quản lý hồ sơ QR, cập nhật nhật ký xử lý, in phiếu QR nhiệt 80mm và thống kê mức độ hài lòng.
             </p>
             <Link to="/admin" className="inline-block px-10 py-4 bg-brand-green text-white font-bold text-lg rounded-full hover:bg-green-600 transition-all shadow-lg hover:shadow-xl relative z-10 w-full md:w-auto">
-              🔐 Truy Cập Cổng Nội Bộ
+              🔐 Truy Cập Cổng Điều Hành CSKH
             </Link>
           </div>
         </div>

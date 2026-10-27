@@ -7,10 +7,8 @@ const Tracking = lazy(() => import('./pages/public/Tracking'));
 const HomeLanding = lazy(() => import('./pages/public/HomeLanding'));
 const BookingForm = lazy(() => import('./pages/public/BookingForm'));
 const PhoneTracking = lazy(() => import('./pages/public/PhoneTracking'));
-const Payment = lazy(() => import('./pages/public/Payment'));
 const Login = lazy(() => import('./pages/admin/Login'));
 const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
-const DirectorDashboard = lazy(() => import('./pages/admin/DirectorDashboard'));
 const ManagerDashboard = lazy(() => import('./pages/admin/ManagerDashboard'));
 const EmployeeManagement = lazy(() => import('./pages/admin/EmployeeManagement'));
 const ProtectedRoute = lazy(() => import('./components/ProtectedRoute'));
@@ -77,44 +75,32 @@ class ErrorBoundary extends Component {
 
 const ROLE_NAV_CONFIG = {
   GIAM_DOC: {
-    shortLabel: '👑 Giám Đốc',
-    fullTitle: '👑 Giám Đốc Điều Hành',
-    link: '/admin/giam-doc',
+    shortLabel: '🛡️ Quản Trị CSKH',
+    fullTitle: '🛡️ Quản Trị Hệ Thống QR CSKH',
+    link: '/admin',
     bgClass: 'bg-slate-900 text-amber-300 hover:bg-slate-800'
   },
   ADMIN: {
-    shortLabel: '👑 Ban Giám Đốc',
-    fullTitle: '👑 Ban Giám Đốc Hệ Thống',
-    link: '/admin/giam-doc',
+    shortLabel: '🛡️ Quản Trị CSKH',
+    fullTitle: '🛡️ Quản Trị Hệ Thống QR CSKH',
+    link: '/admin',
     bgClass: 'bg-slate-900 text-amber-300 hover:bg-slate-800'
   },
   QUAN_LY: {
-    shortLabel: '🏬 Quản Lý',
-    fullTitle: '🏬 Quản Lý Cửa Hàng',
+    shortLabel: '🏬 Trưởng BP CSKH',
+    fullTitle: '🏬 Trưởng Bộ Phận CSKH',
     link: '/admin/quan-ly',
     bgClass: 'bg-blue-600 text-white hover:bg-blue-700'
   },
-  KE_TOAN: {
-    shortLabel: '📊 Kế Toán',
-    fullTitle: '📊 Kế Toán Doanh Thu',
-    link: '/admin',
-    bgClass: 'bg-emerald-600 text-white hover:bg-emerald-700'
-  },
-  THU_KHO: {
-    shortLabel: '📦 Thủ Kho',
-    fullTitle: '📦 Thủ Kho Linh Kiện',
-    link: '/admin',
-    bgClass: 'bg-amber-600 text-white hover:bg-amber-700'
-  },
   KY_THUAT_VIEN: {
-    shortLabel: '🔧 Kỹ Thuật Viên',
-    fullTitle: '🔧 Kỹ Thuật Viên Sửa Chữa',
+    shortLabel: '🎧 Chuyên Viên Hỗ Trợ',
+    fullTitle: '🎧 Chuyên Viên Hỗ Trợ & Xử Lý',
     link: '/admin',
     bgClass: 'bg-brand-green text-white hover:bg-green-600'
   },
   LE_TAN: {
-    shortLabel: '👩‍💼 Lễ Tân',
-    fullTitle: '👩‍💼 Nhân Viên Lễ Tân',
+    shortLabel: '👩‍💼 Lễ Tân & Tiếp Nhận',
+    fullTitle: '👩‍💼 Lễ Tân & Tiếp Nhận QR',
     link: '/admin',
     bgClass: 'bg-sky-600 text-white hover:bg-sky-700'
   }
@@ -179,10 +165,8 @@ function AppContent() {
         localStorage.setItem('username', nextUname || targetUser);
         if (accountId) localStorage.setItem('accountId', String(accountId));
         
-        // Điều hướng chính xác theo vai trò chuyên biệt
-        if (nextRole === 'GIAM_DOC' || nextRole === 'ADMIN') {
-          window.location.href = '/admin/giam-doc';
-        } else if (nextRole === 'QUAN_LY') {
+        // Điều hướng chính xác theo vai trò chuyên biệt CSKH
+        if (nextRole === 'QUAN_LY') {
           window.location.href = '/admin/quan-ly';
         } else {
           window.location.href = '/admin';
@@ -253,17 +237,15 @@ function AppContent() {
                 <div className="flex items-center gap-1 bg-slate-100 hover:bg-slate-200/70 border border-slate-200 rounded-full px-2.5 py-1 transition">
                   <span className="text-[11px] font-medium text-slate-500">🔄</span>
                   <select
-                    value={username || (role === 'GIAM_DOC' ? 'giamdoc' : role === 'QUAN_LY' ? 'quanly' : role === 'KE_TOAN' ? 'ketoan' : role === 'THU_KHO' ? 'thukho' : role === 'KY_THUAT_VIEN' ? 'kythuat' : 'letan')}
+                    value={username === 'giamdoc' ? 'admin' : (username || (role === 'GIAM_DOC' || role === 'ADMIN' ? 'admin' : role === 'QUAN_LY' ? 'quanly' : role === 'KY_THUAT_VIEN' ? 'kythuat' : 'letan'))}
                     onChange={(e) => handleQuickSwitchRole(e.target.value)}
                     aria-label="Chuyển vai trò"
                     className="text-xs font-semibold text-slate-700 bg-transparent outline-none cursor-pointer"
                   >
-                    <option value="kythuat">🔧 Kỹ Thuật Viên</option>
-                    <option value="letan">👩‍💼 Lễ Tân</option>
-                    <option value="quanly">🏬 Quản Lý</option>
-                    <option value="giamdoc">👑 Giám Đốc</option>
-                    <option value="thukho">📦 Thủ Kho</option>
-                    <option value="ketoan">📊 Kế Toán</option>
+                    <option value="kythuat">🎧 Chuyên Viên Hỗ Trợ</option>
+                    <option value="letan">👩‍💼 Lễ Tân & Tiếp Nhận</option>
+                    <option value="quanly">🏬 Trưởng BP CSKH</option>
+                    <option value="admin">🛡️ Quản Trị Hệ Thống</option>
                   </select>
                 </div>
 
@@ -420,11 +402,8 @@ function AppContent() {
 
             {/* Public Pages */}
             <Route path="/dat-lich" element={<BookingForm />} />
-            <Route path="/thanh-toan" element={<Payment />} />
-            <Route path="/thanh-toan/:ticketCode" element={<Payment />} />
-            <Route path="/payment" element={<Payment />} />
 
-            {/* Các trang tra cứu & tiếp nhận */}
+            {/* Các trang tra cứu & tiếp nhận QR CSKH */}
             <Route path="/tra-cuu" element={<PhoneTracking />} />
             <Route path="/intake" element={<IntakeForm />} />
             <Route path="/track/:ticketCode" element={<Tracking />} />
@@ -434,7 +413,7 @@ function AppContent() {
             <Route path="/login" element={<Login />} />
             <Route element={<ProtectedRoute />}>
               <Route path="/admin" element={<Dashboard />} />
-              <Route path="/admin/giam-doc" element={<DirectorDashboard />} />
+              <Route path="/admin/giam-doc" element={<Dashboard />} />
               <Route path="/admin/quan-ly" element={<ManagerDashboard />} />
               <Route path="/admin/nhan-su" element={<EmployeeManagement />} />
             </Route>
@@ -493,7 +472,7 @@ function AppContent() {
                 CÔNG TY CỔ PHẦN PHÁT TRIỂN HÙNG HẬU
               </h3>
               <p className="text-blue-200 text-sm leading-relaxed mb-4">
-                Cổng tiếp nhận và chăm sóc khách hàng nội bộ sửa chữa máy tính, thiết bị công nghệ. Hoạt động trên nền tảng số hóa QR thông minh thuộc Hệ sinh thái HungHau Holdings.
+                Hệ thống Web Quét Mã QR Chăm Sóc Khách Hàng – Nền tảng số hóa quy trình tiếp nhận yêu cầu, tra cứu tiến độ xử lý thời gian thực, sổ bảo hành điện tử (e-Warranty) và đánh giá chất lượng phục vụ thuộc Tập đoàn MYH Group (HungHau Holdings).
               </p>
             </div>
             

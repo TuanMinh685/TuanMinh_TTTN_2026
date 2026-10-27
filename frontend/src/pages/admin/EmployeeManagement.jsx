@@ -4,59 +4,59 @@ import api from '../../services/api';
 
 const ROLE_PERMISSIONS_DETAIL = {
   GIAM_DOC: {
-    title: 'Giám Đốc Điều Hành (Director)',
+    title: 'Quản Trị Hệ Thống CSKH',
     level: 100,
-    badge: '👑 Giám Đốc Điều Hành',
+    badge: '🛡️ Quản Trị Hệ Thống CSKH',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
-    description: 'Quyền hạn tối cao toàn hệ thống: Xem toàn bộ báo cáo doanh thu, phê duyệt chỉ số chiến lược, quản trị và tạo mới mọi cấp bậc nhân sự.',
-    canCreate: ['ADMIN', 'QUAN_LY', 'KE_TOAN', 'THU_KHO', 'KY_THUAT_VIEN', 'LE_TAN']
+    description: 'Quyền hạn tối cao toàn hệ thống Web Quét Mã QR Chăm Sóc Khách Hàng: Quản trị và phân quyền mọi cấp bậc nhân sự CSKH.',
+    canCreate: ['ADMIN', 'QUAN_LY', 'KY_THUAT_VIEN', 'LE_TAN']
   },
   ADMIN: {
-    title: 'Quản Trị Kỹ Thuật (System Admin)',
+    title: 'Quản Trị Hệ Thống CSKH (System Admin)',
     level: 100,
-    badge: '🛡️ Tổng Quản Trị Hệ Thống',
+    badge: '🛡️ Quản Trị Hệ Thống CSKH',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
-    description: 'Toàn quyền kỹ thuật và phân quyền tài khoản hệ thống.',
-    canCreate: ['QUAN_LY', 'KE_TOAN', 'THU_KHO', 'KY_THUAT_VIEN', 'LE_TAN']
+    description: 'Toàn quyền quản trị hệ thống Web Quét Mã QR Chăm Sóc Khách Hàng và phân quyền tài khoản nhân sự.',
+    canCreate: ['QUAN_LY', 'KY_THUAT_VIEN', 'LE_TAN']
   },
   QUAN_LY: {
-    title: 'Quản Lý Cửa Hàng (Store Manager)',
+    title: 'Trưởng Bộ Phận CSKH (CSKH Manager)',
     level: 80,
-    badge: '🏬 Quản Lý Cửa Hàng',
+    badge: '🏬 Trưởng Bộ Phận CSKH',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
-    description: 'Điều hành toàn bộ hoạt động chi nhánh: Theo dõi sửa chữa, duyệt lịch hẹn, kiểm soát kho và quản lý nhân sự cấp dưới (< Level 80).',
-    canCreate: ['KE_TOAN', 'THU_KHO', 'KY_THUAT_VIEN', 'LE_TAN']
+    description: 'Điều hành toàn bộ hoạt động bộ phận CSKH: Theo dõi tiến độ xử lý hồ sơ QR, duyệt lịch hẹn và quản lý nhân sự CSKH (< Level 80).',
+    canCreate: ['KY_THUAT_VIEN', 'LE_TAN']
   },
   KE_TOAN: {
-    title: 'Kế Toán Doanh Thu',
+    title: 'Chuyên Viên Thống Kê CSKH',
     level: 60,
-    badge: '📊 Kế Toán Doanh Thu',
+    badge: '📊 Thống Kê CSKH',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
-    description: 'Theo dõi báo cáo doanh thu, dòng tiền linh kiện, in hóa đơn nhiệt 80mm và thu ngân.',
+    description: 'Theo dõi báo cáo thống kê hồ sơ CSKH và xuất báo cáo Excel.',
     canCreate: []
   },
   THU_KHO: {
-    title: 'Thủ Kho Linh Kiện',
+    title: 'Quản Lý Bảo Hành Điện Tử (e-Warranty)',
     level: 50,
-    badge: '📦 Thủ Kho Linh Kiện',
+    badge: '🛡️ Quản Lý Bảo Hành',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
-    description: 'Quản lý danh mục linh kiện, cập nhật giá nhập/bán, cảnh báo số lượng tồn kho tối thiểu.',
+    description: 'Quản lý danh mục hạng mục bảo hành điện tử (e-Warranty) và mã Serial định danh.',
     canCreate: []
   },
   KY_THUAT_VIEN: {
-    title: 'Kỹ Thuật Viên Sửa Chữa',
+    title: 'Chuyên Viên Hỗ Trợ & Xử Lý CSKH',
     level: 40,
-    badge: '🔧 Kỹ Thuật Viên Sửa Chữa',
+    badge: '🎧 Chuyên Viên Hỗ Trợ CSKH',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
-    description: 'Tiếp nhận chuẩn đoán, tải ảnh ngoại quan trước/sau, thêm linh kiện và gửi báo giá sửa chữa.',
+    description: 'Tiếp nhận phân loại yêu cầu, tải ảnh minh chứng hiện trạng, cập nhật tiến độ xử lý hồ sơ QR và kích hoạt bảo hành điện tử.',
     canCreate: []
   },
   LE_TAN: {
-    title: 'Lễ Tân Tiếp Nhận',
+    title: 'Lễ Tân & Tiếp Nhận QR',
     level: 30,
-    badge: '📋 Lễ Tân Tiếp Nhận',
+    badge: '👩‍💼 Lễ Tân & Tiếp Nhận QR',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
-    description: 'Tạo mã QR quầy tiếp nhận, hướng dẫn khách gửi máy, duyệt/hủy lịch hẹn online.',
+    description: 'Tạo mã QR quầy tiếp nhận, hướng dẫn khách hàng quét mã tự phục vụ, duyệt/hủy lịch hẹn CSKH online.',
     canCreate: []
   }
 };

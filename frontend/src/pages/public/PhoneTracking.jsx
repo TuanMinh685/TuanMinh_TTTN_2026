@@ -53,9 +53,12 @@ function PhoneTracking() {
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <main className="flex-1 container mx-auto px-4 py-12 max-w-3xl">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-brand-blue mb-3">Tra Cứu Tiến Độ Sửa Chữa</h1>
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 text-brand-orange text-xs font-bold uppercase tracking-wider mb-2">
+            📷 Cổng Tra Cứu Hồ Sơ Điện Tử Bằng Mã QR
+          </span>
+          <h1 className="text-3xl font-bold text-brand-blue mb-3">Quét Mã QR &amp; Tra Cứu Hồ Sơ CSKH</h1>
           <p className="text-slate-500">
-            Quét mã QR trên phiếu tiếp nhận hoặc nhập số điện thoại để theo dõi tiến độ sửa chữa thiết bị.
+            Quét mã QR trên biên nhận hoặc nhập Số điện thoại / Mã định danh để theo dõi tiến độ xử lý hồ sơ CSKH và tra cứu Sổ bảo hành điện tử (e-Warranty).
           </p>
         </div>
 
@@ -189,7 +192,7 @@ function PhoneTracking() {
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-slate-500 mb-3">Lỗi báo: {ticket.tinh_trang_may}</p>
+                    <p className="text-sm text-slate-500 mb-3">Nội dung yêu cầu: {ticket.tinh_trang_may}</p>
 
                     <div className="flex flex-wrap items-center gap-2">
                       <span
@@ -211,7 +214,19 @@ function PhoneTracking() {
                             : 'bg-slate-100 text-slate-700'
                         }`}
                       >
-                        {ticket.trang_thai.replace(/_/g, ' ')}
+                        {ticket.trang_thai === 'CHỜ_KHÁM'
+                          ? 'CHỜ TIẾP NHẬN'
+                          : ticket.trang_thai === 'ĐANG_CHUẨN_ĐOÁN'
+                          ? 'ĐANG KIỂM TRA & PHÂN LOẠI'
+                          : ticket.trang_thai === 'CHỜ_KHÁCH_CHỐT_GIÁ'
+                          ? 'CHỜ KHÁCH HÀNG XÁC NHẬN'
+                          : ticket.trang_thai === 'ĐANG_SỬA'
+                          ? 'ĐANG XỬ LÝ HỖ TRỢ'
+                          : ticket.trang_thai === 'ĐÃ_SỬA_XONG'
+                          ? 'ĐÃ XỬ LÝ XONG'
+                          : ticket.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN'
+                          ? 'HOÀN TẤT & BẢO HÀNH'
+                          : ticket.trang_thai.replace(/_/g, ' ')}
                       </span>
                       {ticket.han_bao_hanh && (
                         <span className="inline-block px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
