@@ -4,6 +4,7 @@ import api from '../../services/api';
 import { exportEnterpriseExcel } from '../../utils/excelExport';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import QRCode from 'qrcode';
+import PaymentMethodSelector from '../../components/PaymentMethodSelector';
 
 const STATUS_LABELS = {
   'CHỜ_KHÁM': 'Chờ tiếp nhận máy',
@@ -137,6 +138,7 @@ function Dashboard() {
   const [securityStatus, setSecurityStatus] = useState(null);
   const [pwForm, setPwForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [savingPw, setSavingPw] = useState(false);
+  const [paymentTicketCode, setPaymentTicketCode] = useState('RP-839400');
 
   // POS Walk-in QR Intake modal state
   const [showPosModal, setShowPosModal] = useState(false);
@@ -624,6 +626,12 @@ function Dashboard() {
               Nhân Sự CSKH ({employees.length})
             </button>
           )}
+          <button
+            onClick={() => setActiveTab('PAYMENT_GATEWAY')}
+            className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'PAYMENT_GATEWAY' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
+          >
+            💳 Phương Thức Thanh Toán
+          </button>
           <button
             onClick={async () => {
               setActiveTab('SECURITY');
@@ -1260,6 +1268,35 @@ function Dashboard() {
               </table>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* TAB 4B: CỔNG HIỂN THỊ PHƯƠNG THỨC THANH TOÁN HỖ TRỢ (VIETQR / MOMO / ZALOPAY / THẺ ATM-VISA / POS) */}
+      {activeTab === 'PAYMENT_GATEWAY' && (
+        <div className="space-y-4">
+          <div className="bg-white p-4 rounded-2xl border border-slate-200 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 className="text-sm font-extrabold text-slate-800">Chọn Hồ Sơ Phiếu QR Để Hiển Thị Mã Thanh Toán Tại Quầy</h3>
+              <p className="text-xs text-slate-500"> Tự động đồng bộ Mã phiếu QR và Tên khách hàng vào mã VietQR, MoMo, ZaloPay và Cổng thẻ.</p>
+            </div>
+            <select
+              value={paymentTicketCode}
+              onChange={(e) => setPaymentTicketCode(e.target.value)}
+              className="rounded-xl border border-slate-300 px-3.5 py-2 text-xs font-bold text-brand-blue outline-none"
+            >
+              {tickets.map((t) => (
+                <option key={t.id} value={t.ma_phieu}>
+                  {t.ma_phieu} — {t.ho_ten_khach} ({t.ten_thiet_bi})
+                </option>
+              ))}
+              {tickets.length === 0 && <option value="RP-839400">RP-839400 — Hồ sơ mẫu</option>}
+            </select>
+          </div>
+
+          <PaymentMethodSelector
+            ticketCode={paymentTicketCode}
+            customerName={tickets.find(t => t.ma_phieu === paymentTicketCode)?.ho_ten_khach || 'Khách hàng'}
+          />
         </div>
       )}
 

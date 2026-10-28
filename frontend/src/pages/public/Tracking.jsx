@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import QRCode from 'qrcode';
 import api from '../../services/api';
+import PaymentMethodSelector from '../../components/PaymentMethodSelector';
 
 const PROGRESS_STEPS = [
   { id: 'TIEP_NHAN', label: 'Tiếp nhận máy & Yêu cầu', desc: 'Khởi tạo hồ sơ QR & lưu ảnh ngoại quan', icon: '💻' },
@@ -691,6 +692,14 @@ function Tracking() {
               )
             )}
           </div>
+        </div>
+
+        {/* SECTION 4: CỔNG HIỂN THỊ PHƯƠNG THỨC THANH TOÁN ĐA KÊNH (VIETQR / MOMO / ZALOPAY / THẺ ATM-VISA / TẠI QUẦY) */}
+        <div className="mt-6">
+          <PaymentMethodSelector
+            ticketCode={ticketCode}
+            customerName={ticket.ho_ten || 'Khách hàng'}
+          />
         </div>
 
         {/* Modal Yêu cầu hỗ trợ bảo hành lại */}
