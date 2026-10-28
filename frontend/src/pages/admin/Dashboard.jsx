@@ -598,14 +598,14 @@ function Dashboard() {
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setActiveTab('TICKETS')}
-            className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'TICKETS' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
+            className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'TICKETS' ? 'bg-brand-blue text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
           >
             Hồ Sơ Phiếu QR ({tickets.length})
           </button>
           {canReceptionAction && (
             <button
               onClick={() => setActiveTab('BOOKINGS')}
-              className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'BOOKINGS' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
+              className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'BOOKINGS' ? 'bg-brand-blue text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
             >
               Lịch Hẹn CSKH ({bookings.filter(b => b.trang_thai === 'CHO_XAC_NHAN').length})
             </button>
@@ -613,7 +613,7 @@ function Dashboard() {
           {canViewStats && (
             <button
               onClick={() => setActiveTab('STATS')}
-              className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'STATS' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
+              className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'STATS' ? 'bg-brand-blue text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
             >
               Thống Kê &amp; Đánh Giá CSKH
             </button>
@@ -621,14 +621,14 @@ function Dashboard() {
           {canManageEmployees && (
             <button
               onClick={() => setActiveTab('EMPLOYEES')}
-              className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'EMPLOYEES' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
+              className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'EMPLOYEES' ? 'bg-brand-blue text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
             >
               Nhân Sự CSKH ({employees.length})
             </button>
           )}
           <button
             onClick={() => setActiveTab('PAYMENT_GATEWAY')}
-            className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'PAYMENT_GATEWAY' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
+            className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'PAYMENT_GATEWAY' ? 'bg-brand-blue text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
           >
             💳 Phương Thức Thanh Toán
           </button>
@@ -643,7 +643,7 @@ function Dashboard() {
                 } catch {}
               }
             }}
-            className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'SECURITY' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
+            className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'SECURITY' ? 'bg-brand-blue text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
           >
             🛡️ Bảo Mật &amp; Audit
           </button>
@@ -652,7 +652,7 @@ function Dashboard() {
               setActiveTab('NOTIFICATIONS');
               markAllNotificationsRead();
             }}
-            className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'NOTIFICATIONS' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
+            className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'NOTIFICATIONS' ? 'bg-brand-blue text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
           >
             Thông Báo ({unreadNotificationCount})
           </button>
@@ -686,7 +686,7 @@ function Dashboard() {
                   <button
                     type="button"
                     onClick={() => setShowPosModal(true)}
-                    className="rounded-lg bg-brand-orange px-3.5 py-2 text-xs font-extrabold text-white shadow-sm hover:bg-orange-600 whitespace-nowrap flex items-center gap-1.5"
+                    className="rounded-lg bg-brand-blue px-3.5 py-2 text-xs font-extrabold text-white shadow-sm hover:bg-blue-800 whitespace-nowrap flex items-center gap-1.5"
                   >
                     <span>📷</span> + Tiếp Nhận Nhanh Tại Quầy (POS)
                   </button>
@@ -717,7 +717,7 @@ function Dashboard() {
                       signRole: 'TRƯỞNG BỘ PHẬN CSKH'
                     });
                   }}
-                  className="rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 whitespace-nowrap"
+                  className="rounded-lg bg-brand-blue px-3 py-2 text-xs font-bold text-white shadow-sm hover:bg-blue-800 whitespace-nowrap"
                 >
                   📊 Xuất Danh Sách Hồ Sơ (.xlsx)
                 </button>
@@ -856,7 +856,7 @@ function Dashboard() {
                             <button
                               type="button"
                               onClick={() => updateStatus(t.id, 'ĐANG_CHUẨN_ĐOÁN', 'Đã tiếp nhận thiết bị / yêu cầu phần mềm, Kỹ thuật viên đang kiểm tra và chẩn đoán lỗi.')}
-                              className="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1 rounded text-xs font-bold shadow-xs"
+                              className="bg-brand-blue hover:bg-blue-800 text-white px-2.5 py-1 rounded text-xs font-bold shadow-xs"
                             >
                               🔍 Kiểm tra &amp; Chẩn đoán
                             </button>
@@ -865,7 +865,7 @@ function Dashboard() {
                             <button
                               type="button"
                               onClick={() => updateStatus(t.id, 'ĐANG_SỬA', 'Kỹ thuật viên đang tiến hành sửa chữa máy tính và khắc phục sự cố phần mềm cho khách hàng.')}
-                              className="bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1 rounded text-xs font-bold shadow-xs"
+                              className="bg-brand-blue hover:bg-blue-800 text-white px-2.5 py-1 rounded text-xs font-bold shadow-xs"
                             >
                               🔧 Đang sửa chữa / Xử lý PM
                             </button>
@@ -874,7 +874,7 @@ function Dashboard() {
                             <button
                               type="button"
                               onClick={() => updateStatus(t.id, 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN', 'Đã hoàn tất sửa chữa máy tính / phần mềm, bàn giao khách hàng và kích hoạt Sổ bảo hành điện tử (e-Warranty) 06 tháng.')}
-                              className="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded text-xs font-bold shadow-xs"
+                              className="bg-brand-blue hover:bg-blue-800 text-white px-2.5 py-1 rounded text-xs font-bold shadow-xs"
                             >
                               ✅ Hoàn tất &amp; Cấp e-Warranty
                             </button>
@@ -882,7 +882,7 @@ function Dashboard() {
                           <button
                             type="button"
                             onClick={() => openPhotoModal(t)}
-                            className="bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 px-2.5 py-1 rounded text-xs font-bold"
+                            className="bg-brand-blue hover:bg-blue-800 text-white px-2.5 py-1 rounded text-xs font-bold shadow-xs"
                             title="Xem & Tải ảnh ngoại quan thiết bị"
                           >
                             📸 Ảnh ngoại quan
@@ -890,7 +890,7 @@ function Dashboard() {
                           <button
                             type="button"
                             onClick={() => openReceipt(t)}
-                            className="bg-slate-700 hover:bg-slate-800 text-white px-2.5 py-1 rounded text-xs font-bold"
+                            className="bg-brand-blue hover:bg-blue-800 text-white px-2.5 py-1 rounded text-xs font-bold shadow-xs"
                           >
                             🖨️ In Phiếu QR (80mm)
                           </button>
@@ -972,7 +972,7 @@ function Dashboard() {
                             <button
                               type="button"
                               onClick={() => updateBookingStatus(bk.id, 'HUY')}
-                              className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded font-bold text-xs"
+                              className="bg-brand-blue hover:bg-blue-800 text-white px-3 py-1 rounded font-bold text-xs"
                             >
                               Hủy Lịch
                             </button>
@@ -982,7 +982,7 @@ function Dashboard() {
                           <button
                             type="button"
                             onClick={() => updateBookingStatus(bk.id, 'KHACH_DA_DEN')}
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded font-bold text-xs shadow-xs"
+                            className="bg-brand-blue hover:bg-blue-800 text-white px-3 py-1.5 rounded font-bold text-xs shadow-xs"
                           >
                             ✅ Khách Đã Đến (Tạo Phiếu QR)
                           </button>
@@ -1232,25 +1232,21 @@ function Dashboard() {
                               <button
                                 type="button"
                                 onClick={() => openEditEmployeeModal(emp)}
-                                className="px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-brand-blue border border-blue-200 text-xs font-bold transition"
+                                className="px-2.5 py-1 rounded-lg bg-brand-blue hover:bg-blue-800 text-white text-xs font-bold transition"
                               >
                                 ✏️ Phân quyền / Đổi MK
                               </button>
                               <button
                                 type="button"
                                 onClick={() => toggleEmployeeLock(emp)}
-                                className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition ${
-                                  emp.trang_thai === 'HOAT_DONG'
-                                    ? 'bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-200'
-                                    : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-200'
-                                }`}
+                                className="px-2.5 py-1 rounded-lg bg-brand-blue hover:bg-blue-800 text-white text-xs font-bold transition"
                               >
                                 {emp.trang_thai === 'HOAT_DONG' ? 'Khóa TK' : 'Mở khóa'}
                               </button>
                               <button
                                 type="button"
                                 onClick={() => removeEmployee(emp)}
-                                className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs font-bold transition"
+                                className="px-2.5 py-1 rounded-lg bg-brand-blue hover:bg-blue-800 text-white text-xs font-bold transition"
                               >
                                 Xóa
                               </button>
@@ -1445,7 +1441,7 @@ function Dashboard() {
                       signRole: 'QUẢN TRỊ AN TOÀN THÔNG TIN'
                     });
                   }}
-                  className="rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3.5 py-2 shadow-xs"
+                  className="rounded-lg bg-brand-blue hover:bg-blue-800 text-white font-bold text-xs px-3.5 py-2 shadow-xs"
                 >
                   📊 Xuất Nhật Ký Bảo Mật (.xlsx)
                 </button>

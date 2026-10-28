@@ -93,7 +93,7 @@ export default function AdminNav({ activeKey = 'VAN_HANH' }) {
           <button
             type="button"
             onClick={handleLogout}
-            className="rounded-xl border border-red-200 bg-red-50 px-3.5 py-2 text-xs font-bold text-red-600 transition hover:bg-red-100 cursor-pointer"
+            className="rounded-xl bg-brand-blue px-3.5 py-2 text-xs font-bold text-white transition hover:bg-blue-800 cursor-pointer"
           >
             Đăng xuất
           </button>

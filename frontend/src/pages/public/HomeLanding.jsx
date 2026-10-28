@@ -113,7 +113,7 @@ function HomeLanding() {
                   <button
                     type="button"
                     onClick={() => setIsScannerOpen(true)}
-                    className="px-5 py-3 rounded-xl bg-brand-orange hover:brightness-110 text-white font-bold text-sm transition shadow-md flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+                    className="px-5 py-3 rounded-xl bg-brand-blue hover:bg-blue-800 text-white font-bold text-sm transition shadow-md flex items-center justify-center gap-2 shrink-0 cursor-pointer"
                   >
                     <span>📷</span>
                     <span>Quét Camera QR</span>
@@ -125,21 +125,21 @@ function HomeLanding() {
               <div className="flex flex-wrap gap-3">
                 <Link
                   to="/intake"
-                  className="px-6 py-3.5 bg-brand-green text-white font-bold rounded-full hover:brightness-110 transition-all shadow-lg text-sm flex items-center gap-2"
+                  className="px-6 py-3.5 bg-brand-blue text-white font-bold rounded-full hover:bg-blue-800 transition-all shadow-lg text-sm flex items-center gap-2 border border-white/20"
                 >
                   <span>📝</span>
                   <span>Quét QR Tạo Phiếu Tại Quầy</span>
                 </Link>
                 <Link
                   to="/tra-cuu"
-                  className="px-6 py-3.5 bg-white text-brand-blue font-bold rounded-full hover:bg-slate-100 transition-all shadow-lg text-sm flex items-center gap-2"
+                  className="px-6 py-3.5 bg-brand-blue text-white font-bold rounded-full hover:bg-blue-800 transition-all shadow-lg text-sm flex items-center gap-2 border border-white/20"
                 >
                   <span>📷</span>
                   <span>Quét Mã QR & Tra Cứu</span>
                 </Link>
                 <Link
                   to="/dat-lich"
-                  className="px-6 py-3.5 bg-transparent border-2 border-white/80 text-white font-bold rounded-full hover:bg-white hover:text-brand-blue transition-all text-sm flex items-center gap-2"
+                  className="px-6 py-3.5 bg-brand-blue text-white font-bold rounded-full hover:bg-blue-800 transition-all shadow-lg text-sm flex items-center gap-2 border border-white/20"
                 >
                   <span>📅</span>
                   <span>Đặt Lịch Hẹn CSKH</span>
@@ -182,7 +182,7 @@ function HomeLanding() {
                     onClick={() => setQrMode('DEMO_TRACK')}
                     className={`py-2 px-2 rounded-lg transition cursor-pointer ${
                       qrMode === 'DEMO_TRACK'
-                        ? 'bg-brand-orange text-white shadow-xs'
+                        ? 'bg-brand-blue text-white shadow-xs'
                         : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
@@ -220,7 +220,7 @@ function HomeLanding() {
                   <button
                     type="button"
                     onClick={() => setIsScannerOpen(true)}
-                    className="py-2.5 px-3 rounded-xl bg-brand-orange text-white font-bold text-xs hover:brightness-110 transition flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+                    className="py-2.5 px-3 rounded-xl bg-brand-blue text-white font-bold text-xs hover:bg-blue-800 transition flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
                   >
                     <span>📷</span>
                     <span>Mở Máy Quét QR</span>
@@ -323,14 +323,14 @@ function HomeLanding() {
             <button
               type="button"
               onClick={() => setActiveGuideTab('TAI_QUAY')}
-              className={`px-8 py-3 rounded-full font-bold transition-all shadow-md cursor-pointer ${activeGuideTab === 'TAI_QUAY' ? 'bg-brand-green text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
+              className={`px-8 py-3 rounded-full font-bold transition-all shadow-md cursor-pointer ${activeGuideTab === 'TAI_QUAY' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
             >
               🏢 Luồng 1: Quét QR trực tiếp tại quầy (615 Âu Cơ)
             </button>
             <button
               type="button"
               onClick={() => setActiveGuideTab('TU_XA')}
-              className={`px-8 py-3 rounded-full font-bold transition-all shadow-md cursor-pointer ${activeGuideTab === 'TU_XA' ? 'bg-brand-orange text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
+              className={`px-8 py-3 rounded-full font-bold transition-all shadow-md cursor-pointer ${activeGuideTab === 'TU_XA' ? 'bg-brand-blue text-white' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
             >
               📅 Luồng 2: Đặt lịch hẹn CSKH trước qua Web
             </button>
@@ -343,7 +343,7 @@ function HomeLanding() {
                 <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-1 bg-slate-200 z-0"></div>
 
                 <div className="relative z-10 flex flex-col items-center text-center">
-                  <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-brand-green text-4xl mb-6">
+                  <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-brand-blue text-4xl mb-6">
                     📷
                   </div>
                   <h3 className="text-xl font-bold text-brand-blue mb-3">1. Quét QR tạo phiếu tại quầy</h3>
@@ -359,7 +359,7 @@ function HomeLanding() {
                 </div>
 
                 <div className="relative z-10 flex flex-col items-center text-center">
-                  <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-brand-green text-4xl mb-6">
+                  <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-brand-blue text-4xl mb-6">
                     🛡️
                   </div>
                   <h3 className="text-xl font-bold text-brand-blue mb-3">3. Hoàn tất, Bảo hành QR &amp; Đánh giá</h3>
@@ -368,7 +368,7 @@ function HomeLanding() {
               </div>
 
               <div className="text-center mt-12">
-                <Link to="/intake" className="inline-block px-8 py-4 bg-brand-green text-white font-bold rounded-full hover:brightness-110 shadow-lg">
+                <Link to="/intake" className="inline-block px-8 py-4 bg-brand-blue text-white font-bold rounded-full hover:bg-blue-800 shadow-lg">
                   Tiến hành Tạo Phiếu QR Ngay
                 </Link>
               </div>
@@ -381,7 +381,7 @@ function HomeLanding() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
                 <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-1 bg-slate-200 z-0"></div>
                 <div className="relative z-10 flex flex-col items-center text-center">
-                  <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-brand-orange text-4xl mb-6">📅</div>
+                  <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-brand-blue text-4xl mb-6">📅</div>
                   <h3 className="text-xl font-bold text-brand-blue mb-3">1. Đặt lịch hẹn trực tuyến</h3>
                   <p className="text-slate-600">Chọn khung giờ hẹn trước và mô tả tình trạng thiết bị qua biểu mẫu đặt lịch CSKH trực tuyến.</p>
                 </div>
@@ -391,13 +391,13 @@ function HomeLanding() {
                   <p className="text-slate-600">Bộ phận Lễ tân & CSKH tiếp nhận lịch hẹn trên hệ thống, xác nhận khung giờ và khởi tạo sẵn mã phiếu QR cho bạn.</p>
                 </div>
                 <div className="relative z-10 flex flex-col items-center text-center">
-                  <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-brand-green text-4xl mb-6">✅</div>
+                  <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-brand-blue text-4xl mb-6">✅</div>
                   <h3 className="text-xl font-bold text-brand-blue mb-3">3. Phục vụ ưu tiên & Chăm sóc hậu mãi</h3>
                   <p className="text-slate-600">Khách hàng đến quầy được phục vụ đúng giờ hẹn không cần xếp hàng và theo dõi toàn bộ tiến độ, bảo hành qua mã QR.</p>
                 </div>
               </div>
               <div className="text-center mt-12">
-                <Link to="/dat-lich" className="inline-block px-8 py-4 bg-brand-orange text-white font-bold rounded-full hover:brightness-110 shadow-lg">
+                <Link to="/dat-lich" className="inline-block px-8 py-4 bg-brand-blue text-white font-bold rounded-full hover:bg-blue-800 shadow-lg">
                   Đặt Lịch Hẹn CSKH Ngay
                 </Link>
               </div>
@@ -441,7 +441,7 @@ function HomeLanding() {
             <p className="text-blue-200 text-base sm:text-lg mb-8 max-w-2xl mx-auto relative z-10">
               Dành cho Lễ tân tiếp nhận, Chuyên viên hỗ trợ và Trưởng bộ phận CSKH tại Tập đoàn MYH Group để quản lý hồ sơ QR, cập nhật nhật ký xử lý, in phiếu QR nhiệt 80mm và thống kê mức độ hài lòng.
             </p>
-            <Link to="/admin" className="inline-block px-10 py-4 bg-brand-green text-white font-bold text-lg rounded-full hover:bg-green-600 transition-all shadow-lg hover:shadow-xl relative z-10 w-full md:w-auto">
+            <Link to="/admin" className="inline-block px-10 py-4 bg-white text-brand-blue font-bold text-lg rounded-full hover:bg-blue-50 transition-all shadow-lg hover:shadow-xl relative z-10 w-full md:w-auto">
               🔐 Truy Cập Cổng Điều Hành CSKH
             </Link>
           </div>

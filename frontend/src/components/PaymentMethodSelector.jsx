@@ -15,7 +15,7 @@ const PAYMENT_METHODS = [
     subtitle: 'Quét QR 40+ Ngân hàng NAPAS',
     badge: 'Khuyên dùng',
     icon: '🏦',
-    color: 'border-blue-600 bg-blue-50/70 text-brand-blue'
+    color: 'border-brand-blue bg-blue-50/70 text-brand-blue'
   },
   {
     id: 'EWALLET',
@@ -23,7 +23,7 @@ const PAYMENT_METHODS = [
     subtitle: 'Quét mã QR Ví điện tử',
     badge: 'Siêu tốc',
     icon: '📱',
-    color: 'border-pink-600 bg-pink-50/70 text-pink-700'
+    color: 'border-brand-blue bg-blue-50/70 text-brand-blue'
   },
   {
     id: 'CARD',
@@ -31,7 +31,7 @@ const PAYMENT_METHODS = [
     subtitle: 'Cổng thẻ nội địa & quốc tế',
     badge: '3D-Secure',
     icon: '💳',
-    color: 'border-indigo-600 bg-indigo-50/70 text-indigo-800'
+    color: 'border-brand-blue bg-blue-50/70 text-brand-blue'
   },
   {
     id: 'CASH',
@@ -39,7 +39,7 @@ const PAYMENT_METHODS = [
     subtitle: 'Thanh toán trực tiếp tại 615 Âu Cơ',
     badge: 'In phiếu 80mm',
     icon: '💵',
-    color: 'border-emerald-600 bg-emerald-50/70 text-emerald-800'
+    color: 'border-brand-blue bg-blue-50/70 text-brand-blue'
   }
 ];
 
@@ -188,7 +188,7 @@ function PaymentMethodSelector({ ticketCode = 'RP-839400', customerName = 'Khác
               <div className="flex items-center justify-between gap-2 mb-2">
                 <span className="text-2xl">{method.icon}</span>
                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                  active ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'
+                  active ? 'bg-brand-blue text-white' : 'bg-slate-100 text-slate-600'
                 }`}>
                   {method.badge}
                 </span>
@@ -300,14 +300,14 @@ function PaymentMethodSelector({ ticketCode = 'RP-839400', customerName = 'Khác
 
       {/* NỘI DUNG PHƯƠNG THỨC 2: VÍ ĐIỆN TỬ MOMO / ZALOPAY */}
       {selectedMethod === 'EWALLET' && (
-        <div className="rounded-2xl border border-pink-200 bg-gradient-to-br from-pink-50/60 via-white to-blue-50/40 p-5">
+        <div className="rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50/60 via-white to-slate-50 p-5">
           <div className="flex justify-center gap-3 mb-5">
             <button
               type="button"
               onClick={() => setWalletType('MOMO')}
               className={`px-5 py-2.5 rounded-xl font-extrabold text-xs transition cursor-pointer flex items-center gap-2 ${
                 walletType === 'MOMO'
-                  ? 'bg-[#a50064] text-white shadow-md'
+                  ? 'bg-brand-blue text-white shadow-md'
                   : 'bg-white text-slate-700 border border-slate-200'
               }`}
             >
@@ -318,7 +318,7 @@ function PaymentMethodSelector({ ticketCode = 'RP-839400', customerName = 'Khác
               onClick={() => setWalletType('ZALOPAY')}
               className={`px-5 py-2.5 rounded-xl font-extrabold text-xs transition cursor-pointer flex items-center gap-2 ${
                 walletType === 'ZALOPAY'
-                  ? 'bg-[#0068ff] text-white shadow-md'
+                  ? 'bg-brand-blue text-white shadow-md'
                   : 'bg-white text-slate-700 border border-slate-200'
               }`}
             >
@@ -334,7 +334,7 @@ function PaymentMethodSelector({ ticketCode = 'RP-839400', customerName = 'Khác
                 ) : (
                   <div className="w-48 h-48 flex items-center justify-center text-xs text-slate-400">Đang tạo QR...</div>
                 )}
-                <p className="mt-2 text-xs font-extrabold" style={{ color: walletType === 'MOMO' ? '#a50064' : '#0068ff' }}>
+                <p className="mt-2 text-xs font-extrabold text-brand-blue">
                   {walletType === 'MOMO' ? 'QUÉT MÃ BẰNG ỨNG DỤNG MOMO' : 'QUÉT MÃ BẰNG ZALOPAY / ZALO'}
                 </p>
               </div>
@@ -347,17 +347,16 @@ function PaymentMethodSelector({ ticketCode = 'RP-839400', customerName = 'Khác
                 </p>
                 <p className="text-slate-600">• <strong>Đơn vị tiếp nhận:</strong> TRUNG TÂM CSKH MYH GROUP</p>
                 <p className="text-slate-600">• <strong>Số điện thoại Ví:</strong> <span className="font-mono font-bold text-slate-900">02838604999</span></p>
-                <p className="text-slate-600">• <strong>Lời nhắn tự động:</strong> <span className="font-mono font-bold text-pink-700">{transferContent}</span></p>
+                <p className="text-slate-600">• <strong>Lời nhắn tự động:</strong> <span className="font-mono font-bold text-brand-blue">{transferContent}</span></p>
                 {numericAmount > 0 && (
-                  <p className="text-slate-600">• <strong>Số tiền:</strong> <span className="font-extrabold text-emerald-700">{numericAmount.toLocaleString('vi-VN')} ₫</span></p>
+                  <p className="text-slate-600">• <strong>Số tiền:</strong> <span className="font-extrabold text-brand-blue">{numericAmount.toLocaleString('vi-VN')} ₫</span></p>
                 )}
               </div>
 
               <button
                 type="button"
                 onClick={() => handleConfirmDemoPayment(`Ví điện tử ${walletType}`)}
-                className="w-full py-3 rounded-xl text-white font-extrabold text-xs shadow-md transition cursor-pointer"
-                style={{ backgroundColor: walletType === 'MOMO' ? '#a50064' : '#0068ff' }}
+                className="w-full py-3 rounded-xl bg-brand-blue hover:bg-blue-800 text-white font-extrabold text-xs shadow-md transition cursor-pointer"
               >
                 ✓ Xác Nhận Đã Thanh Toán Qua Ví {walletType}
               </button>
@@ -368,13 +367,13 @@ function PaymentMethodSelector({ ticketCode = 'RP-839400', customerName = 'Khác
 
       {/* NỘI DUNG PHƯƠNG THỨC 3: THẺ ATM NỘI ĐỊA / VISA / MASTERCARD */}
       {selectedMethod === 'CARD' && (
-        <div className="rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50/60 via-white to-slate-50 p-5">
+        <div className="rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50/60 via-white to-slate-50 p-5">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
             {/* Thẻ mô phỏng trực quan */}
             <div className="md:col-span-5">
-              <div className="rounded-2xl bg-gradient-to-br from-slate-900 via-indigo-950 to-blue-900 text-white p-5 shadow-xl relative overflow-hidden h-48 flex flex-col justify-between">
+              <div className="rounded-2xl bg-gradient-to-br from-slate-900 via-blue-950 to-brand-blue text-white p-5 shadow-xl relative overflow-hidden h-48 flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-extrabold tracking-widest uppercase text-indigo-200">
+                  <span className="text-xs font-extrabold tracking-widest uppercase text-blue-200">
                     {cardForm.cardType === 'NAPAS' ? 'NAPAS DOMESTIC ATM' : 'VISA • MASTERCARD • JCB'}
                   </span>
                   <span className="text-xl">💳</span>
@@ -384,13 +383,13 @@ function PaymentMethodSelector({ ticketCode = 'RP-839400', customerName = 'Khác
                 </div>
                 <div className="flex items-end justify-between text-xs">
                   <div>
-                    <p className="text-[9px] uppercase text-indigo-300">Chủ thẻ (Cardholder)</p>
+                    <p className="text-[9px] uppercase text-blue-300">Chủ thẻ (Cardholder)</p>
                     <p className="font-bold tracking-wider truncate max-w-[160px] uppercase">
                       {cardForm.cardHolder || 'TEN CHU THE'}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-[9px] uppercase text-indigo-300">Hiệu lực</p>
+                    <p className="text-[9px] uppercase text-blue-300">Hiệu lực</p>
                     <p className="font-mono font-bold">{cardForm.expiry || 'MM/YY'}</p>
                   </div>
                 </div>
@@ -408,7 +407,7 @@ function PaymentMethodSelector({ ticketCode = 'RP-839400', customerName = 'Khác
                   onClick={() => setCardForm({ ...cardForm, cardType: 'VISA_MASTER' })}
                   className={`flex-1 py-2 px-3 rounded-xl font-bold border cursor-pointer ${
                     cardForm.cardType === 'VISA_MASTER'
-                      ? 'bg-indigo-700 text-white border-indigo-700'
+                      ? 'bg-brand-blue text-white border-brand-blue'
                       : 'bg-white text-slate-700 border-slate-200'
                   }`}
                 >
@@ -419,7 +418,7 @@ function PaymentMethodSelector({ ticketCode = 'RP-839400', customerName = 'Khác
                   onClick={() => setCardForm({ ...cardForm, cardType: 'NAPAS' })}
                   className={`flex-1 py-2 px-3 rounded-xl font-bold border cursor-pointer ${
                     cardForm.cardType === 'NAPAS'
-                      ? 'bg-indigo-700 text-white border-indigo-700'
+                      ? 'bg-brand-blue text-white border-brand-blue'
                       : 'bg-white text-slate-700 border-slate-200'
                   }`}
                 >
@@ -507,7 +506,7 @@ function PaymentMethodSelector({ ticketCode = 'RP-839400', customerName = 'Khác
 
               <button
                 type="submit"
-                className="w-full py-3 rounded-xl bg-indigo-700 hover:bg-indigo-800 text-white font-extrabold text-xs shadow-md transition cursor-pointer"
+                className="w-full py-3 rounded-xl bg-brand-blue hover:bg-blue-800 text-white font-extrabold text-xs shadow-md transition cursor-pointer"
               >
                 🔒 Xác Thực &amp; Thanh Toán Qua Cổng Thẻ
               </button>
@@ -518,13 +517,13 @@ function PaymentMethodSelector({ ticketCode = 'RP-839400', customerName = 'Khác
 
       {/* NỘI DUNG PHƯƠNG THỨC 4: TIỀN MẶT TẠI QUẦY POS */}
       {selectedMethod === 'CASH' && (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-5 text-xs space-y-3">
+        <div className="rounded-2xl border border-blue-200 bg-blue-50/50 p-5 text-xs space-y-3">
           <div className="flex items-start gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-2xl shrink-0">
+            <div className="w-11 h-11 rounded-2xl bg-brand-blue text-white flex items-center justify-center text-2xl shrink-0">
               💵
             </div>
             <div>
-              <h3 className="text-sm font-extrabold text-emerald-900">
+              <h3 className="text-sm font-extrabold text-brand-blue">
                 Thanh Toán Tiền Mặt Hoặc Quẹt Thẻ POS Trực Tiếp Tại Quầy
               </h3>
               <p className="text-slate-600 mt-1 leading-relaxed">
@@ -536,7 +535,7 @@ function PaymentMethodSelector({ ticketCode = 'RP-839400', customerName = 'Khác
             <button
               type="button"
               onClick={() => handleConfirmDemoPayment('Tiền mặt trực tiếp tại quầy POS')}
-              className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-sm transition cursor-pointer"
+              className="px-5 py-2.5 rounded-xl bg-brand-blue hover:bg-blue-800 text-white font-extrabold text-xs shadow-sm transition cursor-pointer"
             >
               ✓ Đăng Ký Thanh Toán Tại Quầy Khi Nhận Máy
             </button>

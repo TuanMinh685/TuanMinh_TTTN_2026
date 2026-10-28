@@ -151,7 +151,7 @@ function IntakeForm() {
             )}
           </div>
 
-          <button disabled={loading} type="submit" className="w-full py-4 bg-gradient-to-r from-brand-orange to-orange-500 text-white font-bold rounded-xl shadow-lg hover:shadow-orange-500/30 transition-all transform hover:-translate-y-0.5 cursor-pointer">
+          <button disabled={loading} type="submit" className="w-full py-4 bg-brand-blue hover:bg-blue-800 text-white font-bold rounded-xl shadow-lg transition-all transform hover:-translate-y-0.5 cursor-pointer">
             {loading ? 'Đang khởi tạo Mã QR...' : 'Tạo Phiếu CSKH & Nhận Mã QR Theo Dõi →'}
           </button>
         </form>

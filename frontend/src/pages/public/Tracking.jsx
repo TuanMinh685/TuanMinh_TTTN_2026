@@ -271,14 +271,14 @@ function Tracking() {
           <div className="flex items-center gap-2">
             <Link
               to="/tra-cuu"
-              className="text-xs font-bold text-slate-600 hover:text-brand-blue bg-white px-3.5 py-2 rounded-xl border border-slate-200 shadow-xs transition flex items-center gap-1.5"
+              className="text-xs font-bold text-white bg-brand-blue hover:bg-blue-800 px-3.5 py-2 rounded-xl shadow-xs transition flex items-center gap-1.5"
             >
               <span>🔍</span> Tra cứu mã khác
             </Link>
             <button
               type="button"
               onClick={() => window.print()}
-              className="text-xs font-bold text-brand-blue hover:bg-blue-50 bg-white px-3.5 py-2 rounded-xl border border-blue-200 shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+              className="text-xs font-bold text-white bg-brand-blue hover:bg-blue-800 px-3.5 py-2 rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer"
             >
               <span>🖨️</span> In phiếu QR điện tử
             </button>
@@ -606,7 +606,7 @@ function Tracking() {
                   <button
                     type="button"
                     onClick={() => setShowWarrantyModal(true)}
-                    className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl text-xs transition-colors shadow-sm uppercase tracking-wider cursor-pointer"
+                    className="w-full py-3 bg-brand-blue hover:bg-blue-800 text-white font-extrabold rounded-xl text-xs transition-colors shadow-sm uppercase tracking-wider cursor-pointer"
                   >
                     🛡️ Gửi Yêu Cầu Hỗ Trợ Bảo Hành Qua QR →
                   </button>
@@ -738,7 +738,7 @@ function Tracking() {
                   <button
                     type="submit"
                     disabled={warrantyLoading}
-                    className="flex-1 py-2.5 bg-emerald-600 text-white rounded-xl font-bold text-sm hover:bg-emerald-700 disabled:opacity-60"
+                    className="flex-1 py-2.5 bg-brand-blue text-white rounded-xl font-bold text-sm hover:bg-blue-800 disabled:opacity-60"
                   >
                     {warrantyLoading ? 'Đang gửi...' : 'Gửi yêu cầu'}
                   </button>

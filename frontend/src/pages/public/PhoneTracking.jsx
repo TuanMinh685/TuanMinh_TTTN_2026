@@ -69,7 +69,7 @@ function PhoneTracking() {
             onClick={() => setActiveTab('QR_CODE')}
             className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
               activeTab === 'QR_CODE'
-                ? 'bg-white text-brand-blue shadow-md'
+                ? 'bg-brand-blue text-white shadow-md'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -80,7 +80,7 @@ function PhoneTracking() {
             onClick={() => setActiveTab('PHONE')}
             className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
               activeTab === 'PHONE'
-                ? 'bg-white text-brand-blue shadow-md'
+                ? 'bg-brand-blue text-white shadow-md'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -90,7 +90,7 @@ function PhoneTracking() {
 
         {/* TAB 1: TRA CỨU BẰNG MÃ PHIẾU HOẶC QUÉT CAMERA QR */}
         {activeTab === 'QR_CODE' && (
-          <div className="bg-white rounded-2xl shadow-xl overflow-hidden border-t-8 border-brand-orange p-6 sm:p-8 mb-8 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden border-t-8 border-brand-blue p-6 sm:p-8 mb-8 animate-in fade-in duration-200">
             <div className="text-center mb-6">
               <h2 className="text-xl font-bold text-slate-800 mb-1">Quét mã QR hoặc Nhập mã phiếu</h2>
               <p className="text-sm text-slate-500">
@@ -103,7 +103,7 @@ function PhoneTracking() {
               <button
                 type="button"
                 onClick={() => setIsScannerOpen(true)}
-                className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-brand-orange to-amber-500 text-white font-bold text-lg rounded-xl hover:brightness-105 shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-3 animate-pulse"
+                className="w-full sm:w-auto px-8 py-4 bg-brand-blue hover:bg-blue-800 text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-3 cursor-pointer"
               >
                 <span className="text-2xl">📷</span>
                 <span>Bật Camera quét mã QR ngay</span>
@@ -122,13 +122,13 @@ function PhoneTracking() {
                 type="text"
                 required
                 placeholder="Nhập mã phiếu (VD: RP-839400)"
-                className="flex-1 px-4 py-3 rounded-lg border border-slate-300 focus:border-brand-orange focus:ring focus:ring-amber-200 outline-none text-lg font-mono uppercase"
+                className="flex-1 px-4 py-3 rounded-lg border border-slate-300 focus:border-brand-blue focus:ring focus:ring-blue-200 outline-none text-lg font-mono uppercase"
                 value={ticketCodeInput}
                 onChange={(e) => setTicketCodeInput(e.target.value)}
               />
               <button
                 type="submit"
-                className="px-8 py-3 bg-brand-blue text-white font-bold text-lg rounded-lg hover:bg-blue-700 shadow-lg transition-all whitespace-nowrap"
+                className="px-8 py-3 bg-brand-blue text-white font-bold text-lg rounded-lg hover:bg-blue-800 shadow-lg transition-all whitespace-nowrap cursor-pointer"
               >
                 Tra Cứu Ngay
               </button>
@@ -138,7 +138,7 @@ function PhoneTracking() {
 
         {/* TAB 2: TRA CỨU THEO SỐ ĐIỆN THOẠI / IMEI / SERIAL */}
         {activeTab === 'PHONE' && (
-          <div className="bg-white rounded-2xl shadow-xl overflow-hidden border-t-8 border-brand-green p-6 sm:p-8 mb-8 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden border-t-8 border-brand-blue p-6 sm:p-8 mb-8 animate-in fade-in duration-200">
             <div className="text-center mb-6">
               <h2 className="text-xl font-bold text-slate-800 mb-1">Tra cứu theo Số điện thoại hoặc Số Serial / Service Tag thiết bị</h2>
               <p className="text-sm text-slate-500">Nhập SĐT khách hàng hoặc Số Serial máy tính (VD: <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-xs">0901234567</code>, <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-xs">C02X9082JG5H</code>, <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-xs">DELL-XPS-8821</code>).</p>
@@ -149,14 +149,14 @@ function PhoneTracking() {
                 type="text"
                 required
                 placeholder="Nhập SĐT khách hàng hoặc Số Serial / Service Tag máy..."
-                className="flex-1 px-4 py-3 rounded-lg border border-slate-300 focus:border-brand-green focus:ring focus:ring-green-200 outline-none text-lg"
+                className="flex-1 px-4 py-3 rounded-lg border border-slate-300 focus:border-brand-blue focus:ring focus:ring-blue-200 outline-none text-lg"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
               />
               <button
                 type="submit"
                 disabled={loading}
-                className="px-8 py-3 bg-brand-green text-white font-bold text-lg rounded-lg hover:bg-green-600 shadow-lg transition-all disabled:opacity-50 whitespace-nowrap"
+                className="px-8 py-3 bg-brand-blue text-white font-bold text-lg rounded-lg hover:bg-blue-800 shadow-lg transition-all disabled:opacity-50 whitespace-nowrap cursor-pointer"
               >
                 {loading ? 'Đang tìm...' : 'Tra Cứu'}
               </button>
@@ -238,7 +238,7 @@ function PhoneTracking() {
 
                   <Link
                     to={`/track/${ticket.ma_tra_cuu}`}
-                    className="px-6 py-2 bg-brand-green/10 text-brand-green font-bold rounded-lg hover:bg-brand-green hover:text-white transition-colors whitespace-nowrap"
+                    className="px-6 py-2 bg-brand-blue text-white font-bold rounded-lg hover:bg-blue-800 transition-colors whitespace-nowrap"
                   >
                     Xem chi tiết tiến độ →
                   </Link>

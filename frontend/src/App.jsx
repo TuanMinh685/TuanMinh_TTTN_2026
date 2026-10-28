@@ -78,31 +78,31 @@ const ROLE_NAV_CONFIG = {
     shortLabel: '🛡️ Quản Trị CSKH',
     fullTitle: '🛡️ Quản Trị Hệ Thống QR CSKH',
     link: '/admin',
-    bgClass: 'bg-slate-900 text-amber-300 hover:bg-slate-800'
+    bgClass: 'bg-brand-blue text-white hover:bg-blue-800'
   },
   ADMIN: {
     shortLabel: '🛡️ Quản Trị CSKH',
     fullTitle: '🛡️ Quản Trị Hệ Thống QR CSKH',
     link: '/admin',
-    bgClass: 'bg-slate-900 text-amber-300 hover:bg-slate-800'
+    bgClass: 'bg-brand-blue text-white hover:bg-blue-800'
   },
   QUAN_LY: {
     shortLabel: '🏬 Trưởng BP CSKH',
     fullTitle: '🏬 Trưởng Bộ Phận CSKH',
     link: '/admin/quan-ly',
-    bgClass: 'bg-blue-600 text-white hover:bg-blue-700'
+    bgClass: 'bg-brand-blue text-white hover:bg-blue-800'
   },
   KY_THUAT_VIEN: {
     shortLabel: '🎧 Chuyên Viên Hỗ Trợ',
     fullTitle: '🎧 Chuyên Viên Hỗ Trợ & Xử Lý',
     link: '/admin',
-    bgClass: 'bg-brand-green text-white hover:bg-green-600'
+    bgClass: 'bg-brand-blue text-white hover:bg-blue-800'
   },
   LE_TAN: {
     shortLabel: '👩‍💼 Lễ Tân & Tiếp Nhận',
     fullTitle: '👩‍💼 Lễ Tân & Tiếp Nhận QR',
     link: '/admin',
-    bgClass: 'bg-sky-600 text-white hover:bg-sky-700'
+    bgClass: 'bg-brand-blue text-white hover:bg-blue-800'
   }
 };
 
@@ -188,13 +188,13 @@ function AppContent() {
         shortLabel: '💼 ' + (role || 'Nội Bộ'),
         fullTitle: '💼 Cổng Quản Trị Hệ Thống',
         link: '/admin',
-        bgClass: 'bg-brand-green text-white hover:bg-green-600'
+        bgClass: 'bg-brand-blue text-white hover:bg-blue-800'
       })
     : {
         shortLabel: '🔐 Cổng Nhân Viên',
         fullTitle: '🔐 Đăng Nhập Nhân Viên',
         link: '/login',
-        bgClass: 'bg-brand-green text-white hover:bg-green-600'
+        bgClass: 'bg-brand-blue text-white hover:bg-blue-800'
       };
 
   return (
@@ -206,25 +206,25 @@ function AppContent() {
           {/* Logo */}
           <Link to="/" className="flex flex-col items-center justify-center">
             <img src="/img/logo-HHH-26.png" alt="HungHau Logo" className="h-10 md:h-12 object-contain" />
-            <span className="text-[10px] text-brand-orange font-bold tracking-widest leading-none mt-1">QR CSKH • MÁY TÍNH &amp; PHẦN MỀM</span>
+            <span className="text-[10px] text-brand-blue font-bold tracking-widest leading-none mt-1">QR CSKH • MÁY TÍNH &amp; PHẦN MỀM</span>
           </Link>
 
           {/* Menu máy tính để bàn (Desktop) - Tập trung trọng tâm Web Quét Mã QR Chăm Sóc Khách Hàng */}
           <nav className="hidden lg:flex items-center gap-2 text-xs font-bold text-slate-600 uppercase h-full">
-            <Link to="/" className="px-3.5 h-full flex items-center hover:text-brand-orange transition-colors">
+            <Link to="/" className="px-3.5 h-full flex items-center hover:text-brand-blue transition-colors">
               Trang chủ
             </Link>
             <Link
               to="/tra-cuu"
-              className="px-4 py-2 mx-1 rounded-full bg-orange-50 text-brand-orange border border-orange-200 hover:bg-brand-orange hover:text-white transition-all flex items-center gap-1.5 shadow-2xs"
+              className="px-4 py-2 mx-1 rounded-full bg-brand-blue text-white hover:bg-blue-800 transition-all flex items-center gap-1.5 shadow-2xs"
             >
               <span>📷</span>
               <span>Quét Mã QR & Tra Cứu</span>
             </Link>
-            <Link to="/intake" className="px-3.5 h-full flex items-center hover:text-brand-orange transition-colors">
+            <Link to="/intake" className="px-3.5 h-full flex items-center hover:text-brand-blue transition-colors">
               📝 Tạo Phiếu QR
             </Link>
-            <Link to="/dat-lich" className="px-3.5 h-full flex items-center hover:text-brand-orange transition-colors">
+            <Link to="/dat-lich" className="px-3.5 h-full flex items-center hover:text-brand-blue transition-colors">
               📅 Đặt Lịch Hẹn CSKH
             </Link>
           </nav>
@@ -316,7 +316,7 @@ function AppContent() {
                   type="button"
                   onClick={handleLogout}
                   title="Đăng xuất khỏi hệ thống"
-                  className="flex items-center gap-1 px-3 py-1.5 rounded-full border border-slate-200 bg-white hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-xs font-semibold text-slate-600 transition"
+                  className="flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-brand-blue hover:bg-blue-800 text-xs font-bold text-white transition cursor-pointer"
                 >
                   <span>🚪</span>
                   <span className="hidden xl:inline">Đăng Xuất</span>
@@ -325,7 +325,7 @@ function AppContent() {
             ) : (
               <Link 
                 to="/login" 
-                className="hidden sm:inline-flex items-center gap-1.5 px-4 xl:px-6 py-2 bg-brand-green text-white font-bold rounded-full hover:bg-green-600 transition-all text-sm shadow-md"
+                className="hidden sm:inline-flex items-center gap-1.5 px-4 xl:px-6 py-2 bg-brand-blue text-white font-bold rounded-full hover:bg-blue-800 transition-all text-sm shadow-md"
               >
                 <span>🔐 Cổng Nhân Viên</span>
               </Link>
@@ -351,7 +351,7 @@ function AppContent() {
               <Link to="/" className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-slate-100 text-brand-blue font-bold">
                 <span className="text-xl">🏠</span> Trang chủ QR CSKH
               </Link>
-              <Link to="/tra-cuu" className="flex items-center gap-3 py-2.5 px-3 rounded-xl bg-orange-50 hover:bg-orange-100 text-brand-orange font-bold">
+              <Link to="/tra-cuu" className="flex items-center gap-3 py-2.5 px-3 rounded-xl bg-blue-50 hover:bg-blue-100 text-brand-blue font-bold">
                 <span className="text-xl">📷</span> Quét Mã QR & Tra cứu tiến độ
               </Link>
               <Link to="/intake" className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-slate-100">
@@ -375,7 +375,7 @@ function AppContent() {
                       localStorage.clear();
                       window.location.href = '/login';
                     }}
-                    className="py-2.5 px-4 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors text-center"
+                    className="py-2.5 px-4 text-xs font-bold text-white bg-brand-blue hover:bg-blue-800 rounded-xl transition-colors text-center"
                   >
                     🚪 Đăng xuất ({fullName || role})
                   </button>
@@ -450,11 +450,11 @@ function AppContent() {
       <div className="fixed bottom-6 right-6 z-40 flex flex-col gap-4">
         <a 
           href="tel:02838604999" 
-          className="w-14 h-14 bg-gradient-to-r from-orange-500 to-amber-500 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform relative group cursor-pointer animate-bounce"
+          className="w-14 h-14 bg-brand-blue hover:bg-blue-800 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform relative group cursor-pointer animate-bounce"
           aria-label="Gọi Hotline Hùng Hậu"
         >
           <svg viewBox="0 0 24 24" fill="currentColor" className="w-7 h-7 text-white"><path d="M6.62 10.79c1.44 2.83 3.76 5.15 6.59 6.59l2.2-2.2c.28-.28.67-.36 1.02-.25 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
-          <span className="absolute -top-10 right-0 bg-white text-brand-orange font-bold px-3 py-1 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap text-xs border border-orange-200">
+          <span className="absolute -top-10 right-0 bg-white text-brand-blue font-bold px-3 py-1 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap text-xs border border-blue-200">
             Gọi ngay: (028) 3860 4999
           </span>
         </a>

@@ -439,25 +439,21 @@ export default function EmployeeManagement() {
                               <>
                                 <button
                                   onClick={() => openEditModal(emp)}
-                                  className="rounded-lg border border-slate-200 px-2.5 py-1 font-bold text-slate-700 hover:bg-slate-100 transition"
+                                  className="rounded-lg bg-brand-blue px-2.5 py-1 font-bold text-white hover:bg-blue-800 transition"
                                   title="Chỉnh sửa hồ sơ hoặc phân quyền"
                                 >
                                   ✏️ Sửa
                                 </button>
                                 <button
                                   onClick={() => handleToggleLock(emp)}
-                                  className={`rounded-lg px-2.5 py-1 font-bold transition ${
-                                    emp.trang_thai === 'HOAT_DONG'
-                                      ? 'border border-amber-200 bg-amber-50 text-slate-800 hover:bg-amber-100'
-                                      : 'border border-emerald-200 bg-emerald-50 text-slate-800 hover:bg-emerald-100'
-                                  }`}
+                                  className="rounded-lg bg-brand-blue px-2.5 py-1 font-bold text-white hover:bg-blue-800 transition"
                                   title={emp.trang_thai === 'HOAT_DONG' ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}
                                 >
                                   {emp.trang_thai === 'HOAT_DONG' ? '🔒 Khóa' : '🔓 Mở'}
                                 </button>
                                 <button
                                   onClick={() => handleDelete(emp)}
-                                  className="rounded-lg border border-red-200 bg-red-50 px-2 py-1 font-bold text-red-600 hover:bg-red-100 transition"
+                                  className="rounded-lg bg-brand-blue px-2 py-1 font-bold text-white hover:bg-blue-800 transition"
                                   title="Xóa tài khoản"
                                 >
                                   🗑️

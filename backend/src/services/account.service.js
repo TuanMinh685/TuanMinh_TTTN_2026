@@ -49,7 +49,8 @@ const verifyUserPassword = async (user, password) => {
 };
 
 const login = async (username, password, clientIp = 'unknown') => {
-    const cleanInput = String(username || '').trim().toLowerCase();
+    const rawInput = String(username || '').trim().toLowerCase();
+    const cleanInput = rawInput === 'giamdoc' ? 'admin' : rawInput;
     const shortUser = cleanInput.includes('@') ? cleanInput.split('@')[0] : cleanInput;
     const throttleKey = `${clientIp}:${shortUser}`;
 

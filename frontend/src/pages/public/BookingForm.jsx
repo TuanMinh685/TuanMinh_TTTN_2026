@@ -177,7 +177,7 @@ function BookingForm() {
               </div>
 
               <button type="submit" disabled={loading}
-                className="w-full py-3.5 bg-brand-orange text-white font-bold text-base rounded-xl hover:brightness-110 shadow-lg hover:shadow-xl transition-all mt-4 disabled:opacity-50 cursor-pointer">
+                className="w-full py-3.5 bg-brand-blue hover:bg-blue-800 text-white font-bold text-base rounded-xl shadow-lg hover:shadow-xl transition-all mt-4 disabled:opacity-50 cursor-pointer">
                 {loading ? 'Đang gửi thông tin...' : 'XÁC NHẬN ĐẶT LỊCH HẸN CSKH'}
               </button>
             </form>

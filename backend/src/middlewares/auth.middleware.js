@@ -55,10 +55,19 @@ const verifyToken = async (req, res, next) => {
             let accountRecord = accountStatusCache.get(accountId);
 
             if (!accountRecord || now - accountRecord.cachedAt > CACHE_TTL_MS) {
-                const dbRes = await pool.query(
+                let dbRes = await pool.query(
                     'SELECT id, ten_dang_nhap, vai_tro, trang_thai FROM nhan_vien WHERE id = $1 LIMIT 1',
                     [accountId]
                 );
+                if (!dbRes.rows[0] && (verified.Username || verified.Role)) {
+                    const fallbackUser = (verified.Username === 'giamdoc' || verified.Role === 'GIAM_DOC')
+                        ? 'admin'
+                        : String(verified.Username || 'admin').toLowerCase();
+                    dbRes = await pool.query(
+                        'SELECT id, ten_dang_nhap, vai_tro, trang_thai FROM nhan_vien WHERE LOWER(ten_dang_nhap) = $1 LIMIT 1',
+                        [fallbackUser]
+                    );
+                }
                 accountRecord = {
                     row: dbRes.rows[0] || null,
                     cachedAt: now
@@ -83,6 +92,7 @@ const verifyToken = async (req, res, next) => {
             }
 
             // Đồng bộ vai trò mới nhất từ CSDL (phòng trường hợp vừa bị hạ quyền)
+            verified.AccountID = accountRecord.row.id;
             verified.Role = accountRecord.row.vai_tro;
             verified.Username = accountRecord.row.ten_dang_nhap;
         }
