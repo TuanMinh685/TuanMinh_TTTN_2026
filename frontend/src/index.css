@@ -1,9 +1,15 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-blue: #1d4ed8;
-  --color-brand-green: #10b981;
-  --color-brand-orange: #f59e0b;
+  --color-brand-blue: #005596;
+  --color-brand-blue-hover: #00457a;
+  --color-brand-blue-light: #e6f0fa;
+  --color-brand-green: #16a34a;
+  --color-brand-orange: #f26522;
+}
+
+.bg-brand-blue:hover {
+  background-color: #00457a !important;
 }
 
 body {

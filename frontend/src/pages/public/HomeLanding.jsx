@@ -101,7 +101,7 @@ function HomeLanding() {
       width: 200,
       margin: 1,
       color: {
-        dark: '#1e293b',
+        dark: '#005596',
         light: '#ffffff'
       }
     })
@@ -142,9 +142,10 @@ function HomeLanding() {
             
             {/* CỘT TRÁI (7/12): THÔNG TIN CHÍNH & HỘP TRA CỨU */}
             <div className="lg:col-span-7 space-y-5">
-              <span className="inline-block px-3 py-1 rounded-md bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold uppercase tracking-wider">
-                MYH GROUP • CSKH SỬA CHỮA MÁY TÍNH &amp; PHẦN MỀM
-              </span>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-white border border-slate-200 text-xs font-semibold uppercase tracking-wider text-slate-700 shadow-2xs">
+                <span className="w-2 h-2 rounded-full bg-brand-green"></span>
+                <span>MYH GROUP • CSKH SỬA CHỮA MÁY TÍNH &amp; PHẦN MỀM</span>
+              </div>
 
               <div className="space-y-2">
                 <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 leading-tight tracking-tight">
@@ -182,7 +183,7 @@ function HomeLanding() {
                   />
                   <button
                     type="submit"
-                    className="px-5 py-2.5 rounded-lg bg-brand-blue hover:bg-blue-700 text-white font-medium text-sm transition shrink-0 cursor-pointer"
+                    className="px-5 py-2.5 rounded-lg bg-brand-blue hover:bg-brand-blue-hover active:brightness-95 text-white font-medium text-sm transition shrink-0 cursor-pointer"
                   >
                     Tra Cứu
                   </button>
@@ -201,7 +202,7 @@ function HomeLanding() {
               <div className="flex flex-wrap gap-2.5 max-w-2xl">
                 <Link
                   to="/intake"
-                  className="px-4 py-2.5 bg-brand-blue hover:bg-blue-700 text-white font-medium rounded-lg text-xs sm:text-sm transition shadow-xs"
+                  className="px-4 py-2.5 bg-brand-blue hover:bg-brand-blue-hover active:brightness-95 text-white font-medium rounded-lg text-xs sm:text-sm transition shadow-xs"
                 >
                   📝 Tạo Phiếu Tại Quầy
                 </Link>
@@ -311,7 +312,7 @@ function HomeLanding() {
                   </button>
                   <Link
                     to={qrMode === 'INTAKE' ? '/intake' : '/track/RP-839400'}
-                    className="py-2 px-3 rounded-lg bg-brand-blue hover:bg-blue-700 text-white font-medium text-xs transition flex items-center justify-center text-center"
+                    className="py-2 px-3 rounded-lg bg-brand-blue hover:bg-brand-blue-hover active:brightness-95 text-white font-medium text-xs transition flex items-center justify-center text-center"
                   >
                     {qrMode === 'INTAKE' ? 'Mở Form Ngay' : 'Xem Hồ Sơ'} →
                   </Link>
@@ -378,7 +379,7 @@ function HomeLanding() {
             </div>
             <Link
               to="/intake"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-brand-blue hover:bg-blue-700 text-white font-medium text-xs sm:text-sm transition shrink-0"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-brand-blue hover:bg-brand-blue-hover active:brightness-95 text-white font-medium text-xs sm:text-sm transition shrink-0"
             >
               <span>📝</span>
               <span>Tạo Phiếu Tiếp Nhận →</span>
@@ -412,7 +413,7 @@ function HomeLanding() {
                   </span>
                   <Link
                     to={`/dat-lich?service=${encodeURIComponent(item.serviceParam)}`}
-                    className="px-3 py-1.5 rounded-lg bg-brand-blue hover:bg-blue-700 text-white font-medium text-xs transition"
+                    className="px-3 py-1.5 rounded-lg bg-brand-blue hover:bg-brand-blue-hover active:brightness-95 text-white font-medium text-xs transition"
                   >
                     Đặt lịch →
                   </Link>
@@ -499,7 +500,7 @@ function HomeLanding() {
               <div className="text-center mt-6">
                 <Link
                   to="/intake"
-                  className="inline-flex items-center gap-1.5 px-6 py-2.5 bg-brand-blue hover:bg-blue-700 text-white font-medium rounded-lg text-xs sm:text-sm transition shadow-xs"
+                  className="inline-flex items-center gap-1.5 px-6 py-2.5 bg-brand-blue hover:bg-brand-blue-hover active:brightness-95 text-white font-medium rounded-lg text-xs sm:text-sm transition shadow-xs"
                 >
                   <span>📝</span>
                   <span>Tạo Phiếu QR Ngay →</span>
@@ -546,7 +547,7 @@ function HomeLanding() {
               <div className="text-center mt-6">
                 <Link
                   to="/dat-lich"
-                  className="inline-flex items-center gap-1.5 px-6 py-2.5 bg-brand-blue hover:bg-blue-700 text-white font-medium rounded-lg text-xs sm:text-sm transition shadow-xs"
+                  className="inline-flex items-center gap-1.5 px-6 py-2.5 bg-brand-blue hover:bg-brand-blue-hover active:brightness-95 text-white font-medium rounded-lg text-xs sm:text-sm transition shadow-xs"
                 >
                   <span>📅</span>
                   <span>Đặt Lịch Hẹn Ngay →</span>
@@ -601,7 +602,7 @@ function HomeLanding() {
             </p>
             <Link
               to="/admin"
-              className="inline-flex items-center gap-1.5 px-6 py-2.5 bg-brand-blue hover:bg-blue-700 text-white font-medium text-xs sm:text-sm rounded-lg transition shadow-xs"
+              className="inline-flex items-center gap-1.5 px-6 py-2.5 bg-brand-blue hover:bg-brand-blue-hover active:brightness-95 text-white font-medium text-xs sm:text-sm rounded-lg transition shadow-xs"
             >
               <span>🔐</span>
               <span>Truy Cập Bàn Điều Hành CSKH →</span>

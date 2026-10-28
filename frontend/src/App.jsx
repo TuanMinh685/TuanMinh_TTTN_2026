@@ -54,7 +54,7 @@ class ErrorBoundary extends Component {
                 this.setState({ hasError: false });
                 window.location.reload();
               }}
-              className="rounded-xl bg-brand-blue px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-700 transition"
+              className="rounded-xl bg-brand-blue px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-blue-hover active:brightness-95 transition"
             >
               Tải lại trang
             </button>
@@ -78,31 +78,31 @@ const ROLE_NAV_CONFIG = {
     shortLabel: '🛡️ Quản Trị CSKH',
     fullTitle: '🛡️ Quản Trị Hệ Thống QR CSKH',
     link: '/admin',
-    bgClass: 'bg-brand-blue text-white hover:bg-blue-700'
+    bgClass: 'bg-brand-blue text-white hover:bg-brand-blue-hover active:brightness-95'
   },
   ADMIN: {
     shortLabel: '🛡️ Quản Trị CSKH',
     fullTitle: '🛡️ Quản Trị Hệ Thống QR CSKH',
     link: '/admin',
-    bgClass: 'bg-brand-blue text-white hover:bg-blue-700'
+    bgClass: 'bg-brand-blue text-white hover:bg-brand-blue-hover active:brightness-95'
   },
   QUAN_LY: {
     shortLabel: '🏬 Trưởng BP CSKH',
     fullTitle: '🏬 Trưởng Bộ Phận CSKH',
     link: '/admin/quan-ly',
-    bgClass: 'bg-brand-blue text-white hover:bg-blue-700'
+    bgClass: 'bg-brand-blue text-white hover:bg-brand-blue-hover active:brightness-95'
   },
   KY_THUAT_VIEN: {
     shortLabel: '🎧 Chuyên Viên Hỗ Trợ',
     fullTitle: '🎧 Chuyên Viên Hỗ Trợ & Xử Lý',
     link: '/admin',
-    bgClass: 'bg-brand-blue text-white hover:bg-blue-700'
+    bgClass: 'bg-brand-blue text-white hover:bg-brand-blue-hover active:brightness-95'
   },
   LE_TAN: {
     shortLabel: '👩‍💼 Lễ Tân & Tiếp Nhận',
     fullTitle: '👩‍💼 Lễ Tân & Tiếp Nhận QR',
     link: '/admin',
-    bgClass: 'bg-brand-blue text-white hover:bg-blue-700'
+    bgClass: 'bg-brand-blue text-white hover:bg-brand-blue-hover active:brightness-95'
   }
 };
 
@@ -188,13 +188,13 @@ function AppContent() {
         shortLabel: '💼 ' + (role || 'Nội Bộ'),
         fullTitle: '💼 Cổng Quản Trị Hệ Thống',
         link: '/admin',
-        bgClass: 'bg-brand-blue text-white hover:bg-blue-700'
+        bgClass: 'bg-brand-blue text-white hover:bg-brand-blue-hover active:brightness-95'
       })
     : {
         shortLabel: '🔐 Cổng Nhân Viên',
         fullTitle: '🔐 Đăng Nhập Nhân Viên',
         link: '/login',
-        bgClass: 'bg-brand-blue text-white hover:bg-blue-700'
+        bgClass: 'bg-brand-blue text-white hover:bg-brand-blue-hover active:brightness-95'
       };
 
   return (
@@ -223,7 +223,7 @@ function AppContent() {
             </Link>
             <Link
               to="/tra-cuu"
-              className="px-4 py-2 mx-1 rounded-full bg-brand-blue text-white hover:bg-blue-700 transition-all flex items-center gap-1.5 shadow-xs"
+              className="px-4 py-2 mx-1 rounded-full bg-brand-blue text-white hover:bg-brand-blue-hover active:brightness-95 transition-all flex items-center gap-1.5 shadow-xs"
             >
               <span>📷</span>
               <span>Quét Mã QR & Tra Cứu</span>
@@ -313,7 +313,7 @@ function AppContent() {
                 {/* Nút Mở Bàn Điều Hành Quản Trị */}
                 <Link 
                   to={navRoleInfo.link} 
-                  className="flex items-center gap-1.5 px-4 py-2 font-bold rounded-full transition-all text-xs shadow-xs bg-brand-blue text-white hover:bg-blue-700"
+                  className="flex items-center gap-1.5 px-4 py-2 font-bold rounded-full transition-all text-xs shadow-xs bg-brand-blue text-white hover:bg-brand-blue-hover active:brightness-95"
                 >
                   <span>📋 Bàn Điều Hành</span>
                 </Link>
@@ -323,7 +323,7 @@ function AppContent() {
                   type="button"
                   onClick={handleLogout}
                   title="Đăng xuất khỏi hệ thống"
-                  className="flex items-center gap-1 px-3.5 py-2 rounded-full bg-brand-blue hover:bg-blue-700 text-xs font-bold text-white transition cursor-pointer"
+                  className="flex items-center gap-1 px-3.5 py-2 rounded-full bg-brand-blue hover:bg-brand-blue-hover active:brightness-95 text-xs font-bold text-white transition cursor-pointer"
                 >
                   <span>🚪</span>
                   <span className="hidden xl:inline">Đăng Xuất</span>
@@ -332,7 +332,7 @@ function AppContent() {
             ) : (
               <Link 
                 to="/login" 
-                className="hidden sm:inline-flex items-center gap-1.5 px-5 py-2 bg-brand-blue text-white font-bold rounded-full hover:bg-blue-700 transition-all text-xs shadow-sm"
+                className="hidden sm:inline-flex items-center gap-1.5 px-5 py-2 bg-brand-blue text-white font-bold rounded-full hover:bg-brand-blue-hover active:brightness-95 transition-all text-xs shadow-sm"
               >
                 <span>🔐 Cổng Nhân Viên</span>
               </Link>
@@ -382,7 +382,7 @@ function AppContent() {
                       localStorage.clear();
                       window.location.href = '/login';
                     }}
-                    className="py-2.5 px-4 text-xs font-bold text-white bg-brand-blue hover:bg-blue-700 rounded-xl transition-colors text-center"
+                    className="py-2.5 px-4 text-xs font-bold text-white bg-brand-blue hover:bg-brand-blue-hover active:brightness-95 rounded-xl transition-colors text-center"
                   >
                     🚪 Đăng xuất ({fullName || role})
                   </button>
@@ -438,7 +438,7 @@ function AppContent() {
                     Đường dẫn bạn truy cập không tồn tại hoặc đã được thay đổi. Vui lòng quay lại trang chủ hoặc tra cứu phiếu sửa chữa.
                   </p>
                   <div className="flex justify-center gap-3">
-                    <Link to="/" className="rounded-xl bg-brand-blue px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-700">
+                    <Link to="/" className="rounded-xl bg-brand-blue px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-blue-hover active:brightness-95">
                       Về Trang Chủ
                     </Link>
                     <Link to="/tra-cuu" className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50">
@@ -457,7 +457,7 @@ function AppContent() {
       <div className="fixed bottom-6 right-6 z-40 flex flex-col gap-4">
         <a 
           href="tel:02838604999" 
-          className="w-14 h-14 bg-brand-blue hover:bg-blue-700 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform relative group cursor-pointer animate-bounce"
+          className="w-14 h-14 bg-brand-blue hover:bg-brand-blue-hover active:brightness-95 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform relative group cursor-pointer animate-bounce"
           aria-label="Gọi Hotline Hùng Hậu"
         >
           <svg viewBox="0 0 24 24" fill="currentColor" className="w-7 h-7 text-white"><path d="M6.62 10.79c1.44 2.83 3.76 5.15 6.59 6.59l2.2-2.2c.28-.28.67-.36 1.02-.25 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
