@@ -50,8 +50,8 @@ function PhoneTracking() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      <main className="flex-1 container mx-auto px-4 py-12 max-w-3xl">
+    <div className="bg-[#f0f5fa] flex flex-col">
+      <main className="flex-1 container mx-auto px-4 py-6 max-w-3xl">
         <div className="text-center mb-8">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 text-brand-orange text-xs font-bold uppercase tracking-wider mb-2">
             📷 Cổng Tra Cứu Hồ Sơ QR – Mảng Sửa Chữa Máy Tính &amp; Phần Mềm

@@ -240,7 +240,7 @@ function Tracking() {
   const issueText = String(ticket.mo_ta_loi || ticket.tinh_trang_may || 'Kiểm tra và hỗ trợ chăm sóc khách hàng theo yêu cầu').trim();
 
   return (
-    <div className="min-h-screen bg-slate-50/70 pb-16 pt-6">
+    <div className="bg-[#f0f5fa] pb-16 pt-2">
       <div className="max-w-5xl mx-auto px-4">
         {/* Thông báo trạng thái Realtime */}
         {statusNotice && (

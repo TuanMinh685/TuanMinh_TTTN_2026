@@ -38,7 +38,7 @@ function BookingForm() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+      <div className="bg-[#f0f5fa] flex items-center justify-center p-4">
         <div className="max-w-lg w-full bg-white rounded-3xl shadow-xl p-6 md:p-8 text-center border-t-8 border-brand-green">
           <div className="w-16 h-16 bg-green-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
             ✓
@@ -75,7 +75,7 @@ function BookingForm() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="bg-[#f0f5fa] flex flex-col">
       <main className="flex-1 container mx-auto px-4 py-8 max-w-2xl">
         <div className="bg-white rounded-3xl shadow-xl overflow-hidden border-t-8 border-brand-orange">
           <div className="p-6 md:p-8">

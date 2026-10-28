@@ -134,9 +134,9 @@ function HomeLanding() {
   };
 
   return (
-    <div className="font-sans text-slate-800 bg-white">
-      {/* SECTION 01: HERO - TRANG NHÃ, RÕ RÀNG, DỊU MẮT */}
-      <section className="bg-slate-50/70 border-b border-slate-200 py-12 lg:py-16">
+    <div className="font-sans text-slate-800 bg-[#f0f5fa]">
+      {/* SECTION 01: HERO - CHUẨN MÀU NỀN HÙNG HẬU (MYH GROUP) */}
+      <section className="bg-gradient-to-b from-[#e8f1f8] via-[#f1f6fa] to-[#f0f5fa] border-b border-slate-200 py-12 lg:py-16">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
             
@@ -366,7 +366,7 @@ function HomeLanding() {
       </section>
 
       {/* SECTION 03: DANH MỤC HỖ TRỢ TRỌNG TÂM MẢNG SỬA CHỮA MÁY TÍNH & PHẦN MỀM */}
-      <section className="py-14 bg-slate-50/70 border-b border-slate-200">
+      <section className="py-14 bg-[#f0f5fa] border-b border-slate-200">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
             <div>
@@ -560,7 +560,7 @@ function HomeLanding() {
 
       {/* SECTION 05: PHẢN HỒI ĐÁNH GIÁ (CSAT) */}
       {topReviews.length > 0 && (
-        <section className="py-14 bg-slate-50/70 border-b border-slate-200">
+        <section className="py-14 bg-[#f0f5fa] border-b border-slate-200">
           <div className="container mx-auto px-4 sm:px-6">
             <div className="text-center mb-8">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500">

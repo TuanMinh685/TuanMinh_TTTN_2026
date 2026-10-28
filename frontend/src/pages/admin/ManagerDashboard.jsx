@@ -56,7 +56,7 @@ export default function ManagerDashboard() {
   const pendingBookings = bookings.filter(b => b.trang_thai === 'CHO_XAC_NHAN' || b.trang_thai === 'CHỜ_XÁC_NHẬN').length;
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6 md:p-8">
+    <div className="bg-[#f0f5fa] p-4 md:p-6 rounded-2xl">
       <AdminNav activeKey="QUAN_LY" />
 
       <div className="space-y-6">

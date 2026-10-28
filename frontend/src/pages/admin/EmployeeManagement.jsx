@@ -226,7 +226,7 @@ export default function EmployeeManagement() {
   const lockedCount = employees.filter(e => e.trang_thai === 'TAM_KHOA').length;
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6 md:p-8">
+    <div className="bg-[#f0f5fa] p-4 md:p-6 rounded-2xl">
       <AdminNav activeKey="NHAN_SU" />
 
       {/* Main Content */}

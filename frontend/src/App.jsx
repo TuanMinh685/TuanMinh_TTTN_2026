@@ -226,9 +226,9 @@ function AppContent() {
       };
 
   return (
-    <div className="min-h-screen font-sans text-slate-800 bg-white flex flex-col">
+    <div className="min-h-screen font-sans text-slate-800 bg-[#f0f5fa] flex flex-col">
       {/* SECTION 01: HEADER & NAVBAR */}
-      <header className="bg-white/95 backdrop-blur-md sticky top-0 z-50 shadow-xs border-b border-slate-200/80">
+      <header className="bg-white sticky top-0 z-50 shadow-xs border-b border-slate-200 border-t-2 border-t-brand-blue">
         <div className="container mx-auto px-4 flex justify-between items-center h-20">
           
           {/* Logo & Brand Lockup */}
