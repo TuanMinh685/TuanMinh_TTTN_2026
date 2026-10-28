@@ -200,47 +200,54 @@ function AppContent() {
   return (
     <div className="min-h-screen font-sans text-slate-800 bg-white flex flex-col">
       {/* SECTION 01: HEADER & NAVBAR */}
-      <header className="bg-white sticky top-0 z-50 shadow-sm border-b border-slate-200">
+      <header className="bg-white/95 backdrop-blur-md sticky top-0 z-50 shadow-xs border-b border-slate-200/80">
         <div className="container mx-auto px-4 flex justify-between items-center h-20">
           
-          {/* Logo */}
-          <Link to="/" className="flex flex-col items-center justify-center">
-            <img src="/img/logo-HHH-26.png" alt="HungHau Logo" className="h-10 md:h-12 object-contain" />
-            <span className="text-[10px] text-brand-blue font-bold tracking-widest leading-none mt-1">QR CSKH • MÁY TÍNH &amp; PHẦN MỀM</span>
+          {/* Logo & Brand Lockup */}
+          <Link to="/" className="flex items-center gap-3 group shrink-0">
+            <img src="/img/logo-HHH-26.png" alt="HungHau Logo" className="h-10 md:h-11 object-contain transition-transform group-hover:scale-105" />
+            <div className="hidden sm:flex flex-col border-l border-slate-200 pl-3">
+              <span className="text-xs font-extrabold text-brand-blue tracking-wide leading-tight">
+                MYH GROUP • CSKH QR
+              </span>
+              <span className="text-[11px] font-semibold text-slate-500 leading-tight mt-0.5">
+                Sửa Chữa Máy Tính &amp; Phần Mềm
+              </span>
+            </div>
           </Link>
 
           {/* Menu máy tính để bàn (Desktop) - Tập trung trọng tâm Web Quét Mã QR Chăm Sóc Khách Hàng */}
-          <nav className="hidden lg:flex items-center gap-2 text-xs font-bold text-slate-600 uppercase h-full">
-            <Link to="/" className="px-3.5 h-full flex items-center hover:text-brand-blue transition-colors">
+          <nav className="hidden lg:flex items-center gap-1.5 text-xs font-bold text-slate-600 uppercase h-full">
+            <Link to="/" className="px-3.5 py-2 rounded-xl hover:bg-slate-100 hover:text-brand-blue transition-colors">
               Trang chủ
             </Link>
             <Link
               to="/tra-cuu"
-              className="px-4 py-2 mx-1 rounded-full bg-brand-blue text-white hover:bg-blue-800 transition-all flex items-center gap-1.5 shadow-2xs"
+              className="px-4 py-2 mx-1 rounded-full bg-brand-blue text-white hover:bg-blue-800 transition-all flex items-center gap-1.5 shadow-xs"
             >
               <span>📷</span>
               <span>Quét Mã QR & Tra Cứu</span>
             </Link>
-            <Link to="/intake" className="px-3.5 h-full flex items-center hover:text-brand-blue transition-colors">
+            <Link to="/intake" className="px-3.5 py-2 rounded-xl hover:bg-slate-100 hover:text-brand-blue transition-colors">
               📝 Tạo Phiếu QR
             </Link>
-            <Link to="/dat-lich" className="px-3.5 h-full flex items-center hover:text-brand-blue transition-colors">
+            <Link to="/dat-lich" className="px-3.5 py-2 rounded-xl hover:bg-slate-100 hover:text-brand-blue transition-colors">
               📅 Đặt Lịch Hẹn CSKH
             </Link>
           </nav>
 
           {/* Cụm Điều Hành Người Dùng (User Cluster) & Nút Menu Mobile */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             {isLoggedIn ? (
               <div className="hidden sm:flex items-center gap-2">
-                {/* Bộ chuyển vai trò làm việc */}
-                <div className="flex items-center gap-1 bg-slate-100 hover:bg-slate-200/70 border border-slate-200 rounded-full px-2.5 py-1 transition">
-                  <span className="text-[11px] font-medium text-slate-500">🔄</span>
+                {/* Bộ chuyển nhanh vai trò */}
+                <div className="flex items-center gap-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-full px-3 py-1.5 transition" title="Chuyển nhanh vai trò kiểm thử">
+                  <span className="text-[11px] font-bold text-brand-blue">Vai trò:</span>
                   <select
                     value={username === 'giamdoc' ? 'admin' : (username || (role === 'GIAM_DOC' || role === 'ADMIN' ? 'admin' : role === 'QUAN_LY' ? 'quanly' : role === 'KY_THUAT_VIEN' ? 'kythuat' : 'letan'))}
                     onChange={(e) => handleQuickSwitchRole(e.target.value)}
                     aria-label="Chuyển vai trò"
-                    className="text-xs font-semibold text-slate-700 bg-transparent outline-none cursor-pointer"
+                    className="text-xs font-bold text-slate-800 bg-transparent outline-none cursor-pointer"
                   >
                     <option value="kythuat">🎧 Chuyên Viên Hỗ Trợ</option>
                     <option value="letan">👩‍💼 Lễ Tân & Tiếp Nhận</option>
@@ -255,11 +262,11 @@ function AppContent() {
                     type="button"
                     onClick={() => setShowNotificationsDropdown(open => !open)}
                     aria-label={`Thông báo (${unreadCount})`}
-                    className="relative flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 transition"
+                    className="relative flex items-center justify-center w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 transition cursor-pointer"
                   >
                     <span className="text-xs">🔔</span>
                     {unreadCount > 0 && (
-                      <span className="absolute -top-1 -right-1 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white shadow-xs">
+                      <span className="absolute -top-1 -right-1 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-brand-blue text-[9px] font-bold text-white shadow-xs">
                         {unreadCount}
                       </span>
                     )}
@@ -303,12 +310,12 @@ function AppContent() {
                   )}
                 </div>
 
-                {/* Huy hiệu Chức vụ Hiện tại */}
+                {/* Nút Mở Bàn Điều Hành Quản Trị */}
                 <Link 
                   to={navRoleInfo.link} 
-                  className={`flex items-center gap-1.5 px-3.5 py-1.5 font-bold rounded-full transition-all text-xs shadow-xs ${navRoleInfo.bgClass}`}
+                  className="flex items-center gap-1.5 px-4 py-2 font-bold rounded-full transition-all text-xs shadow-xs bg-brand-blue text-white hover:bg-blue-800"
                 >
-                  <span>{navRoleInfo.shortLabel}</span>
+                  <span>📋 Bàn Điều Hành</span>
                 </Link>
 
                 {/* Nút Đăng Xuất */}
@@ -316,7 +323,7 @@ function AppContent() {
                   type="button"
                   onClick={handleLogout}
                   title="Đăng xuất khỏi hệ thống"
-                  className="flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-brand-blue hover:bg-blue-800 text-xs font-bold text-white transition cursor-pointer"
+                  className="flex items-center gap-1 px-3.5 py-2 rounded-full bg-brand-blue hover:bg-blue-800 text-xs font-bold text-white transition cursor-pointer"
                 >
                   <span>🚪</span>
                   <span className="hidden xl:inline">Đăng Xuất</span>
@@ -325,7 +332,7 @@ function AppContent() {
             ) : (
               <Link 
                 to="/login" 
-                className="hidden sm:inline-flex items-center gap-1.5 px-4 xl:px-6 py-2 bg-brand-blue text-white font-bold rounded-full hover:bg-blue-800 transition-all text-sm shadow-md"
+                className="hidden sm:inline-flex items-center gap-1.5 px-5 py-2 bg-brand-blue text-white font-bold rounded-full hover:bg-blue-800 transition-all text-xs shadow-sm"
               >
                 <span>🔐 Cổng Nhân Viên</span>
               </Link>
@@ -461,24 +468,24 @@ function AppContent() {
       </div>
 
       {/* SECTION 07: FOOTER */}
-      <footer className="bg-[#0d457b] text-white py-12 border-t-4 border-brand-orange">
+      <footer className="bg-[#083863] text-white py-12 border-t-4 border-brand-blue">
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
               <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                <div className="w-6 h-6 bg-white text-[#0d457b] flex items-center justify-center rounded text-xs font-bold" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}>
+                <div className="w-6 h-6 bg-white text-[#083863] flex items-center justify-center rounded text-xs font-bold" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}>
                   HH
                 </div>
                 CÔNG TY CỔ PHẦN PHÁT TRIỂN HÙNG HẬU
               </h3>
-              <p className="text-blue-200 text-sm leading-relaxed mb-4">
+              <p className="text-blue-100/90 text-sm leading-relaxed mb-4">
                 Hệ thống Web Quét Mã QR Chăm Sóc Khách Hàng Về Mảng Sửa Chữa Máy Tính Và Phần Mềm – Nền tảng số hóa quy trình tiếp nhận thiết bị &amp; yêu cầu phần mềm qua mã QR, theo dõi tiến độ kiểm tra - khắc phục sự cố thời gian thực, cấp sổ bảo hành điện tử (e-Warranty) và đánh giá chất lượng phục vụ thuộc Tập đoàn MYH Group (HungHau Holdings).
               </p>
             </div>
             
             <div>
-              <h3 className="text-lg font-bold mb-4 text-brand-orange">Địa chỉ liên hệ</h3>
-              <ul className="text-blue-200 text-sm space-y-2.5">
+              <h3 className="text-lg font-bold mb-4 text-sky-300">Địa chỉ liên hệ</h3>
+              <ul className="text-blue-100/90 text-sm space-y-2.5">
                 <li className="flex items-start gap-2">
                   <span>📍</span>
                   <span><strong>Trụ sở chính:</strong> 615 Âu Cơ, Phường Phú Trung, Quận Tân Phú, TP. Hồ Chí Minh.</span>
@@ -495,8 +502,8 @@ function AppContent() {
             </div>
             
             <div>
-              <h3 className="text-lg font-bold mb-4 text-brand-orange">Thông tin hỗ trợ</h3>
-              <ul className="text-blue-200 text-sm space-y-2.5">
+              <h3 className="text-lg font-bold mb-4 text-sky-300">Thông tin hỗ trợ</h3>
+              <ul className="text-blue-100/90 text-sm space-y-2.5">
                 <li className="flex items-center gap-2">
                   <span>📞</span>
                   <span><strong>Điện thoại:</strong> (+84) 28 3860 4999</span>
