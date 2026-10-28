@@ -686,7 +686,7 @@ function Dashboard() {
                   <button
                     type="button"
                     onClick={() => setShowPosModal(true)}
-                    className="rounded-lg bg-brand-blue px-3.5 py-2 text-xs font-extrabold text-white shadow-sm hover:bg-blue-800 whitespace-nowrap flex items-center gap-1.5"
+                    className="rounded-lg bg-brand-blue px-3.5 py-2 text-xs font-extrabold text-white shadow-sm hover:bg-blue-700 whitespace-nowrap flex items-center gap-1.5"
                   >
                     <span>📷</span> + Tiếp Nhận Nhanh Tại Quầy (POS)
                   </button>
@@ -717,7 +717,7 @@ function Dashboard() {
                       signRole: 'TRƯỞNG BỘ PHẬN CSKH'
                     });
                   }}
-                  className="rounded-lg bg-brand-blue px-3 py-2 text-xs font-bold text-white shadow-sm hover:bg-blue-800 whitespace-nowrap"
+                  className="rounded-lg bg-brand-blue px-3 py-2 text-xs font-bold text-white shadow-sm hover:bg-blue-700 whitespace-nowrap"
                 >
                   📊 Xuất Danh Sách Hồ Sơ (.xlsx)
                 </button>
@@ -856,7 +856,7 @@ function Dashboard() {
                             <button
                               type="button"
                               onClick={() => updateStatus(t.id, 'ĐANG_CHUẨN_ĐOÁN', 'Đã tiếp nhận thiết bị / yêu cầu phần mềm, Kỹ thuật viên đang kiểm tra và chẩn đoán lỗi.')}
-                              className="bg-brand-blue hover:bg-blue-800 text-white px-2.5 py-1 rounded text-xs font-bold shadow-xs"
+                              className="bg-brand-blue hover:bg-blue-700 text-white px-2.5 py-1 rounded text-xs font-bold shadow-xs"
                             >
                               🔍 Kiểm tra &amp; Chẩn đoán
                             </button>
@@ -865,7 +865,7 @@ function Dashboard() {
                             <button
                               type="button"
                               onClick={() => updateStatus(t.id, 'ĐANG_SỬA', 'Kỹ thuật viên đang tiến hành sửa chữa máy tính và khắc phục sự cố phần mềm cho khách hàng.')}
-                              className="bg-brand-blue hover:bg-blue-800 text-white px-2.5 py-1 rounded text-xs font-bold shadow-xs"
+                              className="bg-brand-blue hover:bg-blue-700 text-white px-2.5 py-1 rounded text-xs font-bold shadow-xs"
                             >
                               🔧 Đang sửa chữa / Xử lý PM
                             </button>
@@ -874,7 +874,7 @@ function Dashboard() {
                             <button
                               type="button"
                               onClick={() => updateStatus(t.id, 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN', 'Đã hoàn tất sửa chữa máy tính / phần mềm, bàn giao khách hàng và kích hoạt Sổ bảo hành điện tử (e-Warranty) 06 tháng.')}
-                              className="bg-brand-blue hover:bg-blue-800 text-white px-2.5 py-1 rounded text-xs font-bold shadow-xs"
+                              className="bg-brand-blue hover:bg-blue-700 text-white px-2.5 py-1 rounded text-xs font-bold shadow-xs"
                             >
                               ✅ Hoàn tất &amp; Cấp e-Warranty
                             </button>
@@ -882,7 +882,7 @@ function Dashboard() {
                           <button
                             type="button"
                             onClick={() => openPhotoModal(t)}
-                            className="bg-brand-blue hover:bg-blue-800 text-white px-2.5 py-1 rounded text-xs font-bold shadow-xs"
+                            className="bg-brand-blue hover:bg-blue-700 text-white px-2.5 py-1 rounded text-xs font-bold shadow-xs"
                             title="Xem & Tải ảnh ngoại quan thiết bị"
                           >
                             📸 Ảnh ngoại quan
@@ -890,7 +890,7 @@ function Dashboard() {
                           <button
                             type="button"
                             onClick={() => openReceipt(t)}
-                            className="bg-brand-blue hover:bg-blue-800 text-white px-2.5 py-1 rounded text-xs font-bold shadow-xs"
+                            className="bg-brand-blue hover:bg-blue-700 text-white px-2.5 py-1 rounded text-xs font-bold shadow-xs"
                           >
                             🖨️ In Phiếu QR (80mm)
                           </button>
@@ -965,14 +965,14 @@ function Dashboard() {
                             <button
                               type="button"
                               onClick={() => updateBookingStatus(bk.id, 'DA_XAC_NHAN')}
-                              className="bg-brand-blue hover:bg-blue-800 text-white px-3 py-1 rounded font-bold text-xs"
+                              className="bg-brand-blue hover:bg-blue-700 text-white px-3 py-1 rounded font-bold text-xs"
                             >
                               📞 Xác Nhận Lịch Hẹn
                             </button>
                             <button
                               type="button"
                               onClick={() => updateBookingStatus(bk.id, 'HUY')}
-                              className="bg-brand-blue hover:bg-blue-800 text-white px-3 py-1 rounded font-bold text-xs"
+                              className="bg-brand-blue hover:bg-blue-700 text-white px-3 py-1 rounded font-bold text-xs"
                             >
                               Hủy Lịch
                             </button>
@@ -982,7 +982,7 @@ function Dashboard() {
                           <button
                             type="button"
                             onClick={() => updateBookingStatus(bk.id, 'KHACH_DA_DEN')}
-                            className="bg-brand-blue hover:bg-blue-800 text-white px-3 py-1.5 rounded font-bold text-xs shadow-xs"
+                            className="bg-brand-blue hover:bg-blue-700 text-white px-3 py-1.5 rounded font-bold text-xs shadow-xs"
                           >
                             ✅ Khách Đã Đến (Tạo Phiếu QR)
                           </button>
@@ -1128,7 +1128,7 @@ function Dashboard() {
               <button
                 type="button"
                 onClick={openCreateEmployeeModal}
-                className="rounded-xl bg-brand-blue hover:bg-blue-800 px-4 py-2.5 text-xs font-extrabold text-white shadow-sm transition flex items-center gap-1.5"
+                className="rounded-xl bg-brand-blue hover:bg-blue-700 px-4 py-2.5 text-xs font-extrabold text-white shadow-sm transition flex items-center gap-1.5"
               >
                 <span>+</span> Tạo Tài Khoản Nhân Sự Mới
               </button>
@@ -1232,21 +1232,21 @@ function Dashboard() {
                               <button
                                 type="button"
                                 onClick={() => openEditEmployeeModal(emp)}
-                                className="px-2.5 py-1 rounded-lg bg-brand-blue hover:bg-blue-800 text-white text-xs font-bold transition"
+                                className="px-2.5 py-1 rounded-lg bg-brand-blue hover:bg-blue-700 text-white text-xs font-bold transition"
                               >
                                 ✏️ Phân quyền / Đổi MK
                               </button>
                               <button
                                 type="button"
                                 onClick={() => toggleEmployeeLock(emp)}
-                                className="px-2.5 py-1 rounded-lg bg-brand-blue hover:bg-blue-800 text-white text-xs font-bold transition"
+                                className="px-2.5 py-1 rounded-lg bg-brand-blue hover:bg-blue-700 text-white text-xs font-bold transition"
                               >
                                 {emp.trang_thai === 'HOAT_DONG' ? 'Khóa TK' : 'Mở khóa'}
                               </button>
                               <button
                                 type="button"
                                 onClick={() => removeEmployee(emp)}
-                                className="px-2.5 py-1 rounded-lg bg-brand-blue hover:bg-blue-800 text-white text-xs font-bold transition"
+                                className="px-2.5 py-1 rounded-lg bg-brand-blue hover:bg-blue-700 text-white text-xs font-bold transition"
                               >
                                 Xóa
                               </button>
@@ -1402,7 +1402,7 @@ function Dashboard() {
               <button
                 type="submit"
                 disabled={savingPw}
-                className="rounded-lg bg-brand-blue hover:bg-blue-800 text-white font-bold text-xs px-4 py-2.5 shadow-xs disabled:opacity-50"
+                className="rounded-lg bg-brand-blue hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 shadow-xs disabled:opacity-50"
               >
                 {savingPw ? 'Đang mã hóa...' : 'Cập Nhật Mật Khẩu'}
               </button>
@@ -1441,7 +1441,7 @@ function Dashboard() {
                       signRole: 'QUẢN TRỊ AN TOÀN THÔNG TIN'
                     });
                   }}
-                  className="rounded-lg bg-brand-blue hover:bg-blue-800 text-white font-bold text-xs px-3.5 py-2 shadow-xs"
+                  className="rounded-lg bg-brand-blue hover:bg-blue-700 text-white font-bold text-xs px-3.5 py-2 shadow-xs"
                 >
                   📊 Xuất Nhật Ký Bảo Mật (.xlsx)
                 </button>
@@ -1671,7 +1671,7 @@ function Dashboard() {
                 <button
                   type="submit"
                   disabled={savingEmployee}
-                  className="rounded-xl bg-brand-blue px-5 py-2.5 font-extrabold text-white hover:bg-blue-800 shadow-md disabled:opacity-60"
+                  className="rounded-xl bg-brand-blue px-5 py-2.5 font-extrabold text-white hover:bg-blue-700 shadow-md disabled:opacity-60"
                 >
                   {savingEmployee ? 'Đang lưu...' : editingEmployee ? 'Lưu Phân Quyền' : 'Tạo Tài Khoản →'}
                 </button>
@@ -1726,7 +1726,7 @@ function Dashboard() {
                 type="button"
                 onClick={() => window.print()}
                 disabled={!receiptQr}
-                className="rounded-lg bg-brand-blue px-5 py-2 font-bold text-white hover:bg-blue-800 disabled:opacity-50"
+                className="rounded-lg bg-brand-blue px-5 py-2 font-bold text-white hover:bg-blue-700 disabled:opacity-50"
               >
                 🖨️ In Phiếu QR (80mm)
               </button>
@@ -1947,3 +1947,4 @@ function Dashboard() {
 }
 
 export default Dashboard;
+

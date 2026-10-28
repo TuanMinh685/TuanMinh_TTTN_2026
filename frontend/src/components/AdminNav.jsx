@@ -93,7 +93,7 @@ export default function AdminNav({ activeKey = 'VAN_HANH' }) {
           <button
             type="button"
             onClick={handleLogout}
-            className="rounded-xl bg-brand-blue px-3.5 py-2 text-xs font-bold text-white transition hover:bg-blue-800 cursor-pointer"
+            className="rounded-xl bg-brand-blue px-3.5 py-2 text-xs font-bold text-white transition hover:bg-blue-700 cursor-pointer"
           >
             Đăng xuất
           </button>
@@ -102,3 +102,4 @@ export default function AdminNav({ activeKey = 'VAN_HANH' }) {
     </header>
   );
 }
+

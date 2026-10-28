@@ -219,7 +219,7 @@ function Tracking() {
         <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">⚠️</div>
         <h2 className="text-xl font-bold text-slate-800 mb-2">Không tìm thấy hồ sơ phiếu CSKH</h2>
         <p className="text-sm text-red-600 font-medium mb-6">{error}</p>
-        <Link to="/tra-cuu" className="inline-flex items-center gap-2 px-6 py-3 bg-brand-blue text-white font-bold rounded-xl hover:bg-blue-800 transition">
+        <Link to="/tra-cuu" className="inline-flex items-center gap-2 px-6 py-3 bg-brand-blue text-white font-bold rounded-xl hover:bg-blue-700 transition">
           ← Quay lại trang Tra cứu QR
         </Link>
       </div>
@@ -271,14 +271,14 @@ function Tracking() {
           <div className="flex items-center gap-2">
             <Link
               to="/tra-cuu"
-              className="text-xs font-bold text-white bg-brand-blue hover:bg-blue-800 px-3.5 py-2 rounded-xl shadow-xs transition flex items-center gap-1.5"
+              className="text-xs font-bold text-white bg-brand-blue hover:bg-blue-700 px-3.5 py-2 rounded-xl shadow-xs transition flex items-center gap-1.5"
             >
               <span>🔍</span> Tra cứu mã khác
             </Link>
             <button
               type="button"
               onClick={() => window.print()}
-              className="text-xs font-bold text-white bg-brand-blue hover:bg-blue-800 px-3.5 py-2 rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+              className="text-xs font-bold text-white bg-brand-blue hover:bg-blue-700 px-3.5 py-2 rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer"
             >
               <span>🖨️</span> In phiếu QR điện tử
             </button>
@@ -286,7 +286,7 @@ function Tracking() {
         </div>
 
         {/* SECTION 1: HERO BANNER HỒ SƠ PHIẾU ĐIỆN TỬ CSKH */}
-        <div className="rounded-3xl bg-gradient-to-r from-[#093666] via-[#0d4d8b] to-[#11634b] text-white p-6 md:p-8 shadow-xl relative overflow-hidden border border-blue-900/30 mb-6">
+        <div className="rounded-3xl bg-gradient-to-r from-blue-700 via-brand-blue to-sky-600 text-white p-6 md:p-8 shadow-xl relative overflow-hidden border border-blue-400/30 mb-6">
           <div className="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-white/10 blur-3xl pointer-events-none"></div>
           <div className="absolute left-1/3 -bottom-20 w-56 h-56 rounded-full bg-emerald-400/10 blur-3xl pointer-events-none"></div>
 
@@ -606,7 +606,7 @@ function Tracking() {
                   <button
                     type="button"
                     onClick={() => setShowWarrantyModal(true)}
-                    className="w-full py-3 bg-brand-blue hover:bg-blue-800 text-white font-extrabold rounded-xl text-xs transition-colors shadow-sm uppercase tracking-wider cursor-pointer"
+                    className="w-full py-3 bg-brand-blue hover:bg-blue-700 text-white font-extrabold rounded-xl text-xs transition-colors shadow-sm uppercase tracking-wider cursor-pointer"
                   >
                     🛡️ Gửi Yêu Cầu Hỗ Trợ Bảo Hành Qua QR →
                   </button>
@@ -682,7 +682,7 @@ function Tracking() {
                       <button
                         type="submit"
                         disabled={reviewLoading}
-                        className="w-full rounded-xl bg-brand-blue px-5 py-3 font-extrabold text-white transition hover:bg-blue-800 disabled:opacity-60 text-xs uppercase tracking-wider cursor-pointer"
+                        className="w-full rounded-xl bg-brand-blue px-5 py-3 font-extrabold text-white transition hover:bg-blue-700 disabled:opacity-60 text-xs uppercase tracking-wider cursor-pointer"
                       >
                         {reviewLoading ? 'Đang gửi đánh giá...' : 'Gửi Đánh Giá Dịch Vụ CSKH'}
                       </button>
@@ -738,7 +738,7 @@ function Tracking() {
                   <button
                     type="submit"
                     disabled={warrantyLoading}
-                    className="flex-1 py-2.5 bg-brand-blue text-white rounded-xl font-bold text-sm hover:bg-blue-800 disabled:opacity-60"
+                    className="flex-1 py-2.5 bg-brand-blue text-white rounded-xl font-bold text-sm hover:bg-blue-700 disabled:opacity-60"
                   >
                     {warrantyLoading ? 'Đang gửi...' : 'Gửi yêu cầu'}
                   </button>
@@ -768,3 +768,4 @@ function Tracking() {
 }
 
 export default Tracking;
+

@@ -121,7 +121,7 @@ function IntakeForm() {
                   Chụp hoặc tải lên hình ảnh ngoại quan máy tính lúc bàn giao hoặc màn hình báo lỗi để lưu hồ sơ CSKH minh bạch.
                 </p>
               </div>
-              <label className="cursor-pointer shrink-0 rounded-lg bg-brand-blue px-3 py-2 text-xs font-bold text-white hover:bg-blue-800 transition">
+              <label className="cursor-pointer shrink-0 rounded-lg bg-brand-blue px-3 py-2 text-xs font-bold text-white hover:bg-blue-700 transition">
                 + Chọn ảnh
                 <input
                   type="file"
@@ -151,7 +151,7 @@ function IntakeForm() {
             )}
           </div>
 
-          <button disabled={loading} type="submit" className="w-full py-4 bg-brand-blue hover:bg-blue-800 text-white font-bold rounded-xl shadow-lg transition-all transform hover:-translate-y-0.5 cursor-pointer">
+          <button disabled={loading} type="submit" className="w-full py-4 bg-brand-blue hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg transition-all transform hover:-translate-y-0.5 cursor-pointer">
             {loading ? 'Đang khởi tạo Mã QR...' : 'Tạo Phiếu CSKH & Nhận Mã QR Theo Dõi →'}
           </button>
         </form>
@@ -161,3 +161,4 @@ function IntakeForm() {
 }
 
 export default IntakeForm;
+

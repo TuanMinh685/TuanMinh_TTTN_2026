@@ -124,7 +124,7 @@ function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-2 py-3.5 bg-brand-blue hover:bg-blue-800 active:scale-[0.99] text-white font-extrabold rounded-xl transition-all shadow-lg shadow-blue-900/20 text-sm uppercase tracking-wider disabled:opacity-50 cursor-pointer"
+              className="w-full mt-2 py-3.5 bg-brand-blue hover:bg-blue-700 active:scale-[0.99] text-white font-extrabold rounded-xl transition-all shadow-lg shadow-blue-900/20 text-sm uppercase tracking-wider disabled:opacity-50 cursor-pointer"
             >
               {loading ? 'Đang xác thực thông tin...' : 'ĐĂNG NHẬP HỆ THỐNG CSKH'}
             </button>
@@ -201,3 +201,4 @@ function Login() {
 }
 
 export default Login;
+

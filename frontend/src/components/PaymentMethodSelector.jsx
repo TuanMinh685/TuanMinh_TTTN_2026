@@ -289,7 +289,7 @@ function PaymentMethodSelector({ ticketCode = 'RP-839400', customerName = 'Khác
               <button
                 type="button"
                 onClick={() => handleConfirmDemoPayment(`VietQR - ${selectedBank.name}`)}
-                className="w-full py-3 rounded-xl bg-brand-blue hover:bg-blue-800 text-white font-extrabold text-xs shadow-md transition cursor-pointer"
+                className="w-full py-3 rounded-xl bg-brand-blue hover:bg-blue-700 text-white font-extrabold text-xs shadow-md transition cursor-pointer"
               >
                 ✓ Xác Nhận Đã Quét Mã VietQR Chuyển Khoản
               </button>
@@ -356,7 +356,7 @@ function PaymentMethodSelector({ ticketCode = 'RP-839400', customerName = 'Khác
               <button
                 type="button"
                 onClick={() => handleConfirmDemoPayment(`Ví điện tử ${walletType}`)}
-                className="w-full py-3 rounded-xl bg-brand-blue hover:bg-blue-800 text-white font-extrabold text-xs shadow-md transition cursor-pointer"
+                className="w-full py-3 rounded-xl bg-brand-blue hover:bg-blue-700 text-white font-extrabold text-xs shadow-md transition cursor-pointer"
               >
                 ✓ Xác Nhận Đã Thanh Toán Qua Ví {walletType}
               </button>
@@ -506,7 +506,7 @@ function PaymentMethodSelector({ ticketCode = 'RP-839400', customerName = 'Khác
 
               <button
                 type="submit"
-                className="w-full py-3 rounded-xl bg-brand-blue hover:bg-blue-800 text-white font-extrabold text-xs shadow-md transition cursor-pointer"
+                className="w-full py-3 rounded-xl bg-brand-blue hover:bg-blue-700 text-white font-extrabold text-xs shadow-md transition cursor-pointer"
               >
                 🔒 Xác Thực &amp; Thanh Toán Qua Cổng Thẻ
               </button>
@@ -535,7 +535,7 @@ function PaymentMethodSelector({ ticketCode = 'RP-839400', customerName = 'Khác
             <button
               type="button"
               onClick={() => handleConfirmDemoPayment('Tiền mặt trực tiếp tại quầy POS')}
-              className="px-5 py-2.5 rounded-xl bg-brand-blue hover:bg-blue-800 text-white font-extrabold text-xs shadow-sm transition cursor-pointer"
+              className="px-5 py-2.5 rounded-xl bg-brand-blue hover:bg-blue-700 text-white font-extrabold text-xs shadow-sm transition cursor-pointer"
             >
               ✓ Đăng Ký Thanh Toán Tại Quầy Khi Nhận Máy
             </button>
@@ -547,3 +547,4 @@ function PaymentMethodSelector({ ticketCode = 'RP-839400', customerName = 'Khác
 }
 
 export default PaymentMethodSelector;
+

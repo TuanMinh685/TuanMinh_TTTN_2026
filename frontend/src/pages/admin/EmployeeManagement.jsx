@@ -439,21 +439,21 @@ export default function EmployeeManagement() {
                               <>
                                 <button
                                   onClick={() => openEditModal(emp)}
-                                  className="rounded-lg bg-brand-blue px-2.5 py-1 font-bold text-white hover:bg-blue-800 transition"
+                                  className="rounded-lg bg-brand-blue px-2.5 py-1 font-bold text-white hover:bg-blue-700 transition"
                                   title="Chỉnh sửa hồ sơ hoặc phân quyền"
                                 >
                                   ✏️ Sửa
                                 </button>
                                 <button
                                   onClick={() => handleToggleLock(emp)}
-                                  className="rounded-lg bg-brand-blue px-2.5 py-1 font-bold text-white hover:bg-blue-800 transition"
+                                  className="rounded-lg bg-brand-blue px-2.5 py-1 font-bold text-white hover:bg-blue-700 transition"
                                   title={emp.trang_thai === 'HOAT_DONG' ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}
                                 >
                                   {emp.trang_thai === 'HOAT_DONG' ? '🔒 Khóa' : '🔓 Mở'}
                                 </button>
                                 <button
                                   onClick={() => handleDelete(emp)}
-                                  className="rounded-lg bg-brand-blue px-2 py-1 font-bold text-white hover:bg-blue-800 transition"
+                                  className="rounded-lg bg-brand-blue px-2 py-1 font-bold text-white hover:bg-blue-700 transition"
                                   title="Xóa tài khoản"
                                 >
                                   🗑️
@@ -612,3 +612,4 @@ export default function EmployeeManagement() {
     </div>
   );
 }
+

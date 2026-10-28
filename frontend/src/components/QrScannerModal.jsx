@@ -150,3 +150,4 @@ function QrScannerModal({ isOpen, onClose, onScanSuccess }) {
 }
 
 export default QrScannerModal;
+

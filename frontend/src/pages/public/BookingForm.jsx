@@ -58,7 +58,7 @@ function BookingForm() {
           <div className="flex flex-col sm:flex-row justify-center gap-3">
             <Link
               to="/tra-cuu"
-              className="px-5 py-2.5 bg-brand-blue text-white font-bold text-xs rounded-xl hover:bg-blue-800 transition"
+              className="px-5 py-2.5 bg-brand-blue text-white font-bold text-xs rounded-xl hover:bg-blue-700 transition"
             >
               📷 Mở Cổng Quét QR & Tra Cứu
             </Link>
@@ -177,7 +177,7 @@ function BookingForm() {
               </div>
 
               <button type="submit" disabled={loading}
-                className="w-full py-3.5 bg-brand-blue hover:bg-blue-800 text-white font-bold text-base rounded-xl shadow-lg hover:shadow-xl transition-all mt-4 disabled:opacity-50 cursor-pointer">
+                className="w-full py-3.5 bg-brand-blue hover:bg-blue-700 text-white font-bold text-base rounded-xl shadow-lg hover:shadow-xl transition-all mt-4 disabled:opacity-50 cursor-pointer">
                 {loading ? 'Đang gửi thông tin...' : 'XÁC NHẬN ĐẶT LỊCH HẸN CSKH'}
               </button>
             </form>
@@ -189,3 +189,4 @@ function BookingForm() {
 }
 
 export default BookingForm;
+

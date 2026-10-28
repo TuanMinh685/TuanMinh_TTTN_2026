@@ -101,7 +101,7 @@ function HomeLanding() {
       width: 220,
       margin: 1,
       color: {
-        dark: '#0b5b9c',
+        dark: '#2563eb',
         light: '#ffffff'
       }
     })
@@ -202,14 +202,14 @@ function HomeLanding() {
                   />
                   <button
                     type="submit"
-                    className="px-5 py-3 rounded-xl bg-brand-blue hover:bg-blue-800 text-white font-bold text-sm transition shadow-sm shrink-0 cursor-pointer"
+                    className="px-5 py-3 rounded-xl bg-brand-blue hover:bg-blue-700 text-white font-bold text-sm transition shadow-sm shrink-0 cursor-pointer"
                   >
                     Tra Cứu Ngay
                   </button>
                   <button
                     type="button"
                     onClick={() => setIsScannerOpen(true)}
-                    className="px-5 py-3 rounded-xl bg-brand-blue hover:bg-blue-800 text-white font-bold text-sm transition shadow-sm flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+                    className="px-5 py-3 rounded-xl bg-brand-blue hover:bg-blue-700 text-white font-bold text-sm transition shadow-sm flex items-center justify-center gap-2 shrink-0 cursor-pointer"
                   >
                     <span>📷</span>
                     <span>Quét Camera QR</span>
@@ -221,21 +221,21 @@ function HomeLanding() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl">
                 <Link
                   to="/intake"
-                  className="px-4 py-3 bg-brand-blue hover:bg-blue-800 text-white font-bold rounded-xl transition-all shadow-sm text-xs sm:text-sm flex items-center justify-center gap-2 text-center"
+                  className="px-4 py-3 bg-brand-blue hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-sm text-xs sm:text-sm flex items-center justify-center gap-2 text-center"
                 >
                   <span>📝</span>
                   <span>Tạo Phiếu QR Tại Quầy</span>
                 </Link>
                 <Link
                   to="/tra-cuu"
-                  className="px-4 py-3 bg-brand-blue hover:bg-blue-800 text-white font-bold rounded-xl transition-all shadow-sm text-xs sm:text-sm flex items-center justify-center gap-2 text-center"
+                  className="px-4 py-3 bg-brand-blue hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-sm text-xs sm:text-sm flex items-center justify-center gap-2 text-center"
                 >
                   <span>📷</span>
                   <span>Tra Cứu SĐT / Serial</span>
                 </Link>
                 <Link
                   to="/dat-lich"
-                  className="px-4 py-3 bg-brand-blue hover:bg-blue-800 text-white font-bold rounded-xl transition-all shadow-sm text-xs sm:text-sm flex items-center justify-center gap-2 text-center"
+                  className="px-4 py-3 bg-brand-blue hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-sm text-xs sm:text-sm flex items-center justify-center gap-2 text-center"
                 >
                   <span>📅</span>
                   <span>Đặt Lịch Hẹn CSKH</span>
@@ -336,14 +336,14 @@ function HomeLanding() {
                     <button
                       type="button"
                       onClick={() => setIsScannerOpen(true)}
-                      className="py-2.5 px-3 rounded-xl bg-brand-blue text-white font-bold text-xs hover:bg-blue-800 transition flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+                      className="py-2.5 px-3 rounded-xl bg-brand-blue text-white font-bold text-xs hover:bg-blue-700 transition flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
                     >
                       <span>📷</span>
                       <span>Mở Máy Quét QR</span>
                     </button>
                     <Link
                       to={qrMode === 'INTAKE' ? '/intake' : '/track/RP-839400'}
-                      className="py-2.5 px-3 rounded-xl bg-brand-blue text-white font-bold text-xs hover:bg-blue-800 transition flex items-center justify-center gap-1.5 shadow-sm text-center"
+                      className="py-2.5 px-3 rounded-xl bg-brand-blue text-white font-bold text-xs hover:bg-blue-700 transition flex items-center justify-center gap-1.5 shadow-sm text-center"
                     >
                       <span>🚀</span>
                       <span>{qrMode === 'INTAKE' ? 'Mở Form Ngay' : 'Xem Hồ Sơ Mẫu'}</span>
@@ -413,7 +413,7 @@ function HomeLanding() {
             </div>
             <Link
               to="/intake"
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-brand-blue hover:bg-blue-800 text-white font-bold text-xs sm:text-sm shadow-sm transition shrink-0"
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-brand-blue hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-sm transition shrink-0"
             >
               <span>📝</span>
               <span>Khởi Tạo Hồ Sơ QR Ngay →</span>
@@ -449,7 +449,7 @@ function HomeLanding() {
                   </span>
                   <Link
                     to={`/dat-lich?service=${encodeURIComponent(item.serviceParam)}`}
-                    className="px-3.5 py-2 rounded-lg bg-brand-blue hover:bg-blue-800 text-white font-bold text-xs transition"
+                    className="px-3.5 py-2 rounded-lg bg-brand-blue hover:bg-blue-700 text-white font-bold text-xs transition"
                   >
                     Đặt lịch hỗ trợ →
                   </Link>
@@ -539,7 +539,7 @@ function HomeLanding() {
               <div className="text-center mt-10">
                 <Link
                   to="/intake"
-                  className="inline-flex items-center gap-2 px-8 py-3.5 bg-brand-blue text-white font-bold rounded-xl hover:bg-blue-800 shadow-md transition"
+                  className="inline-flex items-center gap-2 px-8 py-3.5 bg-brand-blue text-white font-bold rounded-xl hover:bg-blue-700 shadow-md transition"
                 >
                   <span>📝</span>
                   <span>Tiến Hành Tạo Phiếu QR Ngay →</span>
@@ -586,7 +586,7 @@ function HomeLanding() {
               <div className="text-center mt-10">
                 <Link
                   to="/dat-lich"
-                  className="inline-flex items-center gap-2 px-8 py-3.5 bg-brand-blue text-white font-bold rounded-xl hover:bg-blue-800 shadow-md transition"
+                  className="inline-flex items-center gap-2 px-8 py-3.5 bg-brand-blue text-white font-bold rounded-xl hover:bg-blue-700 shadow-md transition"
                 >
                   <span>📅</span>
                   <span>Đặt Lịch Hẹn CSKH Ngay →</span>
@@ -647,7 +647,7 @@ function HomeLanding() {
             </p>
             <Link
               to="/admin"
-              className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-brand-blue text-white font-bold text-sm sm:text-base rounded-xl hover:bg-blue-800 transition-all shadow-md"
+              className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-brand-blue text-white font-bold text-sm sm:text-base rounded-xl hover:bg-blue-700 transition-all shadow-md"
             >
               <span>🔐</span>
               <span>Truy Cập Bàn Điều Hành CSKH →</span>
@@ -667,3 +667,4 @@ function HomeLanding() {
 }
 
 export default HomeLanding;
+

@@ -103,7 +103,7 @@ function PhoneTracking() {
               <button
                 type="button"
                 onClick={() => setIsScannerOpen(true)}
-                className="w-full sm:w-auto px-8 py-4 bg-brand-blue hover:bg-blue-800 text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-3 cursor-pointer"
+                className="w-full sm:w-auto px-8 py-4 bg-brand-blue hover:bg-blue-700 text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-3 cursor-pointer"
               >
                 <span className="text-2xl">📷</span>
                 <span>Bật Camera quét mã QR ngay</span>
@@ -128,7 +128,7 @@ function PhoneTracking() {
               />
               <button
                 type="submit"
-                className="px-8 py-3 bg-brand-blue text-white font-bold text-lg rounded-lg hover:bg-blue-800 shadow-lg transition-all whitespace-nowrap cursor-pointer"
+                className="px-8 py-3 bg-brand-blue text-white font-bold text-lg rounded-lg hover:bg-blue-700 shadow-lg transition-all whitespace-nowrap cursor-pointer"
               >
                 Tra Cứu Ngay
               </button>
@@ -156,7 +156,7 @@ function PhoneTracking() {
               <button
                 type="submit"
                 disabled={loading}
-                className="px-8 py-3 bg-brand-blue text-white font-bold text-lg rounded-lg hover:bg-blue-800 shadow-lg transition-all disabled:opacity-50 whitespace-nowrap cursor-pointer"
+                className="px-8 py-3 bg-brand-blue text-white font-bold text-lg rounded-lg hover:bg-blue-700 shadow-lg transition-all disabled:opacity-50 whitespace-nowrap cursor-pointer"
               >
                 {loading ? 'Đang tìm...' : 'Tra Cứu'}
               </button>
@@ -238,7 +238,7 @@ function PhoneTracking() {
 
                   <Link
                     to={`/track/${ticket.ma_tra_cuu}`}
-                    className="px-6 py-2 bg-brand-blue text-white font-bold rounded-lg hover:bg-blue-800 transition-colors whitespace-nowrap"
+                    className="px-6 py-2 bg-brand-blue text-white font-bold rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
                   >
                     Xem chi tiết tiến độ →
                   </Link>
@@ -260,3 +260,4 @@ function PhoneTracking() {
 }
 
 export default PhoneTracking;
+
