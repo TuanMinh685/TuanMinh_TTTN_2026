@@ -271,14 +271,14 @@ function Tracking() {
           <div className="flex items-center gap-2">
             <Link
               to="/tra-cuu"
-              className="text-xs font-bold text-white bg-brand-blue hover:bg-blue-700 px-3.5 py-2 rounded-xl shadow-xs transition flex items-center gap-1.5"
+              className="text-xs font-semibold text-white bg-brand-blue hover:bg-brand-blue-hover px-3.5 py-2 rounded-xl shadow-xs transition flex items-center gap-1.5"
             >
               <span>🔍</span> Tra cứu mã khác
             </Link>
             <button
               type="button"
               onClick={() => window.print()}
-              className="text-xs font-bold text-white bg-brand-blue hover:bg-blue-700 px-3.5 py-2 rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+              className="text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 px-3.5 py-2 rounded-xl shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
             >
               <span>🖨️</span> In phiếu QR điện tử
             </button>

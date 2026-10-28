@@ -323,7 +323,7 @@ function AppContent() {
                   type="button"
                   onClick={handleLogout}
                   title="Đăng xuất khỏi hệ thống"
-                  className="flex items-center gap-1 px-3.5 py-2 rounded-full bg-brand-blue hover:bg-brand-blue-hover active:brightness-95 text-xs font-bold text-white transition cursor-pointer"
+                  className="flex items-center gap-1 px-3 py-2 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition cursor-pointer"
                 >
                   <span>🚪</span>
                   <span className="hidden xl:inline">Đăng Xuất</span>

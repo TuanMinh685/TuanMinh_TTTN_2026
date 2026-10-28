@@ -717,7 +717,7 @@ function Dashboard() {
                       signRole: 'TRƯỞNG BỘ PHẬN CSKH'
                     });
                   }}
-                  className="rounded-lg bg-brand-blue px-3 py-2 text-xs font-bold text-white shadow-sm hover:bg-blue-700 whitespace-nowrap"
+                  className="rounded-lg bg-white hover:bg-slate-50 border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 shadow-2xs whitespace-nowrap transition cursor-pointer"
                 >
                   📊 Xuất Danh Sách Hồ Sơ (.xlsx)
                 </button>
@@ -852,37 +852,45 @@ function Dashboard() {
                       </td>
                       <td className="py-3 px-4 text-center">
                         <div className="flex flex-wrap items-center justify-center gap-1.5">
+                          {/* 1. NÚT CHÍNH DUY NHẤT: BƯỚC QUY TRÌNH KẾ TIẾP (Màu xanh nhận diện) */}
                           {canTechAction && (t.trang_thai === 'CHỜ_KHÁM' || t.trang_thai === 'YÊU_CẦU_BẢO_HÀNH') && (
                             <button
                               type="button"
                               onClick={() => updateStatus(t.id, 'ĐANG_CHUẨN_ĐOÁN', 'Đã tiếp nhận thiết bị / yêu cầu phần mềm, Kỹ thuật viên đang kiểm tra và chẩn đoán lỗi.')}
-                              className="bg-brand-blue hover:bg-blue-700 text-white px-2.5 py-1 rounded text-xs font-bold shadow-xs"
+                              className="bg-brand-blue hover:bg-brand-blue-hover text-white px-2.5 py-1 rounded text-xs font-semibold shadow-2xs transition shrink-0 cursor-pointer"
                             >
-                              🔍 Kiểm tra &amp; Chẩn đoán
+                              🔍 Khám &amp; Chẩn đoán
                             </button>
                           )}
-                          {canTechAction && (t.trang_thai === 'CHỜ_KHÁM' || t.trang_thai === 'ĐANG_CHUẨN_ĐOÁN') && (
+                          {canTechAction && t.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' && (
                             <button
                               type="button"
                               onClick={() => updateStatus(t.id, 'ĐANG_SỬA', 'Kỹ thuật viên đang tiến hành sửa chữa máy tính và khắc phục sự cố phần mềm cho khách hàng.')}
-                              className="bg-brand-blue hover:bg-blue-700 text-white px-2.5 py-1 rounded text-xs font-bold shadow-xs"
+                              className="bg-brand-blue hover:bg-brand-blue-hover text-white px-2.5 py-1 rounded text-xs font-semibold shadow-2xs transition shrink-0 cursor-pointer"
                             >
-                              🔧 Đang sửa chữa / Xử lý PM
+                              🔧 Sửa chữa &amp; Xử lý
                             </button>
                           )}
-                          {(canTechAction || canReceptionAction) && t.trang_thai !== 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' && (
+                          {(canTechAction || canReceptionAction) && t.trang_thai === 'ĐANG_SỬA' && (
                             <button
                               type="button"
                               onClick={() => updateStatus(t.id, 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN', 'Đã hoàn tất sửa chữa máy tính / phần mềm, bàn giao khách hàng và kích hoạt Sổ bảo hành điện tử (e-Warranty) 06 tháng.')}
-                              className="bg-brand-blue hover:bg-blue-700 text-white px-2.5 py-1 rounded text-xs font-bold shadow-xs"
+                              className="bg-brand-blue hover:bg-brand-blue-hover text-white px-2.5 py-1 rounded text-xs font-semibold shadow-2xs transition shrink-0 cursor-pointer"
                             >
                               ✅ Hoàn tất &amp; Cấp e-Warranty
                             </button>
                           )}
+                          {t.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' && (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                              ✓ Đã bàn giao
+                            </span>
+                          )}
+
+                          {/* 2. CÁC NÚT PHỤ: TIỆN ÍCH HỒ SƠ (Màu trung tính: nền trắng viền xám tinh gọn) */}
                           <button
                             type="button"
                             onClick={() => openPhotoModal(t)}
-                            className="bg-brand-blue hover:bg-blue-700 text-white px-2.5 py-1 rounded text-xs font-bold shadow-xs"
+                            className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-2 py-1 rounded text-xs font-medium transition shrink-0 cursor-pointer"
                             title="Xem & Tải ảnh ngoại quan thiết bị"
                           >
                             📸 Ảnh ngoại quan
@@ -890,9 +898,10 @@ function Dashboard() {
                           <button
                             type="button"
                             onClick={() => openReceipt(t)}
-                            className="bg-brand-blue hover:bg-blue-700 text-white px-2.5 py-1 rounded text-xs font-bold shadow-xs"
+                            className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-2 py-1 rounded text-xs font-medium transition shrink-0 cursor-pointer"
+                            title="In phiếu nhiệt 80mm có mã QR"
                           >
-                            🖨️ In Phiếu QR (80mm)
+                            🖨️ In Phiếu QR
                           </button>
                         </div>
                       </td>
@@ -965,16 +974,16 @@ function Dashboard() {
                             <button
                               type="button"
                               onClick={() => updateBookingStatus(bk.id, 'DA_XAC_NHAN')}
-                              className="bg-brand-blue hover:bg-blue-700 text-white px-3 py-1 rounded font-bold text-xs"
+                              className="bg-brand-blue hover:bg-brand-blue-hover text-white px-3 py-1 rounded text-xs font-semibold shadow-2xs transition cursor-pointer"
                             >
-                              📞 Xác Nhận Lịch Hẹn
+                              📞 Xác Nhận
                             </button>
                             <button
                               type="button"
                               onClick={() => updateBookingStatus(bk.id, 'HUY')}
-                              className="bg-brand-blue hover:bg-blue-700 text-white px-3 py-1 rounded font-bold text-xs"
+                              className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 px-3 py-1 rounded text-xs font-medium transition cursor-pointer"
                             >
-                              Hủy Lịch
+                              Hủy
                             </button>
                           </>
                         )}
@@ -982,9 +991,9 @@ function Dashboard() {
                           <button
                             type="button"
                             onClick={() => updateBookingStatus(bk.id, 'KHACH_DA_DEN')}
-                            className="bg-brand-blue hover:bg-blue-700 text-white px-3 py-1.5 rounded font-bold text-xs shadow-xs"
+                            className="bg-brand-blue hover:bg-brand-blue-hover text-white px-3 py-1 rounded text-xs font-semibold shadow-2xs transition cursor-pointer"
                           >
-                            ✅ Khách Đã Đến (Tạo Phiếu QR)
+                            ✅ Đã Đến (Tạo Phiếu QR)
                           </button>
                         )}
                       </div>
@@ -1232,21 +1241,21 @@ function Dashboard() {
                               <button
                                 type="button"
                                 onClick={() => openEditEmployeeModal(emp)}
-                                className="px-2.5 py-1 rounded-lg bg-brand-blue hover:bg-blue-700 text-white text-xs font-bold transition"
+                                className="px-2.5 py-1 rounded bg-brand-blue hover:bg-brand-blue-hover text-white text-xs font-semibold shadow-2xs transition"
                               >
                                 ✏️ Phân quyền / Đổi MK
                               </button>
                               <button
                                 type="button"
                                 onClick={() => toggleEmployeeLock(emp)}
-                                className="px-2.5 py-1 rounded-lg bg-brand-blue hover:bg-blue-700 text-white text-xs font-bold transition"
+                                className="px-2.5 py-1 rounded bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-medium transition"
                               >
                                 {emp.trang_thai === 'HOAT_DONG' ? 'Khóa TK' : 'Mở khóa'}
                               </button>
                               <button
                                 type="button"
                                 onClick={() => removeEmployee(emp)}
-                                className="px-2.5 py-1 rounded-lg bg-brand-blue hover:bg-blue-700 text-white text-xs font-bold transition"
+                                className="px-2.5 py-1 rounded bg-white hover:bg-slate-50 border border-slate-200 text-slate-500 hover:text-red-600 text-xs font-medium transition"
                               >
                                 Xóa
                               </button>
@@ -1441,7 +1450,7 @@ function Dashboard() {
                       signRole: 'QUẢN TRỊ AN TOÀN THÔNG TIN'
                     });
                   }}
-                  className="rounded-lg bg-brand-blue hover:bg-blue-700 text-white font-bold text-xs px-3.5 py-2 shadow-xs"
+                  className="rounded-lg bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 font-medium text-xs px-3.5 py-2 shadow-2xs transition cursor-pointer"
                 >
                   📊 Xuất Nhật Ký Bảo Mật (.xlsx)
                 </button>

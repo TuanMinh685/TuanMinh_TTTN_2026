@@ -439,21 +439,21 @@ export default function EmployeeManagement() {
                               <>
                                 <button
                                   onClick={() => openEditModal(emp)}
-                                  className="rounded-lg bg-brand-blue px-2.5 py-1 font-bold text-white hover:bg-blue-700 transition"
+                                  className="rounded bg-brand-blue px-2.5 py-1 font-semibold text-white hover:bg-brand-blue-hover text-xs shadow-2xs transition"
                                   title="Chỉnh sửa hồ sơ hoặc phân quyền"
                                 >
                                   ✏️ Sửa
                                 </button>
                                 <button
                                   onClick={() => handleToggleLock(emp)}
-                                  className="rounded-lg bg-brand-blue px-2.5 py-1 font-bold text-white hover:bg-blue-700 transition"
+                                  className="rounded bg-white border border-slate-200 px-2.5 py-1 font-medium text-slate-700 hover:bg-slate-50 text-xs transition"
                                   title={emp.trang_thai === 'HOAT_DONG' ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}
                                 >
                                   {emp.trang_thai === 'HOAT_DONG' ? '🔒 Khóa' : '🔓 Mở'}
                                 </button>
                                 <button
                                   onClick={() => handleDelete(emp)}
-                                  className="rounded-lg bg-brand-blue px-2 py-1 font-bold text-white hover:bg-blue-700 transition"
+                                  className="rounded bg-white border border-slate-200 px-2 py-1 font-medium text-slate-500 hover:text-red-600 hover:border-red-200 text-xs transition"
                                   title="Xóa tài khoản"
                                 >
                                   🗑️
