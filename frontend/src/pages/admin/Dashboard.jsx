@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import api from '../../services/api';
 import { exportEnterpriseExcel } from '../../utils/excelExport';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
@@ -79,6 +79,21 @@ function Dashboard() {
   const [tickets, setTickets] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [activeTab, setActiveTab] = useState('TICKETS');
+  const [searchParams] = useSearchParams();
+
+  // Tự động mở hồ sơ phiếu tương ứng khi bấm vào thông báo hệ thống
+  useEffect(() => {
+    const ticketParam = searchParams.get('ticket') || searchParams.get('search');
+    const tabParam = searchParams.get('tab');
+    if (ticketParam) {
+      setActiveTab('TICKETS');
+      setStatusFilter('ALL');
+      setTicketSearch(ticketParam.trim().toUpperCase());
+    } else if (tabParam) {
+      setActiveTab(tabParam.toUpperCase());
+    }
+  }, [searchParams]);
+
   const [stats, setStats] = useState({
     statusData: [],
     totalTickets: 0,
@@ -661,11 +676,24 @@ function Dashboard() {
 
       {latestNotice && (
         <div role="status" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-brand-blue">
-          <span>
-            <strong>Thông báo:</strong> {latestNotice.description || latestNotice.title}
+          <span
+            onClick={() => {
+              if (latestNotice.ticketCode) {
+                setActiveTab('TICKETS');
+                setStatusFilter('ALL');
+                setTicketSearch(latestNotice.ticketCode);
+              } else if (latestNotice.type === 'booking') {
+                setActiveTab('BOOKINGS');
+              }
+              setLatestNotice(null);
+            }}
+            className="cursor-pointer hover:underline font-medium"
+            title="Bấm để mở trực tiếp hồ sơ"
+          >
+            <strong>Thông báo mới:</strong> {latestNotice.description || latestNotice.title} {latestNotice.ticketCode && ' (Bấm để xem hồ sơ phiếu →)'}
           </span>
-          <button type="button" onClick={() => setLatestNotice(null)} className="font-bold underline">
-            Đã hiểu
+          <button type="button" onClick={() => setLatestNotice(null)} className="font-bold underline cursor-pointer">
+            Đóng
           </button>
         </div>
       )}
@@ -1553,10 +1581,43 @@ function Dashboard() {
               .filter(item => !isNotificationCorrupted(item))
               .filter(notification => notificationFilter !== 'UNREAD' || !notification.read)
               .map(notification => (
-                <article key={notification.id} className={`rounded-lg border p-4 ${notification.read ? 'border-slate-100 bg-white' : 'border-blue-100 bg-blue-50'}`}>
-                  <p className="font-medium text-sm text-slate-800">{notification.title || `Phiếu ${notification.ticketCode}: ${notification.status}`}</p>
-                  {notification.description && <p className="mt-1 text-xs text-slate-500 font-normal">{notification.description}</p>}
-                  <p className="mt-1 text-xs text-slate-500">{notification.createdAt}</p>
+                <article
+                  key={notification.id}
+                  onClick={() => {
+                    // Đánh dấu đã đọc
+                    const updated = notifications.map(item => item.id === notification.id ? { ...item, read: true } : item);
+                    setNotifications(updated);
+                    try {
+                      localStorage.setItem('ticketNotifications', JSON.stringify(updated));
+                    } catch {}
+
+                    if (notification.ticketCode) {
+                      setActiveTab('TICKETS');
+                      setStatusFilter('ALL');
+                      setTicketSearch(notification.ticketCode);
+                    } else if (notification.type === 'booking') {
+                      setActiveTab('BOOKINGS');
+                    }
+                  }}
+                  className={`group flex items-start justify-between gap-3 rounded-xl border p-4 transition cursor-pointer ${
+                    notification.read
+                      ? 'border-slate-200 bg-white hover:bg-slate-50'
+                      : 'border-blue-200 bg-blue-50/80 hover:bg-blue-100/70 shadow-2xs'
+                  }`}
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      {!notification.read && <span className="w-2 h-2 rounded-full bg-brand-blue shrink-0"></span>}
+                      <p className="font-bold text-sm text-slate-800">
+                        {notification.title || `Phiếu ${notification.ticketCode}: ${notification.status}`}
+                      </p>
+                    </div>
+                    {notification.description && <p className="mt-1 text-xs text-slate-600 font-normal">{notification.description}</p>}
+                    <p className="mt-1.5 text-xs text-slate-400">{notification.createdAt}</p>
+                  </div>
+                  <span className="text-xs font-semibold text-brand-blue group-hover:translate-x-1 transition-transform shrink-0 pt-1">
+                    Mở phiếu →
+                  </span>
                 </article>
               ))}
             {notifications.filter(item => !isNotificationCorrupted(item)).filter(notification => notificationFilter !== 'UNREAD' || !notification.read).length === 0 && (

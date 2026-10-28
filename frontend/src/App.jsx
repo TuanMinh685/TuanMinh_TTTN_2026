@@ -1,5 +1,5 @@
 import { Component, lazy, Suspense, useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import api from './services/api';
 
 const IntakeForm = lazy(() => import('./pages/public/IntakeForm'));
@@ -125,6 +125,7 @@ function AppContent() {
     return [];
   });
   useLocation(); // Theo dõi chuyển hướng trang để cập nhật phiên đăng nhập tức thì
+  const navigate = useNavigate();
 
   // Đọc thông tin đăng nhập trực tiếp từ localStorage theo từng lượt render
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
@@ -148,6 +149,33 @@ function AppContent() {
     try {
       localStorage.removeItem('ticketNotifications');
     } catch {}
+  };
+
+  const handleNotificationClick = (n) => {
+    // Đánh dấu thông báo này là đã đọc
+    const updated = notificationsList.map(item => item.id === n.id ? { ...item, read: true } : item);
+    setNotificationsList(updated);
+    try {
+      localStorage.setItem('ticketNotifications', JSON.stringify(updated));
+    } catch {}
+
+    // Đóng dropdown thông báo
+    setShowNotificationsDropdown(false);
+
+    // Chuyển hướng trực tiếp đến đúng phiếu / lịch hẹn
+    if (n.ticketCode) {
+      if (isLoggedIn) {
+        navigate(`/admin?ticket=${encodeURIComponent(n.ticketCode)}`);
+      } else {
+        navigate(`/track/${encodeURIComponent(n.ticketCode)}`);
+      }
+    } else if (n.type === 'booking') {
+      if (isLoggedIn) {
+        navigate('/admin?tab=BOOKINGS');
+      } else {
+        navigate('/dat-lich');
+      }
+    }
   };
 
   const handleQuickSwitchRole = async (targetUser) => {
@@ -293,15 +321,34 @@ function AppContent() {
                           ✓ Đánh dấu tất cả đã đọc
                         </button>
                       )}
-                      <div className="max-h-72 space-y-1.5 overflow-y-auto">
+                      <div className="max-h-80 space-y-1.5 overflow-y-auto">
                         {notificationsList.length === 0 ? (
                           <p className="py-6 text-center text-xs text-slate-400">Chưa có thông báo mới.</p>
                         ) : (
-                          notificationsList.slice(0, 15).map(n => (
-                            <div key={n.id} className={`rounded-xl p-2.5 text-xs ${n.read ? 'bg-slate-50 text-slate-600' : 'bg-blue-50/70 text-slate-800 font-medium'}`}>
-                              <p className="font-semibold text-slate-800">{n.title || `Phiếu ${n.ticketCode}: ${n.status}`}</p>
-                              {n.description && <p className="mt-0.5 text-slate-600 text-[11px]">{n.description}</p>}
-                              <p className="mt-1 text-[10px] text-slate-400">{n.createdAt}</p>
+                          notificationsList.slice(0, 20).map(n => (
+                            <div
+                              key={n.id}
+                              onClick={() => handleNotificationClick(n)}
+                              title={n.ticketCode ? `Bấm để mở hồ sơ phiếu ${n.ticketCode}` : 'Bấm để xem chi tiết'}
+                              className={`group flex items-start justify-between gap-2 rounded-xl p-2.5 text-xs transition cursor-pointer ${
+                                n.read
+                                  ? 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                                  : 'bg-blue-50/80 text-slate-800 font-medium hover:bg-blue-100/70 border border-blue-200/50'
+                              }`}
+                            >
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1.5">
+                                  {!n.read && <span className="w-1.5 h-1.5 rounded-full bg-brand-blue shrink-0"></span>}
+                                  <p className="font-semibold text-slate-800 truncate">
+                                    {n.title || `Phiếu ${n.ticketCode}: ${n.status}`}
+                                  </p>
+                                </div>
+                                {n.description && <p className="mt-0.5 text-slate-600 text-[11px] line-clamp-2">{n.description}</p>}
+                                <p className="mt-1 text-[10px] text-slate-400">{n.createdAt}</p>
+                              </div>
+                              <span className="text-xs text-slate-400 group-hover:text-brand-blue group-hover:translate-x-0.5 transition-transform shrink-0 pt-0.5 font-bold">
+                                →
+                              </span>
                             </div>
                           ))
                         )}
