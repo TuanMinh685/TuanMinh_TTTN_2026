@@ -15,51 +15,51 @@ const STATUS_META = {
   CHỜ_KHÁM: {
     label: 'Đang chờ tiếp nhận kiểm tra máy tính / phần mềm',
     shortLabel: 'CHỜ TIẾP NHẬN',
-    badgeClass: 'bg-amber-400/20 text-amber-200 border-amber-300/40',
-    dotClass: 'bg-amber-400',
-    lightBadge: 'bg-amber-50 text-amber-800 border-amber-200'
+    badgeClass: 'bg-white/20 text-white border-white/30',
+    dotClass: 'bg-slate-400',
+    lightBadge: 'bg-slate-50 text-slate-700 border-slate-200'
   },
   ĐANG_KIỂM_TRA: {
     label: 'Đang kiểm tra phần cứng & phần mềm thiết bị',
     shortLabel: 'ĐANG KIỂM TRA',
-    badgeClass: 'bg-sky-400/20 text-sky-200 border-sky-300/40',
-    dotClass: 'bg-sky-400',
-    lightBadge: 'bg-sky-50 text-sky-800 border-sky-200'
+    badgeClass: 'bg-white/20 text-white border-white/30',
+    dotClass: 'bg-brand-blue',
+    lightBadge: 'bg-slate-50 text-slate-700 border-slate-200'
   },
   ĐANG_CHUẨN_ĐOÁN: {
     label: 'Đang kiểm tra & chẩn đoán lỗi máy tính / phần mềm',
     shortLabel: 'ĐANG CHẨN ĐOÁN',
-    badgeClass: 'bg-sky-400/20 text-sky-200 border-sky-300/40',
-    dotClass: 'bg-sky-400',
-    lightBadge: 'bg-sky-50 text-sky-800 border-sky-200'
+    badgeClass: 'bg-white/20 text-white border-white/30',
+    dotClass: 'bg-brand-blue',
+    lightBadge: 'bg-slate-50 text-slate-700 border-slate-200'
   },
   ĐANG_SỬA: {
     label: 'Đang sửa chữa máy tính & khắc phục sự cố phần mềm',
     shortLabel: 'ĐANG SỬA CHỮA & CÀI ĐẶT',
-    badgeClass: 'bg-indigo-400/25 text-indigo-100 border-indigo-300/40',
-    dotClass: 'bg-indigo-300',
-    lightBadge: 'bg-indigo-50 text-indigo-800 border-indigo-200'
+    badgeClass: 'bg-white/20 text-white border-white/30',
+    dotClass: 'bg-brand-blue',
+    lightBadge: 'bg-slate-50 text-slate-700 border-slate-200'
   },
   ĐÃ_SỬA_XONG: {
     label: 'Đã khắc phục xong • Sẵn sàng bàn giao thiết bị',
     shortLabel: 'ĐÃ XỬ LÝ XONG',
-    badgeClass: 'bg-emerald-400/25 text-emerald-200 border-emerald-300/40',
-    dotClass: 'bg-emerald-400',
-    lightBadge: 'bg-emerald-50 text-emerald-800 border-emerald-200'
+    badgeClass: 'bg-white/20 text-white border-white/30',
+    dotClass: 'bg-emerald-500',
+    lightBadge: 'bg-slate-50 text-slate-700 border-slate-200'
   },
   ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN: {
     label: 'Đã bàn giao máy & Kích hoạt bảo hành điện tử (e-Warranty)',
     shortLabel: 'HOÀN TẤT & BẢO HÀNH',
-    badgeClass: 'bg-emerald-400/25 text-emerald-200 border-emerald-300/40',
-    dotClass: 'bg-emerald-400',
-    lightBadge: 'bg-emerald-50 text-emerald-800 border-emerald-200'
+    badgeClass: 'bg-white/20 text-white border-white/30',
+    dotClass: 'bg-emerald-500',
+    lightBadge: 'bg-slate-50 text-slate-700 border-slate-200'
   },
   YÊU_CẦU_BẢO_HÀNH: {
     label: 'Đang tiếp nhận yêu cầu hỗ trợ bảo hành (e-Warranty)',
     shortLabel: 'YÊU CẦU BẢO HÀNH',
-    badgeClass: 'bg-rose-400/25 text-rose-200 border-rose-300/40',
-    dotClass: 'bg-rose-400',
-    lightBadge: 'bg-rose-50 text-rose-800 border-rose-200'
+    badgeClass: 'bg-white/20 text-white border-white/30',
+    dotClass: 'bg-amber-500',
+    lightBadge: 'bg-slate-50 text-slate-700 border-slate-200'
   }
 };
 

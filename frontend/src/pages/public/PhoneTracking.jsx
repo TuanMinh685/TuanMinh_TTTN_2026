@@ -195,38 +195,31 @@ function PhoneTracking() {
                     <p className="text-sm text-slate-500 mb-3">Nội dung yêu cầu: {ticket.tinh_trang_may}</p>
 
                     <div className="flex flex-wrap items-center gap-2">
-                      <span
-                        className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${
-                          ticket.trang_thai === 'CHỜ_KHÁM'
-                            ? 'bg-yellow-100 text-yellow-700'
-                            : ticket.trang_thai === 'ĐANG_CHUẨN_ĐOÁN'
-                            ? 'bg-orange-100 text-orange-700'
-                            : ticket.trang_thai === 'CHỜ_KHÁCH_CHỐT_GIÁ'
-                            ? 'bg-amber-100 text-amber-800 border border-amber-300'
-                            : ticket.trang_thai === 'ĐANG_SỬA'
-                            ? 'bg-blue-100 text-blue-700'
-                            : ticket.trang_thai === 'ĐÃ_SỬA_XONG'
-                            ? 'bg-green-100 text-green-700'
-                            : ticket.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN'
-                            ? 'bg-purple-100 text-purple-700'
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium bg-slate-50 border border-slate-200 text-slate-700">
+                        <span className={`w-1.5 h-1.5 rounded-full ${
+                          ticket.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' || ticket.trang_thai === 'ĐÃ_SỬA_XONG'
+                            ? 'bg-emerald-500'
                             : ticket.trang_thai === 'YÊU_CẦU_BẢO_HÀNH'
-                            ? 'bg-red-100 text-red-700'
-                            : 'bg-slate-100 text-slate-700'
-                        }`}
-                      >
-                        {ticket.trang_thai === 'CHỜ_KHÁM'
-                          ? 'CHỜ TIẾP NHẬN'
-                          : ticket.trang_thai === 'ĐANG_CHUẨN_ĐOÁN'
-                          ? 'ĐANG KIỂM TRA & PHÂN LOẠI'
-                          : ticket.trang_thai === 'CHỜ_KHÁCH_CHỐT_GIÁ'
-                          ? 'CHỜ KHÁCH HÀNG XÁC NHẬN'
-                          : ticket.trang_thai === 'ĐANG_SỬA'
-                          ? 'ĐANG XỬ LÝ HỖ TRỢ'
-                          : ticket.trang_thai === 'ĐÃ_SỬA_XONG'
-                          ? 'ĐÃ XỬ LÝ XONG'
-                          : ticket.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN'
-                          ? 'HOÀN TẤT & BẢO HÀNH'
-                          : ticket.trang_thai.replace(/_/g, ' ')}
+                            ? 'bg-amber-500'
+                            : ticket.trang_thai === 'CHỜ_KHÁM'
+                            ? 'bg-slate-400'
+                            : 'bg-brand-blue'
+                        }`} />
+                        <span>
+                          {ticket.trang_thai === 'CHỜ_KHÁM'
+                            ? 'Chờ tiếp nhận'
+                            : ticket.trang_thai === 'ĐANG_CHUẨN_ĐOÁN'
+                            ? 'Đang kiểm tra & phân loại'
+                            : ticket.trang_thai === 'CHỜ_KHÁCH_CHỐT_GIÁ'
+                            ? 'Chờ khách xác nhận'
+                            : ticket.trang_thai === 'ĐANG_SỬA'
+                            ? 'Đang xử lý hỗ trợ'
+                            : ticket.trang_thai === 'ĐÃ_SỬA_XONG'
+                            ? 'Đã xử lý xong'
+                            : ticket.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN'
+                            ? 'Hoàn tất & Bảo hành'
+                            : ticket.trang_thai.replace(/_/g, ' ')}
+                        </span>
                       </span>
                       {ticket.han_bao_hanh && (
                         <span className="inline-block px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">

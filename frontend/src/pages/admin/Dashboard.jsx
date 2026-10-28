@@ -822,24 +822,24 @@ function Dashboard() {
                         <div className="text-xs text-slate-600 mt-0.5">{t.mo_ta_loi}</div>
                       </td>
                       <td className="py-3 px-4">
-                        <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-bold ${
-                          t.trang_thai === 'CHỜ_KHÁM' ? 'bg-amber-100 text-amber-800' :
-                          t.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' ? 'bg-blue-100 text-blue-800' :
-                          t.trang_thai === 'ĐANG_SỬA' ? 'bg-indigo-100 text-indigo-800' :
-                          t.trang_thai === 'YÊU_CẦU_BẢO_HÀNH' ? 'bg-rose-100 text-rose-800' :
-                          'bg-emerald-100 text-emerald-800'
-                        }`}>
-                          {STATUS_LABELS[t.trang_thai] || t.trang_thai.replace(/_/g, ' ')}
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-slate-50 border border-slate-200 text-slate-700">
+                          <span className={`w-1.5 h-1.5 rounded-full ${
+                            t.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' ? 'bg-emerald-500' :
+                            t.trang_thai === 'YÊU_CẦU_BẢO_HÀNH' ? 'bg-amber-500' :
+                            t.trang_thai === 'CHỜ_KHÁM' ? 'bg-slate-400' :
+                            'bg-brand-blue'
+                          }`} />
+                          <span>{STATUS_LABELS[t.trang_thai] || t.trang_thai.replace(/_/g, ' ')}</span>
                         </span>
                       </td>
                       <td className="py-3 px-4">
                         {t.trang_thai === 'YÊU_CẦU_BẢO_HÀNH' ? (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-red-100 text-red-700 border border-red-300 animate-pulse">
-                            🚨 Khách yêu cầu BH qua QR
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200">
+                            🛡️ Yêu cầu BH qua QR
                           </span>
                         ) : warrantyRemainingDays > 0 ? (
                           <div>
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-slate-50 text-slate-700 border border-slate-200">
                               🛡️ Còn {warrantyRemainingDays} ngày BH
                             </span>
                             <div className="text-[10px] text-slate-400 mt-0.5">
@@ -956,15 +956,18 @@ function Dashboard() {
                     </td>
                     <td className="py-3 px-4 text-slate-700">{bk.mo_ta_loi}</td>
                     <td className="py-3 px-4">
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
-                        bk.trang_thai === 'CHO_XAC_NHAN' ? 'bg-yellow-100 text-yellow-800' :
-                        bk.trang_thai === 'DA_XAC_NHAN' ? 'bg-blue-100 text-blue-800' :
-                        bk.trang_thai === 'KHACH_DA_DEN' ? 'bg-emerald-100 text-emerald-800' :
-                        'bg-red-100 text-red-700'
-                      }`}>
-                        {bk.trang_thai === 'CHO_XAC_NHAN' ? 'CHỜ XÁC NHẬN' :
-                         bk.trang_thai === 'DA_XAC_NHAN' ? 'ĐÃ XÁC NHẬN' :
-                         bk.trang_thai === 'KHACH_DA_DEN' ? 'KHÁCH ĐÃ ĐẾN' : 'ĐÃ HỦY'}
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-slate-50 border border-slate-200 text-slate-700">
+                        <span className={`w-1.5 h-1.5 rounded-full ${
+                          bk.trang_thai === 'KHACH_DA_DEN' ? 'bg-emerald-500' :
+                          bk.trang_thai === 'DA_XAC_NHAN' ? 'bg-brand-blue' :
+                          bk.trang_thai === 'HUY' ? 'bg-slate-300' :
+                          'bg-slate-400'
+                        }`} />
+                        <span>
+                          {bk.trang_thai === 'CHO_XAC_NHAN' ? 'Chờ xác nhận' :
+                           bk.trang_thai === 'DA_XAC_NHAN' ? 'Đã xác nhận' :
+                           bk.trang_thai === 'KHACH_DA_DEN' ? 'Khách đã đến' : 'Đã hủy'}
+                        </span>
                       </span>
                     </td>
                     <td className="py-3 px-4 text-center">
