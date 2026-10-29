@@ -117,6 +117,13 @@ function Dashboard() {
   const [receiptTicket, setReceiptTicket] = useState(null);
   const [receiptQr, setReceiptQr] = useState('');
 
+  // Zalo ZNS / SMS Notification modal state
+  const [showZaloModal, setShowZaloModal] = useState(false);
+  const [zaloTicket, setZaloTicket] = useState(null);
+  const [zaloCustomNote, setZaloCustomNote] = useState('');
+  const [zaloSending, setZaloSending] = useState(false);
+  const [zaloAlert, setZaloAlert] = useState(null);
+
   // Notifications state
   const [notifications, setNotifications] = useState(() => {
     try {
@@ -499,6 +506,40 @@ function Dashboard() {
   const openReceipt = (ticket) => {
     setReceiptQr('');
     setReceiptTicket(ticket);
+  };
+
+  const openZaloModal = (ticket) => {
+    setZaloTicket(ticket);
+    setZaloCustomNote('');
+    setZaloAlert(null);
+    setShowZaloModal(true);
+  };
+
+  const handleSendZalo = async () => {
+    if (!zaloTicket) return;
+    setZaloSending(true);
+    setZaloAlert(null);
+    try {
+      const res = await api.post(`/tickets/${zaloTicket.id}/notify-zalo`, {
+        customMessage: zaloCustomNote.trim() || undefined
+      });
+      setZaloAlert({
+        type: 'success',
+        message: res.data?.message || 'Đã gửi thông báo Zalo ZNS thành công!'
+      });
+      showToast(`📲 Đã gửi Zalo ZNS tới ${zaloTicket.ho_ten_khach} (${zaloTicket.so_dien_thoai})!`);
+      fetchDashboardData();
+      setTimeout(() => {
+        setShowZaloModal(false);
+      }, 1800);
+    } catch (err) {
+      setZaloAlert({
+        type: 'error',
+        message: err.response?.data?.message || 'Không thể gửi thông báo Zalo ZNS!'
+      });
+    } finally {
+      setZaloSending(false);
+    }
   };
 
   const openCreateEmployeeModal = () => {
@@ -930,6 +971,19 @@ function Dashboard() {
                             title="In phiếu nhiệt 80mm có mã QR"
                           >
                             🖨️ In Phiếu QR
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => openZaloModal(t)}
+                            className={`px-2 py-1 rounded text-xs font-medium transition shrink-0 cursor-pointer flex items-center gap-1 ${
+                              t.trang_thai === 'ĐÃ_SỬA_XONG' || t.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN'
+                                ? 'bg-blue-50 text-brand-blue border border-blue-200 hover:bg-blue-100 font-semibold'
+                                : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200'
+                            }`}
+                            title="Gửi tin nhắn thông báo tự động Zalo ZNS / SMS cho khách hàng"
+                          >
+                            <span>📲</span>
+                            <span>Gửi Zalo</span>
                           </button>
                         </div>
                       </td>
@@ -2011,6 +2065,181 @@ function Dashboard() {
               >
                 Đóng
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 5: TÍCH HỢP GỬI THÔNG BÁO ZALO ZNS / SMS TỰ ĐỘNG (GIẢ LẬP CLOUD & CHAT THỰC TẾ) */}
+      {showZaloModal && zaloTicket && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border-t-4 border-[#0068ff]">
+            {/* Header Modal */}
+            <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-[#0068ff] text-white flex items-center justify-center font-bold text-lg shadow-xs">
+                  💬
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-800 flex items-center gap-1.5">
+                    Trung Tâm Gửi Thông Báo Zalo ZNS CSKH
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-[#0068ff]">
+                      Tự động qua mã QR
+                    </span>
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Hồ sơ: <strong className="text-brand-blue">{zaloTicket.ma_phieu}</strong> • Khách hàng: <strong>{zaloTicket.ho_ten_khach}</strong> ({zaloTicket.so_dien_thoai})
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowZaloModal(false)}
+                className="text-slate-400 hover:text-slate-700 text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-200 cursor-pointer"
+              >
+                &times;
+              </button>
+            </div>
+
+            {/* Nội dung Modal */}
+            <div className="p-5 overflow-y-auto flex-1 space-y-4">
+              {/* Thông báo kết quả gửi */}
+              {zaloAlert && (
+                <div className={`p-3.5 rounded-xl text-xs font-semibold flex items-center justify-between ${
+                  zaloAlert.type === 'success'
+                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                    : 'bg-rose-50 text-rose-800 border border-rose-200'
+                }`}>
+                  <span>{zaloAlert.message}</span>
+                  <button type="button" onClick={() => setZaloAlert(null)} className="text-base font-bold">×</button>
+                </div>
+              )}
+
+              {/* MÔ PHỎNG GIAO DIỆN TIN NHẮN ZALO ZNS TRÊN ĐIỆN THOẠI KHÁCH HÀNG */}
+              <div className="bg-[#eef3f8] p-4 rounded-2xl border border-slate-200">
+                <div className="flex items-center justify-between mb-3 text-[11px] text-slate-500 font-semibold">
+                  <span className="flex items-center gap-1 text-[#0068ff]">
+                    <span>📱</span> Bản xem trước tin nhắn Zalo ZNS trên điện thoại khách hàng:
+                  </span>
+                  <span className="bg-white px-2 py-0.5 rounded-md border border-slate-200 text-emerald-600 font-bold">
+                    ✓ Official Account Đã Xác Thực
+                  </span>
+                </div>
+
+                {/* Bong bóng tin nhắn Zalo OA */}
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 max-w-lg mx-auto space-y-3">
+                  <div className="flex items-center gap-2 pb-2.5 border-b border-slate-100">
+                    <img src="/img/logo-HHH-26.png" alt="Logo" className="w-8 h-8 object-contain rounded-full bg-slate-50 p-1 border border-slate-200" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs font-bold text-slate-900 truncate">MYH GROUP CSKH & KỸ THUẬT</span>
+                        <span className="text-blue-500 text-xs" title="Tài khoản Zalo doanh nghiệp xác thực">☑️</span>
+                      </div>
+                      <span className="text-[10px] text-slate-400">Zalo Notification Service (ZNS)</span>
+                    </div>
+                    <span className="text-[10px] text-slate-400">Vừa xong</span>
+                  </div>
+
+                  <div>
+                    <h4 className="text-xs font-bold text-[#0068ff] uppercase tracking-wide">
+                      THÔNG BÁO HOÀN TẤT DỊCH VỤ SỬA CHỮA & CSKH
+                    </h4>
+                    <p className="text-xs text-slate-600 mt-1">
+                      Kính gửi <strong>{zaloTicket.ho_ten_khach}</strong>, thiết bị của Quý khách đã được Bộ phận Kỹ thuật kiểm tra và xử lý hoàn tất.
+                    </p>
+                  </div>
+
+                  {/* Bảng chi tiết trong tin nhắn */}
+                  <div className="bg-slate-50 rounded-xl p-3 text-xs space-y-1.5 border border-slate-100 font-sans">
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Mã tra cứu QR:</span>
+                      <strong className="text-brand-blue font-mono">{zaloTicket.ma_phieu}</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Thiết bị:</span>
+                      <strong className="text-slate-800">{zaloTicket.ten_thiet_bi}</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Trạng thái:</span>
+                      <span className="font-bold text-emerald-600">
+                        {zaloTicket.trang_thai === 'ĐÃ_SỬA_XONG' || zaloTicket.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN'
+                          ? '✅ ĐÃ SỬA XONG — SẴN SÀNG TRẢ MÁY'
+                          : STATUS_LABELS[zaloTicket.trang_thai] || zaloTicket.trang_thai}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Sổ bảo hành:</span>
+                      <strong className="text-amber-600">🛡️ e-Warranty 06 tháng</strong>
+                    </div>
+                    {zaloCustomNote && (
+                      <div className="pt-1.5 mt-1 border-t border-slate-200 text-[11px] text-slate-600">
+                        <span className="text-slate-500">Ghi chú KTV:</span> <em>{zaloCustomNote}</em>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Nút giả lập hành động trong Zalo */}
+                  <div className="pt-1">
+                    <a
+                      href={`/track/${zaloTicket.ma_phieu}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="block w-full py-2 bg-[#0068ff]/10 hover:bg-[#0068ff]/20 text-[#0068ff] font-bold text-center text-xs rounded-xl transition"
+                    >
+                      🔗 Bấm để xem Hồ sơ & Sổ bảo hành điện tử (e-Warranty)
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              {/* Ô nhập ghi chú riêng của kỹ thuật viên */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  ✍️ Thêm lời nhắn / Ghi chú kỹ thuật gửi kèm qua Zalo (Tùy chọn):
+                </label>
+                <textarea
+                  rows="2"
+                  value={zaloCustomNote}
+                  onChange={(e) => setZaloCustomNote(e.target.value)}
+                  placeholder="VD: Đã thay keo tản nhiệt MX-4, cài Windows 11 và tối ưu phần mềm miễn phí. Mời anh/chị ghé quầy kỹ thuật nhận máy..."
+                  className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl focus:border-brand-blue outline-none bg-white"
+                />
+              </div>
+            </div>
+
+            {/* Footer Modal: 2 nút gửi */}
+            <div className="p-4 border-t border-slate-200 bg-slate-50 flex flex-wrap items-center justify-between gap-2">
+              <a
+                href={`https://zalo.me/${(zaloTicket.so_dien_thoai || '').replace(/\D/g, '')}`}
+                target="_blank"
+                rel="noreferrer"
+                className="px-4 py-2 border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold rounded-xl text-xs flex items-center gap-1.5 transition"
+                title="Mở tab chat Zalo trực tiếp với số điện thoại này"
+              >
+                <span>💬 Mở Zalo Chat Thực Tế ({zaloTicket.so_dien_thoai})</span>
+                <span>↗</span>
+              </a>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowZaloModal(false)}
+                  className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-xl text-xs transition cursor-pointer"
+                >
+                  Đóng
+                </button>
+                <button
+                  type="button"
+                  disabled={zaloSending}
+                  onClick={handleSendZalo}
+                  className={`px-5 py-2 bg-[#0068ff] hover:bg-[#0055d4] text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shadow-sm transition ${
+                    zaloSending ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer active:brightness-95'
+                  }`}
+                >
+                  <span>⚡</span>
+                  <span>{zaloSending ? 'Đang gửi Zalo Cloud...' : 'Gửi Zalo ZNS Tự Động (Giả Lập)'}</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

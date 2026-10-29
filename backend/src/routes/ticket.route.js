@@ -42,6 +42,14 @@ router.patch('/booking/:id/status', verifyToken, ticketController.updateBookingS
 router.get('/', verifyToken, ticketController.getTickets);
 router.patch('/:id/status', verifyToken, ticketController.updateTicketStatus);
 
+// Tích hợp gửi thông báo tự động Zalo ZNS / SMS giả lập & liên kết Zalo trực tiếp
+router.post(
+    '/:id/notify-zalo',
+    verifyToken,
+    requireRole('ADMIN', 'GIAM_DOC', 'QUAN_LY', 'LE_TAN', 'KY_THUAT_VIEN'),
+    ticketController.sendZaloNotification
+);
+
 // Quản lý ảnh minh chứng hiện trạng đính kèm hồ sơ QR
 router.get('/:id/photos', verifyToken, ticketController.getTicketPhotos);
 router.post('/:id/photos', verifyToken, ticketController.addTicketPhoto);

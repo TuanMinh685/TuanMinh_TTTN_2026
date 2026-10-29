@@ -373,6 +373,51 @@ const addTicketPhoto = async (ticketId, { duong_dan_anh, loai_anh, ghi_chu }) =>
     return rows[0];
 };
 
+const sendZaloNotification = async (idOrCode, customMessage = '', employeeId = null) => {
+    const isNumericId = /^\d+$/.test(String(idOrCode).trim());
+    const lookupRes = isNumericId
+        ? await pool.query(`SELECT p.id, p.ma_tra_cuu, p.trang_thai, k.ho_ten, k.so_dien_thoai, t.ten_may AS ten_thiet_bi FROM phieu_sua_chua p LEFT JOIN thiet_bi t ON p.thiet_bi_id = t.id LEFT JOIN khach_hang k ON t.khach_hang_id = k.id WHERE p.id = $1`, [Number(idOrCode)])
+        : await pool.query(`SELECT p.id, p.ma_tra_cuu, p.trang_thai, k.ho_ten, k.so_dien_thoai, t.ten_may AS ten_thiet_bi FROM phieu_sua_chua p LEFT JOIN thiet_bi t ON p.thiet_bi_id = t.id LEFT JOIN khach_hang k ON t.khach_hang_id = k.id WHERE p.ma_tra_cuu = $1`, [String(idOrCode).trim()]);
+
+    if (!lookupRes || lookupRes.rows.length === 0) {
+        return null;
+    }
+
+    const ticket = lookupRes.rows[0];
+    const phone = ticket.so_dien_thoai || '09xxxxxxxx';
+    const customerName = ticket.ho_ten || 'Quý khách';
+    const deviceName = ticket.ten_thiet_bi || 'Thiết bị';
+    const ticketCode = ticket.ma_tra_cuu;
+
+    const noteText = customMessage || `[ZALO ZNS] Đã gửi thông báo tự động: Thiết bị (${deviceName}) của khách hàng ${customerName} (SĐT: ${phone}) đã hoàn tất sửa chữa. Mời khách hàng nhận máy kèm mã QR bảo hành điện tử.`;
+
+    await pool.query(
+        `INSERT INTO nhat_ky_sua_chua (phieu_sua_chua_id, nhan_vien_id, trang_thai_cu, trang_thai_moi, ghi_chu) VALUES ($1, $2, $3, $4, $5)`,
+        [ticket.id, employeeId || null, ticket.trang_thai, ticket.trang_thai, noteText]
+    );
+
+    try {
+        const io = getIo();
+        io.emit('zalo_notification_sent', {
+            ticketId: ticket.id,
+            ticketCode,
+            phone,
+            customerName
+        });
+    } catch (err) {}
+
+    return {
+        ticketId: ticket.id,
+        ticketCode,
+        customerName,
+        phone,
+        deviceName,
+        sentAt: formatVietnamISO(new Date()),
+        zaloZnsId: `ZNS_${Date.now()}_${Math.floor(Math.random() * 8999 + 1000)}`,
+        note: noteText
+    };
+};
+
 module.exports = {
     getTicketPhotos,
     addTicketPhoto,
@@ -381,5 +426,6 @@ module.exports = {
     updateTicketStatus,
     submitBooking,
     getAllBookings,
-    updateBookingStatus
+    updateBookingStatus,
+    sendZaloNotification
 };

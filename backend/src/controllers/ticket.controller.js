@@ -281,6 +281,38 @@ const addTicketPhoto = async (req, res, next) => {
     }
 };
 
+const sendZaloNotification = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { customMessage } = req.body;
+        const employeeId = req.user?.AccountID || null;
+
+        const data = await ticketService.sendZaloNotification(id, customMessage, employeeId);
+        if (!data) {
+            return res.status(404).json({
+                success: false,
+                message: 'Không tìm thấy hồ sơ phiếu CSKH để gửi Zalo!'
+            });
+        }
+
+        logSecurityEvent({
+            req,
+            action: 'SEND_ZALO_NOTIFICATION',
+            target: data.ticketCode,
+            status: 'SUCCESS',
+            details: `Đã gửi thông báo Zalo ZNS tới khách hàng ${data.customerName} (${data.phone})`
+        });
+
+        res.status(200).json({
+            success: true,
+            message: `Đã gửi thông báo Zalo ZNS thành công tới khách hàng ${data.customerName} (${data.phone})`,
+            data
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
 module.exports = {
     initSession,
     checkSession,
@@ -291,5 +323,6 @@ module.exports = {
     updateTicketStatus,
     submitBooking,
     getBookings,
-    updateBookingStatus
+    updateBookingStatus,
+    sendZaloNotification
 };

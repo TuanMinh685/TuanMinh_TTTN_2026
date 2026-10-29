@@ -127,6 +127,31 @@ function AppContent() {
   useLocation(); // Theo dõi chuyển hướng trang để cập nhật phiên đăng nhập tức thì
   const navigate = useNavigate();
 
+  // Chế độ hiển thị Giao diện Tối (Dark Mode)
+  const [isDark, setIsDark] = useState(() => {
+    try {
+      const saved = localStorage.getItem('theme');
+      if (saved) return saved === 'dark';
+      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      }
+    } catch {}
+  }, [isDark]);
+
+  const toggleDarkMode = () => setIsDark(prev => !prev);
+
   // Đọc thông tin đăng nhập trực tiếp từ localStorage theo từng lượt render
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   const role = typeof window !== 'undefined' ? localStorage.getItem('role') : null;
@@ -385,6 +410,17 @@ function AppContent() {
               </Link>
             )}
 
+            {/* Nút chuyển đổi Dark Mode (Sáng / Tối) */}
+            <button
+              type="button"
+              onClick={toggleDarkMode}
+              title={isDark ? "Chuyển sang giao diện Sáng (Light Mode)" : "Chuyển sang giao diện Tối (Dark Mode)"}
+              aria-label="Toggle Dark Mode"
+              className="flex items-center justify-center w-9 h-9 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition cursor-pointer shadow-2xs"
+            >
+              <span className="text-sm select-none">{isDark ? '☀️' : '🌙'}</span>
+            </button>
+
             {/* Nút bấm mở/đóng Menu Mobile */}
             <button 
               type="button"
@@ -414,6 +450,24 @@ function AppContent() {
               <Link to="/dat-lich" className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-slate-100">
                 <span className="text-xl">📅</span> Đặt lịch hẹn CSKH
               </Link>
+
+              {/* Nút bật/tắt Dark Mode trên Mobile */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleDarkMode();
+                }}
+                className="flex items-center justify-between w-full py-2.5 px-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 transition"
+              >
+                <span className="flex items-center gap-2">
+                  <span>{isDark ? '☀️' : '🌙'}</span>
+                  <span>Chế độ hiển thị: {isDark ? 'Ban đêm (Dark)' : 'Ban ngày (Light)'}</span>
+                </span>
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200">
+                  {isDark ? 'BẬT' : 'TẮT'}
+                </span>
+              </button>
               
               <div className="pt-3 mt-2 border-t border-slate-200 flex flex-col gap-3">
                 <Link 

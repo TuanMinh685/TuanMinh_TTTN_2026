@@ -223,10 +223,13 @@ function executeMockQuery(sql, params = []) {
         return { rows: list };
     }
 
-    // 13. trackTicket by ma_tra_cuu
-    if (/SELECT .* FROM phieu_sua_chua p .* WHERE p\.ma_tra_cuu = \$1/i.test(cleanSql)) {
-        const code = params[0];
-        const p = s.phieu_sua_chua.find(x => x.ma_tra_cuu === code);
+    // 13. trackTicket by ma_tra_cuu or id
+    if (/SELECT .* FROM phieu_sua_chua p .* WHERE (?:p\.)?(?:ma_tra_cuu|id) = \$1/i.test(cleanSql)) {
+        const key = params[0];
+        const isNum = typeof key === 'number' || /^\d+$/.test(String(key).trim());
+        const p = isNum 
+            ? (s.phieu_sua_chua.find(x => x.id === Number(key)) || s.phieu_sua_chua.find(x => x.ma_tra_cuu === key))
+            : s.phieu_sua_chua.find(x => x.ma_tra_cuu === key);
         if (!p) return { rows: [] };
         const tb = s.thiet_bi.find(x => x.id === p.thiet_bi_id) || {};
         const kh = s.khach_hang.find(x => x.id === tb.khach_hang_id) || {};
