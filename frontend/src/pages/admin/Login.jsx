@@ -40,7 +40,11 @@ function Login() {
         }
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Tên đăng nhập hoặc mật khẩu không chính xác!');
+      if (!err.response) {
+        setError('Không thể kết nối đến máy chủ backend (Port 5001). Vui lòng kiểm tra kết nối mạng!');
+      } else {
+        setError(err.response?.data?.message || 'Tên đăng nhập hoặc mật khẩu không chính xác!');
+      }
     } finally {
       setLoading(false);
     }
