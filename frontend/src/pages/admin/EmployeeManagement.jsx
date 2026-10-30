@@ -8,7 +8,7 @@ const ROLE_PERMISSIONS_DETAIL = {
     level: 100,
     badge: '🛡️ Quản Trị Hệ Thống CSKH',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
-    description: 'Quyền hạn tối cao toàn hệ thống Web Quét Mã QR Chăm Sóc Khách Hàng: Quản trị và phân quyền mọi cấp bậc nhân sự CSKH.',
+    description: 'Quyền hạn tối cao: Quản trị toàn diện hệ thống CSKH, phê duyệt chi phí và phân quyền mọi cấp bậc nhân sự.',
     canCreate: ['ADMIN', 'QUAN_LY', 'KY_THUAT_VIEN', 'LE_TAN']
   },
   ADMIN: {
@@ -16,7 +16,7 @@ const ROLE_PERMISSIONS_DETAIL = {
     level: 100,
     badge: '🛡️ Quản Trị Hệ Thống CSKH',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
-    description: 'Toàn quyền quản trị hệ thống Web Quét Mã QR Chăm Sóc Khách Hàng và phân quyền tài khoản nhân sự.',
+    description: 'Toàn quyền quản trị kỹ thuật, phân quyền tài khoản và cấu hình hệ thống CSKH.',
     canCreate: ['QUAN_LY', 'KY_THUAT_VIEN', 'LE_TAN']
   },
   QUAN_LY: {

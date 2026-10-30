@@ -67,7 +67,7 @@ export default function ManagerDashboard() {
               <div className="flex items-center gap-2.5">
                 <span className="text-3xl">🏬</span>
                 <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
-                  Tổng Quan Điều Hành — Bộ Phận Chăm Sóc Khách Hàng (QR)
+                  Tổng Quan Điều Hành — Bộ Phận Chăm Sóc Khách Hàng • MYH Group
                 </h2>
               </div>
               <p className="mt-2 text-sm text-blue-100 max-w-2xl leading-relaxed">

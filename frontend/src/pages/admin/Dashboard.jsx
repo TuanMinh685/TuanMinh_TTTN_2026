@@ -30,14 +30,14 @@ const ROLE_META = {
     title: 'Quản Trị Hệ Thống CSKH',
     badge: '🛡️ Quản Trị Hệ Thống CSKH',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
-    permissionsText: 'Toàn quyền quản trị hệ thống Web Quét Mã QR Chăm Sóc Khách Hàng và phân quyền nhân sự.'
+    permissionsText: 'Toàn quyền quản trị hệ thống CSKH, cấu hình kỹ thuật và quản lý nhân sự.'
   },
   GIAM_DOC: {
     level: 100,
     title: 'Quản Trị Hệ Thống CSKH',
     badge: '🛡️ Quản Trị Hệ Thống CSKH',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
-    permissionsText: 'Toàn quyền quản trị hệ thống Web Quét Mã QR Chăm Sóc Khách Hàng và phân quyền nhân sự.'
+    permissionsText: 'Toàn quyền điều hành dịch vụ CSKH, phê duyệt chi phí và phân quyền nhân sự.'
   },
   QUAN_LY: {
     level: 80,
@@ -647,12 +647,14 @@ function Dashboard() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-900">Trung Tâm Điều Hành CSKH Qua Mã QR (Mảng Sửa Chữa Máy Tính &amp; Phần Mềm)</h2>
+          <h2 className="text-xl font-bold text-slate-900">Trung Tâm Điều Hành Dịch Vụ &amp; Chăm Sóc Khách Hàng</h2>
           <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
             <span className={`px-2 py-0.5 rounded-md font-semibold border ${currentRoleInfo.badgeClass}`}>
               {currentRoleInfo.badge}
             </span>
             <span>Nhân sự: <strong className="text-slate-700">{fullName}</strong></span>
+            <span>•</span>
+            <span>Tập đoàn MYH Group</span>
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -1009,7 +1011,7 @@ function Dashboard() {
 
       {/* TAB 2: QUẢN LÝ LỊCH HẸN TƯ VẤN & CSKH */}
       {activeTab === 'BOOKINGS' && canReceptionAction && (
-        <div className="bg-white p-6 rounded-xl shadow border-t-4 border-brand-orange">
+        <div className="bg-white p-6 rounded-xl shadow border-t-4 border-brand-blue">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
             <div>
               <h3 className="text-xl font-bold text-slate-800">Lịch Hẹn Tư Vấn &amp; Chăm Sóc Khách Hàng Qua Web QR</h3>
@@ -1217,7 +1219,7 @@ function Dashboard() {
             <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
               <div>
                 <h3 className="text-lg font-extrabold text-brand-blue flex items-center gap-2">
-                  <span>🏛️</span> Phân Quyền Nhân Sự Hệ Thống Web Quét Mã QR CSKH (RBAC)
+                  <span>🏛️</span> Phân Quyền &amp; Nhân Sự CSKH (RBAC)
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
                   Quản trị viên (ADMIN) và Trưởng bộ phận CSKH (QUAN_LY) cấp phát tài khoản và phân quyền vận hành cho nhân sự.
@@ -1398,7 +1400,7 @@ function Dashboard() {
       {activeTab === 'SECURITY' && (
         <div className="space-y-6">
           {/* 6 Lá chắn Bảo mật Cấp Doanh Nghiệp */}
-          <div className="bg-white p-6 rounded-2xl shadow-xs border-t-4 border-emerald-600">
+          <div className="bg-white p-6 rounded-2xl shadow-xs border-t-4 border-brand-blue">
             <div className="flex flex-wrap items-center justify-between gap-3 mb-5 pb-3 border-b border-slate-100">
               <div>
                 <h3 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
@@ -1697,7 +1699,7 @@ function Dashboard() {
                   {editingEmployee ? `✏️ Phân Quyền Nhân Sự: ${editingEmployee.ho_ten}` : '👤 Tạo Tài Khoản Nhân Sự CSKH Mới'}
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Cấp phát tài khoản vận hành hệ thống Web Quét Mã QR Chăm Sóc Khách Hàng.
+                  Cấp phát tài khoản vận hành hệ thống CSKH và Dịch vụ Kỹ thuật.
                 </p>
               </div>
               <button
@@ -2077,7 +2079,7 @@ function Dashboard() {
       {/* MODAL 5: TÍCH HỢP GỬI THÔNG BÁO ZALO ZNS / SMS TỰ ĐỘNG (GIẢ LẬP CLOUD & CHAT THỰC TẾ) */}
       {showZaloModal && zaloTicket && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border-t-4 border-[#0068ff]">
+          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border-t-4 border-brand-blue">
             {/* Header Modal */}
             <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
               <div className="flex items-center gap-2.5">

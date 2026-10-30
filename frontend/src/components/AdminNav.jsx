@@ -57,7 +57,7 @@ export default function AdminNav({ activeKey = 'VAN_HANH' }) {
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-base font-bold text-slate-800 tracking-tight">
-                HỆ THỐNG WEB QUÉT MÃ QR CHĂM SÓC KHÁCH HÀNG
+                TRUNG TÂM ĐIỀU HÀNH &amp; CSKH • MYH GROUP
               </h1>
               <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-bold ${roleInfo.badge}`}>
                 {roleInfo.icon} {roleInfo.name}

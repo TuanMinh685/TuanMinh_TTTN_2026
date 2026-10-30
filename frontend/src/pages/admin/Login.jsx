@@ -71,7 +71,7 @@ function Login() {
               Cổng Điều Hành CSKH Nội Bộ
             </h1>
             <p className="text-slate-500 text-xs mt-1 font-medium">
-              Web Quét Mã QR Chăm Sóc Khách Hàng • Tập đoàn MYH Group
+              Trung Tâm Dịch Vụ &amp; Chăm Sóc Khách Hàng • Tập đoàn MYH Group
             </p>
           </div>
 
