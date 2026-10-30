@@ -92,6 +92,29 @@ function QrScannerModal({ isOpen, onClose, onScanSuccess }) {
     };
   }, [isOpen, onScanSuccess, stopAndClearScanner]);
 
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setError('');
+      setIsStarting(true);
+      const html5QrCode = new Html5Qrcode('qr-reader-file-temp');
+      const decodedText = await html5QrCode.scanFile(file, true);
+      let code = decodedText.trim();
+      const match = code.match(/track\/([A-Za-z0-9_-]+)/i);
+      if (match && match[1]) {
+        code = match[1];
+      }
+      await stopAndClearScanner();
+      onScanSuccess(code);
+    } catch (err) {
+      console.error('Lỗi nhận diện ảnh QR:', err);
+      setError('Không nhận diện được mã QR trong ảnh. Vui lòng chọn ảnh chụp rõ nét hơn hoặc nhập mã trực tiếp.');
+    } finally {
+      setIsStarting(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -135,10 +158,19 @@ function QrScannerModal({ isOpen, onClose, onScanSuccess }) {
             </div>
           )}
 
-          <div className="mt-6 flex justify-center">
+          <div className="mt-5 pt-4 border-t border-slate-200 text-center">
+            <p className="text-xs text-slate-500 mb-2 font-medium">Hoặc nếu trình duyệt điện thoại chặn camera:</p>
+            <label className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl cursor-pointer transition">
+              <span>🖼️ Tải ảnh chụp mã QR từ máy</span>
+              <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+            </label>
+            <div id="qr-reader-file-temp" className="hidden" />
+          </div>
+
+          <div className="mt-4 flex justify-center">
             <button
               onClick={handleClose}
-              className="px-6 py-2.5 rounded-lg border border-slate-300 font-bold text-slate-600 hover:bg-slate-100 transition-colors"
+              className="px-6 py-2.5 rounded-lg border border-slate-300 font-bold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer text-xs"
             >
               Hủy / Đóng camera
             </button>

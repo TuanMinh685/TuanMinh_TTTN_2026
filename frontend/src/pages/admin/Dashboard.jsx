@@ -5,6 +5,7 @@ import { exportEnterpriseExcel } from '../../utils/excelExport';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import QRCode from 'qrcode';
 import PaymentMethodSelector from '../../components/PaymentMethodSelector';
+import { getAccessibleBaseUrl } from '../../utils/network';
 
 const STATUS_LABELS = {
   'CHỜ_KHÁM': 'Chờ tiếp nhận máy',
@@ -358,13 +359,16 @@ function Dashboard() {
   useEffect(() => {
     if (!receiptTicket) return;
     let active = true;
-    QRCode.toDataURL(`${window.location.origin}/track/${receiptTicket.ma_phieu}`, {
-      width: 180,
-      margin: 1
-    }).then(dataUrl => {
-      if (active) setReceiptQr(dataUrl);
-    }).catch(error => {
-      console.error('Không tạo được mã QR trên phiếu in:', error);
+    getAccessibleBaseUrl().then(origin => {
+      if (!active) return;
+      QRCode.toDataURL(`${origin}/track/${receiptTicket.ma_phieu}`, {
+        width: 180,
+        margin: 1
+      }).then(dataUrl => {
+        if (active) setReceiptQr(dataUrl);
+      }).catch(error => {
+        console.error('Không tạo được mã QR trên phiếu in:', error);
+      });
     });
 
     return () => {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import QRCode from 'qrcode';
 import api from '../../services/api';
+import { getAccessibleBaseUrl } from '../../utils/network';
 import QrScannerModal from '../../components/QrScannerModal';
 
 const CORE_PILLARS = [
@@ -82,6 +83,7 @@ function HomeLanding() {
   const [topReviews, setTopReviews] = useState([]);
   const [qrMode, setQrMode] = useState('INTAKE'); // 'INTAKE' | 'DEMO_TRACK'
   const [qrDataUrl, setQrDataUrl] = useState('');
+  const [displayQrUrl, setDisplayQrUrl] = useState('');
   const [quickTicketCode, setQuickTicketCode] = useState('');
   const [isScannerOpen, setIsScannerOpen] = useState(false);
 
@@ -92,21 +94,31 @@ function HomeLanding() {
   }, []);
 
   useEffect(() => {
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5173';
-    const targetUrl = qrMode === 'INTAKE'
-      ? `${origin}/intake`
-      : `${origin}/track/RP-839400`;
+    let active = true;
+    getAccessibleBaseUrl().then(origin => {
+      if (!active) return;
+      const targetUrl = qrMode === 'INTAKE'
+        ? `${origin}/intake`
+        : `${origin}/tra-cuu`;
+      setDisplayQrUrl(targetUrl);
 
-    QRCode.toDataURL(targetUrl, {
-      width: 200,
-      margin: 1,
-      color: {
-        dark: '#005596',
-        light: '#ffffff'
-      }
-    })
-      .then(url => setQrDataUrl(url))
-      .catch(err => console.error('Lỗi tạo mã QR:', err));
+      QRCode.toDataURL(targetUrl, {
+        width: 200,
+        margin: 1,
+        color: {
+          dark: '#005596',
+          light: '#ffffff'
+        }
+      })
+        .then(url => {
+          if (active) setQrDataUrl(url);
+        })
+        .catch(err => console.error('Lỗi tạo mã QR:', err));
+    });
+
+    return () => {
+      active = false;
+    };
   }, [qrMode]);
 
   const handleQuickLookup = (e) => {
@@ -289,9 +301,14 @@ function HomeLanding() {
                   )}
                   <p className="mt-2 text-xs text-slate-600 text-center font-medium">
                     {qrMode === 'INTAKE'
-                      ? 'Quét để mở biểu mẫu tiếp nhận tại quầy'
-                      : 'Quét để xem hồ sơ CSKH mẫu (#RP-839400)'}
+                      ? 'Dùng Camera điện thoại hoặc Zalo quét để mở form tiếp nhận'
+                      : 'Dùng Camera điện thoại hoặc Zalo quét để tra cứu hồ sơ'}
                   </p>
+                  {displayQrUrl && (
+                    <span className="mt-1 text-[10px] text-slate-400 font-mono text-center truncate max-w-full block">
+                      {displayQrUrl}
+                    </span>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
