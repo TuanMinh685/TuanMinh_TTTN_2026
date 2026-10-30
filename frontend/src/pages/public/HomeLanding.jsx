@@ -144,17 +144,17 @@ function HomeLanding() {
             <div className="lg:col-span-7 space-y-5">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-white border border-slate-200 text-xs font-semibold uppercase tracking-wider text-slate-700 shadow-2xs">
                 <span className="w-2 h-2 rounded-full bg-brand-green"></span>
-                <span>MYH GROUP • CSKH SỬA CHỮA MÁY TÍNH &amp; PHẦN MỀM</span>
+                <span>TRUNG TÂM CSKH &amp; DỊCH VỤ KỸ THUẬT • MYH GROUP</span>
               </div>
 
               <div className="space-y-2">
                 <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 leading-tight tracking-tight">
-                  Web Quét Mã QR Chăm Sóc Khách Hàng <br />
-                  <span className="text-brand-blue font-extrabold">Mảng Sửa Chữa Máy Tính &amp; Phần Mềm</span>
+                  Dịch Vụ Sửa Chữa &amp; Chăm Sóc Khách Hàng <br />
+                  <span className="text-brand-blue font-extrabold">Theo Dõi Tiến Độ &amp; Bảo Hành Qua Mã QR</span>
                 </h1>
 
                 <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-2xl">
-                  Nền tảng số hóa quy trình <strong>Chăm sóc khách hàng bằng Mã QR định danh</strong>: Tiếp nhận thiết bị máy tính tại quầy, lưu ảnh ngoại quan, theo dõi tiến độ kiểm tra phần cứng &amp; xử lý phần mềm thời gian thực, cấp <strong>Sổ bảo hành điện tử (e-Warranty)</strong> và đánh giá chất lượng phục vụ.
+                  Hỗ trợ tiếp nhận thiết bị nhanh chóng, theo dõi tiến độ kiểm tra phần cứng &amp; xử lý phần mềm thời gian thực, quản lý <strong>Sổ bảo hành điện tử (e-Warranty)</strong> và thanh toán tiện lợi chỉ với một lần quét mã QR.
                 </p>
               </div>
 
@@ -371,10 +371,10 @@ function HomeLanding() {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
             <div>
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                CHUYÊN MÔN MẢNG MÁY TÍNH &amp; PHẦN MỀM
+                DỊCH VỤ KỸ THUẬT &amp; HỖ TRỢ TẬN TÂM
               </span>
               <h2 className="text-2xl font-bold text-slate-900 mt-1">
-                Các Hạng Mục Hỗ Trợ Kỹ Thuật CSKH
+                Các Hạng Mục Dịch Vụ Tiếp Nhận &amp; Xử Lý
               </h2>
             </div>
             <Link

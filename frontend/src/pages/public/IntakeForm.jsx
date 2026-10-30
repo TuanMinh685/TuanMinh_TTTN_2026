@@ -72,9 +72,9 @@ function IntakeForm() {
         
         <div className="text-center mb-8 relative z-10">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-brand-blue text-xs font-bold uppercase tracking-wider mb-2">
-            📷 Cổng Tiếp Nhận QR – Mảng Sửa Chữa Máy Tính &amp; Phần Mềm
+            📷 Tiếp Nhận Thiết Bị &amp; Hỗ Trợ Kỹ Thuật
           </span>
-          <h1 className="text-2xl sm:text-3xl font-bold text-brand-blue mb-2">Tạo Phiếu QR Chăm Sóc Khách Hàng</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-brand-blue mb-2">Tạo Phiếu Tiếp Nhận Chăm Sóc Khách Hàng</h1>
           <p className="text-slate-500 text-sm">
             Điền thông tin thiết bị máy tính hoặc yêu cầu phần mềm để hệ thống cấp ngay <strong>Mã QR định danh</strong> theo dõi tiến độ kiểm tra, sửa chữa và kích hoạt bảo hành điện tử.
           </p>

@@ -81,7 +81,7 @@ function BookingForm() {
           <div className="p-6 md:p-8">
             <div className="text-center mb-6">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 text-brand-orange text-xs font-bold uppercase tracking-wider mb-2">
-                📅 Đặt Lịch Hẹn CSKH – Sửa Chữa Máy Tính &amp; Phần Mềm
+                📅 Đặt Lịch Hẹn Dịch Vụ &amp; Hỗ Trợ Kỹ Thuật
               </span>
               <h1 className="text-2xl font-bold text-brand-blue mb-1">Đặt Lịch Hẹn Kiểm Tra Máy Tính &amp; Hỗ Trợ Phần Mềm</h1>
               <p className="text-slate-500 text-xs md:text-sm">

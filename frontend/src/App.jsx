@@ -261,10 +261,10 @@ function AppContent() {
             <img src="/img/logo-HHH-26.png" alt="HungHau Logo" className="h-10 md:h-11 object-contain transition-transform group-hover:scale-105" />
             <div className="hidden sm:flex flex-col border-l border-slate-200 pl-3">
               <span className="text-xs font-extrabold text-brand-blue tracking-wide leading-tight">
-                MYH GROUP • CSKH QR
+                MYH GROUP • CSKH
               </span>
               <span className="text-[11px] font-semibold text-slate-500 leading-tight mt-0.5">
-                Sửa Chữa Máy Tính &amp; Phần Mềm
+                Dịch Vụ Sửa Chữa &amp; Bảo Hành
               </span>
             </div>
           </Link>

@@ -54,7 +54,7 @@ function PhoneTracking() {
       <main className="flex-1 container mx-auto px-4 py-6 max-w-3xl">
         <div className="text-center mb-8">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 text-brand-orange text-xs font-bold uppercase tracking-wider mb-2">
-            📷 Cổng Tra Cứu Hồ Sơ QR – Mảng Sửa Chữa Máy Tính &amp; Phần Mềm
+            📷 Tra Cứu Tiến Độ Sửa Chữa &amp; Bảo Hành Điện Tử
           </span>
           <h1 className="text-3xl font-bold text-brand-blue mb-3">Quét Mã QR &amp; Tra Cứu Hồ Sơ CSKH</h1>
           <p className="text-slate-500">
