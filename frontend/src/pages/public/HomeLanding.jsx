@@ -160,17 +160,10 @@ function HomeLanding() {
 
               {/* Hộp Tra cứu phiếu & Quét camera QR tinh giản */}
               <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-xs max-w-2xl">
-                <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+                <div className="mb-2.5">
                   <span className="text-xs font-bold text-slate-700">
                     Tra cứu nhanh hồ sơ phiếu QR:
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => navigate('/track/RP-839400')}
-                    className="text-xs font-medium text-brand-blue hover:underline cursor-pointer"
-                  >
-                    Xem phiếu mẫu: #RP-839400 →
-                  </button>
                 </div>
 
                 <form onSubmit={handleQuickLookup} className="flex flex-col sm:flex-row gap-2">
