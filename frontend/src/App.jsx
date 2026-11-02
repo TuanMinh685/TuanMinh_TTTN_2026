@@ -258,13 +258,13 @@ function AppContent() {
           
           {/* Logo & Brand Lockup */}
           <Link to="/" className="flex items-center gap-3 group shrink-0">
-            <img src="/img/logo-HHH-26.png" alt="HungHau Logo" className="h-10 md:h-11 object-contain transition-transform group-hover:scale-105" />
+            <img src="/img/logo-luc-giac.png" alt="Logo Công ty Cổ phần Lục Giác" className="h-11 md:h-12 object-contain transition-transform group-hover:scale-105" />
             <div className="hidden sm:flex flex-col border-l border-slate-200 pl-3">
               <span className="text-xs font-extrabold text-brand-blue tracking-wide leading-tight">
-                MYH GROUP • CSKH
+                LỤC GIÁC • CSKH
               </span>
               <span className="text-[11px] font-semibold text-slate-500 leading-tight mt-0.5">
-                Dịch Vụ Sửa Chữa &amp; Bảo Hành
+                Công Ty Cổ Phần Lục Giác
               </span>
             </div>
           </Link>
@@ -574,13 +574,11 @@ function AppContent() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
               <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                <div className="w-6 h-6 bg-brand-blue text-white flex items-center justify-center rounded text-xs font-bold" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}>
-                  HH
-                </div>
-                CÔNG TY CỔ PHẦN PHÁT TRIỂN HÙNG HẬU
+                <img src="/img/logo-luc-giac.png" alt="Logo Lục Giác" className="w-8 h-8 object-contain" />
+                CÔNG TY CỔ PHẦN LỤC GIÁC
               </h3>
               <p className="text-blue-100/90 text-sm leading-relaxed mb-4">
-                Hệ thống Web Quét Mã QR Chăm Sóc Khách Hàng Về Mảng Sửa Chữa Máy Tính Và Phần Mềm – Nền tảng số hóa quy trình tiếp nhận thiết bị &amp; yêu cầu phần mềm qua mã QR, theo dõi tiến độ kiểm tra - khắc phục sự cố thời gian thực, cấp sổ bảo hành điện tử (e-Warranty) và đánh giá chất lượng phục vụ thuộc Tập đoàn MYH Group (HungHau Holdings).
+                Hệ thống Web Quét Mã QR Chăm Sóc Khách Hàng Về Mảng Sửa Chữa Máy Tính Và Phần Mềm – Nền tảng số hóa quy trình tiếp nhận thiết bị &amp; yêu cầu phần mềm qua mã QR, theo dõi tiến độ kiểm tra - khắc phục sự cố thời gian thực, cấp sổ bảo hành điện tử (e-Warranty) và đánh giá chất lượng phục vụ thuộc Công ty Cổ phần Lục Giác.
               </p>
             </div>
             
@@ -593,11 +591,11 @@ function AppContent() {
                 </li>
                 <li className="flex items-start gap-2">
                   <span>📍</span>
-                  <span><strong>Cơ sở đào tạo:</strong> Trường Đại học Văn Hiến (VHU)</span>
+                  <span><strong>Đơn vị thực hiện:</strong> Công ty Cổ phần Lục Giác</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span>📍</span>
-                  <span><strong>Trung tâm bảo hành:</strong> Chi nhánh Lục Giác HungHau</span>
+                  <span><strong>Trung tâm bảo hành &amp; CSKH:</strong> Chi nhánh Công ty Cổ phần Lục Giác</span>
                 </li>
               </ul>
             </div>
@@ -611,18 +609,18 @@ function AppContent() {
                 </li>
                 <li className="flex items-center gap-2">
                   <span>✉</span>
-                  <span><strong>Email:</strong> info@hunghau.vn</span>
+                  <span><strong>Email:</strong> info@lucgiac.vn</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <span>🌐</span>
-                  <span><strong>Website:</strong> <a href="https://hunghau.vn" target="_blank" rel="noreferrer" className="underline hover:text-white">hunghau.vn</a></span>
+                  <span><strong>Website:</strong> <span className="font-semibold text-white">lucgiac.vn</span></span>
                 </li>
               </ul>
             </div>
           </div>
           
           <div className="mt-12 pt-8 border-t border-blue-800 text-center text-blue-300 text-xs">
-            <p>© {CURRENT_YEAR} Bản quyền thuộc về Công ty Cổ phần Phát triển Hùng Hậu - Hệ sinh thái HungHau Holdings.</p>
+            <p>© {CURRENT_YEAR} Bản quyền thuộc về Công ty Cổ phần Lục Giác.</p>
           </div>
         </div>
       </footer>

@@ -86,7 +86,7 @@ app.use('/api', globalLimiter);
 app.get('/api/health', (req, res) => {
     res.status(200).json({
         success: true,
-        service: 'MYH Group - Enterprise QR Customer Care API',
+        service: 'Luc Giac - Enterprise QR Customer Care API',
         version: '2.0.0-Enterprise',
         status: 'HEALTHY',
         database: pool.isCloudConnected && pool.isCloudConnected() ? 'SUPABASE_POSTGRESQL_CLOUD' : 'LOCAL_STORE_FALLBACK',

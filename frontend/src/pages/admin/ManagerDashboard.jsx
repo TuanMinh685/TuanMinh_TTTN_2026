@@ -67,7 +67,7 @@ export default function ManagerDashboard() {
               <div className="flex items-center gap-2.5">
                 <span className="text-3xl">🏬</span>
                 <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
-                  Tổng Quan Điều Hành — Bộ Phận Chăm Sóc Khách Hàng • MYH Group
+                  Tổng Quan Điều Hành — Bộ Phận Chăm Sóc Khách Hàng • Công Ty Cổ Phần Lục Giác
                 </h2>
               </div>
               <p className="mt-2 text-sm text-blue-100 max-w-2xl leading-relaxed">
@@ -75,7 +75,7 @@ export default function ManagerDashboard() {
               </p>
               <div className="mt-3 flex flex-wrap gap-2 text-xs">
                 <span className="rounded-full bg-white/10 border border-white/20 px-3 py-1 font-bold">
-                  Trụ sở: Tập đoàn MYH Group • 615 Âu Cơ, Q. Tân Phú
+                  Trụ sở: Công ty Cổ phần Lục Giác • 615 Âu Cơ, Q. Tân Phú
                 </span>
                 <span className="rounded-full bg-white/10 border border-white/20 px-3 py-1 font-bold">
                   Nhân sự bộ phận CSKH: {subordinateCount} nhân viên

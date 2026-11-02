@@ -95,7 +95,7 @@ const login = async (username, password, clientIp = 'unknown') => {
     const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
         algorithm: 'HS256',
         expiresIn: '12h',
-        issuer: 'hunghau-cskh-qr'
+        issuer: 'luc-giac-cskh-qr'
     });
 
     delete user.mat_khau;

@@ -45,7 +45,7 @@ function BookingForm() {
           </div>
           <h2 className="text-2xl font-bold text-brand-blue mb-2">Đặt lịch hẹn CSKH thành công!</h2>
           <p className="text-slate-600 text-xs md:text-sm mb-6">
-            Cảm ơn bạn <strong>{formData.fullName}</strong> đã đặt hẹn trước. Khi bạn đến quầy lễ tân tại <strong>Tập đoàn MYH Group (615 Âu Cơ)</strong>, nhân viên sẽ xác nhận lịch hẹn và khởi tạo <strong>Mã QR Hồ Sơ CSKH</strong> ngay lập tức!
+            Cảm ơn bạn <strong>{formData.fullName}</strong> đã đặt hẹn trước. Khi bạn đến quầy lễ tân tại <strong>Công ty Cổ phần Lục Giác (615 Âu Cơ)</strong>, nhân viên sẽ xác nhận lịch hẹn và khởi tạo <strong>Mã QR Hồ Sơ CSKH</strong> ngay lập tức!
           </p>
 
           <div className="mb-6 p-4 rounded-2xl bg-blue-50/70 border border-blue-200 text-xs text-slate-600 text-left space-y-1">

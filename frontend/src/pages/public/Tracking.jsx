@@ -299,7 +299,7 @@ function Tracking() {
                 </span>
 
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 text-white/95 font-semibold text-xs border border-white/15 backdrop-blur-md">
-                  🏢 Trung tâm CSKH MYH Group (615 Âu Cơ)
+                  🏢 Trung tâm CSKH Công ty Cổ phần Lục Giác (615 Âu Cơ)
                 </span>
               </div>
 
@@ -563,7 +563,7 @@ function Tracking() {
                 <div className="mt-4 pt-3.5 border-t border-blue-200/60 space-y-2.5 text-xs text-slate-700">
                   <div className="flex items-center justify-between">
                     <span className="text-slate-500">Đơn vị tiếp nhận:</span>
-                    <span className="font-bold text-slate-800">TT CSKH MYH Group (615 Âu Cơ)</span>
+                    <span className="font-bold text-slate-800">TT CSKH Công ty Cổ phần Lục Giác (615 Âu Cơ)</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-slate-500">Kênh khởi tạo:</span>
@@ -599,7 +599,7 @@ function Tracking() {
                 </div>
                 <p className="text-xs text-slate-600 mb-4 leading-relaxed">
                   {ticket.bao_hanh.con_han
-                    ? `Hồ sơ đang trong thời hạn bảo hành & chăm sóc hậu mãi tiêu chuẩn tại MYH Group (còn ${ticket.bao_hanh.so_ngay_con_lai} ngày).`
+                    ? `Hồ sơ đang trong thời hạn bảo hành & chăm sóc hậu mãi tiêu chuẩn tại Công ty Cổ phần Lục Giác (còn ${ticket.bao_hanh.so_ngay_con_lai} ngày).`
                     : 'Hồ sơ đã kết thúc thời hạn bảo hành tiêu chuẩn.'}
                 </p>
                 {ticket.bao_hanh.con_han && (
@@ -633,7 +633,7 @@ function Tracking() {
               (ticket.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' || ticket.trang_thai === 'ĐÃ_SỬA_XONG') && (
                 <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
                   <h2 className="text-lg font-extrabold text-brand-blue">⭐ Đánh giá chất lượng phục vụ CSKH</h2>
-                  <p className="mt-1 text-xs text-slate-500">Chia sẻ mức độ hài lòng của bạn với bộ phận Chăm sóc khách hàng MYH Group.</p>
+                  <p className="mt-1 text-xs text-slate-500">Chia sẻ mức độ hài lòng của bạn với bộ phận Chăm sóc khách hàng Công ty Cổ phần Lục Giác.</p>
 
                   {reviewMessage ? (
                     <p role="status" className="mt-4 rounded-xl bg-green-50 p-3 text-sm font-semibold text-green-700">

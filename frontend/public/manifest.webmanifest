@@ -1,7 +1,7 @@
 {
-  "name": "HungHau IT Support",
-  "short_name": "HH IT Support",
-  "description": "Tiếp nhận và theo dõi phiếu sửa chữa thiết bị.",
+  "name": "Công Ty Cổ Phần Lục Giác - CSKH QR",
+  "short_name": "Lục Giác CSKH",
+  "description": "Tiếp nhận và theo dõi phiếu sửa chữa, bảo hành qua mã QR - Công ty Cổ phần Lục Giác.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -29,14 +29,14 @@
       "sizes": "1366x768",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "Trang chủ HungHau IT Support trên máy tính"
+      "label": "Trang chủ Công ty Cổ phần Lục Giác trên máy tính"
     },
     {
       "src": "/screenshots/app-narrow.png",
       "sizes": "390x844",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Trang chủ HungHau IT Support trên điện thoại"
+      "label": "Trang chủ Công ty Cổ phần Lục Giác trên điện thoại"
     }
   ]
 }

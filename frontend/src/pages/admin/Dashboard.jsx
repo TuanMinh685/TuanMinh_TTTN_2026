@@ -654,7 +654,7 @@ function Dashboard() {
             </span>
             <span>Nhân sự: <strong className="text-slate-700">{fullName}</strong></span>
             <span>•</span>
-            <span>Tập đoàn MYH Group</span>
+            <span>Công ty Cổ phần Lục Giác</span>
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -785,7 +785,7 @@ function Dashboard() {
                     exportEnterpriseExcel({
                       filename: `Danh_Sach_Ho_So_CSKH_QR_${new Date().toISOString().slice(0, 10)}.xlsx`,
                       sheetName: 'Hồ Sơ CSKH QR',
-                      title: 'DANH SÁCH HỒ SƠ CHĂM SÓC KHÁCH HÀNG QUA MÃ QR - MYH GROUP',
+                      title: 'DANH SÁCH HỒ SƠ CHĂM SÓC KHÁCH HÀNG QUA MÃ QR - CÔNG TY CỔ PHẦN LỤC GIÁC',
                       headers: ['STT', 'Mã Phiếu QR', 'Họ Tên Khách Hàng', 'Số Điện Thoại', 'Sản Phẩm / Dịch Vụ', 'Mã Serial / IMEI', 'Nội Dung Yêu Cầu CSKH', 'Trạng Thái Xử Lý', 'Hạn Bảo Hành (e-Warranty)', 'Thời Gian Tiếp Nhận'],
                       rows,
                       summaryRow,
@@ -1158,7 +1158,7 @@ function Dashboard() {
                     exportEnterpriseExcel({
                       filename: `Bao_Cao_Thong_Ke_CSKH_QR_${new Date().toISOString().slice(0, 10)}.xlsx`,
                       sheetName: 'Thống Kê CSKH',
-                      title: 'BÁO CÁO THỐNG KÊ HIỆU SUẤT CHĂM SÓC KHÁCH HÀNG QUA MÃ QR - MYH GROUP',
+                      title: 'BÁO CÁO THỐNG KÊ HIỆU SUẤT CHĂM SÓC KHÁCH HÀNG QUA MÃ QR - CÔNG TY CỔ PHẦN LỤC GIÁC',
                       headers: ['STT', 'Trạng Thái Hồ Sơ CSKH', 'Số Lượng Hồ Sơ (Phiếu)'],
                       rows,
                       summaryRow,
@@ -1534,7 +1534,7 @@ function Dashboard() {
                     exportEnterpriseExcel({
                       filename: `Nhat_Ky_Bao_Mat_Audit_Log_${new Date().toISOString().slice(0, 10)}.xlsx`,
                       sheetName: 'Security Audit Log',
-                      title: 'BÁO CÁO NHẬT KÝ KIỂM TOÁN BẢO MẬT HỆ THỐNG (SECURITY AUDIT TRAIL) - MYH GROUP',
+                      title: 'BÁO CÁO NHẬT KÝ KIỂM TOÁN BẢO MẬT HỆ THỐNG (SECURITY AUDIT TRAIL) - CÔNG TY CỔ PHẦN LỤC GIÁC',
                       headers: ['STT', 'Thời Gian (+07:00)', 'Tài Khoản Thực Hiện', 'Vai Trò', 'Hành Động (Action)', 'Đối Tượng Tác Động', 'Địa Chỉ IP', 'Trạng Thái', 'Chi Tiết Sự Kiện Bảo Mật'],
                       rows,
                       summaryRow: ['', 'TỔNG SỐ SỰ KIỆN GHI VẾT', `${auditLogs.length} bản ghi`, '', '', '', '', '', ''],
@@ -1826,7 +1826,7 @@ function Dashboard() {
             </div>
             <div id="thermal-receipt" className="mx-auto w-full max-w-[72mm] border border-dashed border-slate-300 p-4 text-sm text-slate-900">
               <div className="text-center">
-                <h1 className="text-base font-extrabold">MYH GROUP - CSKH QR</h1>
+                <h1 className="text-base font-extrabold">CÔNG TY CỔ PHẦN LỤC GIÁC</h1>
                 <p className="text-[10px] text-slate-600">615 Âu Cơ, P. Phú Trung, Q. Tân Phú, TP.HCM</p>
                 <p className="text-[10px] text-slate-600">Hotline CSKH: (028) 3860 4999</p>
                 <p className="mt-1 text-xs font-bold uppercase tracking-wider">PHIẾU TIẾP NHẬN &amp; TRA CỨU QR</p>
@@ -1852,7 +1852,7 @@ function Dashboard() {
                   <p className="mt-1 break-all text-[10px] font-mono">{window.location.origin}/track/{receiptTicket.ma_phieu}</p>
                 </div>
               )}
-              <p className="mt-4 text-center text-xs font-semibold">Cảm ơn quý khách đã tin tưởng Tập đoàn MYH Group!</p>
+              <p className="mt-4 text-center text-xs font-semibold">Cảm ơn quý khách đã tin tưởng Công ty Cổ phần Lục Giác!</p>
             </div>
             <div className="mt-4 flex justify-end print:hidden">
               <button
@@ -2135,10 +2135,10 @@ function Dashboard() {
                 {/* Bong bóng tin nhắn Zalo OA */}
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 max-w-lg mx-auto space-y-3">
                   <div className="flex items-center gap-2 pb-2.5 border-b border-slate-100">
-                    <img src="/img/logo-HHH-26.png" alt="Logo" className="w-8 h-8 object-contain rounded-full bg-slate-50 p-1 border border-slate-200" />
+                    <img src="/img/logo-luc-giac.png" alt="Logo Lục Giác" className="w-8 h-8 object-contain rounded-full bg-slate-50 p-1 border border-slate-200" />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1">
-                        <span className="text-xs font-bold text-slate-900 truncate">MYH GROUP CSKH & KỸ THUẬT</span>
+                        <span className="text-xs font-bold text-slate-900 truncate">CSKH CÔNG TY CỔ PHẦN LỤC GIÁC</span>
                         <span className="text-blue-500 text-xs" title="Tài khoản Zalo doanh nghiệp xác thực">☑️</span>
                       </div>
                       <span className="text-[10px] text-slate-400">Zalo Notification Service (ZNS)</span>

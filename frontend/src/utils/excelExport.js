@@ -44,7 +44,7 @@ export async function exportEnterpriseExcel({
   signRole = 'THỦ KHO / KẾ TOÁN'
 }) {
   const wb = new ExcelJS.Workbook();
-  wb.creator = 'HungHau IT Support';
+  wb.creator = 'Công ty Cổ phần Lục Giác';
   wb.created = new Date();
 
   const ws = wb.addWorksheet(sheetName.substring(0, 31), {
@@ -84,7 +84,7 @@ export async function exportEnterpriseExcel({
   // --- DÒNG 1, 2, 3: HEADER QUỐC HIỆU & DOANH NGHIỆP ---
   ws.mergeCells(`A1:${midColLetter1}1`);
   const cA1 = ws.getCell('A1');
-  cA1.value = 'CÔNG TY CỔ PHẦN PHÁT TRIỂN HÙNG HẬU';
+  cA1.value = 'CÔNG TY CỔ PHẦN LỤC GIÁC';
   cA1.font = { name: 'Times New Roman', size: 11, bold: true };
   cA1.alignment = { horizontal: 'left', vertical: 'middle' };
 
@@ -96,7 +96,7 @@ export async function exportEnterpriseExcel({
 
   ws.mergeCells(`A2:${midColLetter1}2`);
   const cA2 = ws.getCell('A2');
-  cA2.value = 'TRUNG TÂM SỬA CHỮA HUNGHAU IT SUPPORT';
+  cA2.value = 'TRUNG TÂM CSKH & DỊCH VỤ SỬA CHỮA LỤC GIÁC';
   cA2.font = { name: 'Times New Roman', size: 11, bold: true, color: { argb: 'FF0D457B' } };
   cA2.alignment = { horizontal: 'left', vertical: 'middle' };
 

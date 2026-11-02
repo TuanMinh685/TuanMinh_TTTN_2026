@@ -147,7 +147,7 @@ function HomeLanding() {
 
   return (
     <div className="font-sans text-slate-800 bg-[#f0f5fa]">
-      {/* SECTION 01: HERO - CHUẨN MÀU NỀN HÙNG HẬU (MYH GROUP) */}
+      {/* SECTION 01: HERO - CHUẨN MÀU NỀN CÔNG TY CỔ PHẦN LỤC GIÁC */}
       <section className="bg-gradient-to-b from-[#e8f1f8] via-[#f1f6fa] to-[#f0f5fa] border-b border-slate-200 py-12 lg:py-16">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
@@ -156,7 +156,7 @@ function HomeLanding() {
             <div className="lg:col-span-7 space-y-5">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-white border border-slate-200 text-xs font-semibold uppercase tracking-wider text-slate-700 shadow-2xs">
                 <span className="w-2 h-2 rounded-full bg-brand-green"></span>
-                <span>TRUNG TÂM CSKH &amp; DỊCH VỤ KỸ THUẬT • MYH GROUP</span>
+                <span>TRUNG TÂM CSKH &amp; DỊCH VỤ KỸ THUẬT • CÔNG TY CỔ PHẦN LỤC GIÁC</span>
               </div>
 
               <div className="space-y-2">
@@ -608,7 +608,7 @@ function HomeLanding() {
               Cổng Điều Hành Chăm Sóc Khách Hàng Nội Bộ
             </h2>
             <p className="text-slate-600 text-xs sm:text-sm mb-5 max-w-xl mx-auto leading-relaxed">
-              Dành cho Lễ tân tiếp nhận, Kỹ thuật viên hỗ trợ và Quản lý tại Tập đoàn MYH Group quản lý hồ sơ QR, cập nhật tiến độ xử lý và in phiếu 80mm.
+              Dành cho Lễ tân tiếp nhận, Kỹ thuật viên hỗ trợ và Quản lý tại Công ty Cổ phần Lục Giác quản lý hồ sơ QR, cập nhật tiến độ xử lý và in phiếu 80mm.
             </p>
             <Link
               to="/admin"

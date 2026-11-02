@@ -59,9 +59,9 @@ function Login() {
           <div className="text-center mb-6">
             <Link to="/" className="inline-block">
               <img
-                src="/img/logo-HHH-26.png"
-                alt="HungHau Logo"
-                className="h-14 object-contain mx-auto mb-3 bg-brand-blue rounded-2xl p-2 shadow-md shadow-blue-900/10"
+                src="/img/logo-luc-giac.png"
+                alt="Logo Công ty Cổ phần Lục Giác"
+                className="h-16 object-contain mx-auto mb-3 transition-transform hover:scale-105"
               />
             </Link>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-brand-blue text-[11px] font-bold uppercase tracking-wider mb-2">
@@ -71,7 +71,7 @@ function Login() {
               Cổng Điều Hành CSKH Nội Bộ
             </h1>
             <p className="text-slate-500 text-xs mt-1 font-medium">
-              Trung Tâm Dịch Vụ &amp; Chăm Sóc Khách Hàng • Tập đoàn MYH Group
+              Trung Tâm Dịch Vụ &amp; Chăm Sóc Khách Hàng • Công ty Cổ phần Lục Giác
             </p>
           </div>
 
@@ -195,7 +195,7 @@ function Login() {
               <span>←</span> Về Trang Chủ Quét Mã QR
             </Link>
             <p className="text-[11px] text-slate-400 text-center">
-              Bản quyền © {CURRENT_YEAR} MYH Group (HungHau Holdings).
+              Bản quyền © {CURRENT_YEAR} Công ty Cổ phần Lục Giác.
             </p>
           </div>
         </div>

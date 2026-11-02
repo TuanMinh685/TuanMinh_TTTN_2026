@@ -75,8 +75,8 @@ function PaymentMethodSelector({ ticketCode = 'RP-839400', customerName = 'Khác
   // Sinh mã QR cho Ví điện tử MoMo / ZaloPay
   useEffect(() => {
     const payload = walletType === 'MOMO'
-      ? `2|99|02838604999|MYH GROUP CSKH|info@hunghau.vn|0|0|${numericAmount}|${transferContent}|transfer_myqr`
-      : `https://zalopay.vn/qr/myh-group-cskh?code=${encodeURIComponent(ticketCode)}&amount=${numericAmount}`;
+      ? `2|99|02838604999|LUC GIAC CSKH|info@lucgiac.vn|0|0|${numericAmount}|${transferContent}|transfer_myqr`
+      : `https://zalopay.vn/qr/luc-giac-cskh?code=${encodeURIComponent(ticketCode)}&amount=${numericAmount}`;
 
     QRCode.toDataURL(payload, {
       width: 220,
@@ -345,7 +345,7 @@ function PaymentMethodSelector({ ticketCode = 'RP-839400', customerName = 'Khác
                 <p className="font-extrabold text-sm text-slate-800">
                   Thông tin Ví {walletType === 'MOMO' ? 'MoMo Doanh Nghiệp' : 'ZaloPay Merchant'}:
                 </p>
-                <p className="text-slate-600">• <strong>Đơn vị tiếp nhận:</strong> TRUNG TÂM CSKH MYH GROUP</p>
+                <p className="text-slate-600">• <strong>Đơn vị tiếp nhận:</strong> TRUNG TÂM CSKH CÔNG TY CỔ PHẦN LỤC GIÁC</p>
                 <p className="text-slate-600">• <strong>Số điện thoại Ví:</strong> <span className="font-mono font-bold text-slate-900">02838604999</span></p>
                 <p className="text-slate-600">• <strong>Lời nhắn tự động:</strong> <span className="font-mono font-bold text-brand-blue">{transferContent}</span></p>
                 {numericAmount > 0 && (
@@ -527,7 +527,7 @@ function PaymentMethodSelector({ ticketCode = 'RP-839400', customerName = 'Khác
                 Thanh Toán Tiền Mặt Hoặc Quẹt Thẻ POS Trực Tiếp Tại Quầy
               </h3>
               <p className="text-slate-600 mt-1 leading-relaxed">
-                Quý khách có thể thanh toán trực tiếp tại Quầy Lễ tân &amp; CSKH <strong>Tập đoàn MYH Group (615 Âu Cơ, P. Phú Trung, Q. Tân Phú, TP.HCM)</strong> khi nhận bàn giao máy tính và nhận <strong>Phiếu in nhiệt QR 80mm</strong>.
+                Quý khách có thể thanh toán trực tiếp tại Quầy Lễ tân &amp; CSKH <strong>Công ty Cổ phần Lục Giác (615 Âu Cơ, P. Phú Trung, Q. Tân Phú, TP.HCM)</strong> khi nhận bàn giao máy tính và nhận <strong>Phiếu in nhiệt QR 80mm</strong>.
               </p>
             </div>
           </div>
