@@ -33,8 +33,8 @@ const submitIntake = async (customerData) => {
             customerId = userResult.rows[0].id;
             if (resolvedFullName) {
                 await client.query(
-                    'UPDATE khach_hang SET ho_ten = $1 WHERE id = $2',
-                    [resolvedFullName, customerId]
+                    'UPDATE khach_hang SET ho_ten = $1, zalo_id = COALESCE(zalo_id, $2) WHERE id = $3',
+                    [resolvedFullName, zaloId || resolvedPhone, customerId]
                 );
             }
         } else {
@@ -42,7 +42,7 @@ const submitIntake = async (customerData) => {
                 INSERT INTO khach_hang (ho_ten, so_dien_thoai, zalo_id)
                 VALUES ($1, $2, $3)
                 RETURNING id
-            `, [resolvedFullName, resolvedPhone, zaloId || null]);
+            `, [resolvedFullName, resolvedPhone, zaloId || resolvedPhone]);
             customerId = newUser.rows[0].id;
         }
         
@@ -242,10 +242,14 @@ const submitBooking = async (bookingData) => {
         const userResult = await client.query('SELECT id FROM khach_hang WHERE so_dien_thoai = $1', [phone]);
         if (userResult.rows.length > 0) {
             customerId = userResult.rows[0].id;
+            await client.query(
+                'UPDATE khach_hang SET zalo_id = COALESCE(zalo_id, $1) WHERE id = $2',
+                [zaloId || phone, customerId]
+            );
         } else {
             const newUser = await client.query(
                 'INSERT INTO khach_hang (ho_ten, so_dien_thoai, zalo_id) VALUES ($1, $2, $3) RETURNING id',
-                [fullName, phone, zaloId || null]
+                [fullName, phone, zaloId || phone]
             );
             customerId = newUser.rows[0].id;
         }

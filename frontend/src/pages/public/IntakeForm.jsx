@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 
@@ -7,6 +7,7 @@ function IntakeForm() {
   const [formData, setFormData] = useState({
     fullName: '',
     phone: '',
+    zaloId: '',
     deviceName: '',
     serialImei: '',
     issueDescription: ''
@@ -14,6 +15,31 @@ function IntakeForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [photos, setPhotos] = useState([]);
+  // 'IDLE' | 'CHECKING' | 'LINKED' | 'INVALID'
+  const [zaloCheckStatus, setZaloCheckStatus] = useState('IDLE');
+
+  // Tự động kiểm tra tài khoản Zalo từ SĐT ngay khi nhập (không cần nhập 2 lần)
+  useEffect(() => {
+    const cleanPhone = (formData.phone || '').replace(/\s+/g, '');
+    if (!cleanPhone || cleanPhone.length < 9) {
+      setZaloCheckStatus('IDLE');
+      return;
+    }
+    setZaloCheckStatus('CHECKING');
+    const timer = setTimeout(() => {
+      const vnMobileRegex = /^(0[35789])[0-9]{8}$/;
+      if (vnMobileRegex.test(cleanPhone)) {
+        setZaloCheckStatus('LINKED');
+        setFormData(prev => ({ ...prev, zaloId: cleanPhone }));
+      } else if (cleanPhone.length >= 10) {
+        setZaloCheckStatus('INVALID');
+        setFormData(prev => ({ ...prev, zaloId: '' }));
+      } else {
+        setZaloCheckStatus('IDLE');
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [formData.phone]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -90,7 +116,7 @@ function IntakeForm() {
             </div>
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1">Số điện thoại liên hệ *</label>
-              <input required type="tel" name="phone" onChange={handleChange} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/50" placeholder="0987..." />
+              <input required type="tel" name="phone" onChange={handleChange} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/50" placeholder="0901234567" />
             </div>
           </div>
 

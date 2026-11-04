@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import api from '../../services/api';
 
@@ -20,13 +20,41 @@ function BookingForm() {
   const [selectedServiceBanner, setSelectedServiceBanner] = useState(targetService);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  // 'IDLE' | 'CHECKING' | 'LINKED' | 'INVALID'
+  const [zaloCheckStatus, setZaloCheckStatus] = useState('IDLE');
+
+  // Tự động kiểm tra liên kết tài khoản Zalo ngay khi nhập SĐT (không cần nhập 2 lần)
+  useEffect(() => {
+    const cleanPhone = (formData.phone || '').replace(/\s+/g, '');
+    if (!cleanPhone || cleanPhone.length < 9) {
+      setZaloCheckStatus('IDLE');
+      return;
+    }
+    setZaloCheckStatus('CHECKING');
+    const timer = setTimeout(() => {
+      const vnMobileRegex = /^(0[35789])[0-9]{8}$/;
+      if (vnMobileRegex.test(cleanPhone)) {
+        setZaloCheckStatus('LINKED');
+        setFormData(prev => ({ ...prev, zaloId: cleanPhone }));
+      } else if (cleanPhone.length >= 10) {
+        setZaloCheckStatus('INVALID');
+        setFormData(prev => ({ ...prev, zaloId: '' }));
+      } else {
+        setZaloCheckStatus('IDLE');
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [formData.phone]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
+      const cleanPhone = (formData.phone || '').replace(/\s+/g, '');
       await api.post('/tickets/booking', {
-        ...formData
+        ...formData,
+        phone: cleanPhone,
+        zaloId: zaloCheckStatus === 'LINKED' ? cleanPhone : ''
       });
       setSuccess(true);
     } catch (err) {
@@ -139,19 +167,11 @@ function BookingForm() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Số Zalo (để nhận thông báo QR tiến độ)</label>
-                  <input type="tel" placeholder="Nhập số Zalo (nếu khác SĐT)"
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-brand-blue focus:ring focus:ring-blue-200 outline-none text-sm"
-                    value={formData.zaloId} onChange={e => setFormData({...formData, zaloId: e.target.value})} />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Thiết bị máy tính / Phần mềm cần hỗ trợ</label>
-                  <input type="text" placeholder="VD: Laptop Dell XPS, MacBook Pro, Cài đặt Windows / Office..."
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-brand-blue focus:ring focus:ring-blue-200 outline-none text-sm"
-                    value={formData.deviceName || ''} onChange={e => setFormData({...formData, deviceName: e.target.value})} />
-                </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Thiết bị máy tính / Phần mềm cần hỗ trợ</label>
+                <input type="text" placeholder="VD: Laptop Dell XPS, MacBook Pro, Cài đặt Windows / Office..."
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-brand-blue focus:ring focus:ring-blue-200 outline-none text-sm"
+                  value={formData.deviceName || ''} onChange={e => setFormData({...formData, deviceName: e.target.value})} />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
