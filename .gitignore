@@ -22,3 +22,11 @@ hinh_anh_*/**
 test_reports/
 *.tmp
 *.log
+
+# Báo cáo thực tập & tài liệu văn bản cá nhân
+Bao_Cao_*
+*.docx
+*.doc
+*.pdf
+Phan_*
+Bao_Cao_Thuc_Tap_Tot_Nghiep_Le_Tran_Tuan_Minh.*
