@@ -12,5 +12,28 @@ export default defineConfig({
         changeOrigin: true
       }
     }
+  },
+  build: {
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('exceljs') || id.includes('xlsx')) {
+              return 'vendor-excel';
+            }
+            if (id.includes('recharts')) {
+              return 'vendor-charts';
+            }
+            if (id.includes('qrcode') || id.includes('html5-qrcode')) {
+              return 'vendor-qr';
+            }
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+              return 'vendor-react';
+            }
+          }
+        }
+      }
+    }
   }
 })
