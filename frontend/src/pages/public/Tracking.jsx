@@ -699,6 +699,9 @@ function Tracking() {
           <PaymentMethodSelector
             ticketCode={ticketCode}
             customerName={ticket.ho_ten || 'Khách hàng'}
+            defaultAmount={ticket.tien_sau_giam || ticket.tong_tien || ''}
+            paymentStatus={ticket.trang_thai_thanh_toan}
+            ticket={ticket}
           />
         </div>
 

@@ -4,6 +4,7 @@ const trackTicket = async (ticketCode) => {
     const result = await pool.query(`
         SELECT 
             p.id, p.ma_tra_cuu, p.trang_thai, p.loai_dich_vu, p.han_bao_hanh, p.ngay_tao, p.ngay_cap_nhat,
+            p.tong_tien, p.giam_gia_sinh_vien, p.tien_sau_giam, p.trang_thai_thanh_toan, p.phuong_thuc_thanh_toan,
             k.ho_ten, k.so_dien_thoai,
             t.ten_may, t.so_imei_serial, t.tinh_trang_may,
             EXISTS (
