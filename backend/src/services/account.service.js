@@ -36,24 +36,12 @@ const clearFailedAttempts = (key) => {
 };
 
 const verifyUserPassword = async (user, password) => {
-    let isMatch = false;
+    if (!user || !user.mat_khau) return false;
     try {
-        if (user && user.mat_khau) {
-            isMatch = await bcrypt.compare(String(password), user.mat_khau);
-        }
+        return await bcrypt.compare(String(password), user.mat_khau);
     } catch (e) {
-        isMatch = false;
+        return false;
     }
-    // Hỗ trợ mật khẩu demo tiêu chuẩn trong mọi môi trường (đặc biệt môi trường báo cáo thực tập trên Render)
-    if (!isMatch) {
-        const passStr = String(password || '');
-        if (passStr === '123456' || passStr === 'admin123' || passStr === 'admin') {
-            isMatch = true;
-        } else if (user && user.ten_dang_nhap === 'quanly' && passStr === 'QuanLy@2026') {
-            isMatch = true;
-        }
-    }
-    return isMatch;
 };
 
 const login = async (username, password, clientIp = 'unknown') => {

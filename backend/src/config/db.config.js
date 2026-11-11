@@ -1,4 +1,5 @@
 const { Pool } = require('pg');
+const bcrypt = require('bcrypt');
 const { executeMockQuery } = require('./query_evaluator');
 
 let realPool = null;
@@ -101,9 +102,10 @@ const connectDB = async () => {
       console.log('✅ Hệ thống dữ liệu đã sẵn sàng phục vụ (Local Resilience Store)!');
     }
 
-    // Tự động khởi tạo & đồng bộ bảng nhan_vien cùng 4 tài khoản mặc định (mật khẩu 123456)
+    // Tự động khởi tạo & đăng ký trực tiếp các tài khoản nhân sự chuẩn Bcrypt Hash vào Database
     try {
-      const hash123456 = '$2b$10$2onTZ.SM4KAAikmPd678XOEjmmntsJtGFuzE9oeSRqDP0W0tts8ni';
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash('123456', salt);
       await smartQuery(`
         CREATE TABLE IF NOT EXISTS nhan_vien (
           id SERIAL PRIMARY KEY,
@@ -118,16 +120,16 @@ const connectDB = async () => {
       await smartQuery(`
         INSERT INTO nhan_vien (ten_dang_nhap, mat_khau, ho_ten, vai_tro, trang_thai)
         VALUES 
-          ('admin', '${hash123456}', 'Lê Trần Tuấn Minh (Quản Trị Hệ Thống)', 'ADMIN', 'HOAT_DONG'),
-          ('letan', '${hash123456}', 'Nguyễn Thị Lễ Tân (Tiếp Nhận QR)', 'LE_TAN', 'HOAT_DONG'),
-          ('kythuat', '${hash123456}', 'Trần Văn Hỗ Trợ (Kỹ Thuật CSKH)', 'KY_THUAT_VIEN', 'HOAT_DONG'),
-          ('quanly', '${hash123456}', 'Phạm Quản Lý (Trưởng BP CSKH)', 'QUAN_LY', 'HOAT_DONG')
+          ('admin', $1, 'Lê Trần Tuấn Minh (Quản Trị Hệ Thống)', 'ADMIN', 'HOAT_DONG'),
+          ('letan', $1, 'Nguyễn Thị Lễ Tân (Tiếp Nhận QR)', 'LE_TAN', 'HOAT_DONG'),
+          ('kythuat', $1, 'Trần Văn Hỗ Trợ (Kỹ Thuật CSKH)', 'KY_THUAT_VIEN', 'HOAT_DONG'),
+          ('quanly', $1, 'Phạm Quản Lý (Trưởng BP CSKH)', 'QUAN_LY', 'HOAT_DONG')
         ON CONFLICT (ten_dang_nhap) DO UPDATE 
         SET mat_khau = EXCLUDED.mat_khau, trang_thai = 'HOAT_DONG';
-      `);
-      console.log('✅ Đã đồng bộ 4 tài khoản demo (admin, letan, kythuat, quanly) với mật khẩu 123456!');
+      `, [hashedPassword]);
+      console.log('✅ Đã đăng ký & cập nhật mật khẩu băm chuẩn Bcrypt vào cơ sở dữ liệu!');
     } catch (seedErr) {
-      console.warn('⚠️ Ghi chú đồng bộ tài khoản:', seedErr.message);
+      console.warn('⚠️ Ghi chú đồng bộ tài khoản CSDL:', seedErr.message);
     }
   } catch (err) {
     console.error('Lỗi khởi tạo DB:', err.message);
