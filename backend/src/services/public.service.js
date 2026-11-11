@@ -26,21 +26,9 @@ const trackTicket = async (ticketCode) => {
     ticket.mo_ta_loi = cleanIssue;
     ticket.ten_thiet_bi = ticket.ten_may;
 
-    // Che giấu dữ liệu cá nhân (Masking)
-    const maskName = (name) => {
-        if (!name) return '';
-        const parts = name.split(' ');
-        if (parts.length === 1) return name.substring(0, 1) + '***';
-        return parts[0] + ' ' + parts.slice(1).map(p => p.substring(0, 1) + '***').join(' ');
-    };
-    
-    const maskPhone = (phone) => {
-        if (!phone || phone.length < 10) return phone;
-        return phone.substring(0, 3) + '****' + phone.substring(phone.length - 3);
-    };
-
-    ticket.ho_ten = maskName(ticket.ho_ten);
-    ticket.so_dien_thoai = maskPhone(ticket.so_dien_thoai);
+    // Hiển thị đầy đủ thông tin khách hàng khi tra cứu mã QR
+    ticket.ho_ten = String(ticket.ho_ten || '').trim();
+    ticket.so_dien_thoai = String(ticket.so_dien_thoai || '').trim();
 
     // Lấy ảnh minh chứng hiện trạng
     const photosRes = await pool.query(`
