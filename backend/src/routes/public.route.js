@@ -7,8 +7,17 @@ const cmsController = require('../controllers/cms.controller');
 // Lấy cấu hình giao diện Client (Hình ảnh, Text, Dịch vụ, Banner) từ Backend
 router.get('/cms-config', cmsController.getPublicCmsConfig);
 
-// Lấy IP mạng nội bộ của máy chủ để sinh mã QR cho điện thoại quét được qua LAN Wi-Fi
+// Lấy IP mạng hoặc Origin công khai để sinh mã QR cho điện thoại quét được
 router.get('/network-ip', (req, res) => {
+    const origin = req.headers.origin || req.headers.referer;
+    if (origin && !origin.includes('localhost') && !origin.includes('127.0.0.1')) {
+        return res.json({
+            success: true,
+            ip: 'public',
+            frontendUrl: origin.replace(/\/$/, '')
+        });
+    }
+
     const ifaces = os.networkInterfaces();
     let localIp = '127.0.0.1';
     for (const name of Object.keys(ifaces)) {
@@ -22,7 +31,7 @@ router.get('/network-ip', (req, res) => {
     res.json({
         success: true,
         ip: localIp,
-        frontendUrl: `http://${localIp}:5173`
+        frontendUrl: origin ? origin.replace(/\/$/, '') : `http://${localIp}:5173`
     });
 });
 
