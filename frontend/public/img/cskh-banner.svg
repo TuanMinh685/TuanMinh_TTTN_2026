@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 320" fill="none">
+  <rect width="800" height="320" rx="16" fill="#F8FAFC"/>
+  <rect x="8" y="8" width="784" height="304" rx="12" stroke="#E2E8F0" stroke-width="2"/>
+  
+  <!-- Left: Laptop Illustration in calm Slate & Brand Blue -->
+  <rect x="60" y="64" width="220" height="140" rx="10" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="3"/>
+  <rect x="74" y="78" width="192" height="112" rx="6" fill="#F1F5F9"/>
+  <rect x="92" y="96" width="90" height="10" rx="5" fill="#005596"/>
+  <rect x="92" y="116" width="140" height="8" rx="4" fill="#94A3B8"/>
+  <rect x="92" y="132" width="115" height="8" rx="4" fill="#CBD5E1"/>
+  <rect x="92" y="154" width="64" height="20" rx="6" fill="#005596"/>
+  <path d="M40 204H300L286 224H54L40 204Z" fill="#CBD5E1"/>
+
+  <!-- Center: Connection Line -->
+  <path d="M315 140H385" stroke="#94A3B8" stroke-width="2.5" stroke-dasharray="6 6"/>
+  <circle cx="350" cy="140" r="14" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="2"/>
+  <path d="M345 140L349 144L356 136" stroke="#005596" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Right: QR Ticket Card -->
+  <rect x="405" y="54" width="335" height="212" rx="14" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="2"/>
+  <rect x="429" y="78" width="84" height="84" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="2"/>
+  <rect x="441" y="90" width="22" height="22" rx="3" fill="#005596"/>
+  <rect x="479" y="90" width="22" height="22" rx="3" fill="#005596"/>
+  <rect x="441" y="128" width="22" height="22" rx="3" fill="#005596"/>
+  <rect x="479" y="128" width="10" height="10" rx="2" fill="#475569"/>
+  <rect x="491" y="140" width="10" height="10" rx="2" fill="#005596"/>
+
+  <text x="532" y="98" fill="#0F172A" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="700">HỒ SƠ QR CSKH ĐIỆN TỬ</text>
+  <text x="532" y="120" fill="#475569" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="500">• Tiếp nhận &amp; Ảnh ngoại quan</text>
+  <text x="532" y="140" fill="#475569" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="500">• Theo dõi tiến độ thời gian thực</text>
+  <text x="532" y="160" fill="#475569" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="500">• Sổ bảo hành điện tử 06 tháng</text>
+
+  <rect x="429" y="186" width="287" height="54" rx="10" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="447" y="209" fill="#005596" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="700">CÔNG TY CỔ PHẦN LỤC GIÁC</text>
+  <text x="447" y="227" fill="#64748B" font-family="Inter, Arial, sans-serif" font-size="11">Trung tâm CSKH: 615 Âu Cơ, Tân Phú, TP.HCM</text>
+</svg>

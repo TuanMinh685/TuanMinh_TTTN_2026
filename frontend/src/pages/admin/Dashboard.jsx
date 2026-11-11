@@ -532,7 +532,7 @@ function Dashboard() {
         message: res.data?.message || 'Đã gửi thông báo Zalo ZNS thành công!'
       });
       showToast(`📲 Đã gửi Zalo ZNS tới ${zaloTicket.ho_ten_khach} (${zaloTicket.so_dien_thoai})!`);
-      fetchDashboardData();
+      fetchTickets().then(setTickets).catch(() => {});
       setTimeout(() => {
         setShowZaloModal(false);
       }, 1800);
@@ -2219,10 +2219,18 @@ function Dashboard() {
                 href={`https://zalo.me/${(zaloTicket.so_dien_thoai || '').replace(/\D/g, '')}`}
                 target="_blank"
                 rel="noreferrer"
-                className="px-4 py-2 border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold rounded-xl text-xs flex items-center gap-1.5 transition"
-                title="Mở tab chat Zalo trực tiếp với số điện thoại này"
+                onClick={() => {
+                  const trackUrl = `${window.location.origin}/track/${zaloTicket.ma_phieu}`;
+                  const textToCopy = `[CSKH CÔNG TY CỔ PHẦN LỤC GIÁC]\nKính gửi ${zaloTicket.ho_ten_khach}, thông báo tiến độ hồ sơ QR: ${zaloTicket.ma_phieu}\n- Thiết bị: ${zaloTicket.ten_thiet_bi}\n- Trạng thái: ${STATUS_LABELS[zaloTicket.trang_thai] || zaloTicket.trang_thai}${zaloCustomNote ? `\n- Ghi chú KTV: ${zaloCustomNote}` : ''}\n👉 Xem chi tiết & Sổ bảo hành điện tử tại: ${trackUrl}`;
+                  if (navigator.clipboard) {
+                    navigator.clipboard.writeText(textToCopy).catch(() => {});
+                  }
+                  showToast(`📋 Đã tự động copy nội dung tin nhắn! Hãy bấm Ctrl+V (Dán) vào cửa sổ Zalo của ${zaloTicket.so_dien_thoai}.`);
+                }}
+                className="px-4 py-2 border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-bold rounded-xl text-xs flex items-center gap-1.5 transition"
+                title="Tự động copy nội dung tin nhắn và mở Zalo trực tiếp với số điện thoại này"
               >
-                <span>💬 Mở Zalo Chat Thực Tế ({zaloTicket.so_dien_thoai})</span>
+                <span>💬 Mở Zalo Thật &amp; Dán Tin Nhắn ({zaloTicket.so_dien_thoai})</span>
                 <span>↗</span>
               </a>
 

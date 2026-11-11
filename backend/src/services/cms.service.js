@@ -1,0 +1,195 @@
+const fs = require('fs');
+const path = require('path');
+const { getIo } = require('../config/socket.config');
+
+const CMS_FILE_PATH = path.join(__dirname, '../config/cms_config.json');
+
+const DEFAULT_CMS_CONFIG = {
+    updatedAt: new Date().toISOString(),
+    updatedBy: 'system',
+    brand: {
+        companyName: 'CÔNG TY CỔ PHẦN LỤC GIÁC',
+        badgeText: 'TRUNG TÂM CSKH & DỊCH VỤ KỸ THUẬT • CÔNG TY CỔ PHẦN LỤC GIÁC',
+        logoUrl: '/img/logo-luc-giac.png',
+        hotline: '(028) 3860 4999',
+        email: 'info@lucgiac.vn',
+        address: '615 Âu Cơ, Phường Phú Trung, Quận Tân Phú, TP. Hồ Chí Minh',
+        website: 'lucgiac.vn',
+        footerDescription: 'Hệ thống Web Quét Mã QR Chăm Sóc Khách Hàng Về Mảng Sửa Chữa Máy Tính Và Phần Mềm – Nền tảng số hóa quy trình tiếp nhận thiết bị & yêu cầu phần mềm qua mã QR, theo dõi tiến độ kiểm tra - khắc phục sự cố thời gian thực, cấp sổ bảo hành điện tử (e-Warranty) và đánh giá chất lượng phục vụ thuộc Công ty Cổ phần Lục Giác.',
+        showPromoBanner: false,
+        promoBannerText: 'Kênh CSKH Điện Tử QR: Miễn phí kiểm tra chẩn đoán lỗi phần cứng & phần mềm tại quầy 615 Âu Cơ.'
+    },
+    hero: {
+        titleLine1: 'Dịch Vụ Sửa Chữa & Chăm Sóc Khách Hàng',
+        titleHighlight: 'Theo Dõi Tiến Độ & Bảo Hành Qua Mã QR',
+        description: 'Hỗ trợ tiếp nhận thiết bị nhanh chóng, theo dõi tiến độ kiểm tra phần cứng & xử lý phần mềm thời gian thực, quản lý Sổ bảo hành điện tử (e-Warranty) và thanh toán tiện lợi chỉ với một lần quét mã QR.',
+        bannerImageUrl: '',
+        showBannerImage: false,
+        kioskTitle: 'Cổng Quét QR Tự Phục Vụ',
+        kioskBranch: '615 Âu Cơ',
+        stats: [
+            { value: '30 Giây', label: 'Tiếp nhận qua mã QR' },
+            { value: 'Thời gian thực', label: 'Cập nhật tiến độ xử lý' },
+            { value: '06 Tháng', label: 'Bảo hành điện tử QR' },
+            { value: '1–5 Sao', label: 'Đánh giá chất lượng CSAT' }
+        ]
+    },
+    pillarsSectionTitle: '4 Trụ Cột Chăm Sóc Khách Hàng Qua Mã QR',
+    pillarsSectionSubtitle: 'Mỗi thiết bị hoặc yêu cầu phần mềm được quản lý bằng một mã QR định danh duy nhất xuyên suốt quy trình hỗ trợ.',
+    pillars: [
+        {
+            step: '01',
+            icon: '💻',
+            title: 'Quét QR Tiếp Nhận Máy & Ảnh Ngoại Quan',
+            desc: 'Khách hàng quét mã QR tại quầy điền nhanh tình trạng lỗi máy tính / phần mềm trong 30 giây và đính kèm ảnh chụp ngoại quan máy lúc bàn giao.'
+        },
+        {
+            step: '02',
+            icon: '⏱️',
+            title: 'Quét QR Theo Dõi Tiến Độ Thời Gian Thực',
+            desc: 'Không cần chờ tổng đài. Quét mã QR trên biên nhận 80mm để xem trực tiếp từng bước kiểm tra phần cứng và khắc phục sự cố phần mềm.'
+        },
+        {
+            step: '03',
+            icon: '🛡️',
+            title: 'Quét QR Sổ Bảo Hành Điện Tử (e-Warranty)',
+            desc: 'Thay thế hoàn toàn sổ bảo hành giấy. Tự động kích hoạt và đếm ngược hạn bảo hành 06 tháng (180 ngày), hỗ trợ gửi yêu cầu bảo hành lại qua QR.'
+        },
+        {
+            step: '04',
+            icon: '⭐',
+            title: 'Quét QR Đánh Giá Chất Lượng CSKH (1–5 Sao)',
+            desc: 'Sau khi nhận bàn giao thiết bị hoạt động ổn định, khách hàng quét mã QR chấm điểm 1–5 sao và gửi nhận xét trực tiếp về Ban quản lý CSKH.'
+        }
+    ],
+    servicesSectionTitle: 'Danh Mục Dịch Vụ Máy Tính & Phần Mềm Chuyên Sâu',
+    servicesSectionSubtitle: 'Tất cả dịch vụ đều được định danh bằng Mã QR, lưu ảnh ngoại quan minh bạch và kích hoạt Sổ bảo hành điện tử (e-Warranty).',
+    services: [
+        {
+            id: 'srv-1',
+            icon: '🖥️',
+            imageUrl: '',
+            tag: 'Phần cứng Laptop & PC',
+            title: 'Kiểm Tra & Sửa Chữa Phần Cứng Chuyên Sâu',
+            desc: 'Chẩn đoán lỗi Mainboard, nguồn, màn hình, bàn phím, bản lề và hệ thống tản nhiệt cho Laptop Dell, HP, Asus, Lenovo, MacBook & PC văn phòng.',
+            priceHint: 'Miễn phí kiểm tra • Báo giá trước khi sửa',
+            serviceParam: 'Kiểm tra & Sửa chữa phần cứng Máy tính / Laptop'
+        },
+        {
+            id: 'srv-2',
+            icon: '💿',
+            imageUrl: '',
+            tag: 'Hệ điều hành & Phần mềm',
+            title: 'Cài Đặt & Khắc Phục Sự Cố Phần Mềm',
+            desc: 'Xử lý lỗi Windows 10/11, macOS, Microsoft Office, phần mềm kế toán - đồ họa, xung đột hệ thống, màn hình xanh (BSOD) và tối ưu tốc độ máy.',
+            priceHint: 'Từ 150.000đ • Bảo hành phần mềm',
+            serviceParam: 'Cài đặt & Khắc phục sự cố Phần mềm / Hệ điều hành'
+        },
+        {
+            id: 'srv-3',
+            icon: '🚀',
+            imageUrl: '',
+            tag: 'Nâng cấp & Serial e-Warranty',
+            title: 'Nâng Cấp SSD, RAM & Linh Kiện Chính Hãng',
+            desc: 'Tư vấn nâng cấp ổ cứng SSD NVMe, RAM, Pin, Sạc chuẩn hãng. Mã Serial linh kiện được lưu trực tiếp vào hồ sơ Sổ bảo hành điện tử QR.',
+            priceHint: 'Bảo hành điện tử 06–36 tháng',
+            serviceParam: 'Nâng cấp SSD / RAM & Linh kiện máy tính'
+        },
+        {
+            id: 'srv-4',
+            icon: '🔐',
+            imageUrl: '',
+            tag: 'Dữ liệu & An toàn bảo mật',
+            title: 'Cứu Dữ Liệu, Sao Lưu & Diệt Virus Mã Độc',
+            desc: 'Khôi phục dữ liệu ổ cứng/SSD lỗi phân vùng, sao lưu an toàn dữ liệu doanh nghiệp và quét sạch mã độc, phần mềm gián điệp.',
+            priceHint: 'Cam kết bảo mật dữ liệu 100%',
+            serviceParam: 'Cứu dữ liệu, Sao lưu & Diệt Virus bảo mật'
+        },
+        {
+            id: 'srv-5',
+            icon: '🌐',
+            imageUrl: '',
+            tag: 'Mạng nội bộ & Máy in',
+            title: 'Khắc Phục Lỗi Mạng LAN/Wi-Fi & Máy In',
+            desc: 'Cấu hình Driver máy in, chia sẻ dữ liệu nội bộ, khắc phục lỗi mất kết nối Wi-Fi/Bluetooth, cổng USB/HDMI và thiết bị văn phòng.',
+            priceHint: 'Xử lý lấy liền trong 30 phút',
+            serviceParam: 'Khắc phục lỗi Mạng, Driver & Thiết bị ngoại vi'
+        },
+        {
+            id: 'srv-6',
+            icon: '🛡️',
+            imageUrl: '',
+            tag: 'Hậu mãi & Bảo hành QR',
+            title: 'Bảo Dưỡng Định Kỳ & Chăm Sóc e-Warranty',
+            desc: 'Vệ sinh laptop chuyên sâu, tra keo tản nhiệt chuẩn nhiệt độ, kiểm tra sức khỏe ổ cứng định kỳ và hỗ trợ bảo hành ưu tiên qua mã QR.',
+            priceHint: 'Combo vệ sinh & tra keo: 150.000đ',
+            serviceParam: 'Bảo dưỡng định kỳ & Chăm sóc hậu mãi e-Warranty'
+        }
+    ]
+};
+
+const getCmsConfig = () => {
+    try {
+        if (fs.existsSync(CMS_FILE_PATH)) {
+            const raw = fs.readFileSync(CMS_FILE_PATH, 'utf8');
+            const parsed = JSON.parse(raw);
+            return {
+                ...DEFAULT_CMS_CONFIG,
+                ...parsed,
+                brand: { ...DEFAULT_CMS_CONFIG.brand, ...(parsed.brand || {}) },
+                hero: { ...DEFAULT_CMS_CONFIG.hero, ...(parsed.hero || {}) },
+                pillars: Array.isArray(parsed.pillars) && parsed.pillars.length > 0 ? parsed.pillars : DEFAULT_CMS_CONFIG.pillars,
+                services: Array.isArray(parsed.services) && parsed.services.length > 0 ? parsed.services : DEFAULT_CMS_CONFIG.services
+            };
+        }
+    } catch (err) {
+        console.warn('Không đọc được cms_config.json, dùng cấu hình mặc định:', err.message);
+    }
+    return JSON.parse(JSON.stringify(DEFAULT_CMS_CONFIG));
+};
+
+const updateCmsConfig = (newConfig = {}, actor = 'admin') => {
+    const current = getCmsConfig();
+    const merged = {
+        ...current,
+        ...newConfig,
+        brand: { ...current.brand, ...(newConfig.brand || {}) },
+        hero: { ...current.hero, ...(newConfig.hero || {}) },
+        pillars: Array.isArray(newConfig.pillars) ? newConfig.pillars : current.pillars,
+        services: Array.isArray(newConfig.services) ? newConfig.services : current.services,
+        updatedAt: new Date().toISOString(),
+        updatedBy: actor
+    };
+
+    fs.writeFileSync(CMS_FILE_PATH, JSON.stringify(merged, null, 2), 'utf8');
+
+    try {
+        const io = getIo();
+        io.emit('cms_config_updated', merged);
+    } catch (err) {}
+
+    return merged;
+};
+
+const resetCmsConfig = (actor = 'admin') => {
+    const fresh = {
+        ...JSON.parse(JSON.stringify(DEFAULT_CMS_CONFIG)),
+        updatedAt: new Date().toISOString(),
+        updatedBy: actor
+    };
+    fs.writeFileSync(CMS_FILE_PATH, JSON.stringify(fresh, null, 2), 'utf8');
+
+    try {
+        const io = getIo();
+        io.emit('cms_config_updated', fresh);
+    } catch (err) {}
+
+    return fresh;
+};
+
+module.exports = {
+    getCmsConfig,
+    updateCmsConfig,
+    resetCmsConfig,
+    DEFAULT_CMS_CONFIG
+};

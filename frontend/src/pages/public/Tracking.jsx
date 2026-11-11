@@ -3,6 +3,11 @@ import { Link, useParams } from 'react-router-dom';
 import QRCode from 'qrcode';
 import api from '../../services/api';
 import PaymentMethodSelector from '../../components/PaymentMethodSelector';
+import {
+  getNotificationPermission,
+  requestNotificationPermission,
+  showPushNotification
+} from '../../utils/webNotification';
 
 const PROGRESS_STEPS = [
   { id: 'TIEP_NHAN', label: 'Tiếp nhận máy & Yêu cầu', desc: 'Khởi tạo hồ sơ QR & lưu ảnh ngoại quan', icon: '💻' },
@@ -94,6 +99,8 @@ function Tracking() {
   const [selectedPreviewImage, setSelectedPreviewImage] = useState(null);
   const [ticketQr, setTicketQr] = useState('');
   const [copiedCode, setCopiedCode] = useState(false);
+  const [notifPermission, setNotifPermission] = useState(() => getNotificationPermission());
+  const [isTestingNotif, setIsTestingNotif] = useState(false);
 
   const fetchTicket = useCallback(
     () => api.get(`/public/track/${ticketCode}`),
@@ -138,7 +145,34 @@ function Tracking() {
         if (!active || !response.data.success || !updatedTicket) return;
         setTicket(currentTicket => {
           if (currentTicket && currentTicket.trang_thai !== updatedTicket.trang_thai) {
-            setStatusNotice(`Hồ sơ của bạn vừa chuyển sang trạng thái: ${STATUS_META[updatedTicket.trang_thai]?.shortLabel || updatedTicket.trang_thai}`);
+            const shortTitle = STATUS_META[updatedTicket.trang_thai]?.shortLabel || updatedTicket.trang_thai;
+            setStatusNotice(`Hồ sơ của bạn vừa chuyển sang trạng thái: ${shortTitle}`);
+
+            // Kích hoạt Web Push Notification kèm Rung & Chuông báo
+            const isFinished = updatedTicket.trang_thai === 'ĐÃ_SỬA_XONG' || updatedTicket.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN';
+            showPushNotification({
+              title: isFinished ? '🎉 Thiết bị của bạn đã được sửa xong!' : '🔔 Cập nhật tiến độ CSKH',
+              body: isFinished
+                ? `Kỹ thuật viên tại 615 Âu Cơ đã sửa xong ${updatedTicket.ten_may || updatedTicket.ten_thiet_bi || 'thiết bị'}. Mời bạn đến nhận máy kèm Sổ bảo hành e-Warranty!`
+                : `Hồ sơ ${ticketCode} vừa chuyển sang: ${STATUS_META[updatedTicket.trang_thai]?.label || updatedTicket.trang_thai}`,
+              ticketCode,
+              isCompleted: isFinished
+            });
+          } else if (
+            currentTicket &&
+            Array.isArray(updatedTicket.logs) &&
+            updatedTicket.logs.length > (currentTicket.logs?.length || 0)
+          ) {
+            const newestLog = updatedTicket.logs[0];
+            if (newestLog?.ghi_chu) {
+              setStatusNotice(`📩 Thông báo mới từ CSKH: ${newestLog.ghi_chu}`);
+              showPushNotification({
+                title: `📲 Thông báo Zalo ZNS — Hồ sơ ${ticketCode}`,
+                body: newestLog.ghi_chu,
+                ticketCode,
+                isCompleted: true
+              });
+            }
           }
           return updatedTicket;
         });
@@ -147,12 +181,31 @@ function Tracking() {
       }
     };
 
-    const intervalId = window.setInterval(refreshTicketStatus, 30000);
+    const intervalId = window.setInterval(refreshTicketStatus, 8000);
     return () => {
       active = false;
       window.clearInterval(intervalId);
     };
-  }, [fetchTicket]);
+  }, [fetchTicket, ticketCode]);
+
+  const handleEnableNotification = async () => {
+    const perm = await requestNotificationPermission();
+    setNotifPermission(perm);
+    if (perm === 'granted') {
+      setStatusNotice('🔔 Đã kích hoạt thông báo Web Push! Bạn sẽ nhận được rung và chuông khi máy sửa xong.');
+    }
+  };
+
+  const handleTestNotification = async () => {
+    setIsTestingNotif(true);
+    await showPushNotification({
+      title: '🔔 [Demo] CSKH Công Ty Cổ Phần Lục Giác',
+      body: `Chuông & rung hoạt động mượt mà! Hồ sơ ${ticketCode}: Sẽ tự động rung chuông khi KTV sửa xong.`,
+      ticketCode,
+      isCompleted: true
+    });
+    setTimeout(() => setIsTestingNotif(false), 1500);
+  };
 
   const handleSubmitReview = async (event) => {
     event.preventDefault();
@@ -283,6 +336,53 @@ function Tracking() {
               <span>🖨️</span> In phiếu QR điện tử
             </button>
           </div>
+        </div>
+
+        {/* BANNER THÔNG BÁO WEB PUSH & RUNG CHUÔNG KHÓA MÀN HÌNH */}
+        <div className="mb-5">
+          {notifPermission === 'granted' ? (
+            <div className="bg-emerald-50/90 border border-emerald-200/90 rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3 text-sm shadow-xs backdrop-blur-xs">
+              <div className="flex items-center space-x-2.5 text-emerald-900">
+                <span className="text-xl">🔔</span>
+                <div>
+                  <p className="font-bold text-emerald-950 text-xs sm:text-sm">Đã kích hoạt Web Push Notifications & Rung chuông</p>
+                  <p className="text-xs text-emerald-700">Điện thoại sẽ tự động rung và đổ chuông báo trên màn hình khóa ngay khi Kỹ thuật viên sửa xong thiết bị.</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleTestNotification}
+                disabled={isTestingNotif}
+                className="px-3.5 py-1.5 bg-white hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-xl text-xs font-semibold shadow-xs transition flex items-center space-x-1 cursor-pointer shrink-0"
+              >
+                <span>{isTestingNotif ? '⏳ Đang rung chuông...' : '▶ Thử rung & chuông'}</span>
+              </button>
+            </div>
+          ) : notifPermission === 'denied' ? (
+            <div className="bg-slate-100 border border-slate-200 rounded-2xl p-3 flex items-center gap-2 text-xs text-slate-600">
+              <span className="text-base">⚠️</span>
+              <span>Thông báo trình duyệt đang bị chặn trong cài đặt thiết bị. Hãy cho phép quyền Thông báo để nhận rung và chuông khi máy sửa xong.</span>
+            </div>
+          ) : (
+            <div className="bg-gradient-to-r from-blue-50 via-indigo-50/60 to-sky-50 border border-blue-200/90 rounded-2xl p-3.5 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3.5 shadow-xs">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-xl bg-brand-blue text-white flex items-center justify-center text-lg shadow-xs shrink-0">
+                  📳
+                </div>
+                <div>
+                  <p className="font-bold text-slate-900 text-sm">Bật thông báo rung & chuông khi máy sửa xong</p>
+                  <p className="text-xs text-slate-600">Điện thoại sẽ rung và đổ chuông báo ngay cả khi bạn khóa màn hình hoặc tắt tab trình duyệt.</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleEnableNotification}
+                className="w-full sm:w-auto px-4 py-2 bg-brand-blue hover:bg-brand-blue-hover text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center justify-center space-x-1.5 shrink-0 cursor-pointer"
+              >
+                <span>🔔 Bật thông báo ngay</span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* SECTION 1: HERO BANNER HỒ SƠ PHIẾU ĐIỆN TỬ CSKH */}

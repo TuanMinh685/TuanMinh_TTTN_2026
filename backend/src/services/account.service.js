@@ -143,8 +143,76 @@ const changePassword = async (accountId, currentPassword, newPassword) => {
     return true;
 };
 
+const register = async ({ username, password, fullName, role = 'LE_TAN' }) => {
+    const cleanUsername = String(username || '').trim().toLowerCase();
+    const cleanFullName = String(fullName || '').trim();
+    const allowedRoles = ['ADMIN', 'QUAN_LY', 'KY_THUAT_VIEN', 'LE_TAN'];
+    const cleanRole = allowedRoles.includes(String(role || '').toUpperCase())
+        ? String(role).toUpperCase()
+        : 'LE_TAN';
+
+    if (!cleanUsername || cleanUsername.length < 3) {
+        const err = new Error('Tên tài khoản phải có ít nhất 3 ký tự!');
+        err.statusCode = 400;
+        throw err;
+    }
+
+    if (!password || String(password).length < 6) {
+        const err = new Error('Mật khẩu phải có ít nhất 6 ký tự!');
+        err.statusCode = 400;
+        throw err;
+    }
+
+    if (!cleanFullName) {
+        const err = new Error('Vui lòng nhập họ và tên đầy đủ!');
+        err.statusCode = 400;
+        throw err;
+    }
+
+    // Kiểm tra trùng tên đăng nhập
+    const existing = await pool.query(
+        'SELECT id FROM nhan_vien WHERE LOWER(ten_dang_nhap) = $1 LIMIT 1',
+        [cleanUsername]
+    );
+    if (existing.rows.length > 0) {
+        const err = new Error(`Tên tài khoản "${cleanUsername}" đã tồn tại trong hệ thống!`);
+        err.statusCode = 409;
+        throw err;
+    }
+
+    const hashedPassword = await bcrypt.hash(String(password), 10);
+    const insertRes = await pool.query(
+        `INSERT INTO nhan_vien (ten_dang_nhap, mat_khau, ho_ten, vai_tro, trang_thai)
+         VALUES ($1, $2, $3, $4, 'HOAT_DONG')
+         RETURNING id, ten_dang_nhap, ho_ten, vai_tro, trang_thai`,
+        [cleanUsername, hashedPassword, cleanFullName, cleanRole]
+    );
+
+    const newUser = insertRes.rows[0];
+    const tokenPayload = {
+        AccountID: newUser.id,
+        Username: newUser.ten_dang_nhap,
+        Role: newUser.vai_tro
+    };
+
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET || 'secret-key-fallback', {
+        algorithm: 'HS256',
+        expiresIn: '12h',
+        issuer: 'luc-giac-cskh-qr'
+    });
+
+    return {
+        AccountID: newUser.id,
+        Username: newUser.ten_dang_nhap,
+        FullName: newUser.ho_ten,
+        Role: newUser.vai_tro,
+        token
+    };
+};
+
 module.exports = {
     login,
+    register,
     getMe,
     changePassword
 };

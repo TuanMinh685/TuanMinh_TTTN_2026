@@ -20,6 +20,9 @@ const loginLimiter = rateLimit({
 // URL: POST /api/auth/login
 router.post('/login', loginLimiter, authController.login);
 
+// URL: POST /api/auth/register
+router.post('/register', loginLimiter, authController.register);
+
 // URL: GET /api/auth/me
 router.get('/me', verifyToken, authController.getMe);
 

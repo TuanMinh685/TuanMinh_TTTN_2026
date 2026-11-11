@@ -2,6 +2,10 @@ const express = require('express');
 const router = express.Router();
 const os = require('os');
 const publicController = require('../controllers/public.controller');
+const cmsController = require('../controllers/cms.controller');
+
+// Lấy cấu hình giao diện Client (Hình ảnh, Text, Dịch vụ, Banner) từ Backend
+router.get('/cms-config', cmsController.getPublicCmsConfig);
 
 // Lấy IP mạng nội bộ của máy chủ để sinh mã QR cho điện thoại quét được qua LAN Wi-Fi
 router.get('/network-ip', (req, res) => {

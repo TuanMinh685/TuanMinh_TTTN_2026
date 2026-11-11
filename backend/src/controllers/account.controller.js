@@ -144,8 +144,55 @@ const changePassword = async (req, res, next) => {
     }
 };
 
+const register = async (req, res, next) => {
+    try {
+        const { username, password, fullName, role } = req.body || {};
+
+        if (!username || !password || !fullName) {
+            return res.status(400).json({
+                success: false,
+                errorCode: 'VALIDATION_ERROR',
+                message: 'Vui lòng nhập đầy đủ Họ tên, Tên tài khoản và Mật khẩu!'
+            });
+        }
+
+        const account = await authService.register({ username, password, fullName, role });
+
+        logSecurityEvent({
+            req,
+            actor: account.Username,
+            role: account.Role,
+            action: 'REGISTER_SUCCESS',
+            target: `Account #${account.AccountID}`,
+            status: 'SUCCESS',
+            details: `Đăng ký tài khoản mới "${account.FullName}" (${account.Role}) thành công`
+        });
+
+        res.status(201).json({
+            success: true,
+            message: 'Đăng ký tài khoản hệ thống thành công!',
+            data: {
+                accountId: account.AccountID,
+                username: account.Username,
+                fullName: account.FullName,
+                role: account.Role,
+                token: account.token
+            }
+        });
+    } catch (error) {
+        if (error.statusCode) {
+            return res.status(error.statusCode).json({
+                success: false,
+                message: error.message
+            });
+        }
+        next(error);
+    }
+};
+
 module.exports = {
     login,
+    register,
     getMe,
     changePassword
 };
