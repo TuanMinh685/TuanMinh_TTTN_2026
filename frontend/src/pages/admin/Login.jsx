@@ -81,9 +81,12 @@ function Login() {
       }
     } catch (err) {
       if (!err.response) {
-        setError('Không thể kết nối đến máy chủ backend (Port 5001). Vui lòng kiểm tra kết nối mạng!');
+        setError('Không thể kết nối đến máy chủ backend. Vui lòng kiểm tra kết nối mạng!');
       } else {
-        setError(err.response?.data?.message || 'Thao tác không thành công, vui lòng kiểm tra lại thông tin!');
+        const msg = typeof err.response?.data === 'string'
+          ? (err.response.status === 404 ? 'Đường dẫn API đăng nhập không tồn tại (404)!' : `Lỗi phản hồi máy chủ (${err.response.status})!`)
+          : (err.response?.data?.message || 'Thao tác không thành công, vui lòng kiểm tra lại thông tin!');
+        setError(msg);
       }
     } finally {
       setLoading(false);

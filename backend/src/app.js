@@ -83,7 +83,7 @@ const globalLimiter = rateLimit({
 app.use('/api', globalLimiter);
 
 // 7. Endpoint Kiểm tra Sức khỏe & Trạng thái Bảo mật Hệ thống (Enterprise Health Probe)
-app.get('/api/health', (req, res) => {
+const healthHandler = (req, res) => {
     res.status(200).json({
         success: true,
         service: 'Luc Giac - Enterprise QR Customer Care API',
@@ -101,13 +101,16 @@ app.get('/api/health', (req, res) => {
         ],
         uptimeSeconds: Math.round(process.uptime())
     });
-});
+};
+app.get('/api/health', healthHandler);
+app.get('/health', healthHandler);
 
-// 8. Định tuyến API nghiệp vụ chính
+// 8. Định tuyến API nghiệp vụ chính (Hỗ trợ cả /api và gọi trực tiếp không có tiền tố)
 app.use('/api', routes);
+app.use('/', routes);
 
 // 9. Xử lý 404 cho các API không tồn tại
-app.use('/api', (req, res) => {
+app.use((req, res) => {
     res.status(404).json({
         success: false,
         errorCode: 'ENDPOINT_NOT_FOUND',

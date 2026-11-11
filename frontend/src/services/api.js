@@ -1,7 +1,11 @@
 import axios from 'axios';
 
-// Tự động dùng /api (được Vite reverse-proxy sang port 5001) cho cả máy tính (localhost) và điện thoại (LAN IP)
-const API_URL = import.meta.env.VITE_API_URL || '/api';
+// Tự động dùng /api hoặc chuẩn hóa URL nếu thiếu tiền tố /api
+let rawApiUrl = (import.meta.env.VITE_API_URL || '/api').trim();
+if (rawApiUrl.startsWith('http') && !rawApiUrl.endsWith('/api') && !rawApiUrl.endsWith('/api/')) {
+  rawApiUrl = rawApiUrl.replace(/\/+$/, '') + '/api';
+}
+const API_URL = rawApiUrl;
 
 const api = axios.create({
   baseURL: API_URL,
