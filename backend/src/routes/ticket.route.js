@@ -50,6 +50,14 @@ router.post(
     ticketController.sendZaloNotification
 );
 
+// Lễ tân / CSKH xác nhận thanh toán tại quầy (Tiền mặt hoặc VietQR)
+router.post(
+    '/:id/confirm-payment',
+    verifyToken,
+    requireRole('ADMIN', 'GIAM_DOC', 'QUAN_LY', 'LE_TAN', 'KY_THUAT_VIEN'),
+    ticketController.confirmPayment
+);
+
 // Quản lý ảnh minh chứng hiện trạng đính kèm hồ sơ QR
 router.get('/:id/photos', verifyToken, ticketController.getTicketPhotos);
 router.post('/:id/photos', verifyToken, ticketController.addTicketPhoto);

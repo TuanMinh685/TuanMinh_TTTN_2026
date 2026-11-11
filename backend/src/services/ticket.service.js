@@ -134,6 +134,7 @@ const submitIntake = async (customerData) => {
 const getAllTickets = async () => {
     const query = `
         SELECT p.id, p.ma_tra_cuu as ma_phieu, p.ma_tra_cuu, p.trang_thai, p.loai_dich_vu, p.han_bao_hanh, p.ngay_tao, p.ngay_cap_nhat,
+            p.tong_tien, p.giam_gia_sinh_vien, p.tien_sau_giam, p.trang_thai_thanh_toan, p.phuong_thuc_thanh_toan, p.ma_giao_dich, p.ngay_thanh_toan,
             k.ho_ten as ho_ten_khach, k.so_dien_thoai,
             t.ten_may as ten_thiet_bi, t.so_imei_serial, t.tinh_trang_may as mo_ta_loi
         FROM phieu_sua_chua p
@@ -422,6 +423,76 @@ const sendZaloNotification = async (idOrCode, customMessage = '', employeeId = n
     };
 };
 
+const confirmPayment = async (ticketId, paymentData = {}, employeeId = null) => {
+    const { method = 'TIEN_MAT', amount, note } = paymentData;
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+        const checkRes = await client.query('SELECT * FROM phieu_sua_chua WHERE id = $1 OR ma_tra_cuu = $2', [
+            isNaN(Number(ticketId)) ? -1 : Number(ticketId),
+            String(ticketId)
+        ]);
+        if (checkRes.rows.length === 0) {
+            await client.query('ROLLBACK');
+            return null;
+        }
+
+        const ticket = checkRes.rows[0];
+        const numAmount = Number(amount || ticket.tien_sau_giam || ticket.tong_tien || 0);
+        const refCode = `${method === 'VIETQR' ? 'VQR' : 'CASH'}_${Date.now().toString().slice(-8)}`;
+        const noteText = note || (method === 'TIEN_MAT'
+            ? 'Lễ tân tại quầy (615 Âu Cơ) đã thu tiền mặt và xác nhận hoàn tất thanh toán.'
+            : 'Lễ tân đã đối soát giao dịch chuyển khoản VietQR và xác nhận hoàn tất thanh toán.');
+
+        const updateRes = await client.query(`
+            UPDATE phieu_sua_chua
+            SET 
+                trang_thai_thanh_toan = 'DA_THANH_TOAN',
+                phuong_thuc_thanh_toan = $1,
+                ma_giao_dich = $2,
+                ngay_thanh_toan = CURRENT_TIMESTAMP,
+                tong_tien = CASE WHEN $3 > 0 THEN $3 ELSE tong_tien END,
+                tien_sau_giam = CASE WHEN $3 > 0 THEN $3 ELSE tien_sau_giam END,
+                han_bao_hanh = COALESCE(han_bao_hanh, CURRENT_TIMESTAMP + INTERVAL '180 days'),
+                ngay_cap_nhat = CURRENT_TIMESTAMP
+            WHERE id = $4
+            RETURNING *
+        `, [method, refCode, numAmount, ticket.id]);
+
+        await client.query(`
+            INSERT INTO nhat_ky_sua_chua (phieu_sua_chua_id, nhan_vien_id, trang_thai_cu, trang_thai_moi, ghi_chu)
+            VALUES ($1, $2, $3, $4, $5)
+        `, [ticket.id, employeeId || null, ticket.trang_thai, ticket.trang_thai, noteText]);
+
+        await client.query('COMMIT');
+
+        try {
+            const io = getIo();
+            io.emit('payment_confirmed', {
+                ticketId: ticket.id,
+                ticketCode: ticket.ma_tra_cuu,
+                method,
+                amount: numAmount,
+                paymentStatus: 'DA_THANH_TOAN'
+            });
+            io.emit('ticket_status_changed', { ticketId: ticket.id, status: ticket.trang_thai });
+        } catch (e) {}
+
+        const updated = updateRes.rows[0] || ticket;
+        return {
+            ...updated,
+            ticketCode: updated.ma_tra_cuu,
+            paymentStatus: 'DA_THANH_TOAN',
+            isPaid: true
+        };
+    } catch (err) {
+        await client.query('ROLLBACK');
+        throw err;
+    } finally {
+        client.release();
+    }
+};
+
 module.exports = {
     getTicketPhotos,
     addTicketPhoto,
@@ -431,5 +502,6 @@ module.exports = {
     submitBooking,
     getAllBookings,
     updateBookingStatus,
-    sendZaloNotification
+    sendZaloNotification,
+    confirmPayment
 };

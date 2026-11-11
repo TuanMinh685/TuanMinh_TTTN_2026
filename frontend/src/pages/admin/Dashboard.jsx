@@ -163,6 +163,12 @@ function Dashboard() {
   const [pwForm, setPwForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [savingPw, setSavingPw] = useState(false);
   const [paymentTicketCode, setPaymentTicketCode] = useState('RP-839400');
+  const [cashierAmount, setCashierAmount] = useState('');
+  const [cashierNote, setCashierNote] = useState('');
+  const [confirmingPayment, setConfirmingPayment] = useState(false);
+  const [cashierSuccessMsg, setCashierSuccessMsg] = useState('');
+  const [cashierFilter, setCashierFilter] = useState('ALL'); // 'ALL' | 'UNPAID' | 'PAID'
+  const [cashierSearch, setCashierSearch] = useState('');
 
   // POS Walk-in QR Intake modal state
   const [showPosModal, setShowPosModal] = useState(false);
@@ -424,6 +430,37 @@ function Dashboard() {
       }
     } catch (err) {
       showToast(`❌ ${err.response?.data?.message || 'Lỗi cập nhật lịch hẹn'}`);
+    }
+  };
+
+  const handleConfirmCashierPayment = async (targetTicket, method) => {
+    if (!targetTicket) return;
+    setConfirmingPayment(true);
+    setCashierSuccessMsg('');
+    try {
+      const finalAmount = Number(cashierAmount) || Number(targetTicket.tien_sau_giam || targetTicket.tong_tien || 0);
+      const res = await api.post(`/tickets/${targetTicket.id}/confirm-payment`, {
+        method,
+        amount: finalAmount,
+        note: cashierNote.trim() || (method === 'TIEN_MAT'
+          ? `Lễ tân [${fullName || 'Quầy CSKH'}] đã thu tiền mặt tại quầy 615 Âu Cơ.`
+          : `Lễ tân [${fullName || 'Quầy CSKH'}] đã đối soát nhận chuyển khoản VietQR thành công.`)
+      });
+
+      playNotificationChime();
+      triggerDeviceVibration([200, 100, 300]);
+      showToast(`✓ Đã xác nhận thanh toán [${method === 'VIETQR' ? 'VietQR' : 'Tiền mặt'}] cho phiếu #${targetTicket.ma_phieu}!`);
+      setCashierSuccessMsg(`⚡ Xác nhận thành công! Hồ sơ #${targetTicket.ma_phieu} đã chuyển sang trạng thái ĐÃ THANH TOÁN.`);
+      setCashierNote('');
+
+      await refreshTickets();
+      if (canViewStats) {
+        setStats(await fetchStats());
+      }
+    } catch (err) {
+      showToast(`❌ Lỗi xác nhận thanh toán: ${err.response?.data?.message || err.message}`);
+    } finally {
+      setConfirmingPayment(false);
     }
   };
 
@@ -693,9 +730,16 @@ function Dashboard() {
           )}
           <button
             onClick={() => setActiveTab('PAYMENT_GATEWAY')}
-            className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'PAYMENT_GATEWAY' ? 'bg-brand-blue text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
+            className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${activeTab === 'PAYMENT_GATEWAY' ? 'bg-brand-blue text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
           >
-            💳 Phương Thức Thanh Toán
+            <span>💵 Quầy Thu Ngân &amp; Xác Nhận TT</span>
+            {tickets.filter(t => t.trang_thai_thanh_toan !== 'DA_THANH_TOAN').length > 0 && (
+              <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                activeTab === 'PAYMENT_GATEWAY' ? 'bg-white text-brand-blue' : 'bg-amber-100 text-amber-800'
+              }`}>
+                {tickets.filter(t => t.trang_thai_thanh_toan !== 'DA_THANH_TOAN').length}
+              </span>
+            )}
           </button>
           <button
             onClick={async () => {
@@ -965,6 +1009,22 @@ function Dashboard() {
                           )}
 
                           {/* 2. CÁC NÚT PHỤ: TIỆN ÍCH HỒ SƠ (Màu trung tính: nền trắng viền xám tinh gọn) */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPaymentTicketCode(t.ma_phieu);
+                              setCashierAmount(t.tien_sau_giam || t.tong_tien || '');
+                              setActiveTab('PAYMENT_GATEWAY');
+                            }}
+                            className={`px-2 py-1 rounded text-xs font-semibold transition shrink-0 cursor-pointer flex items-center gap-1 ${
+                              t.trang_thai_thanh_toan === 'DA_THANH_TOAN'
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
+                                : 'bg-amber-50 text-amber-800 border border-amber-300 hover:bg-amber-100 font-bold'
+                            }`}
+                            title={t.trang_thai_thanh_toan === 'DA_THANH_TOAN' ? 'Đã thanh toán - Bấm để xem chi tiết / in biên lai' : 'Chưa thanh toán - Bấm để mở quầy thu ngân xác nhận'}
+                          >
+                            <span>{t.trang_thai_thanh_toan === 'DA_THANH_TOAN' ? '✓ Đã TT' : '💵 Thu tiền'}</span>
+                          </button>
                           <button
                             type="button"
                             onClick={() => openPhotoModal(t)}
@@ -1370,34 +1430,312 @@ function Dashboard() {
         </div>
       )}
 
-      {/* TAB 4B: CỔNG HIỂN THỊ PHƯƠNG THỨC THANH TOÁN HỖ TRỢ (VIETQR / MOMO / ZALOPAY / THẺ ATM-VISA / POS) */}
-      {activeTab === 'PAYMENT_GATEWAY' && (
-        <div className="space-y-4">
-          <div className="bg-white p-4 rounded-2xl border border-slate-200 flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h3 className="text-sm font-extrabold text-slate-800">Chọn Hồ Sơ Phiếu QR Để Hiển Thị Mã Thanh Toán Tại Quầy</h3>
-              <p className="text-xs text-slate-500"> Tự động đồng bộ Mã phiếu QR và Tên khách hàng vào mã VietQR, MoMo, ZaloPay và Cổng thẻ.</p>
-            </div>
-            <select
-              value={paymentTicketCode}
-              onChange={(e) => setPaymentTicketCode(e.target.value)}
-              className="rounded-xl border border-slate-300 px-3.5 py-2 text-xs font-bold text-brand-blue outline-none"
-            >
-              {tickets.map((t) => (
-                <option key={t.id} value={t.ma_phieu}>
-                  {t.ma_phieu} — {t.ho_ten_khach} ({t.ten_thiet_bi})
-                </option>
-              ))}
-              {tickets.length === 0 && <option value="RP-839400">RP-839400 — Hồ sơ mẫu</option>}
-            </select>
-          </div>
+      {/* TAB 4B: QUẦY THU NGÂN & XÁC NHẬN THANH TOÁN (LỄ TÂN TẠI QUẦY) */}
+      {activeTab === 'PAYMENT_GATEWAY' && (() => {
+        const currentTicket = tickets.find(t => t.ma_phieu === paymentTicketCode) || tickets[0] || null;
+        const unpaidCount = tickets.filter(t => t.trang_thai_thanh_toan !== 'DA_THANH_TOAN').length;
+        const paidCount = tickets.filter(t => t.trang_thai_thanh_toan === 'DA_THANH_TOAN').length;
 
-          <PaymentMethodSelector
-            ticketCode={paymentTicketCode}
-            customerName={tickets.find(t => t.ma_phieu === paymentTicketCode)?.ho_ten_khach || 'Khách hàng'}
-          />
-        </div>
-      )}
+        const filteredCashierTickets = tickets.filter(t => {
+          if (cashierFilter === 'UNPAID' && t.trang_thai_thanh_toan === 'DA_THANH_TOAN') return false;
+          if (cashierFilter === 'PAID' && t.trang_thai_thanh_toan !== 'DA_THANH_TOAN') return false;
+          if (!cashierSearch) return true;
+          const q = cashierSearch.toLowerCase();
+          return (
+            (t.ma_phieu && t.ma_phieu.toLowerCase().includes(q)) ||
+            (t.ho_ten_khach && t.ho_ten_khach.toLowerCase().includes(q)) ||
+            (t.so_dien_thoai && t.so_dien_thoai.toLowerCase().includes(q)) ||
+            (t.ten_thiet_bi && t.ten_thiet_bi.toLowerCase().includes(q))
+          );
+        });
+
+        const isCurrentPaid = currentTicket?.trang_thai_thanh_toan === 'DA_THANH_TOAN';
+        const displayAmount = Number(cashierAmount !== '' ? cashierAmount : (currentTicket?.tien_sau_giam || currentTicket?.tong_tien || 0));
+
+        return (
+          <div className="space-y-5">
+            {/* Thanh tiêu đề Quầy Thu Ngân */}
+            <div className="bg-white p-5 rounded-2xl border-t-4 border-emerald-500 shadow-sm flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h3 className="text-xl font-extrabold text-slate-800 flex items-center gap-2">
+                  <span>💵</span> Quầy Thu Ngân &amp; Xác Nhận Thanh Toán Tại Quầy
+                </h3>
+                <p className="text-xs text-slate-500 mt-1">
+                  Dành riêng cho <strong>Lễ Tân / CSKH</strong> thu tiền mặt hoặc xác nhận chuyển khoản VietQR, in biên nhận và kích hoạt bảo hành điện tử e-Warranty.
+                </p>
+              </div>
+
+              {/* Thống kê thu ngân */}
+              <div className="flex items-center gap-2">
+                <span className="px-3 py-1.5 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                  Chờ thu: <strong>{unpaidCount} hồ sơ</strong>
+                </span>
+                <span className="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                  Đã thu: <strong>{paidCount} hồ sơ</strong>
+                </span>
+              </div>
+            </div>
+
+            {/* Thông báo thao tác */}
+            {cashierSuccessMsg && (
+              <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-bold flex items-center justify-between shadow-xs">
+                <span>{cashierSuccessMsg}</span>
+                <button type="button" onClick={() => setCashierSuccessMsg('')} className="text-slate-400 hover:text-slate-700 font-extrabold text-base">×</button>
+              </div>
+            )}
+
+            {/* Bố cục 2 cột: Cột 1 = Chọn & Xác nhận thanh toán | Cột 2 = Hiển thị cho khách quét */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+              {/* CỘT TRÁI: KHU VỰC THAO TÁC CỦA LỄ TÂN (7 CỘT) */}
+              <div className="lg:col-span-7 space-y-4">
+                {/* 1. Bộ tìm kiếm và chọn nhanh hồ sơ */}
+                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                      1. Chọn hồ sơ khách hàng cần thu tiền:
+                    </label>
+                    {/* Filter pills */}
+                    <div className="flex items-center gap-1">
+                      {[
+                        { key: 'ALL', label: 'Tất cả' },
+                        { key: 'UNPAID', label: '⏳ Chờ thu' },
+                        { key: 'PAID', label: '✓ Đã thu' }
+                      ].map(f => (
+                        <button
+                          key={f.key}
+                          type="button"
+                          onClick={() => setCashierFilter(f.key)}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
+                            cashierFilter === f.key
+                              ? 'bg-brand-blue text-white shadow-2xs'
+                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                          }`}
+                        >
+                          {f.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <input
+                      type="text"
+                      placeholder="🔍 Gõ mã phiếu, tên KH, SĐT..."
+                      value={cashierSearch}
+                      onChange={(e) => setCashierSearch(e.target.value)}
+                      className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-brand-blue"
+                    />
+                    <select
+                      value={paymentTicketCode}
+                      onChange={(e) => {
+                        setPaymentTicketCode(e.target.value);
+                        const sel = tickets.find(t => t.ma_phieu === e.target.value);
+                        if (sel) {
+                          setCashierAmount(sel.tien_sau_giam || sel.tong_tien || '');
+                        }
+                      }}
+                      className="w-full px-3 py-2 text-xs font-bold text-slate-800 border border-slate-200 rounded-xl focus:outline-none focus:border-brand-blue truncate"
+                    >
+                      {filteredCashierTickets.map((t) => (
+                        <option key={t.id} value={t.ma_phieu}>
+                          {t.ma_phieu} — {t.ho_ten_khach} ({t.trang_thai_thanh_toan === 'DA_THANH_TOAN' ? '✓ Đã TT' : 'Chờ TT'})
+                        </option>
+                      ))}
+                      {filteredCashierTickets.length === 0 && <option value="">Không có hồ sơ nào phù hợp</option>}
+                    </select>
+                  </div>
+                </div>
+
+                {/* 2. Chi tiết hồ sơ phiếu được chọn */}
+                {currentTicket ? (
+                  <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+                    {/* Header thông tin phiếu */}
+                    <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg font-extrabold text-brand-blue font-mono">
+                            #{currentTicket.ma_phieu}
+                          </span>
+                          <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-extrabold border ${
+                            isCurrentPaid
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                              : 'bg-amber-50 text-amber-800 border-amber-200'
+                          }`}>
+                            {isCurrentPaid ? '✓ ĐÃ THANH TOÁN' : '⏳ CHỜ THU TIỀN'}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          Ngày tạo: {currentTicket.ngay_tao ? new Date(currentTicket.ngay_tao).toLocaleString('vi-VN') : 'N/A'}
+                        </p>
+                      </div>
+
+                      <a
+                        href={`/track/${currentTicket.ma_phieu}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs text-brand-blue hover:underline font-bold flex items-center gap-1"
+                      >
+                        <span>Mở trang QR khách xem</span>
+                        <span>↗</span>
+                      </a>
+                    </div>
+
+                    {/* Lưới thông tin khách hàng & thiết bị */}
+                    <div className="grid grid-cols-2 gap-3 text-xs">
+                      <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 space-y-1">
+                        <span className="text-slate-400 font-bold uppercase text-[10px] block">Khách hàng</span>
+                        <p className="font-extrabold text-slate-800 text-sm">{currentTicket.ho_ten_khach}</p>
+                        <p className="font-mono text-slate-600">📞 {currentTicket.so_dien_thoai}</p>
+                      </div>
+
+                      <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 space-y-1">
+                        <span className="text-slate-400 font-bold uppercase text-[10px] block">Thiết bị / Dịch vụ</span>
+                        <p className="font-extrabold text-slate-800 text-sm truncate">{currentTicket.ten_thiet_bi}</p>
+                        <p className="text-slate-500 text-[11px] truncate">
+                          {currentTicket.so_imei_serial ? `S/N: ${currentTicket.so_imei_serial}` : currentTicket.mo_ta_loi || 'Sửa chữa máy tính'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Đã thanh toán: Chi tiết giao dịch */}
+                    {isCurrentPaid && (
+                      <div className="p-4 rounded-xl bg-emerald-50/70 border border-emerald-200 text-xs text-emerald-900 space-y-2">
+                        <div className="flex items-center justify-between font-bold">
+                          <span className="flex items-center gap-1.5">
+                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                            ĐÃ XÁC NHẬN HOÀN TẤT THANH TOÁN
+                          </span>
+                          <span className="text-emerald-700 font-mono text-sm">
+                            {Number(currentTicket.tien_sau_giam || currentTicket.tong_tien || 0).toLocaleString('vi-VN')} ₫
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-[11px] text-emerald-800 pt-1">
+                          <p>• Hình thức: <strong>{currentTicket.phuong_thuc_thanh_toan === 'VIETQR' ? 'Chuyển khoản VietQR' : 'Tiền mặt tại quầy'}</strong></p>
+                          <p>• Mã tham chiếu: <strong className="font-mono">{currentTicket.ma_giao_dich || 'CASH_DIRECT'}</strong></p>
+                        </div>
+                        <p className="text-[10px] text-emerald-700">
+                          * Bảo hành điện tử e-Warranty đã được kích hoạt và đồng bộ theo mã QR khách hàng.
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Khu vực nhập tiền và nút bấm xác nhận cho Lễ tân */}
+                    <div className="pt-2 border-t border-slate-100 space-y-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">
+                            Số tiền thực thu (VNĐ):
+                          </label>
+                          <input
+                            type="number"
+                            min="0"
+                            step="1000"
+                            value={cashierAmount}
+                            onChange={(e) => setCashierAmount(e.target.value)}
+                            placeholder="Nhập số tiền..."
+                            className="w-full px-3.5 py-2 text-sm font-extrabold text-brand-blue font-mono border border-slate-300 rounded-xl focus:outline-none focus:border-brand-blue"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">
+                            Ghi chú giao dịch thu ngân:
+                          </label>
+                          <input
+                            type="text"
+                            value={cashierNote}
+                            onChange={(e) => setCashierNote(e.target.value)}
+                            placeholder="Vd: Thu tiền mặt tại quầy 615 Âu Cơ..."
+                            className="w-full px-3.5 py-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:border-brand-blue"
+                          />
+                        </div>
+                      </div>
+
+                      {/* HAI NÚT BẤM XÁC NHẬN NỔI BẬT CHO LỄ TÂN */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                        <button
+                          type="button"
+                          disabled={confirmingPayment}
+                          onClick={() => handleConfirmCashierPayment(currentTicket, 'TIEN_MAT')}
+                          className="py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-extrabold text-xs sm:text-sm shadow-sm transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                        >
+                          <span className="text-base">💵</span>
+                          <span>{confirmingPayment ? 'Đang xử lý...' : 'Xác Nhận ĐÃ THU TIỀN MẶT'}</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          disabled={confirmingPayment}
+                          onClick={() => handleConfirmCashierPayment(currentTicket, 'VIETQR')}
+                          className="py-3 px-4 rounded-xl bg-brand-blue hover:bg-blue-700 active:bg-blue-800 text-white font-extrabold text-xs sm:text-sm shadow-sm transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                        >
+                          <span className="text-base">🏦</span>
+                          <span>{confirmingPayment ? 'Đang xử lý...' : 'Xác Nhận NHẬN VIETQR'}</span>
+                        </button>
+                      </div>
+
+                      {/* In phiếu thu ngân nhanh */}
+                      <div className="flex items-center justify-between pt-1">
+                        <button
+                          type="button"
+                          onClick={() => openReceipt(currentTicket)}
+                          className="text-xs font-bold text-slate-600 hover:text-brand-blue flex items-center gap-1.5 py-1 px-2 rounded-lg hover:bg-slate-100 transition cursor-pointer"
+                        >
+                          <span>🖨️</span>
+                          <span>In Phiếu Thu Ngân / Hóa Đơn Nhiệt 80mm</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => openZaloModal(currentTicket)}
+                          className="text-xs font-bold text-blue-600 hover:underline flex items-center gap-1 cursor-pointer"
+                        >
+                          <span>📲</span>
+                          <span>Gửi xác nhận Zalo cho khách</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-white p-8 rounded-2xl border border-slate-200 text-center text-slate-400">
+                    Vui lòng chọn một hồ sơ phiếu từ danh sách trên để thực hiện thu ngân.
+                  </div>
+                )}
+              </div>
+
+              {/* CỘT PHẢI: MÀN HÌNH HIỂN THỊ MÃ CHO KHÁCH TẠI BÀN (5 CỘT) */}
+              <div className="lg:col-span-5 space-y-4">
+                <div className="bg-slate-900 text-white p-3 rounded-2xl text-xs flex items-center justify-between">
+                  <span className="font-bold flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    MÀN HÌNH HIỂN THỊ KHÁCH HÀNG (CUSTOMER DISPLAY)
+                  </span>
+                  <span className="text-[10px] text-slate-400">Quầy Lễ Tân 615 Âu Cơ</span>
+                </div>
+
+                {currentTicket ? (
+                  <PaymentMethodSelector
+                    ticketCode={currentTicket.ma_phieu}
+                    customerName={currentTicket.ho_ten_khach || 'Khách hàng'}
+                    defaultAmount={displayAmount}
+                    paymentStatus={currentTicket.trang_thai_thanh_toan}
+                    ticket={currentTicket}
+                    onPaymentSuccess={async () => {
+                      await refreshTickets();
+                      showToast(`✓ Đã nhận thanh toán cho hồ sơ #${currentTicket.ma_phieu}!`);
+                    }}
+                  />
+                ) : (
+                  <div className="bg-white p-8 rounded-3xl border border-slate-200 text-center text-slate-400 text-xs">
+                    Chưa chọn hồ sơ.
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* TAB 5: BẢO MẬT DOANH NGHIỆP & NHẬT KÝ KIỂM TOÁN (ENTERPRISE SECURITY & AUDIT) */}
       {activeTab === 'SECURITY' && (

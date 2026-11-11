@@ -313,6 +313,30 @@ const sendZaloNotification = async (req, res, next) => {
     }
 };
 
+const confirmPayment = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { method = 'TIEN_MAT', amount, note } = req.body || {};
+        const employeeId = req.user?.AccountID || null;
+
+        const data = await ticketService.confirmPayment(id, { method, amount, note }, employeeId);
+        if (!data) {
+            return res.status(404).json({
+                success: false,
+                message: 'Không tìm thấy hồ sơ phiếu để xác nhận thanh toán!'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `Xác nhận thanh toán [${method === 'VIETQR' ? 'VietQR' : 'Tiền mặt'}] thành công cho hồ sơ #${data.ma_tra_cuu}!`,
+            data
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
 module.exports = {
     initSession,
     checkSession,
@@ -324,5 +348,6 @@ module.exports = {
     submitBooking,
     getBookings,
     updateBookingStatus,
-    sendZaloNotification
+    sendZaloNotification,
+    confirmPayment
 };
