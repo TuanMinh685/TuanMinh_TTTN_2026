@@ -68,7 +68,7 @@ app.use(express.urlencoded({ limit: '8mb', extended: true }));
 // 5. Làm sạch toàn bộ dữ liệu đầu vào (Chống XSS, Prototype Pollution & HTTP Parameter Pollution)
 app.use(sanitizeRequestInput);
 
-// 6. Rate Limiter toàn cục cho tầng API
+// 6. Rate Limiter toàn cục cho tầng API (bảo vệ cả /api và root endpoints)
 const globalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 phút
     max: 1000,
@@ -80,7 +80,7 @@ const globalLimiter = rateLimit({
         message: 'Hệ thống phát hiện lưu lượng truy cập bất thường. Vui lòng thử lại sau ít phút!'
     }
 });
-app.use('/api', globalLimiter);
+app.use(globalLimiter);
 
 // 7. Endpoint Kiểm tra Sức khỏe & Trạng thái Bảo mật Hệ thống (Enterprise Health Probe)
 const healthHandler = (req, res) => {

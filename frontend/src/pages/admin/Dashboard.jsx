@@ -81,6 +81,10 @@ function Dashboard() {
   const [tickets, setTickets] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [activeTab, setActiveTab] = useState('TICKETS');
+  const [ticketSearch, setTicketSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [statusNote, setStatusNote] = useState('');
+  const [reportPeriod, setReportPeriod] = useState('week');
   const [searchParams] = useSearchParams();
 
   // Tự động mở hồ sơ phiếu tương ứng khi bấm vào thông báo hệ thống
@@ -103,10 +107,6 @@ function Dashboard() {
     avgRating: 5.0,
     totalReviews: 0
   });
-  const [ticketSearch, setTicketSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('ALL');
-  const [statusNote, setStatusNote] = useState('');
-  const [reportPeriod, setReportPeriod] = useState('week');
 
   // Photo evidence modal state
   const [showPhotoModal, setShowPhotoModal] = useState(false);
@@ -439,7 +439,7 @@ function Dashboard() {
     setCashierSuccessMsg('');
     try {
       const finalAmount = Number(cashierAmount) || Number(targetTicket.tien_sau_giam || targetTicket.tong_tien || 0);
-      const res = await api.post(`/tickets/${targetTicket.id}/confirm-payment`, {
+      await api.post(`/tickets/${targetTicket.id}/confirm-payment`, {
         method,
         amount: finalAmount,
         note: cashierNote.trim() || (method === 'TIEN_MAT'

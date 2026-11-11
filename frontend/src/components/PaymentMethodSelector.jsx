@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import api from '../services/api';
 import { playNotificationChime, triggerDeviceVibration } from '../utils/webNotification';
 
@@ -33,12 +33,6 @@ function PaymentMethodSelector({
 
   const isPaid = isAutoReconciled || paymentStatus === 'DA_THANH_TOAN' || ticket?.trang_thai_thanh_toan === 'DA_THANH_TOAN';
 
-  useEffect(() => {
-    if (ticket?.loai_dich_vu === 'ONLINE') {
-      setCustomerMode('ONLINE');
-    }
-  }, [ticket?.loai_dich_vu]);
-
   const vietQrImageUrl = `https://img.vietqr.io/image/${DEFAULT_BANK.id}-${DEFAULT_BANK.accNo}-compact2.png?${
     numericAmount > 0 ? `amount=${numericAmount}&` : ''
   }addInfo=${encodeURIComponent(transferContent)}&accountName=${encodeURIComponent(DEFAULT_BANK.holder)}`;
@@ -72,7 +66,7 @@ function PaymentMethodSelector({
       } else {
         setConfirmMessage(`Đã ghi nhận yêu cầu thanh toán cho hồ sơ #${ticketCode}.`);
       }
-    } catch (err) {
+    } catch {
       setIsAutoReconciled(true);
       playNotificationChime();
       triggerDeviceVibration([200, 100, 300]);

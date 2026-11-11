@@ -104,7 +104,6 @@ function Tracking() {
   const [ticketQr, setTicketQr] = useState('');
   const [copiedCode, setCopiedCode] = useState(false);
   const [notifPermission, setNotifPermission] = useState(() => getNotificationPermission());
-  const [isTestingNotif, setIsTestingNotif] = useState(false);
   const [activeTab, setActiveTab] = useState('status'); // 'status' | 'payment' | 'warranty'
 
   useEffect(() => {
@@ -206,17 +205,6 @@ function Tracking() {
     if (perm === 'granted') {
       setStatusNotice('🔔 Đã kích hoạt thông báo Web Push! Bạn sẽ nhận được rung và chuông khi máy sửa xong.');
     }
-  };
-
-  const handleTestNotification = async () => {
-    setIsTestingNotif(true);
-    await showPushNotification({
-      title: '🔔 [Demo] CSKH Công Ty Cổ Phần Lục Giác',
-      body: `Chuông & rung hoạt động mượt mà! Hồ sơ ${ticketCode}: Sẽ tự động rung chuông khi KTV sửa xong.`,
-      ticketCode,
-      isCompleted: true
-    });
-    setTimeout(() => setIsTestingNotif(false), 1500);
   };
 
   const handleSubmitReview = async (event) => {
@@ -713,9 +701,16 @@ function Tracking() {
               <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
                 <h4 className="text-sm font-extrabold text-brand-blue mb-1">⭐ Đánh giá chất lượng phục vụ CSKH</h4>
                 {ticket.da_danh_gia ? (
-                  <p className="text-xs font-bold text-emerald-700">✓ Đã ghi nhận đánh giá của bạn. Cảm ơn quý khách!</p>
+                  <p className="text-xs font-bold text-emerald-700">
+                    {reviewMessage || '✓ Đã ghi nhận đánh giá của bạn. Cảm ơn quý khách!'}
+                  </p>
                 ) : (
                   <form onSubmit={handleSubmitReview} className="space-y-3 mt-3">
+                    {reviewError && (
+                      <p className="text-xs text-red-600 font-semibold bg-red-50 p-2 rounded-lg border border-red-200">
+                        ⚠️ {reviewError}
+                      </p>
+                    )}
                     <div className="flex gap-2">
                       {[1, 2, 3, 4, 5].map(star => (
                         <button

@@ -117,7 +117,15 @@ function IntakeForm() {
               <input required type="text" name="fullName" onChange={handleChange} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/50" placeholder="VD: Lê Trần Tuấn Minh" />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">Số điện thoại liên hệ *</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-sm font-semibold text-slate-700">Số điện thoại liên hệ *</label>
+                {zaloCheckStatus === 'LINKED' && (
+                  <span className="text-[11px] font-bold text-emerald-600 flex items-center gap-1">✓ SĐT hợp lệ</span>
+                )}
+                {zaloCheckStatus === 'INVALID' && (
+                  <span className="text-[11px] font-bold text-red-500">SĐT không hợp lệ</span>
+                )}
+              </div>
               <input required type="tel" name="phone" onChange={handleChange} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/50" placeholder="0901234567" />
             </div>
           </div>
