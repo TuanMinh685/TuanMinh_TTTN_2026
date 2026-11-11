@@ -82,7 +82,9 @@ function IntakeForm() {
       });
       if (response.data.success) {
         // Chuyển sang trang Hồ sơ QR & Tra cứu tiến độ ngay lập tức với mã phiếu
-        navigate(`/track/${response.data.data.ticketCode}`);
+        navigate(`/track/${response.data.data.ticketCode}`, {
+          state: { isNew: true, ticketCode: response.data.data.ticketCode }
+        });
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại!');

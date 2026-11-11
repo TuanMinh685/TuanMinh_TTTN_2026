@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useLocation } from 'react-router-dom';
 import QRCode from 'qrcode';
 import api from '../../services/api';
 import PaymentMethodSelector from '../../components/PaymentMethodSelector';
 import {
   getNotificationPermission,
   requestNotificationPermission,
-  showPushNotification
+  showPushNotification,
+  playNotificationChime,
+  triggerDeviceVibration
 } from '../../utils/webNotification';
 
 const PROGRESS_STEPS = [
@@ -83,6 +85,8 @@ function formatLogStatusTitle(rawStatus) {
 
 function Tracking() {
   const { ticketCode } = useParams();
+  const location = useLocation();
+  const [showSuccessBanner, setShowSuccessBanner] = useState(() => !!location.state?.isNew);
   const [ticket, setTicket] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -102,6 +106,13 @@ function Tracking() {
   const [notifPermission, setNotifPermission] = useState(() => getNotificationPermission());
   const [isTestingNotif, setIsTestingNotif] = useState(false);
   const [activeTab, setActiveTab] = useState('status'); // 'status' | 'payment' | 'warranty'
+
+  useEffect(() => {
+    if (location.state?.isNew) {
+      playNotificationChime();
+      triggerDeviceVibration([200, 100, 300]);
+    }
+  }, [location.state]);
 
   const fetchTicket = useCallback(
     () => api.get(`/public/track/${ticketCode}`),
@@ -338,6 +349,28 @@ function Tracking() {
             </button>
           </div>
         </div>
+
+        {/* BANNER CHÚC MỪNG KHỞI TẠO HỒ SƠ THÀNH CÔNG */}
+        {showSuccessBanner && (
+          <div className="mb-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-4 shadow-md flex items-center justify-between gap-3 border border-emerald-400/40">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl shrink-0">🎉</span>
+              <div>
+                <p className="font-extrabold text-sm sm:text-base">Khởi tạo hồ sơ CSKH thành công!</p>
+                <p className="text-xs text-emerald-100 mt-0.5">
+                  Mã hồ sơ: <strong className="text-amber-300 font-mono">#{ticketCode}</strong>. Thiết bị của bạn đã được ghi nhận trên hệ thống. Hãy xuất trình mã QR tại quầy 615 Âu Cơ.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowSuccessBanner(false)}
+              className="p-1 px-2.5 rounded-xl bg-white/20 hover:bg-white/30 text-white font-bold text-xs shrink-0 cursor-pointer transition"
+            >
+              ✕ Đóng
+            </button>
+          </div>
+        )}
 
         {/* BANNER THÔNG BÁO TINH GỌN */}
         {notifPermission === 'default' && (

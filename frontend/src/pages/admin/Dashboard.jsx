@@ -6,6 +6,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cel
 import QRCode from 'qrcode';
 import PaymentMethodSelector from '../../components/PaymentMethodSelector';
 import { getAccessibleBaseUrl } from '../../utils/network';
+import { playNotificationChime, triggerDeviceVibration } from '../../utils/webNotification';
 
 const STATUS_LABELS = {
   'CHỜ_KHÁM': 'Chờ tiếp nhận máy',
@@ -284,6 +285,8 @@ function Dashboard() {
     let active = true;
     const pushNotifications = (updates) => {
       if (updates.length === 0) return;
+      playNotificationChime();
+      triggerDeviceVibration([200, 100, 300]);
       setNotifications(previous => [...updates, ...previous].slice(0, 50));
       setLatestNotice(updates[0]);
     };
@@ -349,7 +352,7 @@ function Dashboard() {
     };
 
     pollDashboardEvents();
-    const intervalId = window.setInterval(pollDashboardEvents, 30000);
+    const intervalId = window.setInterval(pollDashboardEvents, 5000);
     return () => {
       active = false;
       window.clearInterval(intervalId);
