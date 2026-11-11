@@ -45,7 +45,8 @@ const verifyToken = async (req, res, next) => {
 
     try {
         // Chỉ chấp nhận thuật toán HS256 để chống tấn công giả mạo thuật toán (alg: none)
-        const verified = jwt.verify(token, process.env.JWT_SECRET, {
+        const secret = process.env.JWT_SECRET || 'super_secret_jwt_key_cho_du_an_tttn_lehao';
+        const verified = jwt.verify(token, secret, {
             algorithms: ['HS256']
         });
 
