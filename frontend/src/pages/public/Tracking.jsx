@@ -101,6 +101,7 @@ function Tracking() {
   const [copiedCode, setCopiedCode] = useState(false);
   const [notifPermission, setNotifPermission] = useState(() => getNotificationPermission());
   const [isTestingNotif, setIsTestingNotif] = useState(false);
+  const [activeTab, setActiveTab] = useState('status'); // 'status' | 'payment' | 'warranty'
 
   const fetchTicket = useCallback(
     () => api.get(`/public/track/${ticketCode}`),
@@ -338,472 +339,367 @@ function Tracking() {
           </div>
         </div>
 
-        {/* BANNER THÔNG BÁO WEB PUSH & RUNG CHUÔNG KHÓA MÀN HÌNH */}
-        <div className="mb-5">
-          {notifPermission === 'granted' ? (
-            <div className="bg-emerald-50/90 border border-emerald-200/90 rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3 text-sm shadow-xs backdrop-blur-xs">
-              <div className="flex items-center space-x-2.5 text-emerald-900">
-                <span className="text-xl">🔔</span>
-                <div>
-                  <p className="font-bold text-emerald-950 text-xs sm:text-sm">Đã kích hoạt Web Push Notifications & Rung chuông</p>
-                  <p className="text-xs text-emerald-700">Điện thoại sẽ tự động rung và đổ chuông báo trên màn hình khóa ngay khi Kỹ thuật viên sửa xong thiết bị.</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={handleTestNotification}
-                disabled={isTestingNotif}
-                className="px-3.5 py-1.5 bg-white hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-xl text-xs font-semibold shadow-xs transition flex items-center space-x-1 cursor-pointer shrink-0"
-              >
-                <span>{isTestingNotif ? '⏳ Đang rung chuông...' : '▶ Thử rung & chuông'}</span>
-              </button>
+        {/* BANNER THÔNG BÁO TINH GỌN */}
+        {notifPermission === 'default' && (
+          <div className="mb-4 bg-blue-50 border border-blue-200 rounded-2xl p-3 flex items-center justify-between gap-3 text-xs shadow-2xs">
+            <div className="flex items-center gap-2 text-slate-700">
+              <span className="text-base shrink-0">🔔</span>
+              <span className="text-xs font-medium">Bật thông báo chuông &amp; rung khi thiết bị xử lý xong.</span>
             </div>
-          ) : notifPermission === 'denied' ? (
-            <div className="bg-slate-100 border border-slate-200 rounded-2xl p-3 flex items-center gap-2 text-xs text-slate-600">
-              <span className="text-base">⚠️</span>
-              <span>Thông báo trình duyệt đang bị chặn trong cài đặt thiết bị. Hãy cho phép quyền Thông báo để nhận rung và chuông khi máy sửa xong.</span>
-            </div>
-          ) : (
-            <div className="bg-gradient-to-r from-blue-50 via-indigo-50/60 to-sky-50 border border-blue-200/90 rounded-2xl p-3.5 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3.5 shadow-xs">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-brand-blue text-white flex items-center justify-center text-lg shadow-xs shrink-0">
-                  📳
-                </div>
-                <div>
-                  <p className="font-bold text-slate-900 text-sm">Bật thông báo rung & chuông khi máy sửa xong</p>
-                  <p className="text-xs text-slate-600">Điện thoại sẽ rung và đổ chuông báo ngay cả khi bạn khóa màn hình hoặc tắt tab trình duyệt.</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={handleEnableNotification}
-                className="w-full sm:w-auto px-4 py-2 bg-brand-blue hover:bg-brand-blue-hover text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center justify-center space-x-1.5 shrink-0 cursor-pointer"
-              >
-                <span>🔔 Bật thông báo ngay</span>
-              </button>
-            </div>
-          )}
-        </div>
+            <button
+              type="button"
+              onClick={handleEnableNotification}
+              className="px-3 py-1 bg-brand-blue hover:bg-brand-blue-hover text-white font-bold text-xs rounded-lg shrink-0 cursor-pointer shadow-xs transition"
+            >
+              Bật ngay
+            </button>
+          </div>
+        )}
 
-        {/* SECTION 1: HERO BANNER HỒ SƠ PHIẾU ĐIỆN TỬ CSKH */}
-        <div className="rounded-3xl bg-gradient-to-r from-blue-700 via-brand-blue to-sky-600 text-white p-6 md:p-8 shadow-xl relative overflow-hidden border border-blue-400/30 mb-6">
+        {/* SECTION 1: HERO BANNER HỒ SƠ PHIẾU ĐIỆN TỬ CSKH - TINH GỌN MOBILE FIRST */}
+        <div className="rounded-3xl bg-gradient-to-r from-blue-700 via-brand-blue to-sky-600 text-white p-5 md:p-7 shadow-xl relative overflow-hidden border border-blue-400/30 mb-5">
           <div className="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-white/10 blur-3xl pointer-events-none"></div>
           <div className="absolute left-1/3 -bottom-20 w-56 h-56 rounded-full bg-emerald-400/10 blur-3xl pointer-events-none"></div>
 
-          <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-5">
             <div className="flex-1 w-full">
-              <div className="flex flex-wrap items-center gap-2.5 mb-4">
-                <span className={`inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold border backdrop-blur-md ${statusInfo.badgeClass}`}>
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                <span className={`inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-bold border backdrop-blur-md ${statusInfo.badgeClass}`}>
                   <span className={`w-2 h-2 rounded-full animate-pulse ${statusInfo.dotClass}`}></span>
                   {statusInfo.label}
                 </span>
 
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 text-white/95 font-semibold text-xs border border-white/15 backdrop-blur-md">
-                  🏢 Trung tâm CSKH Công ty Cổ phần Lục Giác (615 Âu Cơ)
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/15 text-white/90 text-xs border border-white/15">
+                  🏢 TT CSKH 615 Âu Cơ
                 </span>
               </div>
 
-              <div className="flex flex-wrap items-baseline gap-3 mb-5">
-                <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white">
-                  Hồ sơ CSKH: {deviceTitle}
+              <div className="flex flex-wrap items-baseline gap-2.5 mb-4">
+                <h1 className="text-xl md:text-2xl font-extrabold tracking-tight text-white">
+                  {deviceTitle}
                 </h1>
-                <div className="flex items-center gap-2">
-                  <span className="bg-white/15 px-3 py-1 rounded-xl text-xs font-mono font-bold text-amber-300 border border-white/20">
+                <div className="flex items-center gap-1.5">
+                  <span className="bg-white/15 px-2.5 py-0.5 rounded-lg text-xs font-mono font-bold text-amber-300 border border-white/20">
                     #{ticketCode}
                   </span>
                   <button
                     type="button"
                     onClick={handleCopyTicketCode}
-                    className="bg-white/10 hover:bg-white/25 text-white text-xs font-semibold px-3 py-1 rounded-xl border border-white/15 transition cursor-pointer"
+                    className="bg-white/10 hover:bg-white/25 text-white text-xs font-semibold px-2.5 py-0.5 rounded-lg border border-white/15 transition cursor-pointer"
                   >
-                    {copiedCode ? '✓ Đã sao chép' : '📋 Sao chép mã'}
+                    {copiedCode ? '✓ Đã chép' : '📋 Sao chép'}
                   </button>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-                <div className="bg-white/10 backdrop-blur-xs rounded-2xl p-3 border border-white/15">
-                  <p className="text-[11px] uppercase tracking-wider text-blue-200 font-semibold">👤 Khách hàng</p>
-                  <p className="text-sm font-bold text-white mt-0.5 truncate">{ticket.ho_ten || 'Khách hàng'}</p>
+              {/* Lưới thông tin 4 ô nhỏ gọn (2 cột mobile, 4 cột desktop) */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                <div className="bg-white/10 backdrop-blur-xs rounded-xl p-2.5 border border-white/15">
+                  <p className="text-[10px] uppercase tracking-wider text-blue-200 font-bold">Khách hàng</p>
+                  <p className="text-xs font-bold text-white truncate mt-0.5">{ticket.ho_ten || 'Khách hàng'}</p>
                 </div>
-                <div className="bg-white/10 backdrop-blur-xs rounded-2xl p-3 border border-white/15">
-                  <p className="text-[11px] uppercase tracking-wider text-blue-200 font-semibold">📞 Số điện thoại</p>
-                  <p className="text-sm font-bold font-mono text-white mt-0.5">{ticket.so_dien_thoai || 'Bảo mật'}</p>
+                <div className="bg-white/10 backdrop-blur-xs rounded-xl p-2.5 border border-white/15">
+                  <p className="text-[10px] uppercase tracking-wider text-blue-200 font-bold">Số điện thoại</p>
+                  <p className="text-xs font-bold font-mono text-white mt-0.5">{ticket.so_dien_thoai || 'Bảo mật'}</p>
                 </div>
-                <div className="bg-white/10 backdrop-blur-xs rounded-2xl p-3 border border-white/15">
-                  <p className="text-[11px] uppercase tracking-wider text-blue-200 font-semibold">🔢 Mã Định Danh / S/N</p>
-                  <p className="text-sm font-bold font-mono text-white mt-0.5 truncate">
-                    {ticket.so_imei_serial || 'Cập nhật tại quầy'}
+                <div className="bg-white/10 backdrop-blur-xs rounded-xl p-2.5 border border-white/15">
+                  <p className="text-[10px] uppercase tracking-wider text-blue-200 font-bold">Mã Serial / S/N</p>
+                  <p className="text-xs font-bold font-mono text-white truncate mt-0.5">
+                    {ticket.so_imei_serial || 'Tại quầy'}
                   </p>
                 </div>
-                <div className="bg-white/10 backdrop-blur-xs rounded-2xl p-3 border border-white/15">
-                  <p className="text-[11px] uppercase tracking-wider text-blue-200 font-semibold">📅 Ngày tiếp nhận</p>
-                  <p className="text-sm font-bold text-white mt-0.5">
-                    {ticket.ngay_tao ? new Date(ticket.ngay_tao).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' }) : 'Hôm nay'}
+                <div className="bg-white/10 backdrop-blur-xs rounded-xl p-2.5 border border-white/15">
+                  <p className="text-[10px] uppercase tracking-wider text-blue-200 font-bold">Ngày tiếp nhận</p>
+                  <p className="text-xs font-bold text-white mt-0.5">
+                    {ticket.ngay_tao ? new Date(ticket.ngay_tao).toLocaleDateString('vi-VN') : 'Hôm nay'}
                   </p>
                 </div>
               </div>
             </div>
 
             {ticketQr && (
-              <div className="bg-white text-slate-800 p-4 rounded-2xl shadow-xl text-center shrink-0 mx-auto lg:mx-0 border-2 border-white/80">
-                <img src={ticketQr} alt={`QR phiếu ${ticketCode}`} className="w-28 h-28 mx-auto rounded-lg" />
-                <p className="text-xs font-extrabold text-brand-blue mt-2 tracking-wide uppercase">Mã QR Hồ Sơ</p>
-                <p className="text-[10px] text-slate-500 font-medium">Xuất trình tại quầy CSKH 615 Âu Cơ</p>
+              <div className="bg-white text-slate-800 p-3 rounded-2xl shadow-xl text-center shrink-0 border-2 border-white/80 w-36">
+                <img src={ticketQr} alt={`QR phiếu ${ticketCode}`} className="w-24 h-24 mx-auto rounded-lg" />
+                <p className="text-[11px] font-extrabold text-brand-blue mt-1 uppercase">Mã QR Hồ Sơ</p>
+                <p className="text-[9px] text-slate-400">Xuất trình tại quầy 615 Âu Cơ</p>
               </div>
             )}
           </div>
         </div>
 
-        {/* SECTION 2: THANH LỘ TRÌNH 4 BƯỚC CHĂM SÓC KHÁCH HÀNG */}
-        <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/90 mb-6">
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-5 pb-3 border-b border-slate-100">
-            <div className="flex items-center gap-2">
-              <span className="text-lg">🧭</span>
-              <h2 className="text-sm md:text-base font-extrabold text-slate-800 uppercase tracking-wide">
-                Tiến trình xử lý hồ sơ CSKH (Bước {currentStep + 1}/4)
-              </h2>
-            </div>
-            <span className={`px-3 py-1 rounded-full text-xs font-bold border ${statusInfo.lightBadge}`}>
-              Trạng thái: {statusInfo.shortLabel}
-            </span>
-          </div>
+        {/* SECTION 2: TABS CHUYỂN ĐỔI CHỨC NĂNG - TINH GỌN, CHỐNG QUÁ TẢI THÔNG TIN */}
+        <div className="flex bg-white rounded-2xl p-1.5 border border-slate-200 shadow-xs mb-5 gap-1">
+          <button
+            type="button"
+            onClick={() => setActiveTab('status')}
+            className={`flex-1 py-2.5 px-2 sm:px-4 rounded-xl font-extrabold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer ${
+              activeTab === 'status'
+                ? 'bg-brand-blue text-white shadow-xs'
+                : 'text-slate-600 hover:bg-slate-100'
+            }`}
+          >
+            <span>🧭</span>
+            <span>Tiến Độ &amp; Nhật Ký</span>
+          </button>
 
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 relative">
-            {PROGRESS_STEPS.map((step, idx) => {
-              const isDone = idx < currentStep;
-              const isCurrent = idx === currentStep;
-              return (
-                <div
-                  key={step.id}
-                  className={`rounded-2xl p-3.5 border transition-all flex sm:flex-col items-center sm:text-center gap-3 sm:gap-2 ${
-                    isCurrent
-                      ? 'bg-amber-50/90 border-amber-300 shadow-xs ring-2 ring-amber-200/60'
-                      : isDone
-                      ? 'bg-emerald-50/50 border-emerald-200/80'
-                      : 'bg-slate-50/70 border-slate-200/60 opacity-65'
-                  }`}
-                >
-                  <div
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center text-base font-bold shrink-0 ${
-                      isCurrent
-                        ? 'bg-amber-400 text-slate-900 shadow-sm'
-                        : isDone
-                        ? 'bg-emerald-500 text-white'
-                        : 'bg-slate-200 text-slate-500'
-                    }`}
-                  >
-                    {isDone ? '✓' : step.icon}
-                  </div>
-                  <div className="text-left sm:text-center">
-                    <p className={`text-xs font-extrabold ${isCurrent ? 'text-amber-900' : isDone ? 'text-emerald-900' : 'text-slate-600'}`}>
-                      {idx + 1}. {step.label}
-                    </p>
-                    <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">{step.desc}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <button
+            type="button"
+            onClick={() => setActiveTab('payment')}
+            className={`flex-1 py-2.5 px-2 sm:px-4 rounded-xl font-extrabold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer ${
+              activeTab === 'payment'
+                ? 'bg-brand-blue text-white shadow-xs'
+                : 'text-slate-600 hover:bg-slate-100'
+            }`}
+          >
+            <span>💳</span>
+            <span>Thanh Toán</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('warranty')}
+            className={`flex-1 py-2.5 px-2 sm:px-4 rounded-xl font-extrabold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer ${
+              activeTab === 'warranty'
+                ? 'bg-brand-blue text-white shadow-xs'
+                : 'text-slate-600 hover:bg-slate-100'
+            }`}
+          >
+            <span>🛡️</span>
+            <span>Ảnh &amp; Bảo Hành</span>
+          </button>
         </div>
 
-        {/* SECTION 3: BỐ CỤC 2 CỘT CHÍNH */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* CỘT TRÁI (7/12): THÔNG TIN YÊU CẦU, NHẬT KÝ XỬ LÝ & ẢNH MINH CHỨNG */}
-          <div className="lg:col-span-7 space-y-6">
-            {/* Card 1: Nội dung Yêu cầu CSKH */}
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/90">
-              <h3 className="text-base font-extrabold text-slate-800 mb-4 flex items-center gap-2">
-                <span>📋</span> Nội Dung Yêu Cầu Chăm Sóc Khách Hàng
-              </h3>
+        {/* NỘI DUNG THEO TABS */}
+        {activeTab === 'status' && (
+          <div className="space-y-5">
+            {/* Thanh tiến trình 4 bước */}
+            <div className="bg-white rounded-3xl p-5 md:p-6 shadow-sm border border-slate-200/90">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-4 pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-2">
+                  <span className="text-base">🧭</span>
+                  <h2 className="text-xs sm:text-sm font-extrabold text-slate-800 uppercase tracking-wide">
+                    Tiến trình xử lý hồ sơ CSKH (Bước {currentStep + 1}/4)
+                  </h2>
+                </div>
+                <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${statusInfo.lightBadge}`}>
+                  {statusInfo.shortLabel}
+                </span>
+              </div>
 
-              <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200/70 space-y-3">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">
-                    Mô tả yêu cầu hỗ trợ / phản hồi ban đầu của khách hàng
-                  </p>
-                  <p className="text-sm font-semibold text-slate-800 whitespace-pre-line leading-relaxed">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                {PROGRESS_STEPS.map((step, idx) => {
+                  const isDone = idx < currentStep;
+                  const isCurrent = idx === currentStep;
+                  return (
+                    <div
+                      key={step.id}
+                      className={`rounded-2xl p-3 border transition-all text-center flex flex-col items-center justify-center ${
+                        isCurrent
+                          ? 'bg-amber-50/90 border-amber-300 ring-2 ring-amber-200/60'
+                          : isDone
+                          ? 'bg-emerald-50/50 border-emerald-200/80'
+                          : 'bg-slate-50/70 border-slate-200/60 opacity-60'
+                      }`}
+                    >
+                      <div
+                        className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold mb-1.5 ${
+                          isCurrent
+                            ? 'bg-amber-400 text-slate-900'
+                            : isDone
+                            ? 'bg-emerald-500 text-white'
+                            : 'bg-slate-200 text-slate-500'
+                        }`}
+                      >
+                        {isDone ? '✓' : step.icon}
+                      </div>
+                      <p className={`text-xs font-bold leading-tight ${isCurrent ? 'text-amber-900' : isDone ? 'text-emerald-900' : 'text-slate-600'}`}>
+                        {step.label}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {/* Nội dung yêu cầu */}
+              <div className="bg-white rounded-3xl p-5 shadow-sm border border-slate-200/90">
+                <h3 className="text-sm font-extrabold text-slate-800 mb-3 flex items-center gap-2">
+                  <span>📋</span> Yêu Cầu Hỗ Trợ Ban Đầu
+                </h3>
+                <div className="bg-slate-50 rounded-2xl p-3.5 border border-slate-200/70">
+                  <p className="text-xs font-semibold text-slate-800 whitespace-pre-line leading-relaxed">
                     {issueText}
                   </p>
                 </div>
               </div>
+
+              {/* Thông tin hỗ trợ */}
+              <div className="bg-white rounded-3xl p-5 shadow-sm border border-slate-200/90">
+                <h3 className="text-sm font-extrabold text-slate-800 mb-3 flex items-center gap-2">
+                  <span>🎧</span> Trung Tâm CSKH Tiếp Nhận
+                </h3>
+                <div className="bg-blue-50/60 rounded-2xl p-3.5 border border-blue-200/70 space-y-2 text-xs text-slate-700">
+                  <p>🏢 <strong>Địa chỉ:</strong> 615 Âu Cơ, P. Phú Trung, Q. Tân Phú, TP.HCM</p>
+                  <p>⏰ <strong>Giờ làm việc:</strong> 08:00 - 18:00 (Thứ 2 - Thứ 7)</p>
+                  <p>📞 <strong>Hotline:</strong> <a href="tel:02838604999" className="text-brand-orange font-bold hover:underline">(028) 3860 4999</a></p>
+                </div>
+              </div>
             </div>
 
-            {/* Card 2: Nhật ký Xử lý Thời gian thực */}
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/90">
-              <div className="flex items-center justify-between mb-5">
-                <h3 className="text-base font-extrabold text-slate-800 flex items-center gap-2">
-                  <span>🕒</span> Nhật Ký Xử Lý Hồ Sơ Thời Gian Thực
+            {/* Nhật ký xử lý */}
+            <div className="bg-white rounded-3xl p-5 shadow-sm border border-slate-200/90">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-extrabold text-slate-800 flex items-center gap-2">
+                  <span>🕒</span> Nhật Ký Xử Lý Hồ Sơ
                 </h3>
-                <span className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full font-bold flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                  Cập nhật tự động
+                <span className="text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full font-bold">
+                  Cập nhật thời gian thực
                 </span>
               </div>
 
               {ticket.nhat_ky && ticket.nhat_ky.length > 0 ? (
-                <div className="relative pl-6 border-l-2 border-blue-200 space-y-5 ml-2">
+                <div className="relative pl-5 border-l-2 border-blue-200 space-y-4 ml-1">
                   {ticket.nhat_ky.map((log, idx) => {
                     const isLatest = idx === 0;
-                    const logNote =
-                      log.ghi_chu ||
-                      (log.trang_thai_moi === 'CHỜ_KHÁM' || log.trang_thai_moi === 'CẬP_NHẬT'
-                        ? 'Khách hàng vừa khởi tạo hồ sơ yêu cầu CSKH qua hệ thống mã QR.'
-                        : 'Cập nhật tiến độ xử lý hồ sơ tại Trung tâm CSKH 615 Âu Cơ.');
                     return (
                       <div key={idx} className="relative">
                         <div
-                          className={`absolute -left-[31px] top-1 w-4 h-4 rounded-full border-2 border-white shadow-xs ${
-                            isLatest ? 'bg-brand-orange ring-4 ring-orange-100' : 'bg-brand-blue'
+                          className={`absolute -left-[27px] top-1 w-3.5 h-3.5 rounded-full border-2 border-white shadow-xs ${
+                            isLatest ? 'bg-brand-orange ring-2 ring-orange-100' : 'bg-brand-blue'
                           }`}
                         ></div>
-                        <div className={`rounded-2xl p-3.5 border ${isLatest ? 'bg-blue-50/50 border-blue-200' : 'bg-slate-50/70 border-slate-200/70'}`}>
-                          <div className="flex flex-wrap items-center justify-between gap-2">
-                            <p className="text-xs font-extrabold text-slate-800 uppercase tracking-wide">
+                        <div className={`rounded-xl p-3 border ${isLatest ? 'bg-blue-50/50 border-blue-200' : 'bg-slate-50/70 border-slate-200/70'}`}>
+                          <div className="flex flex-wrap items-center justify-between gap-1">
+                            <p className="text-xs font-bold text-slate-800 uppercase">
                               {formatLogStatusTitle(log.trang_thai_moi)}
                             </p>
-                            <span className="text-[11px] font-mono text-slate-500 bg-white px-2 py-0.5 rounded-md border border-slate-200/80">
+                            <span className="text-[10px] font-mono text-slate-500">
                               {new Date(log.ngay_tao).toLocaleString('vi-VN')}
                             </span>
                           </div>
-                          <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">{logNote}</p>
+                          <p className="text-xs text-slate-600 mt-1">{log.ghi_chu || 'Tiếp nhận hồ sơ yêu cầu CSKH qua mã QR.'}</p>
                         </div>
                       </div>
                     );
                   })}
                 </div>
               ) : (
-                <p className="text-xs text-slate-500 italic bg-slate-50 p-4 rounded-2xl text-center">
-                  Hồ sơ vừa được khởi tạo, đang chờ Chuyên viên CSKH cập nhật nhật ký đầu tiên.
+                <p className="text-xs text-slate-500 italic bg-slate-50 p-3 rounded-xl text-center">
+                  Hồ sơ vừa được khởi tạo, đang chờ Chuyên viên CSKH cập nhật nhật ký.
                 </p>
               )}
             </div>
+          </div>
+        )}
 
-            {/* Card 3: Hình ảnh Minh chứng Hiện trạng Lúc Tiếp Nhận */}
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/90">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="text-base font-extrabold text-slate-800 flex items-center gap-2">
-                    <span>📸</span> Hình Ảnh Minh Chứng Hiện Trạng Lúc Tiếp Nhận
-                  </h3>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Lưu trữ hình ảnh sản phẩm, tem bảo hành &amp; biên nhận minh bạch 100%
-                  </p>
-                </div>
-                <span className="text-xs bg-slate-100 text-slate-700 px-3 py-1 rounded-full font-bold border border-slate-200">
-                  {ticket.hinh_anh_ngoai_quan?.length || 0} ảnh
-                </span>
-              </div>
+        {/* TAB 2: THANH TOÁN VIETQR */}
+        {activeTab === 'payment' && (
+          <div>
+            <PaymentMethodSelector
+              ticketCode={ticketCode}
+              customerName={ticket.ho_ten || 'Khách hàng'}
+              defaultAmount={ticket.tien_sau_giam || ticket.tong_tien || ''}
+              paymentStatus={ticket.trang_thai_thanh_toan}
+              ticket={ticket}
+            />
+          </div>
+        )}
 
+        {/* TAB 3: ẢNH & BẢO HÀNH */}
+        {activeTab === 'warranty' && (
+          <div className="space-y-5">
+            {/* Hình ảnh minh chứng */}
+            <div className="bg-white rounded-3xl p-5 shadow-sm border border-slate-200/90">
+              <h3 className="text-sm font-extrabold text-slate-800 mb-3 flex items-center gap-2">
+                <span>📸</span> Hình Ảnh Minh Chứng Lúc Tiếp Nhận ({ticket.hinh_anh_ngoai_quan?.length || 0} ảnh)
+              </h3>
               {ticket.hinh_anh_ngoai_quan && ticket.hinh_anh_ngoai_quan.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {ticket.hinh_anh_ngoai_quan.map((img, idx) => (
                     <div
                       key={idx}
                       onClick={() => setSelectedPreviewImage(img.duong_dan_anh)}
-                      className="group relative rounded-2xl overflow-hidden border border-slate-200 aspect-video bg-slate-100 cursor-pointer shadow-xs hover:shadow-md transition-all"
+                      className="rounded-xl overflow-hidden border border-slate-200 aspect-video bg-slate-100 cursor-pointer shadow-xs hover:shadow-md transition"
                     >
-                      <img
-                        src={img.duong_dan_anh}
-                        alt={img.ghi_chu || 'Ảnh minh chứng'}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900/85 via-slate-900/40 to-transparent p-3 flex items-end justify-between">
-                        <span className="text-xs text-white font-semibold line-clamp-1">
-                          {img.ghi_chu || `Ảnh minh chứng #${idx + 1}`}
-                        </span>
-                        <span className="text-[10px] bg-white/20 text-white px-2 py-0.5 rounded-md backdrop-blur-xs shrink-0">
-                          🔍 Phóng to
-                        </span>
-                      </div>
+                      <img src={img.duong_dan_anh} alt={img.ghi_chu || 'Ảnh'} className="w-full h-full object-cover" />
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="rounded-2xl bg-slate-50 border border-dashed border-slate-300 p-5 text-center">
-                  <p className="text-xs font-semibold text-slate-600">
-                    📷 Chưa có ảnh minh chứng đính kèm lúc tạo phiếu trực tuyến
-                  </p>
-                  <p className="text-[11px] text-slate-500 mt-1">
-                    Khi tiếp nhận tại quầy <strong>615 Âu Cơ</strong>, nhân viên Lễ tân sẽ chụp ảnh hiện trạng và cập nhật trực tiếp lên hồ sơ QR này.
-                  </p>
+                <div className="rounded-2xl bg-slate-50 border border-dashed border-slate-300 p-4 text-center text-xs text-slate-500">
+                  Chưa có ảnh ngoại quan đính kèm. Lễ tân sẽ cập nhật ảnh khi tiếp nhận tại quầy 615 Âu Cơ.
                 </div>
               )}
             </div>
-          </div>
 
-          {/* CỘT PHẢI (5/12): THÔNG TIN HỖ TRỢ CSKH, BẢO HÀNH E-WARRANTY & ĐÁNH GIÁ 5 SAO */}
-          <div className="lg:col-span-5 space-y-6">
-            {/* Card 1: Thông tin Tiếp nhận & Cam kết Chăm sóc khách hàng */}
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/90">
-              <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
-                <h3 className="text-base font-extrabold text-slate-800 flex items-center gap-2">
-                  <span>🎧</span> Thông Tin Hỗ Trợ CSKH
-                </h3>
-                <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${statusInfo.lightBadge}`}>
-                  {statusInfo.shortLabel}
+            {/* Sổ bảo hành e-Warranty */}
+            <div className="p-5 bg-gradient-to-br from-emerald-50 via-teal-50/70 to-white border border-emerald-200 rounded-3xl shadow-sm">
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">🛡️</span>
+                  <h3 className="font-extrabold text-slate-800 text-sm">Sổ Bảo Hành Điện Tử (e-Warranty)</h3>
+                </div>
+                <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${ticket.bao_hanh?.con_han ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700'}`}>
+                  {ticket.bao_hanh?.trang_thai_text || 'Chờ kích hoạt'}
                 </span>
               </div>
-
-              <div className="rounded-2xl bg-gradient-to-b from-blue-50/80 to-slate-50 border border-blue-200/80 p-5">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-brand-blue/15 text-brand-blue flex items-center justify-center text-xl shrink-0 font-bold">
-                    📷
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-extrabold text-slate-800">
-                      Hồ sơ Chăm sóc khách hàng định danh bằng Mã QR
-                    </h4>
-                    <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                      Mọi bước tiếp nhận, phân loại, xử lý hỗ trợ và kích hoạt bảo hành hậu mãi đều được cập nhật minh bạch theo thời gian thực trên mã QR này.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-4 pt-3.5 border-t border-blue-200/60 space-y-2.5 text-xs text-slate-700">
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-500">Đơn vị tiếp nhận:</span>
-                    <span className="font-bold text-slate-800">TT CSKH Công ty Cổ phần Lục Giác (615 Âu Cơ)</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-500">Kênh khởi tạo:</span>
-                    <span className="font-bold text-brand-blue">Cổng Quét Mã QR Tự Phục Vụ</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-500">Hotline CSKH:</span>
-                    <a href="tel:02838604999" className="font-bold text-brand-orange hover:underline">(028) 3860 4999</a>
-                  </div>
-                </div>
-              </div>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                {ticket.bao_hanh?.con_han
+                  ? `Hồ sơ đang trong thời hạn bảo hành tiêu chuẩn (còn ${ticket.bao_hanh.so_ngay_con_lai} ngày).`
+                  : 'Sổ bảo hành điện tử 06 tháng sẽ tự động kích hoạt ngay sau khi hoàn tất sửa chữa và bàn giao máy.'}
+              </p>
+              {ticket.bao_hanh?.con_han && (
+                <button
+                  type="button"
+                  onClick={() => setShowWarrantyModal(true)}
+                  className="mt-3 w-full py-2.5 bg-brand-blue hover:bg-blue-700 text-white font-bold rounded-xl text-xs transition cursor-pointer"
+                >
+                  🛡️ Gửi Yêu Cầu Hỗ Trợ Bảo Hành →
+                </button>
+              )}
             </div>
 
-            {/* Card 2: Sổ Bảo Hành & Hậu Mãi Điện Tử (e-Warranty) */}
-            {ticket.bao_hanh ? (
-              <div className="p-6 bg-gradient-to-br from-emerald-50 via-teal-50/70 to-white border border-emerald-200 rounded-3xl shadow-sm">
-                <div className="flex items-center justify-between gap-2 mb-3">
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-2xl">🛡️</span>
-                    <div>
-                      <h3 className="font-extrabold text-slate-800 text-base">Sổ Bảo Hành Điện Tử (e-Warranty)</h3>
-                      <p className="text-xs text-slate-500">
-                        Hạn bảo hành đến: <strong>{new Date(ticket.bao_hanh.han_bao_hanh).toLocaleDateString('vi-VN')}</strong>
-                      </p>
+            {/* Đánh giá dịch vụ nếu đã hoàn tất */}
+            {(ticket.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' || ticket.trang_thai === 'ĐÃ_SỬA_XONG') && (
+              <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+                <h4 className="text-sm font-extrabold text-brand-blue mb-1">⭐ Đánh giá chất lượng phục vụ CSKH</h4>
+                {ticket.da_danh_gia ? (
+                  <p className="text-xs font-bold text-emerald-700">✓ Đã ghi nhận đánh giá của bạn. Cảm ơn quý khách!</p>
+                ) : (
+                  <form onSubmit={handleSubmitReview} className="space-y-3 mt-3">
+                    <div className="flex gap-2">
+                      {[1, 2, 3, 4, 5].map(star => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => setRating(star)}
+                          className={`text-2xl cursor-pointer ${star <= rating ? 'text-amber-400' : 'text-slate-300'}`}
+                        >
+                          ★
+                        </button>
+                      ))}
                     </div>
-                  </div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${ticket.bao_hanh.con_han ? 'bg-emerald-600 text-white' : 'bg-slate-300 text-slate-700'}`}>
-                    {ticket.bao_hanh.trang_thai_text}
-                  </span>
-                </div>
-                <div className="w-full bg-emerald-100 rounded-full h-2.5 mb-2.5 overflow-hidden">
-                  <div className="bg-emerald-500 h-2.5 rounded-full transition-all duration-500" style={{ width: `${ticket.bao_hanh.ti_le_con_lai}%` }}></div>
-                </div>
-                <p className="text-xs text-slate-600 mb-4 leading-relaxed">
-                  {ticket.bao_hanh.con_han
-                    ? `Hồ sơ đang trong thời hạn bảo hành & chăm sóc hậu mãi tiêu chuẩn tại Công ty Cổ phần Lục Giác (còn ${ticket.bao_hanh.so_ngay_con_lai} ngày).`
-                    : 'Hồ sơ đã kết thúc thời hạn bảo hành tiêu chuẩn.'}
-                </p>
-                {ticket.bao_hanh.con_han && (
-                  <button
-                    type="button"
-                    onClick={() => setShowWarrantyModal(true)}
-                    className="w-full py-3 bg-brand-blue hover:bg-blue-700 text-white font-extrabold rounded-xl text-xs transition-colors shadow-sm uppercase tracking-wider cursor-pointer"
-                  >
-                    🛡️ Gửi Yêu Cầu Hỗ Trợ Bảo Hành Qua QR →
-                  </button>
+                    <textarea
+                      value={reviewText}
+                      onChange={e => setReviewText(e.target.value)}
+                      placeholder="Ý kiến đóng góp của bạn..."
+                      rows={2}
+                      className="w-full rounded-xl border border-slate-200 p-2.5 text-xs outline-none focus:border-brand-blue"
+                    />
+                    <button
+                      type="submit"
+                      disabled={reviewLoading}
+                      className="w-full py-2 bg-brand-blue text-white font-bold text-xs rounded-xl"
+                    >
+                      {reviewLoading ? 'Đang gửi...' : 'Gửi Đánh Giá'}
+                    </button>
+                  </form>
                 )}
               </div>
-            ) : (
-              <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/90">
-                <div className="flex items-center gap-2.5 mb-2">
-                  <span className="text-xl">🛡️</span>
-                  <h3 className="text-base font-extrabold text-slate-800">Chính Sách Bảo Hành Điện Tử (e-Warranty)</h3>
-                </div>
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  Sổ bảo hành điện tử (<strong>e-Warranty 06 tháng</strong>) sẽ tự động kích hoạt trên mã QR này ngay sau khi bộ phận Chăm sóc khách hàng hoàn tất xử lý và bàn giao hồ sơ cho bạn.
-                </p>
-              </div>
-            )}
-
-            {/* Card 3: Đánh giá dịch vụ CSKH (sau khi hoàn tất) */}
-            {ticket.da_danh_gia ? (
-              <div role="status" className="rounded-3xl bg-emerald-50 border border-emerald-200 p-5 text-center font-bold text-emerald-800 text-sm">
-                🌟 Cảm ơn bạn! Hồ sơ CSKH này đã được ghi nhận đánh giá chất lượng phục vụ.
-              </div>
-            ) : (
-              (ticket.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' || ticket.trang_thai === 'ĐÃ_SỬA_XONG') && (
-                <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                  <h2 className="text-lg font-extrabold text-brand-blue">⭐ Đánh giá chất lượng phục vụ CSKH</h2>
-                  <p className="mt-1 text-xs text-slate-500">Chia sẻ mức độ hài lòng của bạn với bộ phận Chăm sóc khách hàng Công ty Cổ phần Lục Giác.</p>
-
-                  {reviewMessage ? (
-                    <p role="status" className="mt-4 rounded-xl bg-green-50 p-3 text-sm font-semibold text-green-700">
-                      {reviewMessage}
-                    </p>
-                  ) : (
-                    <form onSubmit={handleSubmitReview} className="mt-4 space-y-4">
-                      <fieldset>
-                        <legend className="mb-2 text-xs font-bold text-slate-700 uppercase">Mức độ hài lòng (1 - 5 sao)</legend>
-                        <div className="flex gap-2" role="radiogroup" aria-label="Chọn số sao đánh giá">
-                          {[1, 2, 3, 4, 5].map(star => (
-                            <button
-                              key={star}
-                              type="button"
-                              role="radio"
-                              aria-checked={rating === star}
-                              aria-label={`${star} sao`}
-                              onClick={() => setRating(star)}
-                              className={`text-3xl transition-colors cursor-pointer ${star <= rating ? 'text-amber-400' : 'text-slate-300'}`}
-                            >
-                              ★
-                            </button>
-                          ))}
-                        </div>
-                      </fieldset>
-
-                      <div>
-                        <label htmlFor="review-text" className="mb-1 block text-xs font-bold text-slate-700">
-                          Ý kiến đóng góp của bạn (không bắt buộc)
-                        </label>
-                        <textarea
-                          id="review-text"
-                          value={reviewText}
-                          onChange={event => setReviewText(event.target.value)}
-                          maxLength={1000}
-                          rows={3}
-                          className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand-blue/50 text-xs"
-                          placeholder="Bạn hài lòng với thái độ phục vụ và tốc độ xử lý hồ sơ QR chứ?"
-                        />
-                      </div>
-
-                      {reviewError && (
-                        <p role="alert" className="rounded-xl bg-red-50 p-3 text-xs text-red-700">{reviewError}</p>
-                      )}
-
-                      <button
-                        type="submit"
-                        disabled={reviewLoading}
-                        className="w-full rounded-xl bg-brand-blue px-5 py-3 font-extrabold text-white transition hover:bg-blue-700 disabled:opacity-60 text-xs uppercase tracking-wider cursor-pointer"
-                      >
-                        {reviewLoading ? 'Đang gửi đánh giá...' : 'Gửi Đánh Giá Dịch Vụ CSKH'}
-                      </button>
-                    </form>
-                  )}
-                </section>
-              )
             )}
           </div>
-        </div>
-
-        {/* SECTION 4: CỔNG HIỂN THỊ PHƯƠNG THỨC THANH TOÁN ĐA KÊNH (VIETQR / MOMO / ZALOPAY / THẺ ATM-VISA / TẠI QUẦY) */}
-        <div className="mt-6">
-          <PaymentMethodSelector
-            ticketCode={ticketCode}
-            customerName={ticket.ho_ten || 'Khách hàng'}
-            defaultAmount={ticket.tien_sau_giam || ticket.tong_tien || ''}
-            paymentStatus={ticket.trang_thai_thanh_toan}
-            ticket={ticket}
-          />
-        </div>
+        )}
 
         {/* Modal Yêu cầu hỗ trợ bảo hành lại */}
         {showWarrantyModal && (
