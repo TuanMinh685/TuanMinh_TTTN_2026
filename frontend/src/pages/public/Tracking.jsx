@@ -567,15 +567,30 @@ function Tracking() {
                 </div>
               </div>
 
-              {/* Thông tin hỗ trợ */}
+              {/* Cam kết dịch vụ & Quyền lợi CSKH (thay cho thông tin địa chỉ đã có ở chân trang) */}
               <div className="bg-white rounded-3xl p-5 shadow-sm border border-slate-200/90">
                 <h3 className="text-sm font-extrabold text-slate-800 mb-3 flex items-center gap-2">
-                  <span>🎧</span> Trung Tâm CSKH Tiếp Nhận
+                  <span>🛡️</span> Cam Kết Dịch Vụ &amp; Quyền Lợi CSKH
                 </h3>
-                <div className="bg-blue-50/60 rounded-2xl p-3.5 border border-blue-200/70 space-y-2 text-xs text-slate-700">
-                  <p>🏢 <strong>Địa chỉ:</strong> 615 Âu Cơ, P. Phú Trung, Q. Tân Phú, TP.HCM</p>
-                  <p>⏰ <strong>Giờ làm việc:</strong> 08:00 - 18:00 (Thứ 2 - Thứ 7)</p>
-                  <p>📞 <strong>Hotline:</strong> <a href="tel:02838604999" className="text-brand-orange font-bold hover:underline">(028) 3860 4999</a></p>
+                <div className="bg-emerald-50/60 rounded-2xl p-3.5 border border-emerald-200/70 space-y-2.5 text-xs text-slate-700">
+                  <div className="flex items-start gap-2">
+                    <span className="text-emerald-600 font-extrabold text-sm leading-none mt-0.5">✓</span>
+                    <p className="leading-relaxed">
+                      <strong>Minh bạch chi phí:</strong> Báo giá rõ ràng trước khi sửa, miễn phí 100% công kiểm tra và tư vấn ban đầu.
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-emerald-600 font-extrabold text-sm leading-none mt-0.5">✓</span>
+                    <p className="leading-relaxed">
+                      <strong>Bảo mật dữ liệu:</strong> Cam kết giữ an toàn và bảo mật tuyệt đối 100% dữ liệu cá nhân trên thiết bị của khách hàng.
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-emerald-600 font-extrabold text-sm leading-none mt-0.5">✓</span>
+                    <p className="leading-relaxed">
+                      <strong>Bảo hành điện tử e-Warranty:</strong> Cấp mã QR bảo hành chính hãng từ 03 - 06 tháng, tra cứu nhanh mọi lúc mọi nơi.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -794,6 +809,63 @@ function Tracking() {
             </div>
           </div>
         )}
+        {/* KHUNG IN PHIẾU ĐIỆN TỬ DÀNH CHO WINDOW.PRINT */}
+        <div id="printable-ticket" className="hidden print:block text-black bg-white p-6 font-sans">
+          {/* Tiêu đề công ty */}
+          <div className="text-center pb-3 border-b-2 border-black">
+            <h2 className="text-base font-extrabold uppercase tracking-wide">CÔNG TY CỔ PHẦN LỤC GIÁC</h2>
+            <p className="text-xs font-semibold">TRUNG TÂM DỊCH VỤ VÀ CHĂM SÓC KHÁCH HÀNG (CSKH)</p>
+            <p className="text-[11px] text-gray-600">Đ/C: 615 Âu Cơ, P. Phú Trung, Q. Tân Phú, TP.HCM • Hotline: (028) 3860 4999</p>
+          </div>
+
+          <div className="text-center my-3">
+            <h1 className="text-base font-black uppercase">PHIẾU TIẾP NHẬN &amp; THEO DÕI CSKH QUA MÃ QR</h1>
+            <p className="text-sm font-mono font-bold mt-0.5">Mã tra cứu: #{ticketCode}</p>
+          </div>
+
+          {/* Bảng thông tin */}
+          <div className="border border-black rounded-lg p-3 my-2 space-y-1.5 text-xs">
+            <div className="flex justify-between">
+              <span>Khách hàng: <strong>{ticket.ho_ten || 'Khách hàng'}</strong></span>
+              <span>SĐT: <strong className="font-mono">{ticket.so_dien_thoai || 'N/A'}</strong></span>
+            </div>
+            <div className="flex justify-between">
+              <span>Thiết bị: <strong>{deviceTitle}</strong></span>
+              <span>Số Serial / S/N: <strong className="font-mono">{ticket.so_imei_serial || 'N/A'}</strong></span>
+            </div>
+            <div>
+              <span>Nội dung yêu cầu / Lỗi: <strong>{issueText}</strong></span>
+            </div>
+            <div className="flex justify-between pt-1 border-t border-dashed border-gray-400">
+              <span>Trạng thái: <strong>{statusInfo.label}</strong></span>
+              <span>Ngày tiếp nhận: <strong>{ticket.ngay_tao ? new Date(ticket.ngay_tao).toLocaleString('vi-VN') : 'Hôm nay'}</strong></span>
+            </div>
+          </div>
+
+          {/* Mã QR tra cứu */}
+          {ticketQr && (
+            <div className="text-center my-3">
+              <img src={ticketQr} alt="QR Tra cứu" className="w-28 h-28 mx-auto" />
+              <p className="text-[10px] text-gray-600 mt-1">Quét mã QR bằng điện thoại để tra cứu tiến độ và sổ bảo hành e-Warranty</p>
+            </div>
+          )}
+
+          {/* Cam kết & Chữ ký */}
+          <div className="grid grid-cols-2 text-center text-xs mt-4 pt-3 border-t border-black">
+            <div>
+              <p className="font-bold uppercase">Khách hàng</p>
+              <p className="text-[10px] italic text-gray-500">(Ký và ghi rõ họ tên)</p>
+              <div className="h-12"></div>
+              <p className="font-semibold">{ticket.ho_ten || ''}</p>
+            </div>
+            <div>
+              <p className="font-bold uppercase">Đại diện CSKH Lục Giác</p>
+              <p className="text-[10px] italic text-gray-500">(Ký và xác nhận)</p>
+              <div className="h-12"></div>
+              <p className="font-semibold">Trung Tâm CSKH 615 Âu Cơ</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

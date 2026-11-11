@@ -40,8 +40,8 @@ p, li, blockquote {
 
 @media print {
   @page {
-    size: 80mm auto;
-    margin: 4mm;
+    size: auto;
+    margin: 6mm;
   }
 
   body * {
@@ -49,7 +49,9 @@ p, li, blockquote {
   }
 
   #thermal-receipt,
-  #thermal-receipt * {
+  #thermal-receipt *,
+  #printable-ticket,
+  #printable-ticket * {
     visibility: visible !important;
   }
 
@@ -62,5 +64,17 @@ p, li, blockquote {
     padding: 0;
     font-family: Arial, sans-serif;
     font-size: 10pt;
+  }
+
+  #printable-ticket {
+    display: block !important;
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+    max-width: 180mm;
+    margin: 0 auto;
+    border: 0;
+    padding: 6mm;
+    font-family: Arial, sans-serif;
   }
 }
