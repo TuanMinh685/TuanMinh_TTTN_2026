@@ -70,6 +70,7 @@ function Dashboard() {
   const currentAccountId = Number(localStorage.getItem('accountId') || 0);
 
   const isExecutive = role === 'GIAM_DOC' || role === 'ADMIN';
+  const isSystemAdmin = role === 'ADMIN' || role === 'GIAM_DOC';
   const isManagerOrAbove = isExecutive || role === 'QUAN_LY';
   const canReceptionAction = isManagerOrAbove || role === 'LE_TAN';
   const canTechAction = isManagerOrAbove || role === 'KY_THUAT_VIEN';
@@ -264,6 +265,8 @@ function Dashboard() {
     }
     if (canManageEmployees) {
       load(fetchEmployees, setEmployees, 'danh sách nhân sự CSKH');
+    }
+    if (isSystemAdmin) {
       fetchAuditLogs()
         .then(data => {
           if (active) {
@@ -277,7 +280,13 @@ function Dashboard() {
     return () => {
       active = false;
     };
-  }, [canReceptionAction, canViewStats, canManageEmployees, fetchTickets, fetchBookings, fetchStats, fetchEmployees, fetchAuditLogs]);
+  }, [canReceptionAction, canViewStats, canManageEmployees, isSystemAdmin, fetchTickets, fetchBookings, fetchStats, fetchEmployees, fetchAuditLogs]);
+
+  useEffect(() => {
+    if (!isSystemAdmin && activeTab === 'SECURITY') {
+      setActiveTab('TICKETS');
+    }
+  }, [isSystemAdmin, activeTab]);
 
   useEffect(() => {
     try {
@@ -741,17 +750,15 @@ function Dashboard() {
               </span>
             )}
           </button>
-          {isManagerOrAbove && (
+          {isSystemAdmin && (
             <button
               onClick={async () => {
                 setActiveTab('SECURITY');
-                if (canManageEmployees) {
-                  try {
-                    const data = await fetchAuditLogs();
-                    setAuditLogs(data.logs || []);
-                    setSecurityStatus(data.securityStatus || null);
-                  } catch {}
-                }
+                try {
+                  const data = await fetchAuditLogs();
+                  setAuditLogs(data.logs || []);
+                  setSecurityStatus(data.securityStatus || null);
+                } catch {}
               }}
               className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'SECURITY' ? 'bg-brand-blue text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
             >
@@ -1717,8 +1724,8 @@ function Dashboard() {
         );
       })()}
 
-      {/* TAB 5: BẢO MẬT DOANH NGHIỆP & NHẬT KÝ KIỂM TOÁN (ENTERPRISE SECURITY & AUDIT - CHỈ QUẢN LÝ / GIÁM ĐỐC) */}
-      {activeTab === 'SECURITY' && isManagerOrAbove && (
+      {/* TAB 5: BẢO MẬT DOANH NGHIỆP & NHẬT KÝ KIỂM TOÁN (ENTERPRISE SECURITY & AUDIT - CHỈ QUẢN TRỊ HỆ THỐNG / ADMIN) */}
+      {activeTab === 'SECURITY' && isSystemAdmin && (
         <div className="space-y-6">
           {/* BANNER TỔNG QUAN KIẾN TRÚC BẢO MẬT CHUẨN DOANH NGHIỆP */}
           <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-7 shadow-sm space-y-6">
