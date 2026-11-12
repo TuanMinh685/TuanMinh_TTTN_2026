@@ -338,45 +338,6 @@ function Tracking() {
           </div>
         </div>
 
-        {/* BANNER CHÚC MỪNG KHỞI TẠO HỒ SƠ THÀNH CÔNG */}
-        {showSuccessBanner && (
-          <div className="mb-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-4 shadow-md flex items-center justify-between gap-3 border border-emerald-400/40">
-            <div className="flex items-center gap-3">
-              <span className="text-2xl shrink-0">🎉</span>
-              <div>
-                <p className="font-extrabold text-sm sm:text-base">Khởi tạo hồ sơ CSKH thành công!</p>
-                <p className="text-xs text-emerald-100 mt-0.5">
-                  Mã hồ sơ: <strong className="text-amber-300 font-mono">#{ticketCode}</strong>. Thông báo xác nhận &amp; liên kết tra cứu đã tự động gửi qua <strong className="text-white font-semibold">Zalo ZNS / SMS</strong> tới số điện thoại của bạn. Quý khách vui lòng kiểm tra tin nhắn Zalo/SMS hoặc xuất trình mã QR tại quầy 615 Âu Cơ.
-                </p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => setShowSuccessBanner(false)}
-              className="p-1 px-2.5 rounded-xl bg-white/20 hover:bg-white/30 text-white font-bold text-xs shrink-0 cursor-pointer transition"
-            >
-              ✕ Đóng
-            </button>
-          </div>
-        )}
-
-        {/* BANNER THÔNG BÁO TINH GỌN */}
-        {notifPermission === 'default' && (
-          <div className="mb-4 bg-blue-50 border border-blue-200 rounded-2xl p-3 flex items-center justify-between gap-3 text-xs shadow-2xs">
-            <div className="flex items-center gap-2 text-slate-700">
-              <span className="text-base shrink-0">🔔</span>
-              <span className="text-xs font-medium">Bật thông báo chuông &amp; rung khi thiết bị xử lý xong.</span>
-            </div>
-            <button
-              type="button"
-              onClick={handleEnableNotification}
-              className="px-3 py-1 bg-brand-blue hover:bg-brand-blue-hover text-white font-bold text-xs rounded-lg shrink-0 cursor-pointer shadow-xs transition"
-            >
-              Bật ngay
-            </button>
-          </div>
-        )}
-
         {/* SECTION 1: HERO BANNER HỒ SƠ PHIẾU ĐIỆN TỬ CSKH - TINH GỌN MOBILE FIRST */}
         <div className="rounded-3xl bg-gradient-to-r from-blue-700 via-brand-blue to-sky-600 text-white p-5 md:p-7 shadow-xl relative overflow-hidden border border-blue-400/30 mb-5">
           <div className="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-white/10 blur-3xl pointer-events-none"></div>
