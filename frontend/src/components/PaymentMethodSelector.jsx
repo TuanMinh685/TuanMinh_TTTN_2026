@@ -16,12 +16,14 @@ function PaymentMethodSelector({
   defaultAmount = '',
   paymentStatus = '',
   ticket = null,
-  onPaymentSuccess = null
+  onPaymentSuccess = null,
+  isStaff = false
 }) {
-  // Xác định mặc định là Khách Online hay Tại Quầy
-  const isOnlineService = ticket?.loai_dich_vu === 'ONLINE' || ticket?.loai_dich_vu === 'GIAO_HANG';
-  const [customerMode, setCustomerMode] = useState(isOnlineService ? 'ONLINE' : 'COUNTER'); // 'ONLINE' | 'COUNTER'
-  const [counterSubMethod, setCounterSubMethod] = useState('CASH'); // 'CASH' | 'VIETQR'
+  const currentRole = localStorage.getItem('role') || '';
+  const isEmployee = isStaff || !!currentRole;
+
+  // Lựa chọn phương thức thanh toán: 'VIETQR' (Chuyển khoản) hoặc 'TIEN_MAT' (Tiền mặt tại quầy)
+  const [paymentMethod, setPaymentMethod] = useState('VIETQR');
 
   const [copiedField, setCopiedField] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
@@ -86,7 +88,7 @@ function PaymentMethodSelector({
             <span>💳</span> Thanh Toán Hồ Sơ CSKH
           </h3>
           <p className="text-xs text-slate-500 mt-0.5">
-            Mã phiếu: <strong className="text-slate-700">#{ticketCode}</strong> • Khách: <strong className="text-slate-700">{customerName}</strong>
+            Mã phiếu: <strong className="text-slate-700">#{ticketCode}</strong> • Khách hàng: <strong className="text-slate-700">{customerName}</strong>
           </p>
         </div>
 
@@ -114,51 +116,51 @@ function PaymentMethodSelector({
         </div>
       )}
 
-      {/* Tab chọn hình thức: Khách Online vs Khách Tại Quầy */}
+      {/* LỰA CHỌN PHƯƠNG THỨC: CHUYỂN KHOẢN VIETQR HOẶC TIỀN MẶT */}
       <div className="mt-4">
-        <label className="block text-xs font-bold text-slate-600 mb-1.5">
-          Vui lòng chọn đối tượng tiếp nhận thanh toán:
+        <label className="block text-xs font-bold text-slate-700 mb-2">
+          Chọn hình thức thanh toán:
         </label>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-2.5">
           <button
             type="button"
-            onClick={() => setCustomerMode('ONLINE')}
-            className={`py-3 px-3 rounded-2xl border text-center transition cursor-pointer flex flex-col items-center justify-center ${
-              customerMode === 'ONLINE'
-                ? 'border-brand-blue bg-blue-50/80 text-brand-blue font-bold shadow-xs ring-2 ring-blue-500/20'
+            onClick={() => setPaymentMethod('VIETQR')}
+            className={`py-3 px-3 rounded-2xl border text-center transition cursor-pointer flex flex-col items-center justify-center gap-1 ${
+              paymentMethod === 'VIETQR'
+                ? 'border-brand-blue bg-blue-50/90 text-brand-blue font-bold shadow-xs ring-2 ring-blue-500/20'
                 : 'border-slate-200 bg-slate-50/70 text-slate-600 hover:bg-slate-100 font-semibold'
             }`}
           >
-            <span className="text-base mb-0.5">🌐</span>
-            <span className="text-xs sm:text-sm">Khách Đặt Online</span>
-            <span className="text-[10px] opacity-75 font-normal mt-0.5">Chuyển khoản VietQR từ xa 24/7</span>
+            <span className="text-lg">🏦</span>
+            <span className="text-xs sm:text-sm font-bold">Chuyển Khoản (VietQR)</span>
+            <span className="text-[10px] opacity-75 font-normal">Quét mã Banking nhận ngay 24/7</span>
           </button>
 
           <button
             type="button"
-            onClick={() => setCustomerMode('COUNTER')}
-            className={`py-3 px-3 rounded-2xl border text-center transition cursor-pointer flex flex-col items-center justify-center ${
-              customerMode === 'COUNTER'
-                ? 'border-brand-blue bg-blue-50/80 text-brand-blue font-bold shadow-xs ring-2 ring-blue-500/20'
+            onClick={() => setPaymentMethod('TIEN_MAT')}
+            className={`py-3 px-3 rounded-2xl border text-center transition cursor-pointer flex flex-col items-center justify-center gap-1 ${
+              paymentMethod === 'TIEN_MAT'
+                ? 'border-emerald-600 bg-emerald-50/90 text-emerald-700 font-bold shadow-xs ring-2 ring-emerald-500/20'
                 : 'border-slate-200 bg-slate-50/70 text-slate-600 hover:bg-slate-100 font-semibold'
             }`}
           >
-            <span className="text-base mb-0.5">🏢</span>
-            <span className="text-xs sm:text-sm">Khách Tại Quầy</span>
-            <span className="text-[10px] opacity-75 font-normal mt-0.5">Tiền mặt hoặc Quét QR tại 615 Âu Cơ</span>
+            <span className="text-lg">💵</span>
+            <span className="text-xs sm:text-sm font-bold">Tiền Mặt Tại Quầy</span>
+            <span className="text-[10px] opacity-75 font-normal">Thanh toán trực tiếp tại 615 Âu Cơ</span>
           </button>
         </div>
       </div>
 
-      {/* NỘI DUNG 1: DÀNH CHO KHÁCH ĐẶT ONLINE */}
-      {customerMode === 'ONLINE' && (
+      {/* NỘI DUNG 1: CHUYỂN KHOẢN QUA VIETQR */}
+      {paymentMethod === 'VIETQR' && (
         <div className="mt-4 p-4 rounded-2xl bg-blue-50/40 border border-blue-200/80 space-y-3">
           <div className="flex items-center gap-2 text-xs font-bold text-brand-blue">
-            <span>🌐</span>
-            <span>HƯỚNG DẪN THANH TOÁN CHO KHÁCH HÀNG ĐẶT ONLINE / GIAO NHẬN TẬN NƠI</span>
+            <span>🏦</span>
+            <span>QUÉT MÃ VIETQR QUA ỨNG DỤNG NGÂN HÀNG (MOBILE BANKING)</span>
           </div>
           <p className="text-xs text-slate-600 leading-relaxed">
-            Quý khách chỉ cần mở ứng dụng ngân hàng bất kỳ (Mobile Banking), quét mã VietQR bên dưới hoặc nhập số tài khoản để hoàn tất thanh toán. Hệ thống đối soát tự động ghi nhận ngay sau 3 - 5 giây.
+            Mở ứng dụng ngân hàng bất kỳ, quét mã VietQR bên dưới hoặc chuyển khoản theo đúng thông tin để hệ thống đối soát tự động ghi nhận ngay sau 3 - 5 giây.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center gap-4 bg-white p-4 rounded-2xl border border-slate-200">
@@ -166,7 +168,7 @@ function PaymentMethodSelector({
             <div className="p-2 rounded-xl border border-slate-200/80 bg-slate-50 shrink-0 text-center">
               <img
                 src={vietQrImageUrl}
-                alt="Mã VietQR Chuyển khoản Online"
+                alt="Mã VietQR Chuyển khoản"
                 className="w-36 h-36 mx-auto object-contain rounded-lg"
               />
               <span className="text-[10px] font-extrabold text-brand-blue uppercase tracking-wider block mt-1.5">
@@ -191,7 +193,7 @@ function PaymentMethodSelector({
                 <button
                   type="button"
                   onClick={() => handleCopy('accNo', DEFAULT_BANK.accNo)}
-                  className="px-2.5 py-1 bg-white hover:bg-blue-50 text-slate-700 hover:text-brand-blue font-bold text-[11px] rounded-lg border border-slate-200 transition"
+                  className="px-2.5 py-1 bg-white hover:bg-blue-50 text-slate-700 hover:text-brand-blue font-bold text-[11px] rounded-lg border border-slate-200 transition cursor-pointer"
                 >
                   {copiedField === 'accNo' ? '✓ Đã chép' : 'Sao chép'}
                 </button>
@@ -212,7 +214,7 @@ function PaymentMethodSelector({
                 <button
                   type="button"
                   onClick={() => handleCopy('content', transferContent)}
-                  className="px-2.5 py-1 bg-white hover:bg-blue-50 text-slate-700 hover:text-brand-blue font-bold text-[11px] rounded-lg border border-slate-200 transition"
+                  className="px-2.5 py-1 bg-white hover:bg-blue-50 text-slate-700 hover:text-brand-blue font-bold text-[11px] rounded-lg border border-slate-200 transition cursor-pointer"
                 >
                   {copiedField === 'content' ? '✓ Đã chép' : 'Sao chép'}
                 </button>
@@ -220,104 +222,54 @@ function PaymentMethodSelector({
             </div>
           </div>
 
-          {!isPaid && (
-            <button
-              type="button"
-              disabled={isVerifying}
-              onClick={handleSimulatePayment}
-              className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
-            >
-              <span>{isVerifying ? '⏳ Đang kiểm tra đối soát...' : '⚡ Tôi đã chuyển khoản xong / Khớp lệnh ngay (Test)'}</span>
-            </button>
+          {/* Nút giả lập thanh toán chỉ dành cho nhân viên / Lễ tân test, ẩn đối với khách hàng thông thường */}
+          {isEmployee && !isPaid && (
+            <div className="pt-1">
+              <button
+                type="button"
+                disabled={isVerifying}
+                onClick={handleSimulatePayment}
+                className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold text-xs rounded-xl border border-slate-300 transition flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+              >
+                <span>{isVerifying ? '⏳ Đang kiểm tra đối soát...' : '⚡ Khớp lệnh thử nghiệm đối soát VietQR (Test nội bộ)'}</span>
+              </button>
+            </div>
           )}
         </div>
       )}
 
-      {/* NỘI DUNG 2: DÀNH CHO KHÁCH TẠI QUẦY (615 ÂU CƠ) */}
-      {customerMode === 'COUNTER' && (
-        <div className="mt-4 p-4 rounded-2xl bg-amber-50/50 border border-amber-200/80 space-y-3">
+      {/* NỘI DUNG 2: THANH TOÁN TIỀN MẶT TRỰC TIẾP */}
+      {paymentMethod === 'TIEN_MAT' && (
+        <div className="mt-4 p-4 rounded-2xl bg-emerald-50/50 border border-emerald-200/80 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-amber-900 flex items-center gap-1.5">
-              <span>🏢</span> KHÁCH HÀNG GIAO DỊCH TRỰC TIẾP TẠI QUẦY CSKH (615 ÂU CƠ)
+            <span className="text-xs font-bold text-emerald-900 flex items-center gap-1.5">
+              <span>💵</span> THANH TOÁN TIỀN MẶT CHO LỄ TÂN TẠI BÀN TIẾP NHẬN
             </span>
           </div>
 
-          {/* Chọn phương thức tại quầy: Tiền mặt hoặc Quét QR */}
-          <div className="grid grid-cols-2 gap-2 pt-1">
-            <button
-              type="button"
-              onClick={() => setCounterSubMethod('CASH')}
-              className={`py-2 px-3 rounded-xl border text-xs font-bold transition cursor-pointer ${
-                counterSubMethod === 'CASH'
-                  ? 'bg-amber-600 text-white border-amber-600 shadow-xs'
-                  : 'bg-white text-slate-700 border-slate-200 hover:bg-amber-50'
-              }`}
-            >
-              💵 Tiền Mặt Cho Lễ Tân
-            </button>
-            <button
-              type="button"
-              onClick={() => setCounterSubMethod('VIETQR')}
-              className={`py-2 px-3 rounded-xl border text-xs font-bold transition cursor-pointer ${
-                counterSubMethod === 'VIETQR'
-                  ? 'bg-brand-blue text-white border-brand-blue shadow-xs'
-                  : 'bg-white text-slate-700 border-slate-200 hover:bg-blue-50'
-              }`}
-            >
-              🏦 Quét VietQR Tại Bàn Lễ Tân
-            </button>
-          </div>
-
-          {counterSubMethod === 'CASH' ? (
-            <div className="p-3.5 rounded-xl bg-white border border-amber-200 text-xs text-amber-900 space-y-2">
-              <p className="font-extrabold text-sm text-slate-800">💵 Hướng dẫn thanh toán tiền mặt:</p>
-              <ol className="list-decimal list-inside space-y-1.5 text-slate-700 leading-relaxed">
-                <li>
-                  Quý khách xuất trình <strong>Mã phiếu QR #{ticketCode}</strong> cho nhân viên Lễ tân tại quầy.
-                </li>
-                <li>
-                  Thanh toán số tiền <strong className="text-brand-blue">{numericAmount > 0 ? `${numericAmount.toLocaleString('vi-VN')} ₫` : 'Miễn phí'}</strong> bằng tiền mặt.
-                </li>
-                <li>
-                  Lễ tân sẽ bấm <strong>"Xác nhận đã thu Tiền mặt"</strong> trên hệ thống, in phiếu thu và kích hoạt ngay <strong>Sổ bảo hành điện tử (e-Warranty)</strong> cho quý khách.
-                </li>
-              </ol>
-              <div className="pt-2 border-t border-amber-100 flex items-center gap-1.5 text-[11px] text-amber-800">
+          <div className="p-4 rounded-2xl bg-white border border-emerald-200 text-xs text-slate-700 space-y-2.5">
+            <p className="font-extrabold text-sm text-slate-800">📋 Quy trình thanh toán tiền mặt tại quầy:</p>
+            <ol className="list-decimal list-inside space-y-2 text-slate-700 leading-relaxed">
+              <li>
+                Quý khách xuất trình <strong>Mã phiếu QR #{ticketCode}</strong> cho nhân viên Lễ tân tại quầy.
+              </li>
+              <li>
+                Thanh toán số tiền <strong className="text-brand-blue text-sm">{numericAmount > 0 ? `${numericAmount.toLocaleString('vi-VN')} ₫` : 'Miễn phí'}</strong> trực tiếp bằng tiền mặt.
+              </li>
+              <li>
+                Lễ tân sẽ bấm <strong>"Xác nhận đã thu Tiền mặt"</strong> trên hệ thống, in biên nhận và kích hoạt ngay <strong>Sổ bảo hành điện tử (e-Warranty)</strong> cho quý khách.
+              </li>
+            </ol>
+            <div className="pt-2.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
+              <div className="flex items-center gap-1.5">
                 <span>📍</span>
-                <span>Địa chỉ: <strong>615 Âu Cơ, P. Phú Trung, Q. Tân Phú, TP.HCM</strong> (Hotline: 028.3860.4999)</span>
+                <span>Địa chỉ quầy: <strong>615 Âu Cơ, P. Phú Trung, Q. Tân Phú, TP.HCM</strong></span>
+              </div>
+              <div className="text-emerald-700 font-semibold">
+                Hotline hỗ trợ: 028.3860.4999
               </div>
             </div>
-          ) : (
-            <div className="p-3.5 rounded-xl bg-white border border-blue-200 text-xs text-slate-700 space-y-3">
-              <p className="font-extrabold text-sm text-slate-800">🏦 Quét mã VietQR tại bàn tiếp nhận Lễ tân:</p>
-              <div className="flex flex-col sm:flex-row items-center gap-4">
-                <div className="p-2 rounded-xl border border-slate-200 bg-slate-50 shrink-0 text-center">
-                  <img
-                    src={vietQrImageUrl}
-                    alt="Mã VietQR Tại Quầy"
-                    className="w-32 h-32 mx-auto object-contain rounded-lg"
-                  />
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mt-1">
-                    Quét tại quầy 615 Âu Cơ
-                  </span>
-                </div>
-                <div className="space-y-1.5 text-xs">
-                  <p>
-                    • Số tiền: <strong className="text-brand-blue font-mono text-sm">{numericAmount > 0 ? `${numericAmount.toLocaleString('vi-VN')} ₫` : 'Miễn phí'}</strong>
-                  </p>
-                  <p>
-                    • Ngân hàng: <strong>{DEFAULT_BANK.name}</strong>
-                  </p>
-                  <p>
-                    • Nội dung: <strong className="text-brand-orange font-mono">{transferContent}</strong>
-                  </p>
-                  <p className="text-[11px] text-slate-500 mt-1">
-                    Sau khi quý khách quét và chuyển khoản thành công, Lễ tân sẽ bấm xác nhận ngay tại bàn.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
+          </div>
         </div>
       )}
 

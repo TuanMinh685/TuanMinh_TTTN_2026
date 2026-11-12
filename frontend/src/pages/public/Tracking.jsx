@@ -346,7 +346,7 @@ function Tracking() {
               <div>
                 <p className="font-extrabold text-sm sm:text-base">Khởi tạo hồ sơ CSKH thành công!</p>
                 <p className="text-xs text-emerald-100 mt-0.5">
-                  Mã hồ sơ: <strong className="text-amber-300 font-mono">#{ticketCode}</strong>. Thiết bị của bạn đã được ghi nhận trên hệ thống. Hãy xuất trình mã QR tại quầy 615 Âu Cơ.
+                  Mã hồ sơ: <strong className="text-amber-300 font-mono">#{ticketCode}</strong>. Thông báo xác nhận &amp; liên kết tra cứu đã tự động gửi qua <strong className="text-white font-semibold">Zalo ZNS / SMS</strong> tới số điện thoại của bạn. Quý khách vui lòng kiểm tra tin nhắn Zalo/SMS hoặc xuất trình mã QR tại quầy 615 Âu Cơ.
                 </p>
               </div>
             </div>

@@ -1,6 +1,7 @@
 const { pool } = require('../config/db.config');
 const { getIo } = require('../config/socket.config');
 const { formatVietnamISO, markQrSessionSubmitted } = require('./ticket_session.service');
+const notificationService = require('./notification.service');
 
 const submitIntake = async (customerData) => {
     const client = await pool.connect();
@@ -109,6 +110,15 @@ const submitIntake = async (customerData) => {
                 createdAt: createdAtVN
             });
         } catch (socketErr) {}
+
+        // 6. Tự động gửi tin nhắn xác nhận tới SĐT / Zalo của khách hàng
+        notificationService.sendNotification({
+            type: 'TICKET_CREATED',
+            phone: resolvedPhone,
+            customerName: resolvedFullName,
+            ticketCode: ticket.ma_tra_cuu,
+            deviceName: resolvedDeviceName
+        }).catch(err => console.error('[AutoNotification Error]:', err.message));
 
         return {
             ticketId: ticket.id,
@@ -272,6 +282,16 @@ const submitBooking = async (bookingData) => {
                 time: gioHen
             });
         } catch (err) {}
+
+        // Tự động gửi tin nhắn xác nhận đặt lịch hẹn tới SĐT / Zalo của khách hàng
+        notificationService.sendNotification({
+            type: 'BOOKING_CONFIRMATION',
+            phone: phone,
+            customerName: fullName,
+            appointmentDate: ngayHen,
+            appointmentTime: gioHen,
+            deviceName: bookingData.deviceName || ''
+        }).catch(err => console.error('[AutoNotification Error]:', err.message));
 
         return { bookingId: newBooking.rows[0].id };
     } catch (err) {

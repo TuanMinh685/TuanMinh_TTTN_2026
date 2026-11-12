@@ -110,9 +110,9 @@ function HomeLanding() {
   };
 
   const hero = cmsConfig?.hero || {
-    titleLine1: 'Dịch Vụ Sửa Chữa & Chăm Sóc Khách Hàng',
-    titleHighlight: 'Theo Dõi Tiến Độ & Bảo Hành Qua Mã QR',
-    description: 'Hỗ trợ tiếp nhận thiết bị nhanh chóng, theo dõi tiến độ kiểm tra phần cứng & xử lý phần mềm thời gian thực, quản lý Sổ bảo hành điện tử (e-Warranty) và thanh toán tiện lợi chỉ với một lần quét mã QR.',
+    titleLine1: 'Hệ Thống Tiếp Nhận & Chăm Sóc Khách Hàng',
+    titleHighlight: 'Quản Lý Sửa Chữa & Bảo Hành Điện Tử QR',
+    description: 'Số hóa quy trình tiếp nhận thiết bị máy tính và hỗ trợ sự cố phần mềm. Khách hàng dễ dàng theo dõi tiến độ kiểm tra thời gian thực, thanh toán linh hoạt và kích hoạt Sổ bảo hành điện tử (e-Warranty) chỉ với một lần quét mã QR.',
     bannerImageUrl: '',
     showBannerImage: false,
     kioskTitle: 'Cổng Quét QR Tự Phục Vụ',
@@ -255,7 +255,7 @@ function HomeLanding() {
               </div>
 
               {/* 3 Nút nghiệp vụ chính đồng nhất */}
-              <div className="flex flex-wrap gap-2.5 max-w-2xl">
+              <div className="flex flex-wrap gap-2.5 max-w-2xl pt-1">
                 <Link
                   to="/intake"
                   className="px-4 py-2.5 bg-brand-blue hover:bg-brand-blue-hover active:brightness-95 text-white font-medium rounded-lg text-xs sm:text-sm transition shadow-xs"
@@ -274,21 +274,6 @@ function HomeLanding() {
                 >
                   📅 Đặt Lịch Hẹn
                 </Link>
-              </div>
-
-              {/* 4 Chỉ số cam kết nhã nhặn */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1 max-w-2xl">
-                {[
-                  { value: '30 Giây', label: 'Tiếp nhận qua mã QR' },
-                  { value: 'Thời gian thực', label: 'Cập nhật tiến độ xử lý' },
-                  { value: '06 Tháng', label: 'Bảo hành điện tử QR' },
-                  { value: '1–5 Sao', label: 'Đánh giá chất lượng CSAT' }
-                ].map((stat, idx) => (
-                  <div key={idx} className="rounded-lg bg-white border border-slate-200 p-2.5">
-                    <p className="text-sm font-bold text-slate-900 leading-tight">{stat.value}</p>
-                    <p className="text-[11px] text-slate-500 mt-0.5">{stat.label}</p>
-                  </div>
-                ))}
               </div>
             </div>
 
@@ -390,7 +375,7 @@ function HomeLanding() {
         <div className="container mx-auto px-4 sm:px-6">
           <div className="text-center mb-10">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              QUY TRÌNH TIÊU CHUẨN ĐỀ TÀI
+              QUY TRÌNH TIÊU CHUẨN DỊCH VỤ
             </span>
             <h2 className="text-2xl font-bold text-slate-900 mt-1">
               4 Trụ Cột Chăm Sóc Khách Hàng Qua Mã QR
@@ -432,7 +417,7 @@ function HomeLanding() {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
             <div>
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                DỊCH VỤ KỸ THUẬT &amp; HỖ TRỢ TẬN TÂM (DỮ LIỆU ĐỘNG TỪ BACKEND CMS)
+                DỊCH VỤ KỸ THUẬT &amp; HỖ TRỢ CHUYÊN NGHIỆP
               </span>
               <h2 className="text-2xl font-bold text-slate-900 mt-1">
                 Các Hạng Mục Dịch Vụ Tiếp Nhận &amp; Xử Lý

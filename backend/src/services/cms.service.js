@@ -26,13 +26,7 @@ const DEFAULT_CMS_CONFIG = {
         bannerImageUrl: '',
         showBannerImage: false,
         kioskTitle: 'Cổng Quét QR Tự Phục Vụ',
-        kioskBranch: '615 Âu Cơ',
-        stats: [
-            { value: '30 Giây', label: 'Tiếp nhận qua mã QR' },
-            { value: 'Thời gian thực', label: 'Cập nhật tiến độ xử lý' },
-            { value: '06 Tháng', label: 'Bảo hành điện tử QR' },
-            { value: '1–5 Sao', label: 'Đánh giá chất lượng CSAT' }
-        ]
+        kioskBranch: '615 Âu Cơ'
     },
     pillarsSectionTitle: '4 Trụ Cột Chăm Sóc Khách Hàng Qua Mã QR',
     pillarsSectionSubtitle: 'Mỗi thiết bị hoặc yêu cầu phần mềm được quản lý bằng một mã QR định danh duy nhất xuyên suốt quy trình hỗ trợ.',

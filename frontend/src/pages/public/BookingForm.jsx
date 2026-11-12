@@ -66,29 +66,60 @@ function BookingForm() {
 
   if (success) {
     return (
-      <div className="bg-[#f0f5fa] flex items-center justify-center p-4">
-        <div className="max-w-lg w-full bg-white rounded-3xl shadow-xl p-6 md:p-8 text-center border-t-8 border-brand-green">
+      <div className="bg-[#f0f5fa] min-h-[80vh] flex items-center justify-center p-4">
+        <div className="max-w-xl w-full bg-white rounded-3xl shadow-xl p-6 md:p-8 text-center border-t-8 border-brand-green">
           <div className="w-16 h-16 bg-green-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
             ✓
           </div>
-          <h2 className="text-2xl font-bold text-brand-blue mb-2">Đặt lịch hẹn CSKH thành công!</h2>
-          <p className="text-slate-600 text-xs md:text-sm mb-6">
-            Cảm ơn bạn <strong>{formData.fullName}</strong> đã đặt hẹn trước. Khi bạn đến quầy lễ tân tại <strong>Công ty Cổ phần Lục Giác (615 Âu Cơ)</strong>, nhân viên sẽ xác nhận lịch hẹn và khởi tạo <strong>Mã QR Hồ Sơ CSKH</strong> ngay lập tức!
+          <h2 className="text-2xl font-bold text-brand-blue mb-2">Đặt Lịch Hẹn CSKH Thành Công!</h2>
+          <p className="text-slate-600 text-xs md:text-sm mb-5">
+            Cảm ơn bạn <strong>{formData.fullName}</strong> đã đặt lịch hẹn trước. Hệ thống đã tự động gửi xác nhận qua <strong>Zalo ZNS / Tin nhắn SMS</strong> đến số điện thoại <strong>{formData.phone}</strong>.
           </p>
 
-          <div className="mb-6 p-4 rounded-2xl bg-blue-50/70 border border-blue-200 text-xs text-slate-600 text-left space-y-1">
-            <span className="font-bold text-brand-blue block mb-1">📋 Thông tin lịch hẹn đã ghi nhận:</span>
-            <p>• <strong>Khách hàng:</strong> {formData.fullName} ({formData.phone})</p>
-            <p>• <strong>Thời gian hẹn:</strong> {formData.gioHen} - Ngày {formData.ngayHen}</p>
-            <p>• <strong>Địa điểm:</strong> Trung tâm CSKH 615 Âu Cơ, P. Phú Trung, Q. Tân Phú, TP.HCM</p>
+          {/* KHUNG THÔNG BÁO XÁC NHẬN ZALO / SMS TỰ ĐỘNG */}
+          <div className="mb-6 p-4 rounded-2xl bg-gradient-to-br from-blue-50 to-emerald-50 border border-blue-200/70 text-left space-y-3">
+            <div className="flex items-center justify-between border-b border-blue-100 pb-2">
+              <span className="inline-flex items-center gap-2 text-xs font-bold text-brand-blue">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                </span>
+                📲 Đã gửi tin nhắn xác nhận tự động qua Zalo ZNS / SMS
+              </span>
+              <span className="text-[11px] font-bold bg-white text-emerald-700 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                Gửi tới: {formData.phone}
+              </span>
+            </div>
+
+            {/* Bong bóng tin nhắn mô phỏng thực tế Zalo OA */}
+            <div className="bg-white rounded-xl p-3.5 border border-slate-200/80 shadow-2xs space-y-2 text-xs">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                <div className="flex items-center gap-1.5 font-bold text-slate-800 text-xs">
+                  <span>🏢 CÔNG TY CỔ PHẦN LỤC GIÁC</span>
+                  <span className="text-blue-500 text-xs" title="Tài khoản Doanh nghiệp xác thực">☑️</span>
+                </div>
+                <span className="text-[10px] text-slate-400">Tin nhắn Zalo OA / SMS</span>
+              </div>
+              <p className="text-slate-700 leading-relaxed">
+                Kính gửi <strong>{formData.fullName}</strong>, lịch hẹn chăm sóc &amp; kiểm tra máy tính của Quý khách đã được xác nhận thành công:
+              </p>
+              <div className="bg-slate-50 rounded-lg p-2.5 text-[11px] text-slate-700 space-y-1 border border-slate-100">
+                <p>• <strong>Thời gian hẹn:</strong> <span className="text-brand-blue font-bold">{formData.gioHen}</span> - Ngày <span className="text-brand-blue font-bold">{formData.ngayHen}</span></p>
+                <p>• <strong>Thiết bị / Dịch vụ:</strong> {formData.deviceName || 'Máy tính / Phần mềm theo lịch hẹn'}</p>
+                <p>• <strong>Địa điểm quầy CSKH:</strong> 615 Âu Cơ, P. Phú Trung, Q. Tân Phú, TP.HCM</p>
+              </div>
+              <div className="text-[11px] text-slate-500 italic bg-amber-50/60 p-2 rounded border border-amber-100">
+                💡 <strong>Quý khách lưu ý:</strong> Vui lòng mở ứng dụng <strong>Zalo</strong> hoặc kiểm tra tin nhắn <strong>SMS</strong> trên máy ({formData.phone}). Khi đến quầy lễ tân, bạn chỉ cần đọc số điện thoại để được tiếp nhận ngay mà không cần chờ đợi!
+              </div>
+            </div>
           </div>
 
           <div className="flex flex-col sm:flex-row justify-center gap-3">
             <Link
               to="/tra-cuu"
-              className="px-5 py-2.5 bg-brand-blue text-white font-bold text-xs rounded-xl hover:bg-blue-700 transition"
+              className="px-5 py-2.5 bg-brand-blue text-white font-bold text-xs rounded-xl hover:bg-blue-700 transition shadow-sm"
             >
-              📷 Mở Cổng Quét QR & Tra Cứu
+              📷 Mở Cổng Quét QR &amp; Tra Cứu
             </Link>
             <Link
               to="/"
@@ -160,7 +191,19 @@ function BookingForm() {
                     value={formData.fullName} onChange={e => setFormData({...formData, fullName: e.target.value})} />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Số điện thoại liên hệ *</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-bold text-slate-700">Số điện thoại liên hệ *</label>
+                    {zaloCheckStatus === 'LINKED' && (
+                      <span className="text-[11px] font-bold text-emerald-600 flex items-center gap-1">
+                        ✓ Tự động gửi Zalo/SMS
+                      </span>
+                    )}
+                    {zaloCheckStatus === 'INVALID' && (
+                      <span className="text-[11px] font-bold text-red-500">
+                        SĐT chưa đúng định dạng
+                      </span>
+                    )}
+                  </div>
                   <input type="tel" required placeholder="0901234567"
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-brand-blue focus:ring focus:ring-blue-200 outline-none text-sm"
                     value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />

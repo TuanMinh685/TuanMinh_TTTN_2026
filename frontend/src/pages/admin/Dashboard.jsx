@@ -741,21 +741,23 @@ function Dashboard() {
               </span>
             )}
           </button>
-          <button
-            onClick={async () => {
-              setActiveTab('SECURITY');
-              if (canManageEmployees) {
-                try {
-                  const data = await fetchAuditLogs();
-                  setAuditLogs(data.logs || []);
-                  setSecurityStatus(data.securityStatus || null);
-                } catch {}
-              }
-            }}
-            className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'SECURITY' ? 'bg-brand-blue text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
-          >
-            🛡️ Bảo Mật &amp; Audit
-          </button>
+          {isManagerOrAbove && (
+            <button
+              onClick={async () => {
+                setActiveTab('SECURITY');
+                if (canManageEmployees) {
+                  try {
+                    const data = await fetchAuditLogs();
+                    setAuditLogs(data.logs || []);
+                    setSecurityStatus(data.securityStatus || null);
+                  } catch {}
+                }
+              }}
+              className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'SECURITY' ? 'bg-brand-blue text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
+            >
+              🛡️ Bảo Mật &amp; Audit
+            </button>
+          )}
           <button
             onClick={() => {
               setActiveTab('NOTIFICATIONS');
@@ -1040,19 +1042,6 @@ function Dashboard() {
                             title="In phiếu nhiệt 80mm có mã QR"
                           >
                             🖨️ In Phiếu QR
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => openZaloModal(t)}
-                            className={`px-2 py-1 rounded text-xs font-medium transition shrink-0 cursor-pointer flex items-center gap-1 ${
-                              t.trang_thai === 'ĐÃ_SỬA_XONG' || t.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN'
-                                ? 'bg-blue-50 text-brand-blue border border-blue-200 hover:bg-blue-100 font-semibold'
-                                : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200'
-                            }`}
-                            title="Gửi tin nhắn thông báo tự động Zalo ZNS / SMS cho khách hàng"
-                          >
-                            <span>📲</span>
-                            <span>Gửi Zalo</span>
                           </button>
                         </div>
                       </td>
@@ -1685,15 +1674,6 @@ function Dashboard() {
                           <span>🖨️</span>
                           <span>In Phiếu Thu Ngân / Hóa Đơn Nhiệt 80mm</span>
                         </button>
-
-                        <button
-                          type="button"
-                          onClick={() => openZaloModal(currentTicket)}
-                          className="text-xs font-bold text-blue-600 hover:underline flex items-center gap-1 cursor-pointer"
-                        >
-                          <span>📲</span>
-                          <span>Gửi xác nhận Zalo cho khách</span>
-                        </button>
                       </div>
                     </div>
                   </div>
@@ -1737,8 +1717,8 @@ function Dashboard() {
         );
       })()}
 
-      {/* TAB 5: BẢO MẬT DOANH NGHIỆP & NHẬT KÝ KIỂM TOÁN (ENTERPRISE SECURITY & AUDIT) */}
-      {activeTab === 'SECURITY' && (
+      {/* TAB 5: BẢO MẬT DOANH NGHIỆP & NHẬT KÝ KIỂM TOÁN (ENTERPRISE SECURITY & AUDIT - CHỈ QUẢN LÝ / GIÁM ĐỐC) */}
+      {activeTab === 'SECURITY' && isManagerOrAbove && (
         <div className="space-y-6">
           {/* 6 Lá chắn Bảo mật Cấp Doanh Nghiệp */}
           <div className="bg-white p-6 rounded-2xl shadow-xs border-t-4 border-brand-blue">
