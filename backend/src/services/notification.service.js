@@ -24,8 +24,8 @@ const notificationService = {
      * SmsType: 2 (Brandname CSKH riêng nếu đã đăng ký với nhà mạng)
      */
     async sendViaEsms(phone, content) {
-        const apiKey = process.env.ESMS_API_KEY;
-        const secretKey = process.env.ESMS_SECRET_KEY;
+        const apiKey = process.env.ESMS_API_KEY || 'CAC19247A1D4D4EFB216A09FADA3D2';
+        const secretKey = process.env.ESMS_SECRET_KEY || '9BEC302BAC07657B27F0E90A500E40';
         const smsType = Number(process.env.ESMS_SMS_TYPE || 8);
         const brandname = (smsType === 2) ? (process.env.ESMS_BRANDNAME || 'Baotrixemay') : '';
 
