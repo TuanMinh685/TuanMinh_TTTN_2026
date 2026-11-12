@@ -18,24 +18,38 @@ const notificationService = {
     /**
      * Gửi tin nhắn SMS thật qua eSMS.vn (nếu cấu hình ESMS_API_KEY)
      */
+    /**
+     * Gửi tin nhắn SMS thật qua eSMS.vn (nếu cấu hình ESMS_API_KEY)
+     * SmsType: 8 (Đầu số thông báo CSKH cố định - không yêu cầu duyệt trước template, gửi ngay lập tức)
+     * SmsType: 2 (Brandname CSKH riêng nếu đã đăng ký với nhà mạng)
+     */
     async sendViaEsms(phone, content) {
         const apiKey = process.env.ESMS_API_KEY;
         const secretKey = process.env.ESMS_SECRET_KEY;
-        const brandname = process.env.ESMS_BRANDNAME || 'LUC GIAC';
+        const smsType = Number(process.env.ESMS_SMS_TYPE || 8);
+        const brandname = (smsType === 2) ? (process.env.ESMS_BRANDNAME || 'Baotrixemay') : '';
 
         if (!apiKey || !secretKey) return null;
 
         try {
-            const res = await axios.post('http://rest.esms.vn/MainService.svc/json/SendMultipleMessage_V4_post_json', {
+            const payload = {
                 ApiKey: apiKey,
                 SecretKey: secretKey,
                 Phone: phone,
                 Content: content,
-                SmsType: 2, // 2: CSKH Brandname, 4: OTP
-                Brandname: brandname
-            }, { timeout: 10000 });
+                SmsType: smsType
+            };
+            if (brandname) {
+                payload.Brandname = brandname;
+            }
 
-            return { provider: 'eSMS', data: res.data };
+            const res = await axios.post('http://rest.esms.vn/MainService.svc/json/SendMultipleMessage_V4_post_json', payload, { timeout: 10000 });
+
+            console.log('[eSMS Gateway Response]:', res.data);
+            if (res.data && (res.data.CodeResponse === '100' || res.data.CodeResult === '100')) {
+                return { provider: 'eSMS', data: res.data, smsId: res.data.SMSID };
+            }
+            return { provider: `eSMS (Lỗi ${res.data?.CodeResponse || res.data?.CodeResult}: ${res.data?.ErrorMessage || 'Lỗi gửi tin'})`, data: res.data, failed: true };
         } catch (err) {
             console.error('[eSMS Error]:', err.message);
             return null;
@@ -170,8 +184,10 @@ const notificationService = {
             });
         }
 
-        if (realProviderResult) {
-            console.log(`✅ [GATEWAY THỰC TẾ]: Đã bắn tin nhắn thành công qua đối tác ${realProviderResult.provider}!`);
+        if (realProviderResult && !realProviderResult.failed) {
+            console.log(`✅ [GATEWAY THỰC TẾ]: Đã bắn tin nhắn thành công qua đối tác ${realProviderResult.provider}! Mã SMS: ${realProviderResult.smsId || 'OK'}`);
+        } else if (realProviderResult && realProviderResult.failed) {
+            console.warn(`⚠️ [GATEWAY CẢNH BÁO]: Gửi qua ${realProviderResult.provider} không thành công. Hệ thống tự động chuyển sang cơ chế fallback & lưu nhật ký.`);
         } else {
             console.log(`⚡ [AUTO LOG & SIMULATION]: Đã mô phỏng gửi thành công qua Zalo ZNS / SMS Gateway (Sẵn sàng kích hoạt thật khi điền Key vào .env)!`);
         }
