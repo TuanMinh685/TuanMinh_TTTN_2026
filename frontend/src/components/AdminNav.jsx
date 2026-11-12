@@ -46,7 +46,7 @@ export default function AdminNav({ activeKey = 'VAN_HANH' }) {
     },
     {
       key: 'CMS_CLIENT',
-      label: 'Cấu hình giao diện Client',
+      label: 'Cấu hình giao diện trang chủ',
       path: '/admin/cau-hinh-client',
       visible: true
     }

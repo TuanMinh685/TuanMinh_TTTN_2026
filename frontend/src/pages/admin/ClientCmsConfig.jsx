@@ -20,7 +20,7 @@ export default function ClientCmsConfig() {
     } catch (err) {
       setStatusMessage({
         type: 'error',
-        text: 'Không tải được cấu hình từ Backend: ' + (err.response?.data?.message || err.message)
+        text: 'Không thể tải cấu hình giao diện: ' + (err.response?.data?.message || err.message)
       });
     } finally {
       setLoading(false);
@@ -71,7 +71,7 @@ export default function ClientCmsConfig() {
           icon: '🔧',
           tag: 'Dịch vụ mới',
           title: 'Dịch Vụ Kỹ Thuật Mới',
-          desc: 'Mô tả chi tiết hạng mục dịch vụ hiển thị trên giao diện Client...',
+          desc: 'Mô tả chi tiết hạng mục dịch vụ...',
           imageUrl: '/img/cskh-banner.svg',
           priceHint: 'Liên hệ báo giá',
           serviceParam: 'Dịch Vụ Kỹ Thuật Mới'
@@ -127,7 +127,7 @@ export default function ClientCmsConfig() {
         setConfig(res.data.data);
         setStatusMessage({
           type: 'success',
-          text: '✅ Đã lưu cấu hình UI & Hình ảnh lên máy chủ Backend thành công! Trang Client đã được cập nhật tức thì.'
+          text: '✅ Đã lưu và áp dụng nội dung thành công! Trang chủ đã được cập nhật tức thì.'
         });
       }
     } catch (err) {
@@ -141,7 +141,7 @@ export default function ClientCmsConfig() {
   };
 
   const handleResetDefault = async () => {
-    if (!window.confirm('Bạn có chắc muốn khôi phục toàn bộ nội dung, hình ảnh trang Client về mặc định ban đầu?')) {
+    if (!window.confirm('Bạn có chắc muốn khôi phục toàn bộ nội dung, hình ảnh trang chủ về mặc định ban đầu?')) {
       return;
     }
     setSaving(true);
@@ -152,7 +152,7 @@ export default function ClientCmsConfig() {
         setConfig(res.data.data);
         setStatusMessage({
           type: 'success',
-          text: '🔄 Đã khôi phục cấu hình giao diện Client về mặc định!'
+          text: '🔄 Đã khôi phục cấu hình giao diện về mặc định!'
         });
       }
     } catch (err) {
@@ -170,18 +170,18 @@ export default function ClientCmsConfig() {
       <div className="mx-auto max-w-7xl">
         <AdminNav activeKey="CMS_CLIENT" />
 
-        {/* Thanh tiêu đề & Nút lưu Backend */}
+        {/* Thanh tiêu đề & Nút lưu */}
         <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-brand-blue mb-1.5">
-                <span>🎨 Quản Trị Dữ Liệu Giao Diện Động (Backend CMS API)</span>
+                <span>🎨 Quản Lý Giao Diện &amp; Nội Dung Trang Chủ</span>
               </div>
               <h2 className="text-xl font-extrabold text-slate-900">
-                Cấu Hình Giao Diện, Hình Ảnh &amp; Nội Dung Trang Client
+                Cấu Hình Giao Diện, Hình Ảnh &amp; Nội Dung Trang Chủ
               </h2>
               <p className="text-xs text-slate-500 mt-1">
-                Mọi thay đổi về tiêu đề, văn bản, banner thông báo, hình ảnh dịch vụ và bảng giá tại đây được lưu trực tiếp vào cơ sở dữ liệu Backend và đồng bộ thời gian thực (Socket.IO) sang trang chủ Client.
+                Tùy chỉnh tiêu đề, văn bản, banner thông báo, hình ảnh dịch vụ và bảng giá hiển thị trực tiếp đến khách hàng và tự động cập nhật ngay lập tức.
               </p>
             </div>
 
@@ -193,7 +193,7 @@ export default function ClientCmsConfig() {
                 className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition"
               >
                 <span>👁️</span>
-                <span>Xem Trang Client</span>
+                <span>Xem Trang Chủ</span>
               </Link>
               <button
                 type="button"
@@ -211,7 +211,7 @@ export default function ClientCmsConfig() {
                 className="inline-flex items-center gap-1.5 rounded-xl bg-brand-blue px-5 py-2.5 text-xs font-bold text-white shadow-xs hover:bg-brand-blue-hover transition disabled:opacity-50 cursor-pointer"
               >
                 <span>💾</span>
-                <span>{saving ? 'Đang lưu lên Backend...' : 'Lưu Thay Đổi Lên Backend'}</span>
+                <span>{saving ? 'Đang lưu thay đổi...' : 'Lưu Thay Đổi'}</span>
               </button>
             </div>
           </div>
@@ -272,7 +272,7 @@ export default function ClientCmsConfig() {
 
         {loading || !config ? (
           <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center text-sm font-bold text-slate-500">
-            Đang tải dữ liệu cấu hình giao diện từ máy chủ Backend...
+            Đang tải dữ liệu cấu hình giao diện...
           </div>
         ) : (
           <form onSubmit={handleSaveConfig} className="space-y-6">
@@ -288,7 +288,7 @@ export default function ClientCmsConfig() {
                   <div className="flex items-center justify-between rounded-xl bg-slate-50 border border-slate-200 p-3.5">
                     <div>
                       <p className="text-xs font-bold text-slate-800">Hiển thị Banner Thông Báo / Khuyến Mãi đầu trang</p>
-                      <p className="text-[11px] text-slate-500">Bật để hiển thị thanh thông báo nổi bật trên đầu trang chủ Client</p>
+                      <p className="text-[11px] text-slate-500">Bật để hiển thị thanh thông báo nổi bật trên đầu trang chủ</p>
                     </div>
                     <input
                       type="checkbox"
@@ -307,7 +307,7 @@ export default function ClientCmsConfig() {
                       value={config.brand?.promoBannerText || ''}
                       onChange={(e) => handleBrandChange('promoBannerText', e.target.value)}
                       className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-xs font-medium"
-                      placeholder="Nhập thông báo hiển thị trên đầu trang Client..."
+                      placeholder="Nhập thông báo hiển thị trên đầu trang chủ..."
                     />
                   </div>
 
@@ -446,7 +446,7 @@ export default function ClientCmsConfig() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-xs font-bold text-slate-800">Hiển thị Hình Ảnh Banner Minh Họa Trang Chủ</p>
-                        <p className="text-[11px] text-slate-500">Cho phép Admin thay đổi hình ảnh quảng bá hiển thị ở đầu trang Client</p>
+                        <p className="text-[11px] text-slate-500">Cho phép thay đổi hình ảnh quảng bá hiển thị ở đầu trang chủ</p>
                       </div>
                       <input
                         type="checkbox"
@@ -501,7 +501,7 @@ export default function ClientCmsConfig() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4 mb-5">
                   <div>
                     <h3 className="text-base font-extrabold text-slate-800">
-                      🛠️ Quản Lý Danh Sách Dịch Vụ, Hình Ảnh Minh Họa &amp; Báo Giá Trên Client
+                      🛠️ Quản Lý Danh Sách Dịch Vụ, Hình Ảnh Minh Họa &amp; Báo Giá
                     </h3>
                     <p className="text-xs text-slate-500 mt-0.5">
                       Bạn có thể chỉnh sửa tên dịch vụ, mô tả, báo giá, tải ảnh minh họa riêng cho từng dịch vụ hoặc thêm dịch vụ mới.
