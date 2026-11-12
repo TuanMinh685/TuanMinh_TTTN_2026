@@ -106,18 +106,20 @@ const notificationService = {
 
     /**
      * Hàm TỰ ĐỘNG GỬI THÔNG BÁO TỔNG QUÁT:
-     * Tự động nhận diện loại nghiệp vụ (TẠO PHIẾU hoặc ĐẶT LỊCH)
+     * Tự động nhận diện loại nghiệp vụ (TẠO PHIẾU, ĐẶT LỊCH, MÁY SỬA XONG, THANH TOÁN)
      * Ưu tiên gửi qua Cổng SMS / Zalo ZNS thực tế nếu có cấu hình.
      * Nếu không có API Key, tự động ghi nhận nhật ký hệ thống & phát Socket realtime.
      */
     async sendNotification({
-        type, // 'BOOKING_CONFIRMATION' | 'TICKET_CREATED'
+        type, // 'BOOKING_CONFIRMATION' | 'TICKET_CREATED' | 'DEVICE_READY' | 'PAYMENT_CONFIRMATION'
         phone,
         customerName,
         ticketCode = '',
         appointmentDate = '',
         appointmentTime = '',
         deviceName = '',
+        amount = 0,
+        method = 'TIEN_MAT',
         customNote = ''
     }) {
         const cleanPhone = this.normalizePhone(phone);
@@ -132,6 +134,14 @@ const notificationService = {
         } else if (type === 'TICKET_CREATED') {
             title = 'Khởi tạo hồ sơ CSKH & Tra cứu QR';
             content = `[CSKH LUC GIAC] Xin chao ${customerName}, ho so CSKH #${ticketCode} cho (${deviceName || 'thiet bi'}) da duoc khoi tao. Quy khach tra cuu tien do va bao hanh dien tu tai: ${process.env.APP_URL || 'https://tuan-minh-tttn-2026.vercel.app'}/track/${ticketCode}`;
+        } else if (type === 'DEVICE_READY') {
+            title = 'Thiết bị đã xử lý xong - Mời nhận máy';
+            content = `[CSKH LUC GIAC] Xin chao ${customerName}, thiet bi (${deviceName || 'may tinh/phan mem'}) theo ho so #${ticketCode} da duoc xu ly hoan tat. Kinh moi quy khach den 615 Au Co, Tan Phu de kiem tra va nhan ban giao. Tra cuu tai: ${process.env.APP_URL || 'https://tuan-minh-tttn-2026.vercel.app'}/track/${ticketCode}`;
+        } else if (type === 'PAYMENT_CONFIRMATION') {
+            title = 'Xác nhận thanh toán & Kích hoạt e-Warranty';
+            const payMethodText = method === 'VIETQR' ? 'Chuyen khoan VietQR' : 'Tien mat tai quay';
+            const formattedAmount = (amount || 0).toLocaleString('vi-VN');
+            content = `[CSKH LUC GIAC] Cam on ${customerName}, ho so #${ticketCode} da thanh toan ${formattedAmount}d qua ${payMethodText}. So bao hanh dien tu e-Warranty 180 ngay da duoc kich hoat tai: ${process.env.APP_URL || 'https://tuan-minh-tttn-2026.vercel.app'}/track/${ticketCode}`;
         } else {
             title = 'Thông báo CSKH Lục Giác';
             content = customNote || `[CSKH LUC GIAC] Thong bao cap nhat ho so #${ticketCode} cho khach hang ${customerName}.`;

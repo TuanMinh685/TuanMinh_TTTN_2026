@@ -178,9 +178,14 @@ const getAllTickets = async () => {
 
 const updateTicketStatus = async (idOrCode, status, ghiChu = '', employeeId = null) => {
     const isNumericId = /^\d+$/.test(String(idOrCode).trim());
-    const lookupRes = isNumericId
-        ? await pool.query('SELECT id, ma_tra_cuu, trang_thai FROM phieu_sua_chua WHERE id = $1', [Number(idOrCode)])
-        : await pool.query('SELECT id, ma_tra_cuu, trang_thai FROM phieu_sua_chua WHERE ma_tra_cuu = $1', [String(idOrCode).trim()]);
+    const lookupSql = `
+        SELECT p.id, p.ma_tra_cuu, p.trang_thai, k.ho_ten, k.so_dien_thoai, t.ten_may AS ten_thiet_bi 
+        FROM phieu_sua_chua p 
+        LEFT JOIN thiet_bi t ON p.thiet_bi_id = t.id 
+        LEFT JOIN khach_hang k ON t.khach_hang_id = k.id 
+        WHERE ${isNumericId ? 'p.id = $1' : 'p.ma_tra_cuu = $1'}
+    `;
+    const lookupRes = await pool.query(lookupSql, [isNumericId ? Number(idOrCode) : String(idOrCode).trim()]);
 
     if (lookupRes.rows.length === 0) {
         return null;
@@ -223,6 +228,17 @@ const updateTicketStatus = async (idOrCode, status, ghiChu = '', employeeId = nu
             const io = getIo();
             io.emit('ticket_status_changed', { ticketId, status });
         } catch (err) {}
+
+        // Tự động thông báo qua SMS / Zalo khi máy tính/phần mềm đã xử lý xong
+        if (status === 'ĐÃ_SỬA_XONG' && currentTicket.so_dien_thoai) {
+            notificationService.sendNotification({
+                type: 'DEVICE_READY',
+                phone: currentTicket.so_dien_thoai,
+                customerName: currentTicket.ho_ten || 'Quý khách',
+                ticketCode: currentTicket.ma_tra_cuu,
+                deviceName: currentTicket.ten_thiet_bi || ''
+            }).catch(err => console.error('[AutoNotification Error]:', err.message));
+        }
     }
 
     const updatedRow = rows[0] || currentTicket;
@@ -448,7 +464,13 @@ const confirmPayment = async (ticketId, paymentData = {}, employeeId = null) => 
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
-        const checkRes = await client.query('SELECT * FROM phieu_sua_chua WHERE id = $1 OR ma_tra_cuu = $2', [
+        const checkRes = await client.query(`
+            SELECT p.*, k.ho_ten, k.so_dien_thoai, t.ten_may AS ten_thiet_bi 
+            FROM phieu_sua_chua p 
+            LEFT JOIN thiet_bi t ON p.thiet_bi_id = t.id 
+            LEFT JOIN khach_hang k ON t.khach_hang_id = k.id 
+            WHERE p.id = $1 OR p.ma_tra_cuu = $2
+        `, [
             isNaN(Number(ticketId)) ? -1 : Number(ticketId),
             String(ticketId)
         ]);
@@ -497,6 +519,19 @@ const confirmPayment = async (ticketId, paymentData = {}, employeeId = null) => 
             });
             io.emit('ticket_status_changed', { ticketId: ticket.id, status: ticket.trang_thai });
         } catch (e) {}
+
+        // Tự động gửi SMS / Zalo xác nhận thanh toán & kích hoạt Sổ bảo hành điện tử e-Warranty
+        if (ticket.so_dien_thoai) {
+            notificationService.sendNotification({
+                type: 'PAYMENT_CONFIRMATION',
+                phone: ticket.so_dien_thoai,
+                customerName: ticket.ho_ten || 'Quý khách',
+                ticketCode: ticket.ma_tra_cuu,
+                amount: numAmount,
+                method,
+                deviceName: ticket.ten_thiet_bi || ''
+            }).catch(err => console.error('[AutoNotification Error]:', err.message));
+        }
 
         const updated = updateRes.rows[0] || ticket;
         return {

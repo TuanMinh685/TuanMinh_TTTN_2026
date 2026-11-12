@@ -1660,7 +1660,7 @@ function Dashboard() {
                           className="py-3 px-4 rounded-xl bg-brand-blue hover:bg-blue-700 active:bg-blue-800 text-white font-extrabold text-xs sm:text-sm shadow-sm transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                         >
                           <span className="text-base">🏦</span>
-                          <span>{confirmingPayment ? 'Đang xử lý...' : 'Xác Nhận NHẬN VIETQR'}</span>
+                          <span>{confirmingPayment ? 'Đang xử lý...' : 'Xác Nhận ĐÃ CHUYỂN KHOẢN'}</span>
                         </button>
                       </div>
 
