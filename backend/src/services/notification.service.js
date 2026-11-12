@@ -144,21 +144,21 @@ const notificationService = {
 
         if (type === 'BOOKING_CONFIRMATION') {
             title = 'Xác nhận đặt lịch CSKH Lục Giác';
-            content = `[CSKH LUC GIAC] Xin chao ${customerName}, lich hen kiem tra ${deviceName || 'thiet bi/phan mem'} vao luc ${appointmentTime} ngay ${appointmentDate} tai 615 Au Co, Tan Phu da duoc tiep nhan thanh cong. CSKH: 02838604999.`;
+            content = `[CSKH LUC GIAC] Xin chao ${customerName}, lich hen kiem tra ${deviceName || 'thiet bi'} vao ${appointmentTime} ngay ${appointmentDate} tai 615 Au Co da duoc tiep nhan thanh cong. Hotline: 02838604999.`;
         } else if (type === 'TICKET_CREATED') {
             title = 'Khởi tạo hồ sơ CSKH & Tra cứu QR';
-            content = `[CSKH LUC GIAC] Xin chao ${customerName}, ho so CSKH #${ticketCode} cho (${deviceName || 'thiet bi'}) da duoc khoi tao. Quy khach tra cuu tien do va bao hanh dien tu tai: ${process.env.APP_URL || 'https://tuan-minh-tttn-2026.vercel.app'}/track/${ticketCode}`;
+            content = `[CSKH LUC GIAC] Xin chao ${customerName}, ho so #${ticketCode} cho (${deviceName || 'thiet bi'}) da tiep nhan. Quy khach quet ma QR tren bien nhan de theo doi tien do. Hotline: 02838604999.`;
         } else if (type === 'DEVICE_READY') {
             title = 'Thiết bị đã xử lý xong - Mời nhận máy';
-            content = `[CSKH LUC GIAC] Xin chao ${customerName}, thiet bi (${deviceName || 'may tinh/phan mem'}) theo ho so #${ticketCode} da duoc xu ly hoan tat. Kinh moi quy khach den 615 Au Co, Tan Phu de kiem tra va nhan ban giao. Tra cuu tai: ${process.env.APP_URL || 'https://tuan-minh-tttn-2026.vercel.app'}/track/${ticketCode}`;
+            content = `[CSKH LUC GIAC] Xin chao ${customerName}, ho so #${ticketCode} (${deviceName || 'thiet bi'}) da xu ly hoan tat. Kinh moi Quy khach den 615 Au Co de nhan ban giao. Hotline: 02838604999.`;
         } else if (type === 'PAYMENT_CONFIRMATION') {
             title = 'Xác nhận thanh toán & Kích hoạt e-Warranty';
             const payMethodText = method === 'VIETQR' ? 'Chuyen khoan VietQR' : 'Tien mat tai quay';
             const formattedAmount = (amount || 0).toLocaleString('vi-VN');
-            content = `[CSKH LUC GIAC] Cam on ${customerName}, ho so #${ticketCode} da thanh toan ${formattedAmount}d qua ${payMethodText}. So bao hanh dien tu e-Warranty 180 ngay da duoc kich hoat tai: ${process.env.APP_URL || 'https://tuan-minh-tttn-2026.vercel.app'}/track/${ticketCode}`;
+            content = `[CSKH LUC GIAC] Cam on ${customerName}, ho so #${ticketCode} da thanh toan ${formattedAmount}d qua ${payMethodText}. So bao hanh dien tu e-Warranty 180 ngay da kich hoat. Hotline: 02838604999.`;
         } else {
             title = 'Thông báo CSKH Lục Giác';
-            content = customNote || `[CSKH LUC GIAC] Thong bao cap nhat ho so #${ticketCode} cho khach hang ${customerName}.`;
+            content = customNote || `[CSKH LUC GIAC] Thong bao cap nhat ho so #${ticketCode} cho khach hang ${customerName}. Hotline: 02838604999.`;
         }
 
         console.log(`\n======================================================`);
