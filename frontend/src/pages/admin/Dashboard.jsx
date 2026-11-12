@@ -1720,84 +1720,177 @@ function Dashboard() {
       {/* TAB 5: BẢO MẬT DOANH NGHIỆP & NHẬT KÝ KIỂM TOÁN (ENTERPRISE SECURITY & AUDIT - CHỈ QUẢN LÝ / GIÁM ĐỐC) */}
       {activeTab === 'SECURITY' && isManagerOrAbove && (
         <div className="space-y-6">
-          {/* 6 Lá chắn Bảo mật Cấp Doanh Nghiệp */}
-          <div className="bg-white p-6 rounded-2xl shadow-xs border-t-4 border-brand-blue">
-            <div className="flex flex-wrap items-center justify-between gap-3 mb-5 pb-3 border-b border-slate-100">
-              <div>
-                <h3 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
-                  <span>🛡️</span> Kiến Trúc Bảo Mật Chuẩn Doanh Nghiệp (Enterprise Security Suite v2.0)
-                </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Hệ thống tự động bảo vệ dữ liệu khách hàng, xác thực phiên JWT thời gian thực và ghi nhận mọi thao tác điều hành.
-                </p>
+          {/* BANNER TỔNG QUAN KIẾN TRÚC BẢO MẬT CHUẨN DOANH NGHIỆP */}
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-7 shadow-sm space-y-6">
+            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-5">
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-200 text-brand-blue flex items-center justify-center text-2xl shadow-xs">
+                  🛡️
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-lg font-black text-slate-900 tracking-tight">
+                      Kiến Trúc An Toàn Thông Tin Chuẩn Doanh Nghiệp
+                    </h3>
+                    <span className="hidden sm:inline-block px-2.5 py-0.5 rounded-full text-[11px] font-black bg-blue-50 text-brand-blue border border-blue-200 uppercase tracking-wider">
+                      Enterprise Suite v2.0
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1 max-w-2xl leading-relaxed">
+                    Hệ thống tự động phòng thủ chủ động 6 lớp, bảo vệ toàn vẹn dữ liệu khách hàng, xác thực phiên làm việc thời gian thực và ghi vết mọi thao tác điều hành vào Nhật ký Kiểm toán.
+                  </p>
+                </div>
               </div>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-extrabold">
-                ● 6/6 Lớp Bảo Mật Đang Hoạt Động
-              </span>
+
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-black shadow-2xs">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  </span>
+                  6/6 Lớp Bảo Mật Đang Hoạt Động (100%)
+                </span>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* 4 CHỈ SỐ NHANH BẢO MẬT */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Xác Thực Phiên</span>
+                <p className="text-sm font-black text-slate-900 flex items-center gap-1.5">
+                  <span>🔐</span> JWT HS256 Strict
+                </p>
+                <span className="text-[11px] text-slate-500 mt-0.5 block">Xác thực token theo thời gian thực</span>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Mã Hóa Mật Khẩu</span>
+                <p className="text-sm font-black text-slate-900 flex items-center gap-1.5">
+                  <span>🧬</span> Bcrypt (10 Salt Rounds)
+                </p>
+                <span className="text-[11px] text-slate-500 mt-0.5 block">Chống tấn công từ điển & Rainbow</span>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Cơ Chế Lọc Dữ Liệu</span>
+                <p className="text-sm font-black text-slate-900 flex items-center gap-1.5">
+                  <span>🧼</span> SQLi, XSS & HPP Sanitizer
+                </p>
+                <span className="text-[11px] text-slate-500 mt-0.5 block">Tự động làm sạch input ở mọi API</span>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Kết Nối Đám Mây</span>
+                <p className="text-sm font-black text-slate-900 flex items-center gap-1.5">
+                  <span>☁️</span> Supabase Cloud TLS/SSL
+                </p>
+                <span className="text-[11px] text-slate-500 mt-0.5 block">Transaction Pooler mã hóa cổng 6543</span>
+              </div>
+            </div>
+
+            {/* 6 LÁ CHẮN BẢO MẬT CHI TIẾT */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-1">
               {[
                 {
                   icon: '🔐',
+                  badge: 'Lớp 01 • Authentication',
                   title: '1. Xác Thực JWT HS256 & Thu Hồi Tức Thì',
-                  desc: securityStatus?.jwtAlgorithm || 'Kiểm tra chữ ký số HS256 và đối chiếu trạng thái khóa tài khoản trực tiếp từ CSDL.'
+                  desc: securityStatus?.jwtAlgorithm || 'Kiểm tra chữ ký số HS256 nghiêm ngặt, đối chiếu trạng thái hoạt động của tài khoản trực tiếp từ CSDL ở từng request.'
                 },
                 {
                   icon: '🧬',
+                  badge: 'Lớp 02 • One-Way Hash',
                   title: '2. Mã Hóa Mật Khẩu Một Chiều Bcrypt',
-                  desc: securityStatus?.passwordHashing || 'Mật khẩu nhân sự được băm một chiều với Bcrypt (10 Salt Rounds), chống giải mã ngược.'
+                  desc: securityStatus?.passwordHashing || 'Mật khẩu nhân sự được băm một chiều với 10 vòng muối (10 Salt Rounds), đảm bảo an toàn tuyệt đối không thể giải mã ngược.'
                 },
                 {
                   icon: '🧼',
-                  title: '3. Lọc Độc Thi XSS, SQLi & HPP Sanitizer',
-                  desc: securityStatus?.inputProtection || 'Tự động loại bỏ thẻ <script>, Prototype Pollution và tham số trùng lặp (HPP) ở mọi API.'
+                  badge: 'Lớp 03 • Input Sanitizer',
+                  title: '3. Lọc & Chống Mã Độc XSS, SQLi & HPP',
+                  desc: securityStatus?.inputProtection || 'Tự động làm sạch thẻ độc hại, chống Prototype Pollution và loại trừ tham số trùng lặp (HTTP Parameter Pollution).'
                 },
                 {
                   icon: '🧱',
+                  badge: 'Lớp 04 • HTTP Hardening',
                   title: '4. Helmet HTTP Security Headers & CSP',
-                  desc: securityStatus?.httpHeaders || 'Thiết lập Content-Security-Policy, X-Frame-Options: DENY (chống Clickjacking) và No-Sniff.'
+                  desc: securityStatus?.httpHeaders || 'Thiết lập Content-Security-Policy (CSP), cấm nhúng iframe trái phép (X-Frame-Options: DENY) và chặn đoán MIME-type.'
                 },
                 {
                   icon: '🚦',
+                  badge: 'Lớp 05 • Rate Limiting',
                   title: '5. Chống Dò Mật Khẩu (Brute-Force Lockout)',
-                  desc: securityStatus?.rateLimiting || 'Tự động khóa tạm thời 15 phút nếu đăng nhập sai 5 lần liên tiếp và giới hạn tần suất tạo phiếu QR.'
+                  desc: securityStatus?.rateLimiting || 'Tự động khóa tài khoản tạm thời 15 phút nếu đăng nhập sai 5 lần liên tiếp; giới hạn tần suất tạo phiếu QR để ngăn spam.'
                 },
                 {
                   icon: '☁️',
+                  badge: 'Lớp 06 • Transport Security',
                   title: '6. Kết Nối CSDL Đám Mây Mã Hóa SSL/TLS',
-                  desc: securityStatus?.databaseEncryption || 'Truyền tải dữ liệu qua Supabase PostgreSQL Cloud Transaction Pooler (:6543) có mã hóa SSL.'
+                  desc: securityStatus?.databaseEncryption || 'Truyền tải dữ liệu qua Supabase PostgreSQL Cloud Transaction Pooler (Cổng :6543) chuẩn mã hóa SSL/TLS 1.3.'
                 }
               ].map((shield, idx) => (
-                <div key={idx} className="rounded-xl border border-slate-200 p-4 bg-slate-50/70">
-                  <div className="flex items-center gap-2 font-bold text-sm text-brand-blue mb-1">
-                    <span className="text-lg">{shield.icon}</span>
-                    <span>{shield.title}</span>
+                <div
+                  key={idx}
+                  className="rounded-2xl border border-slate-200 bg-white p-5 hover:border-blue-300 hover:shadow-sm transition space-y-3 flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-2xl">{shield.icon}</span>
+                      <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                        {shield.badge}
+                      </span>
+                    </div>
+                    <h4 className="font-extrabold text-sm text-slate-900 tracking-tight">
+                      {shield.title}
+                    </h4>
+                    <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                      {shield.desc}
+                    </p>
                   </div>
-                  <p className="text-xs text-slate-600 leading-relaxed">{shield.desc}</p>
+                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                    <span className="text-slate-400 font-medium">Trạng thái bảo vệ:</span>
+                    <span className="inline-flex items-center gap-1 text-emerald-600 font-extrabold">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> Đang Bảo Vệ
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Khối tự đổi mật khẩu bảo mật cá nhân cho mọi nhân sự */}
-          <div className="bg-white p-6 rounded-2xl shadow-xs border border-slate-200">
-            <h3 className="text-base font-extrabold text-slate-800 mb-1">🔑 Đổi Mật Khẩu Bảo Mật Cá Nhân (@{currentUsername || role})</h3>
-            <p className="text-xs text-slate-500 mb-4">Mật khẩu mới sẽ được mã hóa tự động bằng thuật toán Bcrypt (10 Salt Rounds) và ghi vào Nhật ký Kiểm toán.</p>
-            <form onSubmit={submitChangePassword} className="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
+          {/* KHỐI ĐỔI MẬT KHẨU BẢO MẬT CÁ NHÂN */}
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-7 shadow-sm space-y-5">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Mật khẩu hiện tại *</label>
+                <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+                  <span>🔑</span> Đổi Mật Khẩu Bảo Mật Cá Nhân
+                  <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 font-mono">
+                    @{currentUsername || role}
+                  </span>
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Mật khẩu mới sẽ được mã hóa tự động bằng thuật toán Bcrypt (10 Salt Rounds) và lưu vết vào Nhật ký Kiểm toán.
+                </p>
+              </div>
+              <span className="text-[11px] font-bold text-slate-400">
+                Tối thiểu 6 ký tự • Khuyến nghị kèm số &amp; ký tự đặc biệt
+              </span>
+            </div>
+
+            <form onSubmit={submitChangePassword} className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">Mật khẩu hiện tại *</label>
                 <input
                   type="password"
                   required
                   value={pwForm.currentPassword}
                   onChange={e => setPwForm({ ...pwForm, currentPassword: e.target.value })}
                   placeholder="Nhập mật khẩu đang dùng..."
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-brand-blue outline-none"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-xs text-slate-800 focus:bg-white focus:border-brand-blue focus:outline-none transition"
                 />
               </div>
+
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Mật khẩu mới (&gt;= 6 ký tự) *</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">Mật khẩu mới (&gt;= 6 ký tự) *</label>
                 <input
                   type="password"
                   required
@@ -1805,11 +1898,12 @@ function Dashboard() {
                   value={pwForm.newPassword}
                   onChange={e => setPwForm({ ...pwForm, newPassword: e.target.value })}
                   placeholder="Tối thiểu 6 ký tự..."
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-brand-blue outline-none"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-xs text-slate-800 focus:bg-white focus:border-brand-blue focus:outline-none transition"
                 />
               </div>
+
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Xác nhận mật khẩu mới *</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">Xác nhận mật khẩu mới *</label>
                 <input
                   type="password"
                   required
@@ -1817,27 +1911,41 @@ function Dashboard() {
                   value={pwForm.confirmPassword}
                   onChange={e => setPwForm({ ...pwForm, confirmPassword: e.target.value })}
                   placeholder="Nhập lại mật khẩu mới..."
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-brand-blue outline-none"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-xs text-slate-800 focus:bg-white focus:border-brand-blue focus:outline-none transition"
                 />
               </div>
-              <button
-                type="submit"
-                disabled={savingPw}
-                className="rounded-lg bg-brand-blue hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 shadow-xs disabled:opacity-50"
-              >
-                {savingPw ? 'Đang mã hóa...' : 'Cập Nhật Mật Khẩu'}
-              </button>
+
+              <div>
+                <button
+                  type="submit"
+                  disabled={savingPw}
+                  className="w-full rounded-xl bg-brand-blue hover:bg-blue-700 active:bg-blue-800 text-white font-extrabold text-xs py-2.5 px-4 shadow-sm transition disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <span>🔐</span>
+                  <span>{savingPw ? 'Đang mã hóa Bcrypt...' : 'Cập Nhật Mật Khẩu'}</span>
+                </button>
+              </div>
             </form>
           </div>
 
-          {/* Bảng Nhật ký Kiểm toán Bảo mật Doanh nghiệp (Chỉ dành cho Admin / Quản lý) */}
+          {/* BẢNG NHẬT KÝ KIỂM TOÁN BẢO MẬT DOANH NGHIỆP (SECURITY AUDIT TRAIL) */}
           {canManageEmployees && (
-            <div className="bg-white p-6 rounded-2xl shadow-xs border-t-4 border-brand-blue">
-              <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-7 shadow-sm space-y-5">
+              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
                 <div>
-                  <h3 className="text-lg font-extrabold text-slate-800">📋 Nhật Ký Kiểm Toán Bảo Mật Thời Gian Thực (Security Audit Trail)</h3>
-                  <p className="text-xs text-slate-500">Ghi vết toàn bộ sự kiện đăng nhập, phân quyền nhân sự, khởi tạo phiếu QR và cập nhật trạng thái hồ sơ.</p>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+                      <span>📋</span> Nhật Ký Kiểm Toán Bảo Mật Thời Gian Thực (Security Audit Trail)
+                    </h3>
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                      {auditLogs.length} sự kiện
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Ghi vết bất biến toàn bộ sự kiện: đăng nhập hệ thống, phân quyền nhân sự, khởi tạo mã QR và thay đổi trạng thái hồ sơ.
+                  </p>
                 </div>
+
                 <button
                   type="button"
                   onClick={() => {
@@ -1862,50 +1970,72 @@ function Dashboard() {
                       signRole: 'QUẢN TRỊ AN TOÀN THÔNG TIN'
                     });
                   }}
-                  className="rounded-lg bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 font-medium text-xs px-3.5 py-2 shadow-2xs transition cursor-pointer"
+                  className="rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 font-extrabold text-xs px-4 py-2.5 shadow-2xs transition cursor-pointer flex items-center gap-1.5"
                 >
-                  📊 Xuất Nhật Ký Bảo Mật (.xlsx)
+                  <span>📊</span>
+                  <span>Xuất Nhật Ký Bảo Mật (.xlsx)</span>
                 </button>
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[820px] text-left border-collapse text-xs">
+              <div className="overflow-x-auto rounded-2xl border border-slate-200">
+                <table className="w-full min-w-[860px] text-left border-collapse text-xs">
                   <thead>
-                    <tr className="border-b-2 border-slate-200 font-bold uppercase text-slate-500">
-                      <th className="py-2.5 px-3">Thời Gian</th>
-                      <th className="py-2.5 px-3">Tác Nhân (Actor)</th>
-                      <th className="py-2.5 px-3">Sự Kiện (Action)</th>
-                      <th className="py-2.5 px-3">Đối Tượng</th>
-                      <th className="py-2.5 px-3">IP</th>
-                      <th className="py-2.5 px-3">Trạng Thái</th>
-                      <th className="py-2.5 px-3">Chi Tiết Kiểm Toán</th>
+                    <tr className="border-b border-slate-200 bg-slate-50 text-[11px] font-black uppercase tracking-wider text-slate-600">
+                      <th className="py-3 px-3.5">Thời Gian</th>
+                      <th className="py-3 px-3.5">Tác Nhân (Actor)</th>
+                      <th className="py-3 px-3.5">Sự Kiện (Action)</th>
+                      <th className="py-3 px-3.5">Đối Tượng</th>
+                      <th className="py-3 px-3.5">Địa Chỉ IP</th>
+                      <th className="py-3 px-3.5">Trạng Thái</th>
+                      <th className="py-3 px-3.5">Chi Tiết Kiểm Toán</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-slate-100">
                     {auditLogs.map((log) => (
-                      <tr key={log.id} className="border-b border-slate-100 hover:bg-slate-50">
-                        <td className="py-2.5 px-3 font-mono text-slate-500 whitespace-nowrap">{log.timestamp}</td>
-                        <td className="py-2.5 px-3 font-bold text-slate-800">
-                          {log.actor} <span className="text-[10px] font-normal text-slate-500">({log.role})</span>
+                      <tr key={log.id} className="hover:bg-slate-50/80 transition">
+                        <td className="py-3 px-3.5 font-mono text-[11px] text-slate-500 whitespace-nowrap">
+                          {log.timestamp}
                         </td>
-                        <td className="py-2.5 px-3 font-mono font-bold text-brand-blue">{log.action}</td>
-                        <td className="py-2.5 px-3 font-semibold text-slate-700">{log.target}</td>
-                        <td className="py-2.5 px-3 font-mono text-slate-500">{log.ip}</td>
-                        <td className="py-2.5 px-3">
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                            log.status === 'SUCCESS' ? 'bg-emerald-100 text-emerald-700' :
-                            log.status === 'WARNING' ? 'bg-amber-100 text-amber-800' :
-                            'bg-rose-100 text-rose-700'
+                        <td className="py-3 px-3.5 font-black text-slate-900">
+                          {log.actor} <span className="text-[10px] font-bold text-slate-400 block sm:inline">({log.role})</span>
+                        </td>
+                        <td className="py-3 px-3.5">
+                          <span className="font-mono font-black text-brand-blue text-[11px] px-2 py-0.5 rounded-md bg-blue-50 border border-blue-100">
+                            {log.action}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3.5 font-bold text-slate-700">
+                          {log.target}
+                        </td>
+                        <td className="py-3 px-3.5 font-mono text-[11px] text-slate-500">
+                          <span className="bg-slate-100 px-2 py-0.5 rounded text-slate-600">
+                            {log.ip}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3.5">
+                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wide inline-flex items-center gap-1 ${
+                            log.status === 'SUCCESS' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                            log.status === 'WARNING' ? 'bg-amber-50 text-amber-800 border border-amber-200' :
+                            'bg-rose-50 text-rose-700 border border-rose-200'
                           }`}>
+                            <span className={`h-1.5 w-1.5 rounded-full ${
+                              log.status === 'SUCCESS' ? 'bg-emerald-500' :
+                              log.status === 'WARNING' ? 'bg-amber-500' :
+                              'bg-rose-500'
+                            }`}></span>
                             {log.status}
                           </span>
                         </td>
-                        <td className="py-2.5 px-3 text-slate-600">{log.details}</td>
+                        <td className="py-3 px-3.5 text-slate-600 max-w-xs leading-relaxed">
+                          {log.details}
+                        </td>
                       </tr>
                     ))}
                     {auditLogs.length === 0 && (
                       <tr>
-                        <td colSpan="7" className="text-center py-8 text-slate-400">Chưa có bản ghi kiểm toán bảo mật.</td>
+                        <td colSpan="7" className="text-center py-10 text-slate-400 font-medium">
+                          Chưa có bản ghi kiểm toán bảo mật nào trong phiên hiện tại.
+                        </td>
                       </tr>
                     )}
                   </tbody>
