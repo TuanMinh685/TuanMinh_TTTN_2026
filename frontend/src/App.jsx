@@ -1,6 +1,7 @@
 import { Component, lazy, Suspense, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import api from './services/api';
+import ResponsiveText from './components/ResponsiveText';
 
 const IntakeForm = lazy(() => import('./pages/public/IntakeForm'));
 const Tracking = lazy(() => import('./pages/public/Tracking'));
@@ -415,17 +416,17 @@ function AppContent() {
         {mobileMenuOpen && (
           <div className="lg:hidden bg-white border-t border-slate-200 px-6 py-4 shadow-lg">
             <div className="flex flex-col gap-1.5 text-sm font-medium text-slate-700" onClick={() => setMobileMenuOpen(false)}>
-              <Link to="/" className="py-2 px-3 rounded-lg hover:bg-slate-50">
-                Trang chủ QR CSKH
+              <Link to="/" className="py-2.5 px-3 rounded-lg hover:bg-slate-50">
+                Trang chủ
               </Link>
-              <Link to="/tra-cuu" className="py-2 px-3 rounded-lg hover:bg-slate-50">
-                Quét mã QR &amp; Tra cứu tiến độ
+              <Link to="/tra-cuu" className="py-2.5 px-3 rounded-lg hover:bg-slate-50">
+                Quét QR &amp; Tra cứu
               </Link>
-              <Link to="/intake" className="py-2 px-3 rounded-lg hover:bg-slate-50">
-                Tạo phiếu QR tại quầy
+              <Link to="/intake" className="py-2.5 px-3 rounded-lg hover:bg-slate-50">
+                Tạo phiếu QR
               </Link>
-              <Link to="/dat-lich" className="py-2 px-3 rounded-lg hover:bg-slate-50">
-                Đặt lịch hẹn CSKH
+              <Link to="/dat-lich" className="py-2.5 px-3 rounded-lg hover:bg-slate-50">
+                Đặt lịch hẹn
               </Link>
 
               <div className="pt-3 mt-2 border-t border-slate-200 flex flex-col gap-2">
@@ -523,51 +524,54 @@ function AppContent() {
       </div>
 
       {/* SECTION 07: FOOTER - TỐI GIẢN, ĐỒNG BỘ MÀU TRẮNG & XÁM SLATE */}
-      <footer className="bg-white text-slate-600 py-10 border-t border-slate-200">
-        <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <footer className="bg-white text-slate-600 py-7 sm:py-10 border-t border-slate-200">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-8">
             <div>
-              <h3 className="text-base font-bold text-slate-900 mb-3 flex items-center gap-2.5">
+              <h3 className="text-base font-bold text-slate-900 mb-2 sm:mb-3 flex items-center gap-2.5">
                 <img src="/img/logo-luc-giac.png" alt="Logo Lục Giác" className="w-7 h-7 object-contain" />
                 <span>CÔNG TY CỔ PHẦN LỤC GIÁC</span>
               </h3>
               <p className="text-slate-500 text-xs sm:text-sm leading-relaxed">
-                Hệ thống Web Quét Mã QR Chăm Sóc Khách Hàng Về Mảng Sửa Chữa Máy Tính Và Phần Mềm – Nền tảng số hóa quy trình tiếp nhận thiết bị &amp; yêu cầu phần mềm qua mã QR, theo dõi tiến độ kiểm tra - khắc phục sự cố thời gian thực, cấp sổ bảo hành điện tử (e-Warranty) và đánh giá chất lượng phục vụ thuộc Công ty Cổ phần Lục Giác.
+                <ResponsiveText
+                  mobile="Hệ thống CSKH & Bảo hành điện tử QR mảng sửa chữa máy tính và phần mềm."
+                  desktop="Hệ thống Web Quét Mã QR Chăm Sóc Khách Hàng Về Mảng Sửa Chữa Máy Tính Và Phần Mềm – Nền tảng số hóa quy trình tiếp nhận thiết bị & yêu cầu phần mềm qua mã QR, theo dõi tiến độ kiểm tra - khắc phục sự cố thời gian thực, cấp sổ bảo hành điện tử (e-Warranty) và đánh giá chất lượng phục vụ thuộc Công ty Cổ phần Lục Giác."
+                />
               </p>
             </div>
             
             <div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 mb-3">Địa chỉ liên hệ</h3>
-              <ul className="text-slate-600 text-xs sm:text-sm space-y-2">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 mb-2 sm:mb-3">Địa chỉ liên hệ</h3>
+              <ul className="text-slate-600 text-xs sm:text-sm space-y-1.5 sm:space-y-2">
                 <li>
                   <strong className="text-slate-800">Trụ sở chính:</strong> 615 Âu Cơ, Phường Phú Trung, Quận Tân Phú, TP. Hồ Chí Minh.
                 </li>
-                <li>
+                <li className="hidden sm:list-item">
                   <strong className="text-slate-800">Đơn vị thực hiện:</strong> Công ty Cổ phần Lục Giác
                 </li>
-                <li>
+                <li className="hidden sm:list-item">
                   <strong className="text-slate-800">Trung tâm bảo hành &amp; CSKH:</strong> Chi nhánh Công ty Cổ phần Lục Giác
                 </li>
               </ul>
             </div>
             
             <div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 mb-3">Thông tin hỗ trợ</h3>
-              <ul className="text-slate-600 text-xs sm:text-sm space-y-2">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 mb-2 sm:mb-3">Thông tin hỗ trợ</h3>
+              <ul className="text-slate-600 text-xs sm:text-sm space-y-1.5 sm:space-y-2">
                 <li>
                   <strong className="text-slate-800">Điện thoại:</strong> (+84) 28 3860 4999
                 </li>
                 <li>
                   <strong className="text-slate-800">Email:</strong> info@lucgiac.vn
                 </li>
-                <li>
+                <li className="hidden sm:list-item">
                   <strong className="text-slate-800">Website:</strong> lucgiac.vn
                 </li>
               </ul>
             </div>
           </div>
           
-          <div className="mt-8 pt-6 border-t border-slate-200 text-center text-slate-400 text-xs">
+          <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-slate-200 text-center text-slate-400 text-xs">
             <p>© {CURRENT_YEAR} Bản quyền thuộc về Công ty Cổ phần Lục Giác.</p>
           </div>
         </div>

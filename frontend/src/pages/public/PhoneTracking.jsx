@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import QrScannerModal from '../../components/QrScannerModal';
+import ResponsiveText from '../../components/ResponsiveText';
 
 function PhoneTracking() {
   const navigate = useNavigate();
@@ -51,86 +52,95 @@ function PhoneTracking() {
 
   return (
     <div className="bg-[#f0f5fa] flex flex-col">
-      <main className="flex-1 container mx-auto px-4 py-6 max-w-3xl">
-        <div className="text-center mb-8">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 text-brand-orange text-xs font-bold uppercase tracking-wider mb-2">
-            📷 Tra Cứu Tiến Độ Sửa Chữa &amp; Bảo Hành Điện Tử
+      <main className="flex-1 container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-3xl">
+        <div className="text-center mb-5 sm:mb-8">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 text-brand-orange text-xs font-bold uppercase tracking-wider mb-1.5 sm:mb-2">
+            <ResponsiveText mobile="📷 Tra Cứu & Bảo Hành" desktop="📷 Tra Cứu Tiến Độ Sửa Chữa & Bảo Hành Điện Tử" />
           </span>
-          <h1 className="text-3xl font-bold text-brand-blue mb-3">Quét Mã QR &amp; Tra Cứu Hồ Sơ CSKH</h1>
-          <p className="text-slate-500">
-            Quét mã QR trên biên nhận hoặc nhập Số điện thoại / Số Serial máy để theo dõi tiến độ kiểm tra, sửa chữa máy tính &amp; phần mềm và tra cứu Sổ bảo hành điện tử (e-Warranty).
+          <h1 className="text-xl sm:text-3xl font-bold text-brand-blue mb-1.5 sm:mb-3">
+            <ResponsiveText mobile="Quét Mã QR & Tra Cứu" desktop="Quét Mã QR & Tra Cứu Hồ Sơ CSKH" />
+          </h1>
+          <p className="text-slate-500 text-xs sm:text-base">
+            <ResponsiveText
+              mobile="Quét QR trên phiếu hoặc nhập SĐT / Serial để xem tiến độ."
+              desktop="Quét mã QR trên biên nhận hoặc nhập Số điện thoại / Số Serial máy để theo dõi tiến độ kiểm tra, sửa chữa máy tính & phần mềm và tra cứu Sổ bảo hành điện tử (e-Warranty)."
+            />
           </p>
         </div>
 
         {/* Nút chuyển Tab chế độ tra cứu */}
-        <div className="flex bg-slate-200/80 p-1.5 rounded-2xl max-w-md mx-auto mb-8 shadow-inner">
+        <div className="flex bg-slate-200/80 p-1 sm:p-1.5 rounded-2xl max-w-md mx-auto mb-5 sm:mb-8 shadow-inner">
           <button
             type="button"
             onClick={() => setActiveTab('QR_CODE')}
-            className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
+            className={`flex-1 py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 sm:gap-2 ${
               activeTab === 'QR_CODE'
                 ? 'bg-brand-blue text-white shadow-md'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <span>📷</span> Mã phiếu / Quét QR
+            <span>📷</span> <ResponsiveText mobile="Quét QR / Mã phiếu" desktop="Mã phiếu / Quét QR" />
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('PHONE')}
-            className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
+            className={`flex-1 py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 sm:gap-2 ${
               activeTab === 'PHONE'
                 ? 'bg-brand-blue text-white shadow-md'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <span>📱</span> SĐT / IMEI / Serial
+            <span>📱</span> <ResponsiveText mobile="SĐT / Serial" desktop="SĐT / IMEI / Serial" />
           </button>
         </div>
 
         {/* TAB 1: TRA CỨU BẰNG MÃ PHIẾU HOẶC QUÉT CAMERA QR */}
         {activeTab === 'QR_CODE' && (
-          <div className="bg-white rounded-2xl shadow-xl overflow-hidden border-t-8 border-brand-blue p-6 sm:p-8 mb-8 animate-in fade-in duration-200">
-            <div className="text-center mb-6">
-              <h2 className="text-xl font-bold text-slate-800 mb-1">Quét mã QR hoặc Nhập mã phiếu</h2>
-              <p className="text-sm text-slate-500">
-                Mã tra cứu được in trên phiếu tiếp nhận (Ví dụ: <code className="bg-slate-100 px-2 py-0.5 rounded font-mono font-bold text-brand-blue">RP-839400</code>)
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden border-t-8 border-brand-blue p-5 sm:p-8 mb-6 sm:mb-8 animate-in fade-in duration-200">
+            <div className="text-center mb-4 sm:mb-6">
+              <h2 className="text-lg sm:text-xl font-bold text-slate-800 mb-1">
+                <ResponsiveText mobile="Quét QR hoặc Nhập mã" desktop="Quét mã QR hoặc Nhập mã phiếu" />
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-500">
+                <span className="hidden sm:inline">Mã tra cứu được in trên phiếu tiếp nhận (</span>Ví dụ: <code className="bg-slate-100 px-2 py-0.5 rounded font-mono font-bold text-brand-blue">RP-839400</code><span className="hidden sm:inline">)</span>
               </p>
             </div>
 
             {/* Nút bật Camera quét mã QR */}
-            <div className="mb-6 flex justify-center">
+            <div className="mb-5 sm:mb-6 flex justify-center">
               <button
                 type="button"
                 onClick={() => setIsScannerOpen(true)}
-                className="w-full sm:w-auto px-8 py-4 bg-brand-blue hover:bg-blue-700 text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-3 cursor-pointer"
+                className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-brand-blue hover:bg-blue-700 text-white font-bold text-base sm:text-lg rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2.5 sm:gap-3 cursor-pointer"
               >
-                <span className="text-2xl">📷</span>
-                <span>Bật Camera quét mã QR ngay</span>
+                <span className="text-xl sm:text-2xl">📷</span>
+                <ResponsiveText mobile="Bật Camera Quét QR" desktop="Bật Camera quét mã QR ngay" />
               </button>
             </div>
 
-            <div className="relative flex items-center my-6">
+            <div className="relative flex items-center my-4 sm:my-6">
               <div className="flex-grow border-t border-slate-200"></div>
-              <span className="flex-shrink mx-4 text-xs font-bold uppercase tracking-wider text-slate-400">Hoặc gõ mã bằng tay</span>
+              <span className="flex-shrink mx-4 text-xs font-bold uppercase tracking-wider text-slate-400">
+                <ResponsiveText mobile="Hoặc nhập mã" desktop="Hoặc gõ mã bằng tay" />
+              </span>
               <div className="flex-grow border-t border-slate-200"></div>
             </div>
 
             {/* Form nhập mã phiếu */}
-            <form onSubmit={handleTicketCodeSearch} className="flex flex-col sm:flex-row gap-4">
+            <form onSubmit={handleTicketCodeSearch} className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <input
                 type="text"
                 required
                 placeholder="Nhập mã phiếu (VD: RP-839400)"
-                className="flex-1 px-4 py-3 rounded-lg border border-slate-300 focus:border-brand-blue focus:ring focus:ring-blue-200 outline-none text-lg font-mono uppercase"
+                className="flex-1 px-4 py-2.5 sm:py-3 rounded-lg border border-slate-300 focus:border-brand-blue focus:ring focus:ring-blue-200 outline-none text-base sm:text-lg font-mono uppercase"
                 value={ticketCodeInput}
                 onChange={(e) => setTicketCodeInput(e.target.value)}
               />
               <button
                 type="submit"
-                className="px-8 py-3 bg-brand-blue text-white font-bold text-lg rounded-lg hover:bg-blue-700 shadow-lg transition-all whitespace-nowrap cursor-pointer"
+                className="px-6 sm:px-8 py-2.5 sm:py-3 bg-brand-blue text-white font-bold text-base sm:text-lg rounded-lg hover:bg-blue-700 shadow-lg transition-all whitespace-nowrap cursor-pointer"
               >
-                Tra Cứu Ngay
+                <ResponsiveText mobile="Tra Cứu" desktop="Tra Cứu Ngay" />
               </button>
             </form>
           </div>
@@ -138,25 +148,32 @@ function PhoneTracking() {
 
         {/* TAB 2: TRA CỨU THEO SỐ ĐIỆN THOẠI / IMEI / SERIAL */}
         {activeTab === 'PHONE' && (
-          <div className="bg-white rounded-2xl shadow-xl overflow-hidden border-t-8 border-brand-blue p-6 sm:p-8 mb-8 animate-in fade-in duration-200">
-            <div className="text-center mb-6">
-              <h2 className="text-xl font-bold text-slate-800 mb-1">Tra cứu theo Số điện thoại hoặc Số Serial / Service Tag thiết bị</h2>
-              <p className="text-sm text-slate-500">Nhập SĐT khách hàng hoặc Số Serial máy tính (VD: <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-xs">0901234567</code>, <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-xs">C02X9082JG5H</code>, <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-xs">DELL-XPS-8821</code>).</p>
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden border-t-8 border-brand-blue p-5 sm:p-8 mb-6 sm:mb-8 animate-in fade-in duration-200">
+            <div className="text-center mb-4 sm:mb-6">
+              <h2 className="text-lg sm:text-xl font-bold text-slate-800 mb-1">
+                <ResponsiveText
+                  mobile="Tra cứu SĐT / Serial"
+                  desktop="Tra cứu theo Số điện thoại hoặc Số Serial / Service Tag thiết bị"
+                />
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-500">
+                <span className="hidden sm:inline">Nhập SĐT khách hàng hoặc Số Serial máy tính (</span>VD: <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-xs">0901234567</code>, <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-xs">C02X9082JG5H</code><span className="hidden sm:inline">, <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-xs">DELL-XPS-8821</code>)</span>.
+              </p>
             </div>
 
-            <form onSubmit={handlePhoneSearch} className="flex flex-col sm:flex-row gap-4">
+            <form onSubmit={handlePhoneSearch} className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <input
                 type="text"
                 required
                 placeholder="Nhập SĐT khách hàng hoặc Số Serial / Service Tag máy..."
-                className="flex-1 px-4 py-3 rounded-lg border border-slate-300 focus:border-brand-blue focus:ring focus:ring-blue-200 outline-none text-lg"
+                className="flex-1 px-4 py-2.5 sm:py-3 rounded-lg border border-slate-300 focus:border-brand-blue focus:ring focus:ring-blue-200 outline-none text-base sm:text-lg"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
               />
               <button
                 type="submit"
                 disabled={loading}
-                className="px-8 py-3 bg-brand-blue text-white font-bold text-lg rounded-lg hover:bg-blue-700 shadow-lg transition-all disabled:opacity-50 whitespace-nowrap cursor-pointer"
+                className="px-6 sm:px-8 py-2.5 sm:py-3 bg-brand-blue text-white font-bold text-base sm:text-lg rounded-lg hover:bg-blue-700 shadow-lg transition-all disabled:opacity-50 whitespace-nowrap cursor-pointer"
               >
                 {loading ? 'Đang tìm...' : 'Tra Cứu'}
               </button>

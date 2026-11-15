@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+import ResponsiveText from '../../components/ResponsiveText';
 
 function IntakeForm() {
   const navigate = useNavigate();
@@ -94,31 +95,44 @@ function IntakeForm() {
   };
 
   return (
-    <div className="max-w-xl mx-auto my-10 px-4">
-      <div className="bg-white/90 backdrop-blur-md rounded-2xl p-8 shadow-2xl border-t-4 border-brand-blue relative overflow-hidden">
+    <div className="max-w-xl mx-auto my-4 sm:my-10 px-3 sm:px-4">
+      <div className="bg-white/90 backdrop-blur-md rounded-2xl p-5 sm:p-8 shadow-2xl border-t-4 border-brand-blue relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-brand-orange/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
         
-        <div className="text-center mb-8 relative z-10">
+        <div className="text-center mb-5 sm:mb-8 relative z-10">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-brand-blue text-xs font-bold uppercase tracking-wider mb-2">
-            📷 Tiếp Nhận Thiết Bị &amp; Hỗ Trợ Kỹ Thuật
+            <ResponsiveText mobile="📷 Tiếp Nhận CSKH" desktop="📷 Tiếp Nhận Thiết Bị & Hỗ Trợ Kỹ Thuật" />
           </span>
-          <h1 className="text-2xl sm:text-3xl font-bold text-brand-blue mb-2">Tạo Phiếu Tiếp Nhận Chăm Sóc Khách Hàng</h1>
-          <p className="text-slate-500 text-sm">
-            Điền thông tin thiết bị máy tính hoặc yêu cầu phần mềm để hệ thống cấp ngay <strong>Mã QR định danh</strong> theo dõi tiến độ kiểm tra, sửa chữa và kích hoạt bảo hành điện tử.
+          <h1 className="text-xl sm:text-3xl font-bold text-brand-blue mb-1.5 sm:mb-2">
+            <ResponsiveText mobile="Tạo Phiếu Tiếp Nhận" desktop="Tạo Phiếu Tiếp Nhận Chăm Sóc Khách Hàng" />
+          </h1>
+          <p className="text-slate-500 text-xs sm:text-sm">
+            <ResponsiveText
+              mobile="Điền thông tin để nhận Mã QR theo dõi tiến độ & bảo hành."
+              desktop={
+                <>
+                  Điền thông tin thiết bị máy tính hoặc yêu cầu phần mềm để hệ thống cấp ngay <strong>Mã QR định danh</strong> theo dõi tiến độ kiểm tra, sửa chữa và kích hoạt bảo hành điện tử.
+                </>
+              }
+            />
           </p>
         </div>
 
-        {error && <div className="bg-red-50 text-red-600 p-4 rounded-xl mb-6 text-sm">{error}</div>}
+        {error && <div className="bg-red-50 text-red-600 p-3 sm:p-4 rounded-xl mb-4 sm:mb-6 text-xs sm:text-sm">{error}</div>}
 
-        <form onSubmit={handleSubmit} className="space-y-5 relative z-10">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 relative z-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">Họ và Tên khách hàng *</label>
-              <input required type="text" name="fullName" onChange={handleChange} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/50" placeholder="VD: Lê Trần Tuấn Minh" />
+              <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">
+                <ResponsiveText mobile="Họ và tên *" desktop="Họ và Tên khách hàng *" />
+              </label>
+              <input required type="text" name="fullName" onChange={handleChange} className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/50 text-sm sm:text-base" placeholder="VD: Lê Trần Tuấn Minh" />
             </div>
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="block text-sm font-semibold text-slate-700">Số điện thoại liên hệ *</label>
+                <label className="block text-xs sm:text-sm font-semibold text-slate-700">
+                  <ResponsiveText mobile="Số điện thoại *" desktop="Số điện thoại liên hệ *" />
+                </label>
                 {zaloCheckStatus === 'LINKED' && (
                   <span className="text-[11px] font-bold text-emerald-600 flex items-center gap-1">✓ SĐT hợp lệ</span>
                 )}
@@ -126,38 +140,47 @@ function IntakeForm() {
                   <span className="text-[11px] font-bold text-red-500">SĐT không hợp lệ</span>
                 )}
               </div>
-              <input required type="tel" name="phone" onChange={handleChange} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/50" placeholder="0901234567" />
+              <input required type="tel" name="phone" onChange={handleChange} className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/50 text-sm sm:text-base" placeholder="0901234567" />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">Thiết bị máy tính / Phần mềm cần hỗ trợ *</label>
-              <input required type="text" name="deviceName" onChange={handleChange} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/50" placeholder="VD: Laptop Dell XPS, MacBook M1, Windows 11..." />
+              <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">
+                <ResponsiveText mobile="Thiết bị / Dịch vụ *" desktop="Thiết bị máy tính / Phần mềm cần hỗ trợ *" />
+              </label>
+              <input required type="text" name="deviceName" onChange={handleChange} className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/50 text-sm sm:text-base" placeholder="VD: Laptop Dell XPS, MacBook M1, Windows 11..." />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">Số Serial / Service Tag máy</label>
-              <input type="text" name="serialImei" onChange={handleChange} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/50" placeholder="VD: C02X9082JG5H (Không bắt buộc)" />
+              <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">
+                <ResponsiveText mobile="Số Serial / Service Tag" desktop="Số Serial / Service Tag máy" />
+              </label>
+              <input type="text" name="serialImei" onChange={handleChange} className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/50 text-sm sm:text-base" placeholder="VD: C02X9082JG5H (Không bắt buộc)" />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">Mô tả sự cố máy tính / Yêu cầu hỗ trợ phần mềm *</label>
-            <textarea required name="issueDescription" onChange={handleChange} rows="3" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/50" placeholder="Mô tả chi tiết tình trạng lỗi phần cứng máy tính hoặc sự cố phần mềm cần bộ phận CSKH & Kỹ thuật hỗ trợ..."></textarea>
+            <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">
+              <ResponsiveText mobile="Mô tả sự cố *" desktop="Mô tả sự cố máy tính / Yêu cầu hỗ trợ phần mềm *" />
+            </label>
+            <textarea required name="issueDescription" onChange={handleChange} rows="3" className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/50 text-sm sm:text-base" placeholder="Mô tả chi tiết tình trạng lỗi phần cứng máy tính hoặc sự cố phần mềm cần bộ phận CSKH & Kỹ thuật hỗ trợ..."></textarea>
           </div>
 
           {/* Khối Tải ảnh minh chứng hiện trạng lúc tiếp nhận */}
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 sm:p-4 space-y-2.5 sm:space-y-3">
             <div className="flex items-center justify-between gap-2">
-              <div>
-                <label className="block text-sm font-bold text-slate-800">
-                  📸 Ảnh chụp ngoại quan máy / Màn hình lỗi phần mềm (Tùy chọn)
+              <div className="min-w-0">
+                <label className="block text-xs sm:text-sm font-bold text-slate-800">
+                  <ResponsiveText
+                    mobile="📸 Ảnh hiện trạng (Tùy chọn)"
+                    desktop="📸 Ảnh chụp ngoại quan máy / Màn hình lỗi phần mềm (Tùy chọn)"
+                  />
                 </label>
-                <p className="text-xs text-slate-500">
+                <p className="hidden sm:block text-xs text-slate-500">
                   Chụp hoặc tải lên hình ảnh ngoại quan máy tính lúc bàn giao hoặc màn hình báo lỗi để lưu hồ sơ CSKH minh bạch.
                 </p>
               </div>
-              <label className="cursor-pointer shrink-0 rounded-lg bg-brand-blue px-3 py-2 text-xs font-bold text-white hover:bg-blue-700 transition">
+              <label className="cursor-pointer shrink-0 rounded-lg bg-brand-blue px-3 py-2 text-xs font-bold text-white hover:bg-blue-700 transition inline-flex items-center">
                 + Chọn ảnh
                 <input
                   type="file"
@@ -187,8 +210,12 @@ function IntakeForm() {
             )}
           </div>
 
-          <button disabled={loading} type="submit" className="w-full py-4 bg-brand-blue hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg transition-all transform hover:-translate-y-0.5 cursor-pointer">
-            {loading ? 'Đang khởi tạo Mã QR...' : 'Tạo Phiếu CSKH & Nhận Mã QR Theo Dõi →'}
+          <button disabled={loading} type="submit" className="w-full py-3.5 sm:py-4 bg-brand-blue hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg transition-all transform hover:-translate-y-0.5 cursor-pointer text-sm sm:text-base">
+            {loading ? (
+              'Đang khởi tạo Mã QR...'
+            ) : (
+              <ResponsiveText mobile="Tạo Phiếu & Nhận Mã QR →" desktop="Tạo Phiếu CSKH & Nhận Mã QR Theo Dõi →" />
+            )}
           </button>
         </form>
       </div>

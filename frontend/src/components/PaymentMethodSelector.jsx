@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import api from '../services/api';
 import { playNotificationChime, triggerDeviceVibration } from '../utils/webNotification';
+import ResponsiveText from './ResponsiveText';
 
 const DEFAULT_BANK = {
   id: 'MB',
@@ -125,41 +126,45 @@ function PaymentMethodSelector({
           <button
             type="button"
             onClick={() => setPaymentMethod('VIETQR')}
-            className={`py-3 px-3 rounded-2xl border text-center transition cursor-pointer flex flex-col items-center justify-center gap-1 ${
+            className={`py-2.5 sm:py-3 px-3 rounded-2xl border text-center transition cursor-pointer flex flex-col items-center justify-center gap-0.5 sm:gap-1 ${
               paymentMethod === 'VIETQR'
                 ? 'border-brand-blue bg-blue-50/90 text-brand-blue font-bold shadow-xs ring-2 ring-blue-500/20'
                 : 'border-slate-200 bg-slate-50/70 text-slate-600 hover:bg-slate-100 font-semibold'
             }`}
           >
             <span className="text-lg">🏦</span>
-            <span className="text-xs sm:text-sm font-bold">Chuyển Khoản (VietQR)</span>
-            <span className="text-[10px] opacity-75 font-normal">Quét mã Banking nhận ngay 24/7</span>
+            <span className="text-xs sm:text-sm font-bold">
+              <ResponsiveText mobile="VietQR" desktop="Chuyển Khoản (VietQR)" />
+            </span>
+            <span className="hidden sm:inline text-[10px] opacity-75 font-normal">Quét mã Banking nhận ngay 24/7</span>
           </button>
 
           <button
             type="button"
             onClick={() => setPaymentMethod('TIEN_MAT')}
-            className={`py-3 px-3 rounded-2xl border text-center transition cursor-pointer flex flex-col items-center justify-center gap-1 ${
+            className={`py-2.5 sm:py-3 px-3 rounded-2xl border text-center transition cursor-pointer flex flex-col items-center justify-center gap-0.5 sm:gap-1 ${
               paymentMethod === 'TIEN_MAT'
                 ? 'border-emerald-600 bg-emerald-50/90 text-emerald-700 font-bold shadow-xs ring-2 ring-emerald-500/20'
                 : 'border-slate-200 bg-slate-50/70 text-slate-600 hover:bg-slate-100 font-semibold'
             }`}
           >
             <span className="text-lg">💵</span>
-            <span className="text-xs sm:text-sm font-bold">Tiền Mặt Tại Quầy</span>
-            <span className="text-[10px] opacity-75 font-normal">Thanh toán trực tiếp tại 615 Âu Cơ</span>
+            <span className="text-xs sm:text-sm font-bold">
+              <ResponsiveText mobile="Tiền mặt" desktop="Tiền Mặt Tại Quầy" />
+            </span>
+            <span className="hidden sm:inline text-[10px] opacity-75 font-normal">Thanh toán trực tiếp tại 615 Âu Cơ</span>
           </button>
         </div>
       </div>
 
       {/* NỘI DUNG 1: CHUYỂN KHOẢN QUA VIETQR */}
       {paymentMethod === 'VIETQR' && (
-        <div className="mt-4 p-4 rounded-2xl bg-blue-50/40 border border-blue-200/80 space-y-3">
+        <div className="mt-4 p-3.5 sm:p-4 rounded-2xl bg-blue-50/40 border border-blue-200/80 space-y-3">
           <div className="flex items-center gap-2 text-xs font-bold text-brand-blue">
             <span>🏦</span>
-            <span>QUÉT MÃ VIETQR QUA ỨNG DỤNG NGÂN HÀNG (MOBILE BANKING)</span>
+            <ResponsiveText mobile="QUÉT MÃ VIETQR NGÂN HÀNG" desktop="QUÉT MÃ VIETQR QUA ỨNG DỤNG NGÂN HÀNG (MOBILE BANKING)" />
           </div>
-          <p className="text-xs text-slate-600 leading-relaxed">
+          <p className="hidden sm:block text-xs text-slate-600 leading-relaxed">
             Mở ứng dụng ngân hàng bất kỳ, quét mã VietQR bên dưới hoặc chuyển khoản theo đúng thông tin để hệ thống đối soát tự động ghi nhận ngay sau 3 - 5 giây.
           </p>
 
@@ -240,33 +245,46 @@ function PaymentMethodSelector({
 
       {/* NỘI DUNG 2: THANH TOÁN TIỀN MẶT TRỰC TIẾP */}
       {paymentMethod === 'TIEN_MAT' && (
-        <div className="mt-4 p-4 rounded-2xl bg-emerald-50/50 border border-emerald-200/80 space-y-3">
+        <div className="mt-4 p-3.5 sm:p-4 rounded-2xl bg-emerald-50/50 border border-emerald-200/80 space-y-2.5 sm:space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-emerald-900 flex items-center gap-1.5">
-              <span>💵</span> THANH TOÁN TIỀN MẶT CHO LỄ TÂN TẠI BÀN TIẾP NHẬN
+              <span>💵</span>{' '}
+              <ResponsiveText mobile="THANH TOÁN TIỀN MẶT TẠI QUẦY" desktop="THANH TOÁN TIỀN MẶT CHO LỄ TÂN TẠI BÀN TIẾP NHẬN" />
             </span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-white border border-emerald-200 text-xs text-slate-700 space-y-2.5">
-            <p className="font-extrabold text-sm text-slate-800">📋 Quy trình thanh toán tiền mặt tại quầy:</p>
-            <ol className="list-decimal list-inside space-y-2 text-slate-700 leading-relaxed">
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-emerald-200 text-xs text-slate-700 space-y-2 sm:space-y-2.5">
+            <p className="hidden sm:block font-extrabold text-sm text-slate-800">📋 Quy trình thanh toán tiền mặt tại quầy:</p>
+            <ol className="list-decimal list-inside space-y-1.5 sm:space-y-2 text-slate-700 leading-relaxed">
               <li>
-                Quý khách xuất trình <strong>Mã phiếu QR #{ticketCode}</strong> cho nhân viên Lễ tân tại quầy.
+                <ResponsiveText
+                  mobile={<>Đưa mã phiếu <strong>#{ticketCode}</strong> tại quầy lễ tân.</>}
+                  desktop={<>Quý khách xuất trình <strong>Mã phiếu QR #{ticketCode}</strong> cho nhân viên Lễ tân tại quầy.</>}
+                />
               </li>
               <li>
-                Thanh toán số tiền <strong className="text-brand-blue text-sm">{numericAmount > 0 ? `${numericAmount.toLocaleString('vi-VN')} ₫` : 'Miễn phí'}</strong> trực tiếp bằng tiền mặt.
+                <ResponsiveText
+                  mobile={<>Thanh toán <strong className="text-brand-blue">{numericAmount > 0 ? `${numericAmount.toLocaleString('vi-VN')} ₫` : 'Miễn phí'}</strong> tiền mặt.</>}
+                  desktop={<>Thanh toán số tiền <strong className="text-brand-blue text-sm">{numericAmount > 0 ? `${numericAmount.toLocaleString('vi-VN')} ₫` : 'Miễn phí'}</strong> trực tiếp bằng tiền mặt.</>}
+                />
               </li>
               <li>
-                Lễ tân sẽ bấm <strong>"Xác nhận đã thu Tiền mặt"</strong> trên hệ thống, in biên nhận và kích hoạt ngay <strong>Sổ bảo hành điện tử (e-Warranty)</strong> cho quý khách.
+                <ResponsiveText
+                  mobile="Nhận biên nhận & kích hoạt bảo hành e-Warranty."
+                  desktop={<>Lễ tân sẽ bấm <strong>"Xác nhận đã thu Tiền mặt"</strong> trên hệ thống, in biên nhận và kích hoạt ngay <strong>Sổ bảo hành điện tử (e-Warranty)</strong> cho quý khách.</>}
+                />
               </li>
             </ol>
-            <div className="pt-2.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
+            <div className="pt-2 sm:pt-2.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
               <div className="flex items-center gap-1.5">
                 <span>📍</span>
-                <span>Địa chỉ quầy: <strong>615 Âu Cơ, P. Phú Trung, Q. Tân Phú, TP.HCM</strong></span>
+                <ResponsiveText
+                  mobile={<strong>615 Âu Cơ, P. Phú Trung, Q. Tân Phú</strong>}
+                  desktop={<>Địa chỉ quầy: <strong>615 Âu Cơ, P. Phú Trung, Q. Tân Phú, TP.HCM</strong></>}
+                />
               </div>
               <div className="text-emerald-700 font-semibold">
-                Hotline hỗ trợ: 028.3860.4999
+                <ResponsiveText mobile="☎ 028.3860.4999" desktop="Hotline hỗ trợ: 028.3860.4999" />
               </div>
             </div>
           </div>
@@ -274,9 +292,9 @@ function PaymentMethodSelector({
       )}
 
       {/* Chân trang ghi chú bảo hành */}
-      <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
-        <span>🛡️ Kích hoạt e-Warranty tự động sau khi thanh toán</span>
-        <span>Công ty CP Lục Giác • Hotline: 028.3860.4999</span>
+      <div className="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-1 text-[11px] text-slate-400">
+        <ResponsiveText mobile="🛡️ Tự động kích hoạt e-Warranty" desktop="🛡️ Kích hoạt e-Warranty tự động sau khi thanh toán" />
+        <ResponsiveText mobile="Hotline: 028.3860.4999" desktop="Công ty CP Lục Giác • Hotline: 028.3860.4999" />
       </div>
     </div>
   );

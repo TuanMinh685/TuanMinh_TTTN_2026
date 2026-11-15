@@ -3,6 +3,7 @@ import { Link, useParams, useLocation } from 'react-router-dom';
 import QRCode from 'qrcode';
 import api from '../../services/api';
 import PaymentMethodSelector from '../../components/PaymentMethodSelector';
+import ResponsiveText from '../../components/ResponsiveText';
 import {
   getNotificationPermission,
   requestNotificationPermission,
@@ -326,14 +327,14 @@ function Tracking() {
               to="/tra-cuu"
               className="text-xs font-semibold text-white bg-brand-blue hover:bg-brand-blue-hover px-3.5 py-2 rounded-xl shadow-xs transition flex items-center gap-1.5"
             >
-              <span>🔍</span> Tra cứu mã khác
+              <span>🔍</span> <ResponsiveText mobile="Tra mã khác" desktop="Tra cứu mã khác" />
             </Link>
             <button
               type="button"
               onClick={() => window.print()}
               className="text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 px-3.5 py-2 rounded-xl shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
             >
-              <span>🖨️</span> In phiếu QR điện tử
+              <span>🖨️</span> <ResponsiveText mobile="In phiếu" desktop="In phiếu QR điện tử" />
             </button>
           </div>
         </div>
@@ -410,7 +411,7 @@ function Tracking() {
         </div>
 
         {/* SECTION 2: TABS CHUYỂN ĐỔI CHỨC NĂNG - TINH GỌN, CHỐNG QUÁ TẢI THÔNG TIN */}
-        <div className="flex bg-white rounded-2xl p-1.5 border border-slate-200 shadow-xs mb-5 gap-1">
+        <div className="flex bg-white rounded-2xl p-1 sm:p-1.5 border border-slate-200 shadow-xs mb-4 sm:mb-5 gap-1">
           <button
             type="button"
             onClick={() => setActiveTab('status')}
@@ -421,7 +422,7 @@ function Tracking() {
             }`}
           >
             <span>🧭</span>
-            <span>Tiến Độ &amp; Nhật Ký</span>
+            <ResponsiveText mobile="Tiến độ" desktop="Tiến Độ & Nhật Ký" />
           </button>
 
           <button
@@ -447,7 +448,7 @@ function Tracking() {
             }`}
           >
             <span>🛡️</span>
-            <span>Ảnh &amp; Bảo Hành</span>
+            <ResponsiveText mobile="Bảo hành" desktop="Ảnh & Bảo Hành" />
           </button>
         </div>
 
@@ -517,27 +518,36 @@ function Tracking() {
               </div>
 
               {/* Cam kết dịch vụ & Quyền lợi CSKH (thay cho thông tin địa chỉ đã có ở chân trang) */}
-              <div className="bg-white rounded-3xl p-5 shadow-sm border border-slate-200/90">
-                <h3 className="text-sm font-extrabold text-slate-800 mb-3 flex items-center gap-2">
-                  <span>🛡️</span> Cam Kết Dịch Vụ &amp; Quyền Lợi CSKH
+              <div className="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200/90">
+                <h3 className="text-sm font-extrabold text-slate-800 mb-2.5 sm:mb-3 flex items-center gap-2">
+                  <span>🛡️</span> <ResponsiveText mobile="Cam Kết Dịch Vụ" desktop="Cam Kết Dịch Vụ & Quyền Lợi CSKH" />
                 </h3>
-                <div className="bg-emerald-50/60 rounded-2xl p-3.5 border border-emerald-200/70 space-y-2.5 text-xs text-slate-700">
+                <div className="bg-emerald-50/60 rounded-2xl p-3 sm:p-3.5 border border-emerald-200/70 space-y-2 sm:space-y-2.5 text-xs text-slate-700">
                   <div className="flex items-start gap-2">
                     <span className="text-emerald-600 font-extrabold text-sm leading-none mt-0.5">✓</span>
                     <p className="leading-relaxed">
-                      <strong>Minh bạch chi phí:</strong> Báo giá rõ ràng trước khi sửa, miễn phí 100% công kiểm tra và tư vấn ban đầu.
+                      <ResponsiveText
+                        mobile={<><strong>Minh bạch chi phí:</strong> Báo giá trước khi sửa, miễn phí kiểm tra.</>}
+                        desktop={<><strong>Minh bạch chi phí:</strong> Báo giá rõ ràng trước khi sửa, miễn phí 100% công kiểm tra và tư vấn ban đầu.</>}
+                      />
                     </p>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-emerald-600 font-extrabold text-sm leading-none mt-0.5">✓</span>
                     <p className="leading-relaxed">
-                      <strong>Bảo mật dữ liệu:</strong> Cam kết giữ an toàn và bảo mật tuyệt đối 100% dữ liệu cá nhân trên thiết bị của khách hàng.
+                      <ResponsiveText
+                        mobile={<><strong>Bảo mật dữ liệu:</strong> Giữ an toàn 100% dữ liệu cá nhân.</>}
+                        desktop={<><strong>Bảo mật dữ liệu:</strong> Cam kết giữ an toàn và bảo mật tuyệt đối 100% dữ liệu cá nhân trên thiết bị của khách hàng.</>}
+                      />
                     </p>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-emerald-600 font-extrabold text-sm leading-none mt-0.5">✓</span>
                     <p className="leading-relaxed">
-                      <strong>Bảo hành điện tử e-Warranty:</strong> Cấp mã QR bảo hành chính hãng từ 03 - 06 tháng, tra cứu nhanh mọi lúc mọi nơi.
+                      <ResponsiveText
+                        mobile={<><strong>e-Warranty:</strong> Bảo hành điện tử QR 03 - 06 tháng.</>}
+                        desktop={<><strong>Bảo hành điện tử e-Warranty:</strong> Cấp mã QR bảo hành chính hãng từ 03 - 06 tháng, tra cứu nhanh mọi lúc mọi nơi.</>}
+                      />
                     </p>
                   </div>
                 </div>
@@ -607,9 +617,13 @@ function Tracking() {
         {activeTab === 'warranty' && (
           <div className="space-y-5">
             {/* Hình ảnh minh chứng */}
-            <div className="bg-white rounded-3xl p-5 shadow-sm border border-slate-200/90">
-              <h3 className="text-sm font-extrabold text-slate-800 mb-3 flex items-center gap-2">
-                <span>📸</span> Hình Ảnh Minh Chứng Lúc Tiếp Nhận ({ticket.hinh_anh_ngoai_quan?.length || 0} ảnh)
+            <div className="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200/90">
+              <h3 className="text-sm font-extrabold text-slate-800 mb-2.5 sm:mb-3 flex items-center gap-2">
+                <span>📸</span>{' '}
+                <ResponsiveText
+                  mobile={`Ảnh Tiếp Nhận (${ticket.hinh_anh_ngoai_quan?.length || 0})`}
+                  desktop={`Hình Ảnh Minh Chứng Lúc Tiếp Nhận (${ticket.hinh_anh_ngoai_quan?.length || 0} ảnh)`}
+                />
               </h3>
               {ticket.hinh_anh_ngoai_quan && ticket.hinh_anh_ngoai_quan.length > 0 ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -624,27 +638,40 @@ function Tracking() {
                   ))}
                 </div>
               ) : (
-                <div className="rounded-2xl bg-slate-50 border border-dashed border-slate-300 p-4 text-center text-xs text-slate-500">
-                  Chưa có ảnh ngoại quan đính kèm. Lễ tân sẽ cập nhật ảnh khi tiếp nhận tại quầy 615 Âu Cơ.
+                <div className="rounded-2xl bg-slate-50 border border-dashed border-slate-300 p-3.5 sm:p-4 text-center text-xs text-slate-500">
+                  <ResponsiveText
+                    mobile="Chưa có ảnh hiện trạng đính kèm."
+                    desktop="Chưa có ảnh ngoại quan đính kèm. Lễ tân sẽ cập nhật ảnh khi tiếp nhận tại quầy 615 Âu Cơ."
+                  />
                 </div>
               )}
             </div>
 
             {/* Sổ bảo hành e-Warranty */}
-            <div className="p-5 bg-gradient-to-br from-emerald-50 via-teal-50/70 to-white border border-emerald-200 rounded-3xl shadow-sm">
+            <div className="p-4 sm:p-5 bg-gradient-to-br from-emerald-50 via-teal-50/70 to-white border border-emerald-200 rounded-3xl shadow-sm">
               <div className="flex items-center justify-between gap-2 mb-2">
                 <div className="flex items-center gap-2">
                   <span className="text-xl">🛡️</span>
-                  <h3 className="font-extrabold text-slate-800 text-sm">Sổ Bảo Hành Điện Tử (e-Warranty)</h3>
+                  <h3 className="font-extrabold text-slate-800 text-sm">
+                    <ResponsiveText mobile="Bảo Hành Điện Tử" desktop="Sổ Bảo Hành Điện Tử (e-Warranty)" />
+                  </h3>
                 </div>
                 <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${ticket.bao_hanh?.con_han ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700'}`}>
                   {ticket.bao_hanh?.trang_thai_text || 'Chờ kích hoạt'}
                 </span>
               </div>
               <p className="text-xs text-slate-600 leading-relaxed">
-                {ticket.bao_hanh?.con_han
-                  ? `Hồ sơ đang trong thời hạn bảo hành tiêu chuẩn (còn ${ticket.bao_hanh.so_ngay_con_lai} ngày).`
-                  : 'Sổ bảo hành điện tử 06 tháng sẽ tự động kích hoạt ngay sau khi hoàn tất sửa chữa và bàn giao máy.'}
+                {ticket.bao_hanh?.con_han ? (
+                  <ResponsiveText
+                    mobile={`Còn hạn bảo hành (${ticket.bao_hanh.so_ngay_con_lai} ngày).`}
+                    desktop={`Hồ sơ đang trong thời hạn bảo hành tiêu chuẩn (còn ${ticket.bao_hanh.so_ngay_con_lai} ngày).`}
+                  />
+                ) : (
+                  <ResponsiveText
+                    mobile="Tự động kích hoạt bảo hành 06 tháng sau khi bàn giao máy."
+                    desktop="Sổ bảo hành điện tử 06 tháng sẽ tự động kích hoạt ngay sau khi hoàn tất sửa chữa và bàn giao máy."
+                  />
+                )}
               </p>
               {ticket.bao_hanh?.con_han && (
                 <button

@@ -4,6 +4,7 @@ import QRCode from 'qrcode';
 import api from '../../services/api';
 import { getAccessibleBaseUrl } from '../../utils/network';
 import QrScannerModal from '../../components/QrScannerModal';
+import ResponsiveText from '../../components/ResponsiveText';
 
 const CORE_PILLARS = [
   {
@@ -189,24 +190,24 @@ function HomeLanding() {
       )}
 
       {/* SECTION 01: HERO - CHUẨN MÀU NỀN CÔNG TY CỔ PHẦN LỤC GIÁC (CẤU HÌNH ĐỘNG TỪ BE) */}
-      <section className="bg-gradient-to-b from-[#e8f1f8] via-[#f1f6fa] to-[#f0f5fa] border-b border-slate-200 py-12 lg:py-16">
+      <section className="bg-gradient-to-b from-[#e8f1f8] via-[#f1f6fa] to-[#f0f5fa] border-b border-slate-200 py-7 sm:py-12 lg:py-16">
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-10 items-center">
             
             {/* CỘT TRÁI (7/12): THÔNG TIN CHÍNH & HỘP TRA CỨU */}
-            <div className="lg:col-span-7 space-y-5">
+            <div className="lg:col-span-7 space-y-4 sm:space-y-5">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-white border border-slate-200 text-xs font-semibold uppercase tracking-wider text-slate-700 shadow-2xs">
-                <span className="w-2 h-2 rounded-full bg-brand-green"></span>
-                <span>{brand.badgeText}</span>
+                <span className="w-2 h-2 rounded-full bg-brand-green shrink-0"></span>
+                <ResponsiveText mobile="TT CSKH • LỤC GIÁC" desktop={brand.badgeText} />
               </div>
 
-              <div className="space-y-2">
-                <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 leading-tight tracking-tight">
+              <div className="space-y-1.5 sm:space-y-2">
+                <h1 className="text-2xl sm:text-4xl font-bold text-slate-900 leading-tight tracking-tight">
                   {hero.titleLine1} <br />
                   <span className="text-brand-blue font-extrabold">{hero.titleHighlight}</span>
                 </h1>
 
-                <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-2xl">
+                <p className="text-xs sm:text-base text-slate-600 leading-relaxed max-w-2xl line-clamp-2 sm:line-clamp-none">
                   {hero.description}
                 </p>
               </div>
@@ -336,12 +337,17 @@ function HomeLanding() {
                     </div>
                   )}
                   <p className="mt-2 text-xs text-slate-600 text-center font-medium">
-                    {qrMode === 'INTAKE'
-                      ? 'Dùng Camera điện thoại hoặc Zalo quét để mở form tiếp nhận'
-                      : 'Dùng Camera điện thoại hoặc Zalo quét để tra cứu hồ sơ'}
+                    <ResponsiveText
+                      mobile={qrMode === 'INTAKE' ? 'Quét QR để mở form tạo phiếu' : 'Quét QR để tra cứu hồ sơ'}
+                      desktop={
+                        qrMode === 'INTAKE'
+                          ? 'Dùng Camera điện thoại hoặc Zalo quét để mở form tiếp nhận'
+                          : 'Dùng Camera điện thoại hoặc Zalo quét để tra cứu hồ sơ'
+                      }
+                    />
                   </p>
                   {displayQrUrl && (
-                    <span className="mt-1 text-[10px] text-slate-400 font-mono text-center truncate max-w-full block">
+                    <span className="hidden sm:block mt-1 text-[10px] text-slate-400 font-mono text-center truncate max-w-full">
                       {displayQrUrl}
                     </span>
                   )}
@@ -371,37 +377,37 @@ function HomeLanding() {
       </section>
 
       {/* SECTION 02: 4 TRỤ CỘT CHĂM SÓC KHÁCH HÀNG QUA MÃ QR */}
-      <section className="py-14 bg-white border-b border-slate-200">
+      <section className="py-8 sm:py-14 bg-white border-b border-slate-200">
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="text-center mb-10">
+          <div className="text-center mb-6 sm:mb-10">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              QUY TRÌNH TIÊU CHUẨN DỊCH VỤ
+              <ResponsiveText mobile="QUY TRÌNH QR CSKH" desktop="QUY TRÌNH TIÊU CHUẨN DỊCH VỤ" />
             </span>
-            <h2 className="text-2xl font-bold text-slate-900 mt-1">
-              4 Trụ Cột Chăm Sóc Khách Hàng Qua Mã QR
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mt-1">
+              <ResponsiveText mobile="4 Bước Chăm Sóc Qua QR" desktop="4 Trụ Cột Chăm Sóc Khách Hàng Qua Mã QR" />
             </h2>
-            <p className="text-slate-500 mt-1.5 max-w-2xl mx-auto text-xs sm:text-sm">
+            <p className="hidden sm:block text-slate-500 mt-1.5 max-w-2xl mx-auto text-xs sm:text-sm">
               Mỗi thiết bị hoặc yêu cầu phần mềm được quản lý bằng một mã QR định danh duy nhất xuyên suốt quy trình hỗ trợ.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-5">
             {dynamicPillars.map((pillar, idx) => (
               <div
                 key={pillar.step || idx}
-                className="rounded-xl border border-slate-200 bg-white p-5 hover:border-slate-300 transition flex flex-col justify-between"
+                className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5 hover:border-slate-300 transition flex flex-col justify-between"
               >
                 <div>
-                  <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center justify-between mb-2 sm:mb-3">
                     <span className="text-2xl">{pillar.icon}</span>
                     <span className="text-xs font-semibold text-slate-400">
                       BƯỚC {pillar.step || `0${idx + 1}`}
                     </span>
                   </div>
-                  <h3 className="font-bold text-sm text-slate-900 mb-1.5">
+                  <h3 className="font-bold text-sm text-slate-900 mb-1 sm:mb-1.5">
                     {pillar.title}
                   </h3>
-                  <p className="text-xs text-slate-600 leading-relaxed">
+                  <p className="text-xs text-slate-600 leading-relaxed line-clamp-2 sm:line-clamp-none">
                     {pillar.desc}
                   </p>
                 </div>
@@ -412,31 +418,31 @@ function HomeLanding() {
       </section>
 
       {/* SECTION 03: DANH MỤC HỖ TRỢ TRỌNG TÂM MẢNG SỬA CHỮA MÁY TÍNH & PHẦN MỀM */}
-      <section className="py-14 bg-[#f0f5fa] border-b border-slate-200">
+      <section className="py-8 sm:py-14 bg-[#f0f5fa] border-b border-slate-200">
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 sm:gap-4 mb-5 sm:mb-8">
             <div>
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                DỊCH VỤ KỸ THUẬT &amp; HỖ TRỢ CHUYÊN NGHIỆP
+                <ResponsiveText mobile="DỊCH VỤ KỸ THUẬT" desktop="DỊCH VỤ KỸ THUẬT & HỖ TRỢ CHUYÊN NGHIỆP" />
               </span>
-              <h2 className="text-2xl font-bold text-slate-900 mt-1">
-                Các Hạng Mục Dịch Vụ Tiếp Nhận &amp; Xử Lý
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mt-1">
+                <ResponsiveText mobile="Dịch Vụ Tiếp Nhận & Xử Lý" desktop="Các Hạng Mục Dịch Vụ Tiếp Nhận & Xử Lý" />
               </h2>
             </div>
             <Link
               to="/intake"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-brand-blue hover:bg-brand-blue-hover active:brightness-95 text-white font-medium text-xs sm:text-sm transition shrink-0"
+              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-brand-blue hover:bg-brand-blue-hover active:brightness-95 text-white font-medium text-xs sm:text-sm transition shrink-0"
             >
               <span>📝</span>
-              <span>Tạo Phiếu Tiếp Nhận →</span>
+              <ResponsiveText mobile="Tạo Phiếu →" desktop="Tạo Phiếu Tiếp Nhận →" />
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-5">
             {dynamicServices.map((item, idx) => (
               <div
                 key={item.id || idx}
-                className="bg-white rounded-xl border border-slate-200 p-5 hover:border-slate-300 transition flex flex-col justify-between overflow-hidden"
+                className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 hover:border-slate-300 transition flex flex-col justify-between overflow-hidden"
               >
                 <div>
                   {item.imageUrl && (
@@ -444,20 +450,20 @@ function HomeLanding() {
                       <img
                         src={item.imageUrl}
                         alt={item.title}
-                        className="h-36 w-full object-cover transition-transform duration-300 hover:scale-105"
+                        className="h-32 sm:h-36 w-full object-cover transition-transform duration-300 hover:scale-105"
                       />
                     </div>
                   )}
-                  <div className="flex items-center justify-between gap-2 mb-2.5">
+                  <div className="flex items-center justify-between gap-2 mb-2 sm:mb-2.5">
                     <span className="text-2xl">{item.icon}</span>
                     <span className="text-[11px] font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
                       {item.tag}
                     </span>
                   </div>
-                  <h3 className="text-sm font-bold text-slate-900 mb-1.5">
+                  <h3 className="text-sm font-bold text-slate-900 mb-1 sm:mb-1.5">
                     {item.title}
                   </h3>
-                  <p className="text-xs text-slate-600 leading-relaxed mb-4">
+                  <p className="text-xs text-slate-600 leading-relaxed mb-3 sm:mb-4 line-clamp-2 sm:line-clamp-none">
                     {item.desc}
                   </p>
                 </div>
@@ -487,79 +493,79 @@ function HomeLanding() {
       </section>
 
       {/* SECTION 04: HƯỚNG DẪN 3 BƯỚC */}
-      <section id="how-it-works" className="py-14 bg-white border-b border-slate-200">
+      <section id="how-it-works" className="py-8 sm:py-14 bg-white border-b border-slate-200">
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-slate-900">
-              Hướng Dẫn Khách Hàng Tiếp Nhận &amp; Tra Cứu
+          <div className="text-center mb-5 sm:mb-8">
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
+              <ResponsiveText mobile="Hướng Dẫn Nhanh" desktop="Hướng Dẫn Khách Hàng Tiếp Nhận & Tra Cứu" />
             </h2>
-            <p className="text-slate-500 text-xs sm:text-sm mt-1">
+            <p className="hidden sm:block text-slate-500 text-xs sm:text-sm mt-1">
               Lựa chọn hình thức phù hợp để xem các bước thực hiện
             </p>
           </div>
 
           {/* Các nút chuyển Tab thanh lịch */}
-          <div className="flex flex-col sm:flex-row justify-center gap-2 mb-8">
+          <div className="grid grid-cols-2 sm:flex sm:flex-row justify-center gap-2 mb-5 sm:mb-8">
             <button
               type="button"
               onClick={() => setActiveGuideTab('TAI_QUAY')}
-              className={`px-5 py-2 rounded-lg font-semibold text-xs sm:text-sm transition cursor-pointer ${
+              className={`px-3 sm:px-5 py-2 rounded-lg font-semibold text-xs sm:text-sm transition cursor-pointer ${
                 activeGuideTab === 'TAI_QUAY'
                   ? 'bg-brand-blue text-white shadow-xs'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
-              🏢 Luồng 1: Quét QR tại quầy (615 Âu Cơ)
+              <ResponsiveText mobile="🏢 Tại quầy" desktop="🏢 Luồng 1: Quét QR tại quầy (615 Âu Cơ)" />
             </button>
             <button
               type="button"
               onClick={() => setActiveGuideTab('TU_XA')}
-              className={`px-5 py-2 rounded-lg font-semibold text-xs sm:text-sm transition cursor-pointer ${
+              className={`px-3 sm:px-5 py-2 rounded-lg font-semibold text-xs sm:text-sm transition cursor-pointer ${
                 activeGuideTab === 'TU_XA'
                   ? 'bg-brand-blue text-white shadow-xs'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
-              📅 Luồng 2: Đặt lịch hẹn trước qua Web
+              <ResponsiveText mobile="📅 Đặt lịch" desktop="📅 Luồng 2: Đặt lịch hẹn trước qua Web" />
             </button>
           </div>
 
           {/* Nội dung Tab: TẠI QUẦY */}
           {activeGuideTab === 'TAI_QUAY' && (
             <div className="animate-fade-in-up">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-5 text-center">
-                  <div className="w-12 h-12 mx-auto bg-white border border-slate-200 rounded-xl flex items-center justify-center text-xl font-bold text-slate-800 mb-3">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-5">
+                <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4 sm:p-5 text-center">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto bg-white border border-slate-200 rounded-xl flex items-center justify-center text-lg sm:text-xl font-bold text-slate-800 mb-2 sm:mb-3">
                     1
                   </div>
                   <h3 className="text-sm font-bold text-slate-900 mb-1">Quét QR tạo phiếu tại quầy</h3>
-                  <p className="text-xs text-slate-600 leading-relaxed">
+                  <p className="text-xs text-slate-600 leading-relaxed line-clamp-2 sm:line-clamp-none">
                     Khách dùng điện thoại quét mã QR quầy lễ tân để điền thông tin và đính kèm ảnh ngoại quan máy tính.
                   </p>
                 </div>
 
-                <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-5 text-center">
-                  <div className="w-12 h-12 mx-auto bg-white border border-slate-200 rounded-xl flex items-center justify-center text-xl font-bold text-slate-800 mb-3">
+                <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4 sm:p-5 text-center">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto bg-white border border-slate-200 rounded-xl flex items-center justify-center text-lg sm:text-xl font-bold text-slate-800 mb-2 sm:mb-3">
                     2
                   </div>
                   <h3 className="text-sm font-bold text-slate-900 mb-1">Theo dõi tiến độ trực tuyến</h3>
-                  <p className="text-xs text-slate-600 leading-relaxed">
+                  <p className="text-xs text-slate-600 leading-relaxed line-clamp-2 sm:line-clamp-none">
                     Nhận biên nhận nhiệt 80mm có in mã QR riêng để theo dõi từng bước chẩn đoán và khắc phục sự cố.
                   </p>
                 </div>
 
-                <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-5 text-center">
-                  <div className="w-12 h-12 mx-auto bg-white border border-slate-200 rounded-xl flex items-center justify-center text-xl font-bold text-slate-800 mb-3">
+                <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4 sm:p-5 text-center">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto bg-white border border-slate-200 rounded-xl flex items-center justify-center text-lg sm:text-xl font-bold text-slate-800 mb-2 sm:mb-3">
                     3
                   </div>
                   <h3 className="text-sm font-bold text-slate-900 mb-1">Nhận máy &amp; Bảo hành e-Warranty</h3>
-                  <p className="text-xs text-slate-600 leading-relaxed">
+                  <p className="text-xs text-slate-600 leading-relaxed line-clamp-2 sm:line-clamp-none">
                     Hoàn tất hỗ trợ, tự động kích hoạt Sổ bảo hành điện tử 06 tháng trên mã QR và gửi đánh giá dịch vụ.
                   </p>
                 </div>
               </div>
 
-              <div className="text-center mt-6">
+              <div className="text-center mt-5 sm:mt-6">
                 <Link
                   to="/intake"
                   className="inline-flex items-center gap-1.5 px-6 py-2.5 bg-brand-blue hover:bg-brand-blue-hover active:brightness-95 text-white font-medium rounded-lg text-xs sm:text-sm transition shadow-xs"
@@ -574,39 +580,39 @@ function HomeLanding() {
           {/* Nội dung Tab: ĐẶT LỊCH HẸN TRƯỚC */}
           {activeGuideTab === 'TU_XA' && (
             <div className="animate-fade-in-up">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-5 text-center">
-                  <div className="w-12 h-12 mx-auto bg-white border border-slate-200 rounded-xl flex items-center justify-center text-xl font-bold text-slate-800 mb-3">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-5">
+                <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4 sm:p-5 text-center">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto bg-white border border-slate-200 rounded-xl flex items-center justify-center text-lg sm:text-xl font-bold text-slate-800 mb-2 sm:mb-3">
                     1
                   </div>
                   <h3 className="text-sm font-bold text-slate-900 mb-1">Đặt lịch hẹn trực tuyến</h3>
-                  <p className="text-xs text-slate-600 leading-relaxed">
+                  <p className="text-xs text-slate-600 leading-relaxed line-clamp-2 sm:line-clamp-none">
                     Chọn khung giờ hẹn và điền thông tin tình trạng máy tính / sự cố phần mềm qua biểu mẫu đặt hẹn.
                   </p>
                 </div>
 
-                <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-5 text-center">
-                  <div className="w-12 h-12 mx-auto bg-white border border-slate-200 rounded-xl flex items-center justify-center text-xl font-bold text-slate-800 mb-3">
+                <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4 sm:p-5 text-center">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto bg-white border border-slate-200 rounded-xl flex items-center justify-center text-lg sm:text-xl font-bold text-slate-800 mb-2 sm:mb-3">
                     2
                   </div>
                   <h3 className="text-sm font-bold text-slate-900 mb-1">Xác nhận lịch &amp; Cấp mã QR</h3>
-                  <p className="text-xs text-slate-600 leading-relaxed">
+                  <p className="text-xs text-slate-600 leading-relaxed line-clamp-2 sm:line-clamp-none">
                     Nhân viên tiếp nhận lịch hẹn trên hệ thống nội bộ, xác nhận khung giờ và khởi tạo sẵn mã hồ sơ QR.
                   </p>
                 </div>
 
-                <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-5 text-center">
-                  <div className="w-12 h-12 mx-auto bg-white border border-slate-200 rounded-xl flex items-center justify-center text-xl font-bold text-slate-800 mb-3">
+                <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4 sm:p-5 text-center">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto bg-white border border-slate-200 rounded-xl flex items-center justify-center text-lg sm:text-xl font-bold text-slate-800 mb-2 sm:mb-3">
                     3
                   </div>
                   <h3 className="text-sm font-bold text-slate-900 mb-1">Phục vụ đúng giờ &amp; Hậu mãi</h3>
-                  <p className="text-xs text-slate-600 leading-relaxed">
+                  <p className="text-xs text-slate-600 leading-relaxed line-clamp-2 sm:line-clamp-none">
                     Khách hàng đến quầy được ưu tiên phục vụ đúng giờ và theo dõi toàn bộ tiến độ qua mã QR.
                   </p>
                 </div>
               </div>
 
-              <div className="text-center mt-6">
+              <div className="text-center mt-5 sm:mt-6">
                 <Link
                   to="/dat-lich"
                   className="inline-flex items-center gap-1.5 px-6 py-2.5 bg-brand-blue hover:bg-brand-blue-hover active:brightness-95 text-white font-medium rounded-lg text-xs sm:text-sm transition shadow-xs"
@@ -622,19 +628,19 @@ function HomeLanding() {
 
       {/* SECTION 05: PHẢN HỒI ĐÁNH GIÁ (CSAT) */}
       {topReviews.length > 0 && (
-        <section className="py-14 bg-[#f0f5fa] border-b border-slate-200">
+        <section className="py-8 sm:py-14 bg-[#f0f5fa] border-b border-slate-200">
           <div className="container mx-auto px-4 sm:px-6">
-            <div className="text-center mb-8">
+            <div className="text-center mb-5 sm:mb-8">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                CHỈ SỐ HÀI LÒNG CSAT
+                <ResponsiveText mobile="ĐÁNH GIÁ CSAT" desktop="CHỈ SỐ HÀI LÒNG CSAT" />
               </span>
-              <h2 className="text-2xl font-bold text-slate-900 mt-1">
-                Đánh Giá Thực Tế Từ Khách Hàng Quét Mã QR
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mt-1">
+                <ResponsiveText mobile="Đánh Giá Từ Khách Hàng" desktop="Đánh Giá Thực Tế Từ Khách Hàng Quét Mã QR" />
               </h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-5">
               {topReviews.map((r, i) => (
-                <div key={i} className="bg-white p-5 rounded-xl border border-slate-200 flex flex-col justify-between">
+                <div key={i} className="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 flex flex-col justify-between">
                   <div>
                     <div className="text-amber-500 mb-2 text-sm font-semibold">
                       {'★'.repeat(r.so_sao)}
@@ -653,29 +659,29 @@ function HomeLanding() {
       )}
 
       {/* SECTION 06: CỔNG ĐIỀU HÀNH NỘI BỘ */}
-      <section className="py-12 bg-white">
+      <section className="py-8 sm:py-12 bg-white">
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="max-w-4xl mx-auto rounded-2xl p-6 sm:p-8 text-center border border-slate-200 bg-slate-50/80">
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">
-              Cổng Điều Hành Chăm Sóc Khách Hàng Nội Bộ
+          <div className="max-w-4xl mx-auto rounded-2xl p-5 sm:p-8 text-center border border-slate-200 bg-slate-50/80">
+            <h2 className="text-lg sm:text-2xl font-bold text-slate-900 mb-1.5 sm:mb-2">
+              <ResponsiveText mobile="Cổng Nội Bộ CSKH" desktop="Cổng Điều Hành Chăm Sóc Khách Hàng Nội Bộ" />
             </h2>
-            <p className="text-slate-600 text-xs sm:text-sm mb-5 max-w-xl mx-auto leading-relaxed">
+            <p className="text-slate-600 text-xs sm:text-sm mb-4 sm:mb-5 max-w-xl mx-auto leading-relaxed line-clamp-2 sm:line-clamp-none">
               Dành cho Lễ tân tiếp nhận, Kỹ thuật viên hỗ trợ và Quản lý tại Công ty Cổ phần Lục Giác quản lý hồ sơ QR, cập nhật tiến độ xử lý và in phiếu 80mm.
             </p>
-            <div className="flex flex-wrap justify-center gap-3">
+            <div className="flex flex-wrap justify-center gap-2.5 sm:gap-3">
               <Link
                 to="/admin"
-                className="inline-flex items-center gap-1.5 px-6 py-2.5 bg-brand-blue hover:bg-brand-blue-hover active:brightness-95 text-white font-medium text-xs sm:text-sm rounded-lg transition shadow-xs"
+                className="inline-flex items-center gap-1.5 px-5 sm:px-6 py-2.5 bg-brand-blue hover:bg-brand-blue-hover active:brightness-95 text-white font-medium text-xs sm:text-sm rounded-lg transition shadow-xs"
               >
                 <span>🔐</span>
-                <span>Truy Cập Bàn Điều Hành CSKH →</span>
+                <ResponsiveText mobile="Bàn Điều Hành →" desktop="Truy Cập Bàn Điều Hành CSKH →" />
               </Link>
               <Link
                 to="/admin/cau-hinh-client"
-                className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-xs sm:text-sm rounded-lg transition shadow-2xs"
+                className="inline-flex items-center gap-1.5 px-4 sm:px-5 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-xs sm:text-sm rounded-lg transition shadow-2xs"
               >
                 <span>🎨</span>
-                <span>Cấu Hình Giao Diện Client (CMS)</span>
+                <ResponsiveText mobile="Cấu Hình CMS" desktop="Cấu Hình Giao Diện Client (CMS)" />
               </Link>
             </div>
           </div>
