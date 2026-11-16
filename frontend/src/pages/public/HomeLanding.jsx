@@ -317,7 +317,7 @@ function HomeLanding() {
                         : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
-                    🛡️ QR Phiếu Mẫu
+                    🔍 QR Tra Cứu
                   </button>
                 </div>
 
@@ -363,10 +363,10 @@ function HomeLanding() {
                     <span>Mở Camera Quét</span>
                   </button>
                   <Link
-                    to={qrMode === 'INTAKE' ? '/intake' : '/track/RP-839400'}
+                    to={qrMode === 'INTAKE' ? '/intake' : '/tra-cuu'}
                     className="py-2 px-3 rounded-lg bg-brand-blue hover:bg-brand-blue-hover active:brightness-95 text-white font-medium text-xs transition flex items-center justify-center text-center"
                   >
-                    {qrMode === 'INTAKE' ? 'Mở Form Ngay' : 'Xem Hồ Sơ'} →
+                    {qrMode === 'INTAKE' ? 'Mở Form Ngay' : 'Tra Cứu Ngay'} →
                   </Link>
                 </div>
               </div>
