@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
+import SvgIcon from './SvgIcon';
 
 function QrScannerModal({ isOpen, onClose, onScanSuccess }) {
   const [error, setError] = useState('');
@@ -123,7 +124,7 @@ function QrScannerModal({ isOpen, onClose, onScanSuccess }) {
         {/* Header Modal */}
         <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-6 py-4">
           <div className="flex items-center gap-2">
-            <span className="text-xl">📷</span>
+            <SvgIcon name="camera" className="w-5 h-5 text-brand-blue" />
             <h3 className="font-bold text-slate-800 text-lg">Quét mã QR trên phiếu</h3>
           </div>
           <button
@@ -131,7 +132,7 @@ function QrScannerModal({ isOpen, onClose, onScanSuccess }) {
             className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-200 hover:text-slate-700 transition-colors"
             aria-label="Đóng"
           >
-            ✕
+            <SvgIcon name="x" className="w-4 h-4" />
           </button>
         </div>
 
@@ -143,7 +144,10 @@ function QrScannerModal({ isOpen, onClose, onScanSuccess }) {
 
           {error ? (
             <div className="rounded-xl bg-red-50 p-4 text-center text-sm text-red-600">
-              <p className="font-bold mb-1">⚠️ Lỗi Camera</p>
+              <p className="font-bold mb-1 inline-flex items-center gap-1.5">
+                <SvgIcon name="alert" className="w-4 h-4" />
+                <span>Lỗi Camera</span>
+              </p>
               <p>{error}</p>
             </div>
           ) : (
@@ -161,7 +165,8 @@ function QrScannerModal({ isOpen, onClose, onScanSuccess }) {
           <div className="mt-5 pt-4 border-t border-slate-200 text-center">
             <p className="text-xs text-slate-500 mb-2 font-medium">Hoặc nếu trình duyệt điện thoại chặn camera:</p>
             <label className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl cursor-pointer transition">
-              <span>🖼️ Tải ảnh chụp mã QR từ máy</span>
+              <SvgIcon name="image" className="w-4 h-4 text-slate-600" />
+              <span>Tải ảnh chụp mã QR từ máy</span>
               <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
             </label>
             <div id="qr-reader-file-temp" className="hidden" />

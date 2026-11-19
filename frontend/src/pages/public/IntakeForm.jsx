@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import ResponsiveText from '../../components/ResponsiveText';
+import SvgIcon from '../../components/SvgIcon';
 
 function IntakeForm() {
   const navigate = useNavigate();
@@ -96,12 +97,11 @@ function IntakeForm() {
 
   return (
     <div className="max-w-xl mx-auto my-4 sm:my-10 px-3 sm:px-4">
-      <div className="bg-white/90 backdrop-blur-md rounded-2xl p-5 sm:p-8 shadow-2xl border-t-4 border-brand-blue relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-brand-orange/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
-        
-        <div className="text-center mb-5 sm:mb-8 relative z-10">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-brand-blue text-xs font-bold uppercase tracking-wider mb-2">
-            <ResponsiveText mobile="📷 Tiếp Nhận CSKH" desktop="📷 Tiếp Nhận Thiết Bị & Hỗ Trợ Kỹ Thuật" />
+      <div className="bg-white rounded-2xl p-5 sm:p-8 shadow-sm border border-slate-200 border-t-4 border-t-brand-blue">
+        <div className="text-center mb-5 sm:mb-7">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold uppercase tracking-wider mb-2">
+            <SvgIcon name="qr" className="w-3.5 h-3.5 text-brand-blue" />
+            <ResponsiveText mobile="Tiếp Nhận CSKH" desktop="Tiếp Nhận Thiết Bị & Hỗ Trợ Kỹ Thuật" />
           </span>
           <h1 className="text-xl sm:text-3xl font-bold text-brand-blue mb-1.5 sm:mb-2">
             <ResponsiveText mobile="Tạo Phiếu Tiếp Nhận" desktop="Tạo Phiếu Tiếp Nhận Chăm Sóc Khách Hàng" />
@@ -111,17 +111,17 @@ function IntakeForm() {
               mobile="Điền thông tin để nhận Mã QR theo dõi tiến độ & bảo hành."
               desktop={
                 <>
-                  Điền thông tin thiết bị máy tính hoặc yêu cầu phần mềm để hệ thống cấp ngay <strong>Mã QR định danh</strong> theo dõi tiến độ kiểm tra, sửa chữa và kích hoạt bảo hành điện tử.
+                  Điền thông tin thiết bị máy tính hoặc yêu cầu phần mềm để hệ thống cấp <strong>Mã QR</strong> theo dõi tiến độ kiểm tra, sửa chữa và bảo hành điện tử.
                 </>
               }
             />
           </p>
         </div>
 
-        {error && <div className="bg-red-50 text-red-600 p-3 sm:p-4 rounded-xl mb-4 sm:mb-6 text-xs sm:text-sm">{error}</div>}
+        {error && <div className="bg-red-50 text-red-600 p-3 sm:p-4 rounded-xl mb-4 sm:mb-6 text-xs sm:text-sm border border-red-200">{error}</div>}
 
-        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 relative z-10">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 items-end">
             <div>
               <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">
                 <ResponsiveText mobile="Họ và tên *" desktop="Họ và Tên khách hàng *" />
@@ -134,7 +134,10 @@ function IntakeForm() {
                   <ResponsiveText mobile="Số điện thoại *" desktop="Số điện thoại liên hệ *" />
                 </label>
                 {zaloCheckStatus === 'LINKED' && (
-                  <span className="text-[11px] font-bold text-emerald-600 flex items-center gap-1">✓ SĐT hợp lệ</span>
+                  <span className="text-[11px] font-bold text-emerald-600 flex items-center gap-1">
+                    <SvgIcon name="check" className="w-3 h-3" />
+                    <span>SĐT hợp lệ</span>
+                  </span>
                 )}
                 {zaloCheckStatus === 'INVALID' && (
                   <span className="text-[11px] font-bold text-red-500">SĐT không hợp lệ</span>
@@ -144,7 +147,7 @@ function IntakeForm() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 items-end">
             <div>
               <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">
                 <ResponsiveText mobile="Thiết bị / Dịch vụ *" desktop="Thiết bị máy tính / Phần mềm cần hỗ trợ *" />
@@ -163,25 +166,27 @@ function IntakeForm() {
             <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">
               <ResponsiveText mobile="Mô tả sự cố *" desktop="Mô tả sự cố máy tính / Yêu cầu hỗ trợ phần mềm *" />
             </label>
-            <textarea required name="issueDescription" onChange={handleChange} rows="3" className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/50 text-sm sm:text-base" placeholder="Mô tả chi tiết tình trạng lỗi phần cứng máy tính hoặc sự cố phần mềm cần bộ phận CSKH & Kỹ thuật hỗ trợ..."></textarea>
+            <textarea required name="issueDescription" onChange={handleChange} rows="3" className="w-full px-4 py-2.5 sm:py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/50 text-sm sm:text-base" placeholder="Mô tả tình trạng lỗi phần cứng hoặc sự cố phần mềm cần hỗ trợ..."></textarea>
           </div>
 
           {/* Khối Tải ảnh minh chứng hiện trạng lúc tiếp nhận */}
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 sm:p-4 space-y-2.5 sm:space-y-3">
             <div className="flex items-center justify-between gap-2">
               <div className="min-w-0">
-                <label className="block text-xs sm:text-sm font-bold text-slate-800">
+                <label className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-800">
+                  <SvgIcon name="camera" className="w-4 h-4 text-brand-blue" />
                   <ResponsiveText
-                    mobile="📸 Ảnh hiện trạng (Tùy chọn)"
-                    desktop="📸 Ảnh chụp ngoại quan máy / Màn hình lỗi phần mềm (Tùy chọn)"
+                    mobile="Ảnh hiện trạng (Tùy chọn)"
+                    desktop="Ảnh chụp ngoại quan máy / Màn hình lỗi (Tùy chọn)"
                   />
                 </label>
-                <p className="hidden sm:block text-xs text-slate-500">
-                  Chụp hoặc tải lên hình ảnh ngoại quan máy tính lúc bàn giao hoặc màn hình báo lỗi để lưu hồ sơ CSKH minh bạch.
+                <p className="hidden sm:block text-xs text-slate-500 mt-0.5">
+                  Chụp hoặc tải ảnh ngoại quan máy lúc bàn giao hoặc màn hình báo lỗi để lưu hồ sơ.
                 </p>
               </div>
-              <label className="cursor-pointer shrink-0 rounded-lg bg-brand-blue px-3 py-2 text-xs font-bold text-white hover:bg-blue-700 transition inline-flex items-center">
-                + Chọn ảnh
+              <label className="cursor-pointer shrink-0 rounded-lg bg-brand-blue px-3 py-2 text-xs font-bold text-white hover:bg-blue-700 transition inline-flex items-center gap-1">
+                <SvgIcon name="plus" className="w-3.5 h-3.5" />
+                <span>Chọn ảnh</span>
                 <input
                   type="file"
                   accept="image/*"
@@ -201,8 +206,9 @@ function IntakeForm() {
                       type="button"
                       onClick={() => handleRemovePhoto(idx)}
                       className="absolute top-1 right-1 bg-red-600 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center opacity-90 hover:opacity-100"
+                      aria-label="Xóa ảnh"
                     >
-                      ×
+                      <SvgIcon name="x" className="w-3 h-3" />
                     </button>
                   </div>
                 ))}
@@ -210,9 +216,9 @@ function IntakeForm() {
             )}
           </div>
 
-          <button disabled={loading} type="submit" className="w-full py-3.5 sm:py-4 bg-brand-blue hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg transition-all transform hover:-translate-y-0.5 cursor-pointer text-sm sm:text-base">
+          <button disabled={loading} type="submit" className="w-full py-3.5 sm:py-4 bg-brand-blue hover:bg-brand-blue-hover text-white font-bold rounded-xl shadow-xs transition-all cursor-pointer text-sm sm:text-base">
             {loading ? (
-              'Đang khởi tạo Mã QR...'
+              'Đang tạo phiếu...'
             ) : (
               <ResponsiveText mobile="Tạo Phiếu & Nhận Mã QR →" desktop="Tạo Phiếu CSKH & Nhận Mã QR Theo Dõi →" />
             )}

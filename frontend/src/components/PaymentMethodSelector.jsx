@@ -2,6 +2,7 @@ import { useState } from 'react';
 import api from '../services/api';
 import { playNotificationChime, triggerDeviceVibration } from '../utils/webNotification';
 import ResponsiveText from './ResponsiveText';
+import SvgIcon from './SvgIcon';
 
 const DEFAULT_BANK = {
   id: 'MB',
@@ -64,7 +65,7 @@ function PaymentMethodSelector({
         setIsAutoReconciled(true);
         playNotificationChime();
         triggerDeviceVibration([200, 100, 300]);
-        setConfirmMessage('⚡ Đã khớp lệnh thanh toán VietQR thành công! Hệ thống chuyển sang trạng thái ĐÃ THANH TOÁN.');
+        setConfirmMessage('Đã khớp lệnh thanh toán VietQR thành công. Trạng thái: ĐÃ THANH TOÁN.');
         if (onPaymentSuccess) onPaymentSuccess(res.data);
       } else {
         setConfirmMessage(`Đã ghi nhận yêu cầu thanh toán cho hồ sơ #${ticketCode}.`);
@@ -73,7 +74,7 @@ function PaymentMethodSelector({
       setIsAutoReconciled(true);
       playNotificationChime();
       triggerDeviceVibration([200, 100, 300]);
-      setConfirmMessage('⚡ Khớp lệnh thanh toán thành công! Trạng thái: ĐÃ THANH TOÁN.');
+      setConfirmMessage('Khớp lệnh thanh toán thành công. Trạng thái: ĐÃ THANH TOÁN.');
       if (onPaymentSuccess) onPaymentSuccess({ ticketCode, isPaid: true });
     } finally {
       setIsVerifying(false);
@@ -81,12 +82,13 @@ function PaymentMethodSelector({
   };
 
   return (
-    <div className="bg-white rounded-3xl p-5 md:p-6 border border-slate-200/90 shadow-sm">
+    <div className="bg-white rounded-2xl p-5 md:p-6 border border-slate-200 shadow-xs">
       {/* Tiêu đề & Tóm tắt số tiền */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-100">
         <div>
-          <h3 className="text-base font-extrabold text-slate-800 flex items-center gap-2">
-            <span>💳</span> Thanh Toán Hồ Sơ CSKH
+          <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
+            <SvgIcon name="credit-card" className="w-5 h-5 text-brand-blue" />
+            <span>Thanh Toán Hồ Sơ CSKH</span>
           </h3>
           <p className="text-xs text-slate-500 mt-0.5">
             Mã phiếu: <strong className="text-slate-700">#{ticketCode}</strong> • Khách hàng: <strong className="text-slate-700">{customerName}</strong>
@@ -97,8 +99,8 @@ function PaymentMethodSelector({
         <div className="text-right">
           <p className="text-[11px] font-bold uppercase text-slate-400">Số tiền thanh toán</p>
           {isPaid ? (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 font-extrabold text-xs border border-emerald-200">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 font-bold text-xs border border-emerald-200">
+              <SvgIcon name="check-circle" className="w-3.5 h-3.5 text-emerald-600" />
               ĐÃ THANH TOÁN
             </span>
           ) : (
@@ -126,29 +128,29 @@ function PaymentMethodSelector({
           <button
             type="button"
             onClick={() => setPaymentMethod('VIETQR')}
-            className={`py-2.5 sm:py-3 px-3 rounded-2xl border text-center transition cursor-pointer flex flex-col items-center justify-center gap-0.5 sm:gap-1 ${
+            className={`py-2.5 sm:py-3 px-3 rounded-2xl border text-center transition cursor-pointer flex flex-col items-center justify-center gap-1 ${
               paymentMethod === 'VIETQR'
                 ? 'border-brand-blue bg-blue-50/90 text-brand-blue font-bold shadow-xs ring-2 ring-blue-500/20'
                 : 'border-slate-200 bg-slate-50/70 text-slate-600 hover:bg-slate-100 font-semibold'
             }`}
           >
-            <span className="text-lg">🏦</span>
+            <SvgIcon name="bank" className="w-5 h-5" />
             <span className="text-xs sm:text-sm font-bold">
               <ResponsiveText mobile="VietQR" desktop="Chuyển Khoản (VietQR)" />
             </span>
-            <span className="hidden sm:inline text-[10px] opacity-75 font-normal">Quét mã Banking nhận ngay 24/7</span>
+            <span className="hidden sm:inline text-[10px] opacity-75 font-normal">Quét mã ngân hàng 24/7</span>
           </button>
 
           <button
             type="button"
             onClick={() => setPaymentMethod('TIEN_MAT')}
-            className={`py-2.5 sm:py-3 px-3 rounded-2xl border text-center transition cursor-pointer flex flex-col items-center justify-center gap-0.5 sm:gap-1 ${
+            className={`py-2.5 sm:py-3 px-3 rounded-2xl border text-center transition cursor-pointer flex flex-col items-center justify-center gap-1 ${
               paymentMethod === 'TIEN_MAT'
                 ? 'border-emerald-600 bg-emerald-50/90 text-emerald-700 font-bold shadow-xs ring-2 ring-emerald-500/20'
                 : 'border-slate-200 bg-slate-50/70 text-slate-600 hover:bg-slate-100 font-semibold'
             }`}
           >
-            <span className="text-lg">💵</span>
+            <SvgIcon name="cash" className="w-5 h-5" />
             <span className="text-xs sm:text-sm font-bold">
               <ResponsiveText mobile="Tiền mặt" desktop="Tiền Mặt Tại Quầy" />
             </span>
@@ -161,8 +163,8 @@ function PaymentMethodSelector({
       {paymentMethod === 'VIETQR' && (
         <div className="mt-4 p-3.5 sm:p-4 rounded-2xl bg-blue-50/40 border border-blue-200/80 space-y-3">
           <div className="flex items-center gap-2 text-xs font-bold text-brand-blue">
-            <span>🏦</span>
-            <ResponsiveText mobile="QUÉT MÃ VIETQR NGÂN HÀNG" desktop="QUÉT MÃ VIETQR QUA ỨNG DỤNG NGÂN HÀNG (MOBILE BANKING)" />
+            <SvgIcon name="bank" className="w-4 h-4" />
+            <ResponsiveText mobile="QUÉT MÃ VIETQR NGÂN HÀNG" desktop="QUÉT MÃ VIETQR QUA ỨNG DỤNG NGÂN HÀNG" />
           </div>
           <p className="hidden sm:block text-xs text-slate-600 leading-relaxed">
             Mở ứng dụng ngân hàng bất kỳ, quét mã VietQR bên dưới hoặc chuyển khoản theo đúng thông tin để hệ thống đối soát tự động ghi nhận ngay sau 3 - 5 giây.
@@ -198,9 +200,16 @@ function PaymentMethodSelector({
                 <button
                   type="button"
                   onClick={() => handleCopy('accNo', DEFAULT_BANK.accNo)}
-                  className="px-2.5 py-1 bg-white hover:bg-blue-50 text-slate-700 hover:text-brand-blue font-bold text-[11px] rounded-lg border border-slate-200 transition cursor-pointer"
+                  className="px-2.5 py-1 bg-white hover:bg-blue-50 text-slate-700 hover:text-brand-blue font-bold text-[11px] rounded-lg border border-slate-200 transition cursor-pointer inline-flex items-center gap-1"
                 >
-                  {copiedField === 'accNo' ? '✓ Đã chép' : 'Sao chép'}
+                  {copiedField === 'accNo' ? (
+                    <>
+                      <SvgIcon name="check" className="w-3 h-3" />
+                      <span>Đã chép</span>
+                    </>
+                  ) : (
+                    'Sao chép'
+                  )}
                 </button>
               </div>
 
@@ -219,9 +228,16 @@ function PaymentMethodSelector({
                 <button
                   type="button"
                   onClick={() => handleCopy('content', transferContent)}
-                  className="px-2.5 py-1 bg-white hover:bg-blue-50 text-slate-700 hover:text-brand-blue font-bold text-[11px] rounded-lg border border-slate-200 transition cursor-pointer"
+                  className="px-2.5 py-1 bg-white hover:bg-blue-50 text-slate-700 hover:text-brand-blue font-bold text-[11px] rounded-lg border border-slate-200 transition cursor-pointer inline-flex items-center gap-1"
                 >
-                  {copiedField === 'content' ? '✓ Đã chép' : 'Sao chép'}
+                  {copiedField === 'content' ? (
+                    <>
+                      <SvgIcon name="check" className="w-3 h-3" />
+                      <span>Đã chép</span>
+                    </>
+                  ) : (
+                    'Sao chép'
+                  )}
                 </button>
               </div>
             </div>
@@ -236,7 +252,8 @@ function PaymentMethodSelector({
                 onClick={handleSimulatePayment}
                 className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold text-xs rounded-xl border border-slate-300 transition flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
-                <span>{isVerifying ? '⏳ Đang kiểm tra đối soát...' : '⚡ Khớp lệnh thử nghiệm đối soát VietQR (Test nội bộ)'}</span>
+                <SvgIcon name={isVerifying ? 'clock' : 'check-circle'} className="w-3.5 h-3.5" />
+                <span>{isVerifying ? 'Đang kiểm tra đối soát...' : 'Xác nhận đối soát VietQR (Nhân viên)'}</span>
               </button>
             </div>
           )}
@@ -248,13 +265,16 @@ function PaymentMethodSelector({
         <div className="mt-4 p-3.5 sm:p-4 rounded-2xl bg-emerald-50/50 border border-emerald-200/80 space-y-2.5 sm:space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-emerald-900 flex items-center gap-1.5">
-              <span>💵</span>{' '}
-              <ResponsiveText mobile="THANH TOÁN TIỀN MẶT TẠI QUẦY" desktop="THANH TOÁN TIỀN MẶT CHO LỄ TÂN TẠI BÀN TIẾP NHẬN" />
+              <SvgIcon name="cash" className="w-4 h-4 text-emerald-700" />
+              <ResponsiveText mobile="THANH TOÁN TIỀN MẶT TẠI QUẦY" desktop="THANH TOÁN TIỀN MẶT TẠI QUẦY TIẾP NHẬN" />
             </span>
           </div>
 
           <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-emerald-200 text-xs text-slate-700 space-y-2 sm:space-y-2.5">
-            <p className="hidden sm:block font-extrabold text-sm text-slate-800">📋 Quy trình thanh toán tiền mặt tại quầy:</p>
+            <p className="hidden sm:flex items-center gap-1.5 font-extrabold text-sm text-slate-800">
+              <SvgIcon name="clipboard" className="w-4 h-4 text-emerald-700" />
+              <span>Quy trình thanh toán tiền mặt tại quầy:</span>
+            </p>
             <ol className="list-decimal list-inside space-y-1.5 sm:space-y-2 text-slate-700 leading-relaxed">
               <li>
                 <ResponsiveText
@@ -271,20 +291,21 @@ function PaymentMethodSelector({
               <li>
                 <ResponsiveText
                   mobile="Nhận biên nhận & kích hoạt bảo hành e-Warranty."
-                  desktop={<>Lễ tân sẽ bấm <strong>"Xác nhận đã thu Tiền mặt"</strong> trên hệ thống, in biên nhận và kích hoạt ngay <strong>Sổ bảo hành điện tử (e-Warranty)</strong> cho quý khách.</>}
+                  desktop={<>Lễ tân xác nhận thu tiền trên hệ thống, in biên nhận và kích hoạt <strong>Sổ bảo hành điện tử (e-Warranty)</strong>.</>}
                 />
               </li>
             </ol>
             <div className="pt-2 sm:pt-2.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
               <div className="flex items-center gap-1.5">
-                <span>📍</span>
+                <SvgIcon name="map-pin" className="w-3.5 h-3.5 text-slate-400" />
                 <ResponsiveText
                   mobile={<strong>615 Âu Cơ, P. Phú Trung, Q. Tân Phú</strong>}
                   desktop={<>Địa chỉ quầy: <strong>615 Âu Cơ, P. Phú Trung, Q. Tân Phú, TP.HCM</strong></>}
                 />
               </div>
-              <div className="text-emerald-700 font-semibold">
-                <ResponsiveText mobile="☎ 028.3860.4999" desktop="Hotline hỗ trợ: 028.3860.4999" />
+              <div className="text-emerald-700 font-semibold flex items-center gap-1">
+                <SvgIcon name="phone" className="w-3.5 h-3.5" />
+                <ResponsiveText mobile="028.3860.4999" desktop="Hotline hỗ trợ: 028.3860.4999" />
               </div>
             </div>
           </div>
@@ -293,7 +314,10 @@ function PaymentMethodSelector({
 
       {/* Chân trang ghi chú bảo hành */}
       <div className="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-1 text-[11px] text-slate-400">
-        <ResponsiveText mobile="🛡️ Tự động kích hoạt e-Warranty" desktop="🛡️ Kích hoạt e-Warranty tự động sau khi thanh toán" />
+        <span className="inline-flex items-center gap-1">
+          <SvgIcon name="shield" className="w-3.5 h-3.5 text-slate-400" />
+          <ResponsiveText mobile="Tự động kích hoạt e-Warranty" desktop="Kích hoạt e-Warranty tự động sau khi thanh toán" />
+        </span>
         <ResponsiveText mobile="Hotline: 028.3860.4999" desktop="Công ty CP Lục Giác • Hotline: 028.3860.4999" />
       </div>
     </div>

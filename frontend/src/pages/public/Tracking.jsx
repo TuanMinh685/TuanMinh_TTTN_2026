@@ -4,6 +4,7 @@ import QRCode from 'qrcode';
 import api from '../../services/api';
 import PaymentMethodSelector from '../../components/PaymentMethodSelector';
 import ResponsiveText from '../../components/ResponsiveText';
+import SvgIcon from '../../components/SvgIcon';
 import {
   getNotificationPermission,
   requestNotificationPermission,
@@ -13,10 +14,10 @@ import {
 } from '../../utils/webNotification';
 
 const PROGRESS_STEPS = [
-  { id: 'TIEP_NHAN', label: 'Tiếp nhận máy & Yêu cầu', desc: 'Khởi tạo hồ sơ QR & lưu ảnh ngoại quan', icon: '💻' },
-  { id: 'CHAN_DOAN', label: 'Kiểm tra & Chẩn đoán lỗi', desc: 'KTV kiểm tra phần cứng / phần mềm', icon: '🔍' },
-  { id: 'DANG_SUA', label: 'Đang sửa chữa & Cài đặt', desc: 'Khắc phục sự cố máy tính & phần mềm', icon: '🔧' },
-  { id: 'HOAN_TAT', label: 'Hoàn tất & Bảo hành QR', desc: 'Bàn giao máy, e-Warranty & Đánh giá sao', icon: '✅' }
+  { id: 'TIEP_NHAN', label: 'Tiếp nhận máy & Yêu cầu', desc: 'Tạo hồ sơ QR & lưu ảnh ngoại quan', icon: 'laptop' },
+  { id: 'CHAN_DOAN', label: 'Kiểm tra & Chẩn đoán lỗi', desc: 'KTV kiểm tra phần cứng / phần mềm', icon: 'search' },
+  { id: 'DANG_SUA', label: 'Đang sửa chữa & Cài đặt', desc: 'Khắc phục sự cố máy tính & phần mềm', icon: 'wrench' },
+  { id: 'HOAN_TAT', label: 'Hoàn tất & Bảo hành QR', desc: 'Bàn giao máy, bảo hành & đánh giá', icon: 'check-circle' }
 ];
 
 const STATUS_META = {
@@ -163,9 +164,9 @@ function Tracking() {
             // Kích hoạt Web Push Notification kèm Rung & Chuông báo
             const isFinished = updatedTicket.trang_thai === 'ĐÃ_SỬA_XONG' || updatedTicket.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN';
             showPushNotification({
-              title: isFinished ? '🎉 Thiết bị của bạn đã được sửa xong!' : '🔔 Cập nhật tiến độ CSKH',
+              title: isFinished ? 'Thiết bị của bạn đã được sửa xong' : 'Cập nhật tiến độ CSKH',
               body: isFinished
-                ? `Kỹ thuật viên tại 615 Âu Cơ đã sửa xong ${updatedTicket.ten_may || updatedTicket.ten_thiet_bi || 'thiết bị'}. Mời bạn đến nhận máy kèm Sổ bảo hành e-Warranty!`
+                ? `Kỹ thuật viên tại 615 Âu Cơ đã sửa xong ${updatedTicket.ten_may || updatedTicket.ten_thiet_bi || 'thiết bị'}. Mời bạn đến nhận máy kèm Sổ bảo hành điện tử.`
                 : `Hồ sơ ${ticketCode} vừa chuyển sang: ${STATUS_META[updatedTicket.trang_thai]?.label || updatedTicket.trang_thai}`,
               ticketCode,
               isCompleted: isFinished
@@ -177,9 +178,9 @@ function Tracking() {
           ) {
             const newestLog = updatedTicket.logs[0];
             if (newestLog?.ghi_chu) {
-              setStatusNotice(`📩 Thông báo mới từ CSKH: ${newestLog.ghi_chu}`);
+              setStatusNotice(`Thông báo mới từ CSKH: ${newestLog.ghi_chu}`);
               showPushNotification({
-                title: `📲 Thông báo Zalo ZNS — Hồ sơ ${ticketCode}`,
+                title: `Thông báo tiến độ — Hồ sơ ${ticketCode}`,
                 body: newestLog.ghi_chu,
                 ticketCode,
                 isCompleted: true
@@ -204,7 +205,7 @@ function Tracking() {
     const perm = await requestNotificationPermission();
     setNotifPermission(perm);
     if (perm === 'granted') {
-      setStatusNotice('🔔 Đã kích hoạt thông báo Web Push! Bạn sẽ nhận được rung và chuông khi máy sửa xong.');
+      setStatusNotice('Đã bật thông báo trình duyệt. Bạn sẽ nhận được thông báo khi máy sửa xong.');
     }
   };
 
@@ -269,12 +270,15 @@ function Tracking() {
 
   if (error) {
     return (
-      <div className="max-w-lg mx-auto my-16 p-8 bg-white rounded-2xl shadow-lg border border-red-100 text-center">
-        <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">⚠️</div>
+      <div className="max-w-lg mx-auto my-16 p-8 bg-white rounded-2xl shadow-sm border border-red-200 text-center">
+        <div className="w-14 h-14 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-200">
+          <SvgIcon name="alert" className="w-7 h-7" />
+        </div>
         <h2 className="text-xl font-bold text-slate-800 mb-2">Không tìm thấy hồ sơ phiếu CSKH</h2>
         <p className="text-sm text-red-600 font-medium mb-6">{error}</p>
-        <Link to="/tra-cuu" className="inline-flex items-center gap-2 px-6 py-3 bg-brand-blue text-white font-bold rounded-xl hover:bg-blue-700 transition">
-          ← Quay lại trang Tra cứu QR
+        <Link to="/tra-cuu" className="inline-flex items-center gap-2 px-6 py-3 bg-brand-blue text-white font-bold rounded-xl hover:bg-brand-blue-hover transition">
+          <SvgIcon name="arrow-left" className="w-4 h-4" />
+          <span>Quay lại trang Tra cứu QR</span>
         </Link>
       </div>
     );
@@ -304,9 +308,14 @@ function Tracking() {
           </div>
         )}
         {warrantyNotice && (
-          <div role="status" className="mb-5 flex items-center justify-between gap-3 rounded-2xl bg-emerald-50 border border-emerald-200 p-4 font-semibold text-emerald-800 shadow-sm">
-            <span>🛡️ {warrantyNotice}</span>
-            <button type="button" onClick={() => setWarrantyNotice('')} aria-label="Đóng" className="text-xl leading-none px-2 hover:bg-emerald-100 rounded-lg">×</button>
+          <div role="status" className="mb-5 flex items-center justify-between gap-3 rounded-xl bg-emerald-50 border border-emerald-200 p-4 font-semibold text-emerald-800 shadow-xs text-sm">
+            <span className="flex items-center gap-2">
+              <SvgIcon name="shield" className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>{warrantyNotice}</span>
+            </span>
+            <button type="button" onClick={() => setWarrantyNotice('')} aria-label="Đóng" className="p-1 hover:bg-emerald-100 rounded-lg cursor-pointer">
+              <SvgIcon name="x" className="w-4 h-4" />
+            </button>
           </div>
         )}
 
@@ -327,33 +336,33 @@ function Tracking() {
               to="/tra-cuu"
               className="text-xs font-semibold text-white bg-brand-blue hover:bg-brand-blue-hover px-3.5 py-2 rounded-xl shadow-xs transition flex items-center gap-1.5"
             >
-              <span>🔍</span> <ResponsiveText mobile="Tra mã khác" desktop="Tra cứu mã khác" />
+              <SvgIcon name="search" className="w-3.5 h-3.5" />
+              <ResponsiveText mobile="Tra mã khác" desktop="Tra cứu mã khác" />
             </Link>
             <button
               type="button"
               onClick={() => window.print()}
               className="text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 px-3.5 py-2 rounded-xl shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
             >
-              <span>🖨️</span> <ResponsiveText mobile="In phiếu" desktop="In phiếu QR điện tử" />
+              <SvgIcon name="printer" className="w-3.5 h-3.5 text-slate-600" />
+              <ResponsiveText mobile="In phiếu" desktop="In phiếu QR điện tử" />
             </button>
           </div>
         </div>
 
-        {/* SECTION 1: HERO BANNER HỒ SƠ PHIẾU ĐIỆN TỬ CSKH - TINH GỌN MOBILE FIRST */}
-        <div className="rounded-3xl bg-gradient-to-r from-blue-700 via-brand-blue to-sky-600 text-white p-5 md:p-7 shadow-xl relative overflow-hidden border border-blue-400/30 mb-5">
-          <div className="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-white/10 blur-3xl pointer-events-none"></div>
-          <div className="absolute left-1/3 -bottom-20 w-56 h-56 rounded-full bg-emerald-400/10 blur-3xl pointer-events-none"></div>
-
-          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-5">
+        {/* SECTION 1: HERO BANNER HỒ SƠ PHIẾU ĐIỆN TỬ CSKH */}
+        <div className="rounded-2xl bg-brand-blue text-white p-5 md:p-7 shadow-sm border border-blue-800/30 mb-5">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-5">
             <div className="flex-1 w-full">
               <div className="flex flex-wrap items-center gap-2 mb-3">
-                <span className={`inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-bold border backdrop-blur-md ${statusInfo.badgeClass}`}>
-                  <span className={`w-2 h-2 rounded-full animate-pulse ${statusInfo.dotClass}`}></span>
+                <span className={`inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-bold border ${statusInfo.badgeClass}`}>
+                  <span className={`w-2 h-2 rounded-full ${statusInfo.dotClass}`}></span>
                   {statusInfo.label}
                 </span>
 
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/15 text-white/90 text-xs border border-white/15">
-                  🏢 TT CSKH 615 Âu Cơ
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/15 text-white/90 text-xs border border-white/15">
+                  <SvgIcon name="building" className="w-3.5 h-3.5" />
+                  <span>TT CSKH 615 Âu Cơ</span>
                 </span>
               </div>
 
@@ -368,30 +377,31 @@ function Tracking() {
                   <button
                     type="button"
                     onClick={handleCopyTicketCode}
-                    className="bg-white/10 hover:bg-white/25 text-white text-xs font-semibold px-2.5 py-0.5 rounded-lg border border-white/15 transition cursor-pointer"
+                    className="bg-white/10 hover:bg-white/25 text-white text-xs font-semibold px-2.5 py-0.5 rounded-lg border border-white/15 transition cursor-pointer inline-flex items-center gap-1"
                   >
-                    {copiedCode ? '✓ Đã chép' : '📋 Sao chép'}
+                    <SvgIcon name={copiedCode ? 'check' : 'copy'} className="w-3 h-3" />
+                    <span>{copiedCode ? 'Đã chép' : 'Sao chép'}</span>
                   </button>
                 </div>
               </div>
 
               {/* Lưới thông tin 4 ô nhỏ gọn (2 cột mobile, 4 cột desktop) */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
-                <div className="bg-white/10 backdrop-blur-xs rounded-xl p-2.5 border border-white/15">
+                <div className="bg-white/10 rounded-xl p-2.5 border border-white/15">
                   <p className="text-[10px] uppercase tracking-wider text-blue-200 font-bold">Khách hàng</p>
                   <p className="text-xs font-bold text-white truncate mt-0.5">{ticket.ho_ten || 'Khách hàng'}</p>
                 </div>
-                <div className="bg-white/10 backdrop-blur-xs rounded-xl p-2.5 border border-white/15">
+                <div className="bg-white/10 rounded-xl p-2.5 border border-white/15">
                   <p className="text-[10px] uppercase tracking-wider text-blue-200 font-bold">Số điện thoại</p>
                   <p className="text-xs font-bold font-mono text-white mt-0.5">{ticket.so_dien_thoai || 'Bảo mật'}</p>
                 </div>
-                <div className="bg-white/10 backdrop-blur-xs rounded-xl p-2.5 border border-white/15">
+                <div className="bg-white/10 rounded-xl p-2.5 border border-white/15">
                   <p className="text-[10px] uppercase tracking-wider text-blue-200 font-bold">Mã Serial / S/N</p>
                   <p className="text-xs font-bold font-mono text-white truncate mt-0.5">
                     {ticket.so_imei_serial || 'Tại quầy'}
                   </p>
                 </div>
-                <div className="bg-white/10 backdrop-blur-xs rounded-xl p-2.5 border border-white/15">
+                <div className="bg-white/10 rounded-xl p-2.5 border border-white/15">
                   <p className="text-[10px] uppercase tracking-wider text-blue-200 font-bold">Ngày tiếp nhận</p>
                   <p className="text-xs font-bold text-white mt-0.5">
                     {ticket.ngay_tao ? new Date(ticket.ngay_tao).toLocaleDateString('vi-VN') : 'Hôm nay'}
@@ -401,7 +411,7 @@ function Tracking() {
             </div>
 
             {ticketQr && (
-              <div className="bg-white text-slate-800 p-3 rounded-2xl shadow-xl text-center shrink-0 border-2 border-white/80 w-36">
+              <div className="bg-white text-slate-800 p-3 rounded-xl shadow-sm text-center shrink-0 border border-slate-200 w-36">
                 <img src={ticketQr} alt={`QR phiếu ${ticketCode}`} className="w-24 h-24 mx-auto rounded-lg" />
                 <p className="text-[11px] font-extrabold text-brand-blue mt-1 uppercase">Mã QR Hồ Sơ</p>
                 <p className="text-[9px] text-slate-400">Xuất trình tại quầy 615 Âu Cơ</p>
@@ -410,44 +420,44 @@ function Tracking() {
           </div>
         </div>
 
-        {/* SECTION 2: TABS CHUYỂN ĐỔI CHỨC NĂNG - TINH GỌN, CHỐNG QUÁ TẢI THÔNG TIN */}
-        <div className="flex bg-white rounded-2xl p-1 sm:p-1.5 border border-slate-200 shadow-xs mb-4 sm:mb-5 gap-1">
+        {/* SECTION 2: TABS CHUYỂN ĐỔI CHỨC NĂNG */}
+        <div className="flex bg-white rounded-xl p-1 sm:p-1.5 border border-slate-200 shadow-xs mb-4 sm:mb-5 gap-1">
           <button
             type="button"
             onClick={() => setActiveTab('status')}
-            className={`flex-1 py-2.5 px-2 sm:px-4 rounded-xl font-extrabold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer ${
+            className={`flex-1 py-2.5 px-2 sm:px-4 rounded-lg font-extrabold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer ${
               activeTab === 'status'
                 ? 'bg-brand-blue text-white shadow-xs'
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
-            <span>🧭</span>
+            <SvgIcon name="compass" className="w-4 h-4" />
             <ResponsiveText mobile="Tiến độ" desktop="Tiến Độ & Nhật Ký" />
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('payment')}
-            className={`flex-1 py-2.5 px-2 sm:px-4 rounded-xl font-extrabold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer ${
+            className={`flex-1 py-2.5 px-2 sm:px-4 rounded-lg font-extrabold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer ${
               activeTab === 'payment'
                 ? 'bg-brand-blue text-white shadow-xs'
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
-            <span>💳</span>
+            <SvgIcon name="credit-card" className="w-4 h-4" />
             <span>Thanh Toán</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('warranty')}
-            className={`flex-1 py-2.5 px-2 sm:px-4 rounded-xl font-extrabold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer ${
+            className={`flex-1 py-2.5 px-2 sm:px-4 rounded-lg font-extrabold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer ${
               activeTab === 'warranty'
                 ? 'bg-brand-blue text-white shadow-xs'
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
-            <span>🛡️</span>
+            <SvgIcon name="shield" className="w-4 h-4" />
             <ResponsiveText mobile="Bảo hành" desktop="Ảnh & Bảo Hành" />
           </button>
         </div>
@@ -456,10 +466,10 @@ function Tracking() {
         {activeTab === 'status' && (
           <div className="space-y-5">
             {/* Thanh tiến trình 4 bước */}
-            <div className="bg-white rounded-3xl p-5 md:p-6 shadow-sm border border-slate-200/90">
+            <div className="bg-white rounded-2xl p-5 md:p-6 shadow-xs border border-slate-200">
               <div className="flex flex-wrap items-center justify-between gap-2 mb-4 pb-3 border-b border-slate-100">
                 <div className="flex items-center gap-2">
-                  <span className="text-base">🧭</span>
+                  <SvgIcon name="compass" className="w-4 h-4 text-brand-blue" />
                   <h2 className="text-xs sm:text-sm font-extrabold text-slate-800 uppercase tracking-wide">
                     Tiến trình xử lý hồ sơ CSKH (Bước {currentStep + 1}/4)
                   </h2>
@@ -476,7 +486,7 @@ function Tracking() {
                   return (
                     <div
                       key={step.id}
-                      className={`rounded-2xl p-3 border transition-all text-center flex flex-col items-center justify-center ${
+                      className={`rounded-xl p-3 border transition-all text-center flex flex-col items-center justify-center ${
                         isCurrent
                           ? 'bg-amber-50/90 border-amber-300 ring-2 ring-amber-200/60'
                           : isDone
@@ -485,7 +495,7 @@ function Tracking() {
                       }`}
                     >
                       <div
-                        className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold mb-1.5 ${
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center mb-1.5 ${
                           isCurrent
                             ? 'bg-amber-400 text-slate-900'
                             : isDone
@@ -493,7 +503,7 @@ function Tracking() {
                             : 'bg-slate-200 text-slate-500'
                         }`}
                       >
-                        {isDone ? '✓' : step.icon}
+                        <SvgIcon name={isDone ? 'check' : step.icon} className="w-4 h-4" />
                       </div>
                       <p className={`text-xs font-bold leading-tight ${isCurrent ? 'text-amber-900' : isDone ? 'text-emerald-900' : 'text-slate-600'}`}>
                         {step.label}
@@ -506,25 +516,27 @@ function Tracking() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {/* Nội dung yêu cầu */}
-              <div className="bg-white rounded-3xl p-5 shadow-sm border border-slate-200/90">
+              <div className="bg-white rounded-2xl p-5 shadow-xs border border-slate-200">
                 <h3 className="text-sm font-extrabold text-slate-800 mb-3 flex items-center gap-2">
-                  <span>📋</span> Yêu Cầu Hỗ Trợ Ban Đầu
+                  <SvgIcon name="clipboard" className="w-4 h-4 text-brand-blue" />
+                  <span>Yêu Cầu Hỗ Trợ Ban Đầu</span>
                 </h3>
-                <div className="bg-slate-50 rounded-2xl p-3.5 border border-slate-200/70">
+                <div className="bg-slate-50 rounded-xl p-3.5 border border-slate-200/70">
                   <p className="text-xs font-semibold text-slate-800 whitespace-pre-line leading-relaxed">
                     {issueText}
                   </p>
                 </div>
               </div>
 
-              {/* Cam kết dịch vụ & Quyền lợi CSKH (thay cho thông tin địa chỉ đã có ở chân trang) */}
-              <div className="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200/90">
+              {/* Cam kết dịch vụ & Quyền lợi CSKH */}
+              <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-xs border border-slate-200">
                 <h3 className="text-sm font-extrabold text-slate-800 mb-2.5 sm:mb-3 flex items-center gap-2">
-                  <span>🛡️</span> <ResponsiveText mobile="Cam Kết Dịch Vụ" desktop="Cam Kết Dịch Vụ & Quyền Lợi CSKH" />
+                  <SvgIcon name="shield" className="w-4 h-4 text-emerald-600" />
+                  <ResponsiveText mobile="Cam Kết Dịch Vụ" desktop="Cam Kết Dịch Vụ & Quyền Lợi CSKH" />
                 </h3>
-                <div className="bg-emerald-50/60 rounded-2xl p-3 sm:p-3.5 border border-emerald-200/70 space-y-2 sm:space-y-2.5 text-xs text-slate-700">
+                <div className="bg-emerald-50/60 rounded-xl p-3 sm:p-3.5 border border-emerald-200/70 space-y-2 sm:space-y-2.5 text-xs text-slate-700">
                   <div className="flex items-start gap-2">
-                    <span className="text-emerald-600 font-extrabold text-sm leading-none mt-0.5">✓</span>
+                    <SvgIcon name="check" className="w-3.5 h-3.5 text-emerald-600 mt-0.5 shrink-0" />
                     <p className="leading-relaxed">
                       <ResponsiveText
                         mobile={<><strong>Minh bạch chi phí:</strong> Báo giá trước khi sửa, miễn phí kiểm tra.</>}
@@ -533,20 +545,20 @@ function Tracking() {
                     </p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <span className="text-emerald-600 font-extrabold text-sm leading-none mt-0.5">✓</span>
+                    <SvgIcon name="check" className="w-3.5 h-3.5 text-emerald-600 mt-0.5 shrink-0" />
                     <p className="leading-relaxed">
                       <ResponsiveText
                         mobile={<><strong>Bảo mật dữ liệu:</strong> Giữ an toàn 100% dữ liệu cá nhân.</>}
-                        desktop={<><strong>Bảo mật dữ liệu:</strong> Cam kết giữ an toàn và bảo mật tuyệt đối 100% dữ liệu cá nhân trên thiết bị của khách hàng.</>}
+                        desktop={<><strong>Bảo mật dữ liệu:</strong> Cam kết giữ an toàn và bảo mật tuyệt đối dữ liệu cá nhân trên thiết bị của khách hàng.</>}
                       />
                     </p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <span className="text-emerald-600 font-extrabold text-sm leading-none mt-0.5">✓</span>
+                    <SvgIcon name="check" className="w-3.5 h-3.5 text-emerald-600 mt-0.5 shrink-0" />
                     <p className="leading-relaxed">
                       <ResponsiveText
-                        mobile={<><strong>e-Warranty:</strong> Bảo hành điện tử QR 03 - 06 tháng.</>}
-                        desktop={<><strong>Bảo hành điện tử e-Warranty:</strong> Cấp mã QR bảo hành chính hãng từ 03 - 06 tháng, tra cứu nhanh mọi lúc mọi nơi.</>}
+                        mobile={<><strong>Bảo hành điện tử:</strong> Bảo hành QR 03 - 06 tháng.</>}
+                        desktop={<><strong>Bảo hành điện tử (e-Warranty):</strong> Cấp mã QR bảo hành từ 03 - 06 tháng, tra cứu thuận tiện mọi lúc.</>}
                       />
                     </p>
                   </div>
@@ -555,13 +567,14 @@ function Tracking() {
             </div>
 
             {/* Nhật ký xử lý */}
-            <div className="bg-white rounded-3xl p-5 shadow-sm border border-slate-200/90">
+            <div className="bg-white rounded-2xl p-5 shadow-xs border border-slate-200">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-extrabold text-slate-800 flex items-center gap-2">
-                  <span>🕒</span> Nhật Ký Xử Lý Hồ Sơ
+                  <SvgIcon name="clock" className="w-4 h-4 text-brand-blue" />
+                  <span>Nhật Ký Xử Lý Hồ Sơ</span>
                 </h3>
                 <span className="text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full font-bold">
-                  Cập nhật thời gian thực
+                  Cập nhật tự động
                 </span>
               </div>
 
@@ -617,9 +630,9 @@ function Tracking() {
         {activeTab === 'warranty' && (
           <div className="space-y-5">
             {/* Hình ảnh minh chứng */}
-            <div className="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200/90">
+            <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-xs border border-slate-200">
               <h3 className="text-sm font-extrabold text-slate-800 mb-2.5 sm:mb-3 flex items-center gap-2">
-                <span>📸</span>{' '}
+                <SvgIcon name="camera" className="w-4 h-4 text-brand-blue" />
                 <ResponsiveText
                   mobile={`Ảnh Tiếp Nhận (${ticket.hinh_anh_ngoai_quan?.length || 0})`}
                   desktop={`Hình Ảnh Minh Chứng Lúc Tiếp Nhận (${ticket.hinh_anh_ngoai_quan?.length || 0} ảnh)`}
@@ -638,7 +651,7 @@ function Tracking() {
                   ))}
                 </div>
               ) : (
-                <div className="rounded-2xl bg-slate-50 border border-dashed border-slate-300 p-3.5 sm:p-4 text-center text-xs text-slate-500">
+                <div className="rounded-xl bg-slate-50 border border-dashed border-slate-300 p-3.5 sm:p-4 text-center text-xs text-slate-500">
                   <ResponsiveText
                     mobile="Chưa có ảnh hiện trạng đính kèm."
                     desktop="Chưa có ảnh ngoại quan đính kèm. Lễ tân sẽ cập nhật ảnh khi tiếp nhận tại quầy 615 Âu Cơ."
@@ -648,10 +661,10 @@ function Tracking() {
             </div>
 
             {/* Sổ bảo hành e-Warranty */}
-            <div className="p-4 sm:p-5 bg-gradient-to-br from-emerald-50 via-teal-50/70 to-white border border-emerald-200 rounded-3xl shadow-sm">
+            <div className="p-4 sm:p-5 bg-emerald-50/50 border border-emerald-200 rounded-2xl shadow-xs">
               <div className="flex items-center justify-between gap-2 mb-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-xl">🛡️</span>
+                  <SvgIcon name="shield" className="w-5 h-5 text-emerald-700" />
                   <h3 className="font-extrabold text-slate-800 text-sm">
                     <ResponsiveText mobile="Bảo Hành Điện Tử" desktop="Sổ Bảo Hành Điện Tử (e-Warranty)" />
                   </h3>
@@ -677,26 +690,32 @@ function Tracking() {
                 <button
                   type="button"
                   onClick={() => setShowWarrantyModal(true)}
-                  className="mt-3 w-full py-2.5 bg-brand-blue hover:bg-blue-700 text-white font-bold rounded-xl text-xs transition cursor-pointer"
+                  className="mt-3 w-full py-2.5 bg-brand-blue hover:bg-brand-blue-hover text-white font-bold rounded-xl text-xs transition cursor-pointer inline-flex items-center justify-center gap-1.5"
                 >
-                  🛡️ Gửi Yêu Cầu Hỗ Trợ Bảo Hành →
+                  <SvgIcon name="shield" className="w-4 h-4" />
+                  <span>Gửi Yêu Cầu Hỗ Trợ Bảo Hành →</span>
                 </button>
               )}
             </div>
 
             {/* Đánh giá dịch vụ nếu đã hoàn tất */}
             {(ticket.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' || ticket.trang_thai === 'ĐÃ_SỬA_XONG') && (
-              <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-                <h4 className="text-sm font-extrabold text-brand-blue mb-1">⭐ Đánh giá chất lượng phục vụ CSKH</h4>
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+                <h4 className="text-sm font-extrabold text-brand-blue mb-1 flex items-center gap-1.5">
+                  <SvgIcon name="star" className="w-4 h-4 text-amber-500 fill-current" />
+                  <span>Đánh giá chất lượng phục vụ CSKH</span>
+                </h4>
                 {ticket.da_danh_gia ? (
-                  <p className="text-xs font-bold text-emerald-700">
-                    {reviewMessage || '✓ Đã ghi nhận đánh giá của bạn. Cảm ơn quý khách!'}
+                  <p className="text-xs font-bold text-emerald-700 flex items-center gap-1.5 mt-1">
+                    <SvgIcon name="check" className="w-3.5 h-3.5" />
+                    <span>{reviewMessage || 'Đã ghi nhận đánh giá của bạn. Cảm ơn quý khách.'}</span>
                   </p>
                 ) : (
                   <form onSubmit={handleSubmitReview} className="space-y-3 mt-3">
                     {reviewError && (
-                      <p className="text-xs text-red-600 font-semibold bg-red-50 p-2 rounded-lg border border-red-200">
-                        ⚠️ {reviewError}
+                      <p className="text-xs text-red-600 font-semibold bg-red-50 p-2 rounded-lg border border-red-200 flex items-center gap-1.5">
+                        <SvgIcon name="alert" className="w-3.5 h-3.5 shrink-0" />
+                        <span>{reviewError}</span>
                       </p>
                     )}
                     <div className="flex gap-2">
@@ -705,9 +724,10 @@ function Tracking() {
                           key={star}
                           type="button"
                           onClick={() => setRating(star)}
-                          className={`text-2xl cursor-pointer ${star <= rating ? 'text-amber-400' : 'text-slate-300'}`}
+                          className={`p-1 cursor-pointer transition ${star <= rating ? 'text-amber-400' : 'text-slate-300'}`}
+                          aria-label={`${star} sao`}
                         >
-                          ★
+                          <SvgIcon name="star" className="w-6 h-6 fill-current" />
                         </button>
                       ))}
                     </div>
@@ -721,7 +741,7 @@ function Tracking() {
                     <button
                       type="submit"
                       disabled={reviewLoading}
-                      className="w-full py-2 bg-brand-blue text-white font-bold text-xs rounded-xl"
+                      className="w-full py-2 bg-brand-blue hover:bg-brand-blue-hover text-white font-bold text-xs rounded-xl cursor-pointer"
                     >
                       {reviewLoading ? 'Đang gửi...' : 'Gửi Đánh Giá'}
                     </button>
@@ -735,12 +755,15 @@ function Tracking() {
         {/* Modal Yêu cầu hỗ trợ bảo hành lại */}
         {showWarrantyModal && (
           <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                  <span>🛡️</span> Gửi Yêu Cầu Hỗ Trợ Bảo Hành (e-Warranty)
+                  <SvgIcon name="shield" className="w-5 h-5 text-brand-blue" />
+                  <span>Gửi Yêu Cầu Hỗ Trợ Bảo Hành</span>
                 </h3>
-                <button onClick={() => setShowWarrantyModal(false)} className="text-slate-400 hover:text-slate-600 text-lg">×</button>
+                <button onClick={() => setShowWarrantyModal(false)} className="text-slate-400 hover:text-slate-600 p-1 cursor-pointer">
+                  <SvgIcon name="x" className="w-4 h-4" />
+                </button>
               </div>
               <p className="text-xs text-slate-500 mb-4">
                 Nếu bạn cần hỗ trợ bảo hành hoặc chăm sóc hậu mãi trong thời hạn e-Warranty, vui lòng nhập nội dung bên dưới. Bộ phận CSKH tại <strong>615 Âu Cơ</strong> sẽ liên hệ xử lý ngay.

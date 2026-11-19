@@ -5,75 +5,76 @@ import api from '../../services/api';
 import { getAccessibleBaseUrl } from '../../utils/network';
 import QrScannerModal from '../../components/QrScannerModal';
 import ResponsiveText from '../../components/ResponsiveText';
+import SvgIcon, { DynamicIcon } from '../../components/SvgIcon';
 
 const CORE_PILLARS = [
   {
     step: '01',
-    icon: '💻',
-    title: 'Quét QR Tiếp Nhận Máy & Ảnh Ngoại Quan',
-    desc: 'Khách hàng quét mã QR tại quầy điền nhanh tình trạng lỗi máy tính / phần mềm trong 30 giây và đính kèm ảnh chụp ngoại quan máy lúc bàn giao.'
+    icon: 'laptop',
+    title: 'Tiếp Nhận Thiết Bị & Lưu Ảnh Hiện Trạng',
+    desc: 'Quét mã QR tại quầy để điền thông tin sự cố máy tính / phần mềm và đính kèm ảnh ngoại quan thiết bị khi bàn giao.'
   },
   {
     step: '02',
-    icon: '⏱️',
-    title: 'Quét QR Theo Dõi Tiến Độ Thời Gian Thực',
-    desc: 'Không cần chờ tổng đài. Quét mã QR trên biên nhận 80mm để xem trực tiếp từng bước kiểm tra phần cứng và khắc phục sự cố phần mềm.'
+    icon: 'clock',
+    title: 'Tra Cứu Tiến Độ Kiểm Tra & Sửa Chữa',
+    desc: 'Sử dụng mã QR trên phiếu tiếp nhận để xem trực tiếp trạng thái kiểm tra phần cứng, báo giá linh kiện và nhật ký kỹ thuật.'
   },
   {
     step: '03',
-    icon: '🛡️',
-    title: 'Quét QR Sổ Bảo Hành Điện Tử (e-Warranty)',
-    desc: 'Thay thế hoàn toàn sổ bảo hành giấy. Tự động kích hoạt và đếm ngược hạn bảo hành 06 tháng (180 ngày), hỗ trợ gửi yêu cầu bảo hành lại qua QR.'
+    icon: 'shield',
+    title: 'Quản Lý Bảo Hành Điện Tử (e-Warranty)',
+    desc: 'Thông tin bảo hành 06 tháng và số Serial linh kiện được lưu trực tiếp trên mã QR hồ sơ, thuận tiện tra cứu khi cần hỗ trợ.'
   },
   {
     step: '04',
-    icon: '⭐',
-    title: 'Quét QR Đánh Giá Chất Lượng CSKH (1–5 Sao)',
-    desc: 'Sau khi nhận bàn giao thiết bị hoạt động ổn định, khách hàng quét mã QR chấm điểm 1–5 sao và gửi nhận xét trực tiếp về Ban quản lý CSKH.'
+    icon: 'star',
+    title: 'Đánh Giá Chất Lượng Dịch Vụ',
+    desc: 'Sau khi nhận bàn giao thiết bị, khách hàng có thể gửi đánh giá và góp ý chất lượng phục vụ ngay trên trang tra cứu.'
   }
 ];
 
 const COMPUTER_SOFTWARE_SERVICES = [
   {
-    icon: '🖥️',
+    icon: 'desktop',
     tag: 'Phần cứng Laptop & PC',
     title: 'Kiểm Tra & Sửa Chữa Phần Cứng Chuyên Sâu',
     desc: 'Chẩn đoán lỗi Mainboard, nguồn, màn hình, bàn phím, bản lề và hệ thống tản nhiệt cho Laptop Dell, HP, Asus, Lenovo, MacBook & PC văn phòng.',
     serviceParam: 'Kiểm tra & Sửa chữa phần cứng Máy tính / Laptop'
   },
   {
-    icon: '💿',
+    icon: 'disc',
     tag: 'Hệ điều hành & Phần mềm',
     title: 'Cài Đặt & Khắc Phục Sự Cố Phần Mềm',
     desc: 'Xử lý lỗi Windows 10/11, macOS, Microsoft Office, phần mềm kế toán - đồ họa, xung đột hệ thống, màn hình xanh (BSOD) và tối ưu tốc độ máy.',
     serviceParam: 'Cài đặt & Khắc phục sự cố Phần mềm / Hệ điều hành'
   },
   {
-    icon: '🚀',
-    tag: 'Nâng cấp & Serial e-Warranty',
+    icon: 'zap',
+    tag: 'Nâng cấp linh kiện',
     title: 'Nâng Cấp SSD, RAM & Linh Kiện Chính Hãng',
-    desc: 'Tư vấn nâng cấp ổ cứng SSD NVMe, RAM, Pin, Sạc chuẩn hãng. Mã Serial linh kiện được lưu trực tiếp vào hồ sơ Sổ bảo hành điện tử QR.',
+    desc: 'Tư vấn nâng cấp ổ cứng SSD NVMe, RAM, Pin, Sạc chuẩn hãng. Mã Serial linh kiện được lưu trực tiếp vào hồ sơ bảo hành điện tử.',
     serviceParam: 'Nâng cấp SSD / RAM & Linh kiện máy tính'
   },
   {
-    icon: '🔐',
-    tag: 'Dữ liệu & An toàn bảo mật',
+    icon: 'lock',
+    tag: 'Dữ liệu & Bảo mật',
     title: 'Cứu Dữ Liệu, Sao Lưu & Diệt Virus Mã Độc',
     desc: 'Khôi phục dữ liệu ổ cứng/SSD lỗi phân vùng, sao lưu an toàn dữ liệu doanh nghiệp và quét sạch mã độc, phần mềm gián điệp.',
     serviceParam: 'Cứu dữ liệu, Sao lưu & Diệt Virus bảo mật'
   },
   {
-    icon: '🌐',
+    icon: 'globe',
     tag: 'Mạng nội bộ & Máy in',
     title: 'Khắc Phục Lỗi Mạng LAN/Wi-Fi & Máy In',
     desc: 'Cấu hình Driver máy in, chia sẻ dữ liệu nội bộ, khắc phục lỗi mất kết nối Wi-Fi/Bluetooth, cổng USB/HDMI và thiết bị văn phòng.',
     serviceParam: 'Khắc phục lỗi Mạng, Driver & Thiết bị ngoại vi'
   },
   {
-    icon: '🛡️',
-    tag: 'Hậu mãi & Bảo hành QR',
-    title: 'Bảo Dưỡng Định Kỳ & Chăm Sóc e-Warranty',
-    desc: 'Vệ sinh laptop chuyên sâu, tra keo tản nhiệt chuẩn nhiệt độ, kiểm tra sức khỏe ổ cứng định kỳ và hỗ trợ bảo hành ưu tiên qua mã QR.',
+    icon: 'shield',
+    tag: 'Bảo dưỡng & Hậu mãi',
+    title: 'Bảo Dưỡng Định Kỳ & Kiểm Tra Phần Cứng',
+    desc: 'Vệ sinh laptop chuyên sâu, tra keo tản nhiệt, kiểm tra sức khỏe ổ cứng định kỳ và hỗ trợ bảo hành qua mã QR.',
     serviceParam: 'Bảo dưỡng định kỳ & Chăm sóc hậu mãi e-Warranty'
   }
 ];
@@ -105,18 +106,18 @@ function HomeLanding() {
 
   const brand = cmsConfig?.brand || {
     companyName: 'CÔNG TY CỔ PHẦN LỤC GIÁC',
-    badgeText: 'TRUNG TÂM CSKH & DỊCH VỤ KỸ THUẬT • CÔNG TY CỔ PHẦN LỤC GIÁC',
+    badgeText: 'TRUNG TÂM CSKH & SỬA CHỮA • CÔNG TY CỔ PHẦN LỤC GIÁC',
     showPromoBanner: false,
-    promoBannerText: 'Kênh CSKH Điện Tử QR: Miễn phí kiểm tra chẩn đoán lỗi phần cứng & phần mềm tại quầy 615 Âu Cơ.'
+    promoBannerText: 'Miễn phí kiểm tra lỗi phần cứng & phần mềm tại quầy 615 Âu Cơ.'
   };
 
   const hero = cmsConfig?.hero || {
-    titleLine1: 'Hệ Thống Tiếp Nhận & Chăm Sóc Khách Hàng',
-    titleHighlight: 'Quản Lý Sửa Chữa & Bảo Hành Điện Tử QR',
-    description: 'Số hóa quy trình tiếp nhận thiết bị máy tính và hỗ trợ sự cố phần mềm. Khách hàng dễ dàng theo dõi tiến độ kiểm tra thời gian thực, thanh toán linh hoạt và kích hoạt Sổ bảo hành điện tử (e-Warranty) chỉ với một lần quét mã QR.',
+    titleLine1: 'Tiếp Nhận & Chăm Sóc Khách Hàng',
+    titleHighlight: 'Theo Dõi Sửa Chữa & Bảo Hành Qua Mã QR',
+    description: 'Tiếp nhận thiết bị máy tính, theo dõi tiến độ kiểm tra - sửa chữa và tra cứu thời hạn bảo hành điện tử bằng mã QR.',
     bannerImageUrl: '',
     showBannerImage: false,
-    kioskTitle: 'Cổng Quét QR Tự Phục Vụ',
+    kioskTitle: 'Mã QR Quầy Tiếp Nhận',
     kioskBranch: '615 Âu Cơ'
   };
 
@@ -249,7 +250,7 @@ function HomeLanding() {
                     onClick={() => setIsScannerOpen(true)}
                     className="px-4 py-2.5 rounded-lg border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium text-sm transition flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
                   >
-                    <span>📷</span>
+                    <SvgIcon name="camera" className="w-4 h-4 text-slate-600" />
                     <span>Quét QR</span>
                   </button>
                 </form>
@@ -259,21 +260,24 @@ function HomeLanding() {
               <div className="flex flex-wrap gap-2.5 max-w-2xl pt-1">
                 <Link
                   to="/intake"
-                  className="px-4 py-2.5 bg-brand-blue hover:bg-brand-blue-hover active:brightness-95 text-white font-medium rounded-lg text-xs sm:text-sm transition shadow-xs"
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-brand-blue hover:bg-brand-blue-hover active:brightness-95 text-white font-medium rounded-lg text-xs sm:text-sm transition shadow-xs"
                 >
-                  📝 Tạo Phiếu Tại Quầy
+                  <SvgIcon name="file-text" className="w-4 h-4" />
+                  <span>Tạo Phiếu Tại Quầy</span>
                 </Link>
                 <Link
                   to="/tra-cuu"
-                  className="px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium rounded-lg text-xs sm:text-sm transition"
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium rounded-lg text-xs sm:text-sm transition"
                 >
-                  🔍 Tra Cứu SĐT / Serial
+                  <SvgIcon name="search" className="w-4 h-4 text-slate-500" />
+                  <span>Tra Cứu SĐT / Serial</span>
                 </Link>
                 <Link
                   to="/dat-lich"
-                  className="px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium rounded-lg text-xs sm:text-sm transition"
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium rounded-lg text-xs sm:text-sm transition"
                 >
-                  📅 Đặt Lịch Hẹn
+                  <SvgIcon name="calendar" className="w-4 h-4 text-slate-500" />
+                  <span>Đặt Lịch Hẹn</span>
                 </Link>
               </div>
             </div>
@@ -300,24 +304,26 @@ function HomeLanding() {
                   <button
                     type="button"
                     onClick={() => setQrMode('INTAKE')}
-                    className={`py-1.5 px-2 rounded-md transition cursor-pointer ${
+                    className={`py-1.5 px-2 rounded-md transition cursor-pointer inline-flex items-center justify-center gap-1.5 ${
                       qrMode === 'INTAKE'
                         ? 'bg-white text-slate-900 shadow-xs'
                         : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
-                    📝 QR Tạo Phiếu
+                    <SvgIcon name="file-text" className="w-3.5 h-3.5 text-brand-blue" />
+                    <span>QR Tạo Phiếu</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setQrMode('DEMO_TRACK')}
-                    className={`py-1.5 px-2 rounded-md transition cursor-pointer ${
+                    className={`py-1.5 px-2 rounded-md transition cursor-pointer inline-flex items-center justify-center gap-1.5 ${
                       qrMode === 'DEMO_TRACK'
                         ? 'bg-white text-slate-900 shadow-xs'
                         : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
-                    🔍 QR Tra Cứu
+                    <SvgIcon name="search" className="w-3.5 h-3.5 text-brand-blue" />
+                    <span>QR Tra Cứu</span>
                   </button>
                 </div>
 
@@ -357,9 +363,9 @@ function HomeLanding() {
                   <button
                     type="button"
                     onClick={() => setIsScannerOpen(true)}
-                    className="py-2 px-3 rounded-lg border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium text-xs transition flex items-center justify-center gap-1 cursor-pointer"
+                    className="py-2 px-3 rounded-lg border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium text-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
                   >
-                    <span>📷</span>
+                    <SvgIcon name="camera" className="w-3.5 h-3.5 text-slate-600" />
                     <span>Mở Camera Quét</span>
                   </button>
                   <Link
@@ -376,18 +382,15 @@ function HomeLanding() {
         </div>
       </section>
 
-      {/* SECTION 02: 4 TRỤ CỘT CHĂM SÓC KHÁCH HÀNG QUA MÃ QR */}
+      {/* SECTION 02: QUY TRÌNH DỊCH VỤ QUA MÃ QR */}
       <section className="py-8 sm:py-14 bg-white border-b border-slate-200">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="text-center mb-6 sm:mb-10">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              <ResponsiveText mobile="QUY TRÌNH QR CSKH" desktop="QUY TRÌNH TIÊU CHUẨN DỊCH VỤ" />
-            </span>
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mt-1">
-              <ResponsiveText mobile="4 Bước Chăm Sóc Qua QR" desktop="4 Trụ Cột Chăm Sóc Khách Hàng Qua Mã QR" />
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
+              <ResponsiveText mobile="Quy Trình Tiếp Nhận & Bảo Hành" desktop="Quy Trình Tiếp Nhận & Theo Dõi Sửa Chữa Qua Mã QR" />
             </h2>
             <p className="hidden sm:block text-slate-500 mt-1.5 max-w-2xl mx-auto text-xs sm:text-sm">
-              Mỗi thiết bị hoặc yêu cầu phần mềm được quản lý bằng một mã QR định danh duy nhất xuyên suốt quy trình hỗ trợ.
+              Mỗi thiết bị khi tiếp nhận tại quầy được cấp một mã QR riêng để theo dõi trạng thái xử lý và thời hạn bảo hành.
             </p>
           </div>
 
@@ -398,8 +401,10 @@ function HomeLanding() {
                 className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5 hover:border-slate-300 transition flex flex-col justify-between"
               >
                 <div>
-                  <div className="flex items-center justify-between mb-2 sm:mb-3">
-                    <span className="text-2xl">{pillar.icon}</span>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="w-10 h-10 rounded-lg bg-blue-50 text-brand-blue flex items-center justify-center border border-blue-100">
+                      <DynamicIcon value={pillar.icon} className="w-5 h-5" />
+                    </div>
                     <span className="text-xs font-semibold text-slate-400">
                       BƯỚC {pillar.step || `0${idx + 1}`}
                     </span>
@@ -422,18 +427,18 @@ function HomeLanding() {
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 sm:gap-4 mb-5 sm:mb-8">
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                <ResponsiveText mobile="DỊCH VỤ KỸ THUẬT" desktop="DỊCH VỤ KỸ THUẬT & HỖ TRỢ CHUYÊN NGHIỆP" />
-              </span>
-              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mt-1">
-                <ResponsiveText mobile="Dịch Vụ Tiếp Nhận & Xử Lý" desktop="Các Hạng Mục Dịch Vụ Tiếp Nhận & Xử Lý" />
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
+                <ResponsiveText mobile="Dịch Vụ Kỹ Thuật" desktop="Danh Mục Dịch Vụ Sửa Chữa & Hỗ Trợ Kỹ Thuật" />
               </h2>
+              <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                Kiểm tra tình trạng máy miễn phí tại quầy và báo giá chi tiết trước khi thực hiện.
+              </p>
             </div>
             <Link
               to="/intake"
               className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-brand-blue hover:bg-brand-blue-hover active:brightness-95 text-white font-medium text-xs sm:text-sm transition shrink-0"
             >
-              <span>📝</span>
+              <SvgIcon name="file-text" className="w-4 h-4" />
               <ResponsiveText mobile="Tạo Phiếu →" desktop="Tạo Phiếu Tiếp Nhận →" />
             </Link>
           </div>
@@ -454,8 +459,10 @@ function HomeLanding() {
                       />
                     </div>
                   )}
-                  <div className="flex items-center justify-between gap-2 mb-2 sm:mb-2.5">
-                    <span className="text-2xl">{item.icon}</span>
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <div className="w-9 h-9 rounded-lg bg-blue-50 text-brand-blue flex items-center justify-center border border-blue-100">
+                      <DynamicIcon value={item.icon} className="w-4 h-4" />
+                    </div>
                     <span className="text-[11px] font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
                       {item.tag}
                     </span>
@@ -470,8 +477,9 @@ function HomeLanding() {
 
                 <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
                   <div className="flex flex-col">
-                    <span className="text-[11px] text-slate-500">
-                      🛡️ Bảo hành QR 06 tháng
+                    <span className="text-[11px] text-slate-500 inline-flex items-center gap-1">
+                      <SvgIcon name="shield" className="w-3.5 h-3.5 text-brand-blue" />
+                      <span>Bảo hành điện tử 06 tháng</span>
                     </span>
                     {item.priceHint && (
                       <span className="text-[11px] font-semibold text-slate-700 mt-0.5">
@@ -509,24 +517,26 @@ function HomeLanding() {
             <button
               type="button"
               onClick={() => setActiveGuideTab('TAI_QUAY')}
-              className={`px-3 sm:px-5 py-2 rounded-lg font-semibold text-xs sm:text-sm transition cursor-pointer ${
+              className={`px-3 sm:px-5 py-2 rounded-lg font-semibold text-xs sm:text-sm transition cursor-pointer inline-flex items-center justify-center gap-1.5 ${
                 activeGuideTab === 'TAI_QUAY'
                   ? 'bg-brand-blue text-white shadow-xs'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
-              <ResponsiveText mobile="🏢 Tại quầy" desktop="🏢 Luồng 1: Quét QR tại quầy (615 Âu Cơ)" />
+              <SvgIcon name="building" className="w-4 h-4" />
+              <ResponsiveText mobile="Tại quầy" desktop="Quét QR trực tiếp tại quầy (615 Âu Cơ)" />
             </button>
             <button
               type="button"
               onClick={() => setActiveGuideTab('TU_XA')}
-              className={`px-3 sm:px-5 py-2 rounded-lg font-semibold text-xs sm:text-sm transition cursor-pointer ${
+              className={`px-3 sm:px-5 py-2 rounded-lg font-semibold text-xs sm:text-sm transition cursor-pointer inline-flex items-center justify-center gap-1.5 ${
                 activeGuideTab === 'TU_XA'
                   ? 'bg-brand-blue text-white shadow-xs'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
-              <ResponsiveText mobile="📅 Đặt lịch" desktop="📅 Luồng 2: Đặt lịch hẹn trước qua Web" />
+              <SvgIcon name="calendar" className="w-4 h-4" />
+              <ResponsiveText mobile="Đặt lịch" desktop="Đặt lịch hẹn trước qua Website" />
             </button>
           </div>
 
@@ -570,7 +580,7 @@ function HomeLanding() {
                   to="/intake"
                   className="inline-flex items-center gap-1.5 px-6 py-2.5 bg-brand-blue hover:bg-brand-blue-hover active:brightness-95 text-white font-medium rounded-lg text-xs sm:text-sm transition shadow-xs"
                 >
-                  <span>📝</span>
+                  <SvgIcon name="file-text" className="w-4 h-4" />
                   <span>Tạo Phiếu QR Ngay →</span>
                 </Link>
               </div>
@@ -617,7 +627,7 @@ function HomeLanding() {
                   to="/dat-lich"
                   className="inline-flex items-center gap-1.5 px-6 py-2.5 bg-brand-blue hover:bg-brand-blue-hover active:brightness-95 text-white font-medium rounded-lg text-xs sm:text-sm transition shadow-xs"
                 >
-                  <span>📅</span>
+                  <SvgIcon name="calendar" className="w-4 h-4" />
                   <span>Đặt Lịch Hẹn Ngay →</span>
                 </Link>
               </div>
@@ -626,24 +636,23 @@ function HomeLanding() {
         </div>
       </section>
 
-      {/* SECTION 05: PHẢN HỒI ĐÁNH GIÁ (CSAT) */}
+      {/* SECTION 05: PHẢN HỒI ĐÁNH GIÁ */}
       {topReviews.length > 0 && (
         <section className="py-8 sm:py-14 bg-[#f0f5fa] border-b border-slate-200">
           <div className="container mx-auto px-4 sm:px-6">
             <div className="text-center mb-5 sm:mb-8">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                <ResponsiveText mobile="ĐÁNH GIÁ CSAT" desktop="CHỈ SỐ HÀI LÒNG CSAT" />
-              </span>
-              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mt-1">
-                <ResponsiveText mobile="Đánh Giá Từ Khách Hàng" desktop="Đánh Giá Thực Tế Từ Khách Hàng Quét Mã QR" />
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
+                <ResponsiveText mobile="Đánh Giá Từ Khách Hàng" desktop="Phản Hồi Từ Khách Hàng Sử Dụng Dịch Vụ" />
               </h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-5">
               {topReviews.map((r, i) => (
                 <div key={i} className="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 flex flex-col justify-between">
                   <div>
-                    <div className="text-amber-500 mb-2 text-sm font-semibold">
-                      {'★'.repeat(r.so_sao)}
+                    <div className="flex items-center gap-1 text-amber-500 mb-2">
+                      {Array.from({ length: Number(r.so_sao) || 5 }).map((_, starIdx) => (
+                        <SvgIcon key={starIdx} name="star" className="w-4 h-4 fill-current" />
+                      ))}
                     </div>
                     <p className="text-slate-600 text-xs sm:text-sm italic mb-4 leading-relaxed">"{r.nhan_xet}"</p>
                   </div>
@@ -657,36 +666,6 @@ function HomeLanding() {
           </div>
         </section>
       )}
-
-      {/* SECTION 06: CỔNG ĐIỀU HÀNH NỘI BỘ */}
-      <section className="py-8 sm:py-12 bg-white">
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="max-w-4xl mx-auto rounded-2xl p-5 sm:p-8 text-center border border-slate-200 bg-slate-50/80">
-            <h2 className="text-lg sm:text-2xl font-bold text-slate-900 mb-1.5 sm:mb-2">
-              <ResponsiveText mobile="Cổng Nội Bộ CSKH" desktop="Cổng Điều Hành Chăm Sóc Khách Hàng Nội Bộ" />
-            </h2>
-            <p className="text-slate-600 text-xs sm:text-sm mb-4 sm:mb-5 max-w-xl mx-auto leading-relaxed line-clamp-2 sm:line-clamp-none">
-              Dành cho Lễ tân tiếp nhận, Kỹ thuật viên hỗ trợ và Quản lý tại Công ty Cổ phần Lục Giác quản lý hồ sơ QR, cập nhật tiến độ xử lý và in phiếu 80mm.
-            </p>
-            <div className="flex flex-wrap justify-center gap-2.5 sm:gap-3">
-              <Link
-                to="/admin"
-                className="inline-flex items-center gap-1.5 px-5 sm:px-6 py-2.5 bg-brand-blue hover:bg-brand-blue-hover active:brightness-95 text-white font-medium text-xs sm:text-sm rounded-lg transition shadow-xs"
-              >
-                <span>🔐</span>
-                <ResponsiveText mobile="Bàn Điều Hành →" desktop="Truy Cập Bàn Điều Hành CSKH →" />
-              </Link>
-              <Link
-                to="/admin/cau-hinh-client"
-                className="inline-flex items-center gap-1.5 px-4 sm:px-5 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-xs sm:text-sm rounded-lg transition shadow-2xs"
-              >
-                <span>🎨</span>
-                <ResponsiveText mobile="Cấu Hình CMS" desktop="Cấu Hình Giao Diện Client (CMS)" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Modal Camera Quét Mã QR */}
       <QrScannerModal

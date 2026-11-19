@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AdminNav from '../../components/AdminNav';
 import api from '../../services/api';
+import SvgIcon from '../../components/SvgIcon';
 
 const STATUS_LABELS = {
   'CHỜ_KHÁM': 'Chờ tiếp nhận',
@@ -61,23 +62,23 @@ export default function ManagerDashboard() {
 
       <div className="space-y-6">
         {/* CSKH Manager Banner */}
-        <section className="rounded-2xl border border-slate-200 bg-brand-blue p-6 text-white shadow-lg">
+        <section className="rounded-xl border border-blue-800/20 bg-brand-blue p-6 text-white shadow-xs">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <div className="flex items-center gap-2.5">
-                <span className="text-3xl">🏬</span>
-                <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
-                  Tổng Quan Điều Hành — Bộ Phận Chăm Sóc Khách Hàng • Công Ty Cổ Phần Lục Giác
+                <SvgIcon name="building" className="w-7 h-7 text-blue-100 shrink-0" />
+                <h2 className="text-xl md:text-2xl font-semibold tracking-tight">
+                  Tổng Quan Điều Hành — Bộ Phận CSKH • Công Ty Cổ Phần Lục Giác
                 </h2>
               </div>
               <p className="mt-2 text-sm text-blue-100 max-w-2xl leading-relaxed">
-                Giám sát toàn bộ quy trình tiếp nhận hồ sơ QR, phân loại yêu cầu hỗ trợ, kích hoạt bảo hành điện tử (e-Warranty), duyệt lịch hẹn và quản lý nhân sự bộ phận CSKH.
+                Theo dõi tình trạng tiếp nhận hồ sơ QR, tiến độ xử lý, bảo hành điện tử, lịch hẹn và nhân sự bộ phận CSKH.
               </p>
               <div className="mt-3 flex flex-wrap gap-2 text-xs">
-                <span className="rounded-full bg-white/10 border border-white/20 px-3 py-1 font-bold">
+                <span className="rounded-md bg-white/10 border border-white/20 px-3 py-1 font-bold">
                   Trụ sở: Công ty Cổ phần Lục Giác • 615 Âu Cơ, Q. Tân Phú
                 </span>
-                <span className="rounded-full bg-white/10 border border-white/20 px-3 py-1 font-bold">
+                <span className="rounded-md bg-white/10 border border-white/20 px-3 py-1 font-bold">
                   Nhân sự bộ phận CSKH: {subordinateCount} nhân viên
                 </span>
               </div>
@@ -86,15 +87,17 @@ export default function ManagerDashboard() {
             <div className="flex shrink-0 flex-wrap gap-2">
               <Link
                 to="/admin/nhan-su"
-                className="rounded-xl bg-white px-4 py-2.5 text-xs font-semibold text-blue-900 shadow-sm transition hover:bg-blue-50"
+                className="rounded-xl bg-white px-4 py-2.5 text-xs font-semibold text-blue-900 shadow-2xs transition hover:bg-blue-50 inline-flex items-center gap-1.5"
               >
-                👥 Nhân Sự &amp; Phân Quyền CSKH
+                <SvgIcon name="users" className="w-4 h-4" />
+                <span>Nhân Sự &amp; Phân Quyền CSKH</span>
               </Link>
               <Link
                 to="/admin"
-                className="rounded-xl bg-white/10 border border-white/20 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-white/20"
+                className="rounded-xl bg-white/10 border border-white/20 px-4 py-2.5 text-xs font-semibold text-white shadow-2xs transition hover:bg-white/20 inline-flex items-center gap-1.5"
               >
-                📋 Bàn Điều Hành Hồ Sơ QR
+                <SvgIcon name="clipboard" className="w-4 h-4" />
+                <span>Bàn Điều Hành Hồ Sơ QR</span>
               </Link>
             </div>
           </div>
@@ -108,37 +111,37 @@ export default function ManagerDashboard() {
 
         {/* Operational Priority Cards */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Mới Tiếp Nhận &amp; Phân Loại</span>
-              <span className="text-xl">🔍</span>
+              <SvgIcon name="search" className="w-5 h-5 text-slate-500" />
             </div>
             <p className="mt-3 text-3xl font-bold text-slate-800">{pendingIntake}</p>
             <p className="mt-1 text-xs text-slate-500">Hồ sơ QR chờ chuyên viên kiểm tra</p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Đang Xử Lý Hỗ Trợ CSKH</span>
-              <span className="text-xl">🎧</span>
+              <SvgIcon name="wrench" className="w-5 h-5 text-brand-blue" />
             </div>
             <p className="mt-3 text-3xl font-bold text-slate-800">{inProcessing}</p>
             <p className="mt-1 text-xs text-slate-500">Chuyên viên đang hỗ trợ khách hàng</p>
           </div>
 
-          <div className="rounded-2xl border border-emerald-200 bg-white p-5 shadow-xs">
+          <div className="rounded-xl border border-emerald-200 bg-white p-5 shadow-xs">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">Đã Hoàn Tất &amp; Cấp e-Warranty</span>
-              <span className="text-xl">🛡️</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">Đã Hoàn Tất &amp; Bảo Hành</span>
+              <SvgIcon name="shield" className="w-5 h-5 text-emerald-600" />
             </div>
             <p className="mt-3 text-3xl font-bold text-emerald-800">{completedCount}</p>
-            <p className="mt-1 text-xs text-slate-500">Đã hoàn tất CSKH &amp; bảo hành điện tử</p>
+            <p className="mt-1 text-xs text-slate-500">Đã hoàn tất xử lý &amp; bảo hành điện tử</p>
           </div>
 
-          <div className="rounded-2xl border border-blue-200 bg-white p-5 shadow-xs">
+          <div className="rounded-xl border border-blue-200 bg-white p-5 shadow-xs">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-blue-700">Lịch Hẹn CSKH Chờ Duyệt</span>
-              <span className="text-xl">📅</span>
+              <SvgIcon name="calendar" className="w-5 h-5 text-blue-600" />
             </div>
             <p className="mt-3 text-3xl font-bold text-blue-900">{pendingBookings}</p>
             <p className="mt-1 text-xs text-slate-500">Khách đặt lịch hẹn tư vấn qua Web</p>
@@ -217,7 +220,7 @@ export default function ManagerDashboard() {
                 </h3>
                 <p className="text-xs text-slate-500">Khách đặt lịch tư vấn &amp; bảo hành qua Web</p>
               </div>
-              <span className="text-xl">📅</span>
+              <SvgIcon name="calendar" className="w-5 h-5 text-slate-500" />
             </div>
 
             <div className="flex-1 space-y-3 overflow-y-auto max-h-80">
@@ -255,26 +258,32 @@ export default function ManagerDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Link
             to="/admin/nhan-su"
-            className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-xs hover:border-brand-blue hover:shadow-md transition flex items-center justify-between"
+            className="group rounded-xl border border-slate-200 bg-white p-5 shadow-xs hover:border-brand-blue hover:shadow-sm transition flex items-center justify-between"
           >
             <div>
               <p className="text-xs font-bold text-brand-blue uppercase tracking-wider">Nhân Sự Bộ Phận CSKH</p>
               <h4 className="text-base font-semibold text-slate-800 mt-1">Quản Lý Nhân Sự &amp; Phân Quyền</h4>
               <p className="text-xs text-slate-500 mt-1">Cấp tài khoản Lễ tân, Chuyên viên hỗ trợ &amp; điều phối ca trực</p>
             </div>
-            <span className="text-2xl group-hover:translate-x-1 transition-transform">👥 →</span>
+            <span className="inline-flex items-center gap-1.5 text-brand-blue group-hover:translate-x-1 transition-transform">
+              <SvgIcon name="users" className="w-5 h-5" />
+              <SvgIcon name="arrow-right" className="w-4 h-4" />
+            </span>
           </Link>
 
           <Link
             to="/admin"
-            className="group rounded-2xl border border-blue-200 bg-white p-5 shadow-xs hover:border-blue-400 hover:shadow-md transition flex items-center justify-between"
+            className="group rounded-xl border border-blue-200 bg-white p-5 shadow-xs hover:border-blue-400 hover:shadow-sm transition flex items-center justify-between"
           >
             <div>
               <p className="text-xs font-bold text-blue-700 uppercase tracking-wider">Tác Nghiệp CSKH Thực Tế</p>
               <h4 className="text-base font-semibold text-slate-800 mt-1">Bàn Điều Hành Hồ Sơ QR</h4>
               <p className="text-xs text-slate-500 mt-1">Tiếp nhận phiếu QR, cập nhật tiến độ xử lý &amp; in phiếu nhiệt 80mm</p>
             </div>
-            <span className="text-2xl group-hover:translate-x-1 transition-transform">📋 →</span>
+            <span className="inline-flex items-center gap-1.5 text-brand-blue group-hover:translate-x-1 transition-transform">
+              <SvgIcon name="clipboard" className="w-5 h-5" />
+              <SvgIcon name="arrow-right" className="w-4 h-4" />
+            </span>
           </Link>
         </div>
       </div>

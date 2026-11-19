@@ -1,20 +1,23 @@
 import { useCallback, useEffect, useState } from 'react';
 import AdminNav from '../../components/AdminNav';
 import api from '../../services/api';
+import SvgIcon from '../../components/SvgIcon';
 
 const ROLE_PERMISSIONS_DETAIL = {
   GIAM_DOC: {
     title: 'Quản Trị Hệ Thống CSKH',
     level: 100,
-    badge: '🛡️ Quản Trị Hệ Thống CSKH',
+    icon: 'shield',
+    badge: 'Quản Trị Hệ Thống CSKH',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
-    description: 'Quyền hạn tối cao: Quản trị toàn diện hệ thống CSKH, phê duyệt chi phí và phân quyền mọi cấp bậc nhân sự.',
+    description: 'Quản trị toàn diện hệ thống CSKH, phê duyệt chi phí và phân quyền mọi cấp bậc nhân sự.',
     canCreate: ['ADMIN', 'QUAN_LY', 'KY_THUAT_VIEN', 'LE_TAN']
   },
   ADMIN: {
     title: 'Quản Trị Hệ Thống CSKH (System Admin)',
     level: 100,
-    badge: '🛡️ Quản Trị Hệ Thống CSKH',
+    icon: 'shield',
+    badge: 'Quản Trị Hệ Thống CSKH',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     description: 'Toàn quyền quản trị kỹ thuật, phân quyền tài khoản và cấu hình hệ thống CSKH.',
     canCreate: ['QUAN_LY', 'KY_THUAT_VIEN', 'LE_TAN']
@@ -22,41 +25,46 @@ const ROLE_PERMISSIONS_DETAIL = {
   QUAN_LY: {
     title: 'Trưởng Bộ Phận CSKH (CSKH Manager)',
     level: 80,
-    badge: '🏬 Trưởng Bộ Phận CSKH',
+    icon: 'building',
+    badge: 'Trưởng Bộ Phận CSKH',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
-    description: 'Điều hành toàn bộ hoạt động bộ phận CSKH: Theo dõi tiến độ xử lý hồ sơ QR, duyệt lịch hẹn và quản lý nhân sự CSKH (< Level 80).',
+    description: 'Điều hành hoạt động bộ phận CSKH: theo dõi tiến độ xử lý hồ sơ QR, duyệt lịch hẹn và quản lý nhân sự (< Level 80).',
     canCreate: ['KY_THUAT_VIEN', 'LE_TAN']
   },
   KE_TOAN: {
     title: 'Chuyên Viên Thống Kê CSKH',
     level: 60,
-    badge: '📊 Thống Kê CSKH',
+    icon: 'chart',
+    badge: 'Thống Kê CSKH',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     description: 'Theo dõi báo cáo thống kê hồ sơ CSKH và xuất báo cáo Excel.',
     canCreate: []
   },
   THU_KHO: {
-    title: 'Quản Lý Bảo Hành Điện Tử (e-Warranty)',
+    title: 'Quản Lý Bảo Hành Điện Tử',
     level: 50,
-    badge: '🛡️ Quản Lý Bảo Hành',
+    icon: 'box',
+    badge: 'Quản Lý Bảo Hành',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
-    description: 'Quản lý danh mục hạng mục bảo hành điện tử (e-Warranty) và mã Serial định danh.',
+    description: 'Quản lý danh mục hạng mục bảo hành điện tử và mã Serial định danh.',
     canCreate: []
   },
   KY_THUAT_VIEN: {
     title: 'Chuyên Viên Hỗ Trợ & Xử Lý CSKH',
     level: 40,
-    badge: '🎧 Chuyên Viên Hỗ Trợ CSKH',
+    icon: 'wrench',
+    badge: 'Chuyên Viên Hỗ Trợ CSKH',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
-    description: 'Tiếp nhận phân loại yêu cầu, tải ảnh minh chứng hiện trạng, cập nhật tiến độ xử lý hồ sơ QR và kích hoạt bảo hành điện tử.',
+    description: 'Tiếp nhận phân loại yêu cầu, tải ảnh hiện trạng, cập nhật tiến độ xử lý hồ sơ QR và kích hoạt bảo hành.',
     canCreate: []
   },
   LE_TAN: {
     title: 'Lễ Tân & Tiếp Nhận QR',
     level: 30,
-    badge: '👩‍💼 Lễ Tân & Tiếp Nhận QR',
+    icon: 'user',
+    badge: 'Lễ Tân & Tiếp Nhận QR',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
-    description: 'Tạo mã QR quầy tiếp nhận, hướng dẫn khách hàng quét mã tự phục vụ, duyệt/hủy lịch hẹn CSKH online.',
+    description: 'Tạo mã QR quầy tiếp nhận, hướng dẫn khách hàng quét mã, duyệt/hủy lịch hẹn CSKH online.',
     canCreate: []
   }
 };
@@ -232,65 +240,67 @@ export default function EmployeeManagement() {
       {/* Main Content */}
       <div className="space-y-6">
         {/* Banner RBAC Introduction */}
-        <section className="rounded-2xl border border-slate-200 bg-brand-blue p-6 text-white shadow-md">
+        <section className="rounded-xl border border-blue-800/20 bg-brand-blue p-6 text-white shadow-xs">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-2xl">👥</span>
-                <h2 className="text-2xl font-semibold tracking-tight">
-                  Quản Trị Nhân Sự & Cấp Bậc Phân Quyền (RBAC)
+                <SvgIcon name="users" className="w-6 h-6 text-blue-100 shrink-0" />
+                <h2 className="text-xl md:text-2xl font-semibold tracking-tight">
+                  Quản Trị Nhân Sự &amp; Phân Quyền (RBAC)
                 </h2>
               </div>
               <p className="mt-2 text-sm text-blue-100 max-w-2xl leading-relaxed">
-                Hệ thống kiểm soát truy cập dựa trên vai trò phân tầng từ cấp Giám Đốc (Level 100), Quản Lý Cửa Hàng (Level 80) xuống các bộ phận Kế toán, Kho, Kỹ thuật và Lễ tân.
+                Quản lý tài khoản và phân quyền truy cập từ cấp Quản trị (Level 100), Quản lý (Level 80) đến Kế toán, Kho, Kỹ thuật viên và Lễ tân.
               </p>
               <div className="mt-3 flex flex-wrap gap-2 text-xs">
-                <span className="rounded-full bg-white/10 border border-white/20 px-3 py-1 font-semibold">
+                <span className="rounded-md bg-white/10 border border-white/20 px-3 py-1 font-semibold">
                   Vai trò của bạn: <strong>{currentRoleInfo.title}</strong>
                 </span>
-                <span className="rounded-full bg-white/10 border border-white/20 px-3 py-1 font-semibold">
-                  {isExecutive ? 'Quyền hạn: Toàn quyền tạo & phân cấp mọi vị trí' : 'Quyền hạn: Tạo & quản lý nhân sự cấp dưới (< Level 80)'}
+                <span className="rounded-md bg-white/10 border border-white/20 px-3 py-1 font-semibold">
+                  {isExecutive ? 'Quyền hạn: Tạo & phân cấp mọi vị trí' : 'Quyền hạn: Tạo & quản lý nhân sự cấp dưới (< Level 80)'}
                 </span>
               </div>
             </div>
 
             <button
               onClick={openCreateModal}
-              className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-brand-blue shadow-md transition hover:bg-slate-100 active:scale-95"
+              className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-brand-blue shadow-2xs transition hover:bg-slate-100 cursor-pointer"
             >
-              <span>➕</span> Tạo Tài Khoản Mới
+              <SvgIcon name="plus" className="w-4 h-4" />
+              <span>Tạo Tài Khoản Mới</span>
             </button>
           </div>
         </section>
 
         {/* Quick KPI Stats */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
             <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Tổng Số Nhân Sự</p>
             <p className="mt-2 text-3xl font-semibold text-brand-blue">{totalCount}</p>
             <p className="mt-1 text-xs text-slate-500">Đã đăng ký trong hệ thống</p>
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
             <p className="text-xs font-bold uppercase tracking-wider text-slate-800">Đang Hoạt Động</p>
             <p className="mt-2 text-3xl font-semibold text-slate-800">{activeCount}</p>
             <p className="mt-1 text-xs text-emerald-600">Sẵn sàng tác nghiệp</p>
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
             <p className="text-xs font-bold uppercase tracking-wider text-slate-800">Tạm Khóa Quyền</p>
             <p className="mt-2 text-3xl font-semibold text-slate-800">{lockedCount}</p>
             <p className="mt-1 text-xs text-amber-600">Vô hiệu hóa đăng nhập</p>
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
             <p className="text-xs font-bold uppercase tracking-wider text-slate-800">Cấp Bậc Quản Trị</p>
             <p className="mt-2 text-3xl font-semibold text-slate-800">6 Cấp Bậc</p>
-            <p className="mt-1 text-xs text-purple-600">Phân tầng bảo mật nghiêm ngặt</p>
+            <p className="mt-1 text-xs text-slate-600">Phân tầng theo chức vụ</p>
           </div>
         </div>
 
         {/* Hierarchical Role Matrix Visual Cards */}
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
+        <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
           <h3 className="text-base font-semibold text-slate-800 mb-4 flex items-center gap-2">
-            <span>🛡️</span> Ma Trận Cấp Bậc & Quyền Hạn Trong Cửa Hàng
+            <SvgIcon name="shield" className="w-4 h-4 text-brand-blue" />
+            <span>Ma Trận Cấp Bậc &amp; Quyền Hạn Trong Cửa Hàng</span>
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {Object.entries(ROLE_PERMISSIONS_DETAIL).map(([key, roleItem]) => {
@@ -298,8 +308,9 @@ export default function EmployeeManagement() {
               return (
                 <div key={key} className="rounded-xl border border-slate-200 p-4 bg-slate-50/60 hover:bg-white hover:shadow-xs transition">
                   <div className="flex items-center justify-between mb-2">
-                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${roleItem.badgeClass}`}>
-                      {roleItem.badge}
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-semibold border ${roleItem.badgeClass}`}>
+                      <SvgIcon name={roleItem.icon || 'user'} className="w-3.5 h-3.5 text-brand-blue" />
+                      <span>{roleItem.badge}</span>
                     </span>
                     <span className="text-xs font-bold text-slate-500">
                       {countInRole} nhân sự
@@ -314,7 +325,7 @@ export default function EmployeeManagement() {
         </section>
 
         {/* Employee Table & Filter Controls */}
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
+        <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between mb-6">
             <h3 className="text-lg font-semibold text-slate-800">
               Danh Sách Tài Khoản Nhân Sự ({filteredEmployees.length} / {totalCount})
@@ -322,13 +333,16 @@ export default function EmployeeManagement() {
 
             <div className="flex flex-wrap items-center gap-3">
               {/* Search input */}
-              <input
-                type="text"
-                placeholder="🔍 Tìm họ tên, username..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full sm:w-64 rounded-xl border border-slate-200 px-3.5 py-2 text-xs font-medium outline-none focus:border-brand-blue"
-              />
+              <div className="relative w-full sm:w-64">
+                <SvgIcon name="search" className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder="Tìm họ tên, username..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 pl-8 pr-3.5 py-2 text-xs font-medium outline-none focus:border-brand-blue"
+                />
+              </div>
 
               {/* Role filter */}
               <select
@@ -337,13 +351,13 @@ export default function EmployeeManagement() {
                 className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 outline-none focus:border-brand-blue"
               >
                 <option value="ALL">Tất cả chức vụ</option>
-                <option value="GIAM_DOC">👑 Giám Đốc</option>
-                <option value="ADMIN">🛡️ Admin</option>
-                <option value="QUAN_LY">🏬 Quản Lý</option>
-                <option value="KE_TOAN">📊 Kế Toán</option>
-                <option value="THU_KHO">📦 Thủ Kho</option>
-                <option value="KY_THUAT_VIEN">🔧 Kỹ Thuật Viên</option>
-                <option value="LE_TAN">📋 Lễ Tân</option>
+                <option value="GIAM_DOC">Giám Đốc</option>
+                <option value="ADMIN">Admin</option>
+                <option value="QUAN_LY">Quản Lý</option>
+                <option value="KE_TOAN">Kế Toán</option>
+                <option value="THU_KHO">Thủ Kho</option>
+                <option value="KY_THUAT_VIEN">Kỹ Thuật Viên</option>
+                <option value="LE_TAN">Lễ Tân</option>
               </select>
 
               {/* Status filter */}
@@ -413,14 +427,15 @@ export default function EmployeeManagement() {
                           @{emp.ten_dang_nhap}
                         </td>
                         <td className="py-3.5 px-4">
-                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-bold border ${empMeta.badgeClass}`}>
-                            {empMeta.badge}
+                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md font-bold border ${empMeta.badgeClass}`}>
+                            <SvgIcon name={empMeta.icon || 'user'} className="w-3.5 h-3.5 text-brand-blue" />
+                            <span>{empMeta.badge}</span>
                           </span>
                         </td>
                         <td className="py-3.5 px-4">
                           {emp.trang_thai === 'HOAT_DONG' ? (
                             <span className="inline-flex items-center gap-1.5 text-slate-800 font-bold">
-                              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                              <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
                               Hoạt động
                             </span>
                           ) : (
@@ -439,24 +454,27 @@ export default function EmployeeManagement() {
                               <>
                                 <button
                                   onClick={() => openEditModal(emp)}
-                                  className="rounded bg-brand-blue px-2.5 py-1 font-semibold text-white hover:bg-brand-blue-hover text-xs shadow-2xs transition"
+                                  className="rounded bg-brand-blue px-2.5 py-1 font-semibold text-white hover:bg-brand-blue-hover text-xs shadow-2xs transition inline-flex items-center gap-1 cursor-pointer"
                                   title="Chỉnh sửa hồ sơ hoặc phân quyền"
                                 >
-                                  ✏️ Sửa
+                                  <SvgIcon name="edit" className="w-3.5 h-3.5" />
+                                  <span>Sửa</span>
                                 </button>
                                 <button
                                   onClick={() => handleToggleLock(emp)}
-                                  className="rounded bg-white border border-slate-200 px-2.5 py-1 font-medium text-slate-700 hover:bg-slate-50 text-xs transition"
+                                  className="rounded bg-white border border-slate-200 px-2.5 py-1 font-medium text-slate-700 hover:bg-slate-50 text-xs transition inline-flex items-center gap-1 cursor-pointer"
                                   title={emp.trang_thai === 'HOAT_DONG' ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}
                                 >
-                                  {emp.trang_thai === 'HOAT_DONG' ? '🔒 Khóa' : '🔓 Mở'}
+                                  <SvgIcon name={emp.trang_thai === 'HOAT_DONG' ? 'lock' : 'unlock'} className="w-3.5 h-3.5" />
+                                  <span>{emp.trang_thai === 'HOAT_DONG' ? 'Khóa' : 'Mở'}</span>
                                 </button>
                                 <button
                                   onClick={() => handleDelete(emp)}
-                                  className="rounded bg-white border border-slate-200 px-2 py-1 font-medium text-slate-500 hover:text-red-600 hover:border-red-200 text-xs transition"
+                                  className="rounded bg-white border border-slate-200 px-2 py-1 font-medium text-slate-500 hover:text-red-600 hover:border-red-200 text-xs transition inline-flex items-center cursor-pointer"
                                   title="Xóa tài khoản"
+                                  aria-label="Xóa tài khoản"
                                 >
-                                  🗑️
+                                  <SvgIcon name="trash" className="w-3.5 h-3.5" />
                                 </button>
                               </>
                             ) : (
@@ -486,12 +504,13 @@ export default function EmployeeManagement() {
 
       {/* Modal Cấp Mới / Chỉnh Sửa Nhân Sự */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
-          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-xl border border-slate-200">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div>
-                <h3 className="text-lg font-semibold text-slate-800">
-                  {editingEmployee ? `✏️ Phân Quyền: ${editingEmployee.ho_ten}` : '➕ Tạo Tài Khoản Nhân Sự Mới'}
+                <h3 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                  <SvgIcon name={editingEmployee ? 'edit' : 'user-plus'} className="w-5 h-5 text-brand-blue" />
+                  <span>{editingEmployee ? `Phân Quyền: ${editingEmployee.ho_ten}` : 'Tạo Tài Khoản Nhân Sự Mới'}</span>
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
                   {editingEmployee ? 'Cập nhật chức vụ, mật khẩu hoặc trạng thái' : 'Cấp tài khoản mới theo phân tầng RBAC'}
@@ -499,9 +518,10 @@ export default function EmployeeManagement() {
               </div>
               <button
                 onClick={() => setShowModal(false)}
-                className="h-8 w-8 rounded-full bg-slate-100 text-slate-600 font-bold hover:bg-slate-200"
+                className="h-8 w-8 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center cursor-pointer"
+                aria-label="Đóng"
               >
-                ✕
+                <SvgIcon name="x" className="w-4 h-4" />
               </button>
             </div>
 
@@ -562,13 +582,13 @@ export default function EmployeeManagement() {
                   onChange={(e) => setFormData({ ...formData, vai_tro: e.target.value })}
                   className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 font-bold text-slate-800 outline-none focus:border-brand-blue"
                 >
-                  {isExecutive && <option value="GIAM_DOC">👑 Giám Đốc Điều Hành</option>}
-                  {isExecutive && <option value="ADMIN">🛡️ Quản Trị Hệ Thống</option>}
-                  {isExecutive && <option value="QUAN_LY">🏬 Quản Lý Cửa Hàng</option>}
-                  <option value="KE_TOAN">📊 Kế Toán Doanh Thu</option>
-                  <option value="THU_KHO">📦 Thủ Kho Linh Kiện</option>
-                  <option value="KY_THUAT_VIEN">🔧 Kỹ Thuật Viên Sửa Chữa</option>
-                  <option value="LE_TAN">📋 Lễ Tân Tiếp Nhận</option>
+                  {isExecutive && <option value="GIAM_DOC">Giám Đốc Điều Hành</option>}
+                  {isExecutive && <option value="ADMIN">Quản Trị Hệ Thống</option>}
+                  {isExecutive && <option value="QUAN_LY">Quản Lý Cửa Hàng</option>}
+                  <option value="KE_TOAN">Kế Toán Doanh Thu</option>
+                  <option value="THU_KHO">Thủ Kho Linh Kiện</option>
+                  <option value="KY_THUAT_VIEN">Kỹ Thuật Viên Sửa Chữa</option>
+                  <option value="LE_TAN">Lễ Tân Tiếp Nhận</option>
                 </select>
                 <p className="mt-1.5 text-[11px] text-slate-500 leading-relaxed bg-slate-50 p-2.5 rounded-lg border border-slate-200">
                   {ROLE_PERMISSIONS_DETAIL[formData.vai_tro]?.description}
@@ -583,8 +603,8 @@ export default function EmployeeManagement() {
                     onChange={(e) => setFormData({ ...formData, trang_thai: e.target.value })}
                     className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 font-bold text-slate-800 outline-none focus:border-brand-blue"
                   >
-                    <option value="HOAT_DONG">✅ Đang hoạt động (HOAT_DONG)</option>
-                    <option value="TAM_KHOA">🔒 Tạm khóa đăng nhập (TAM_KHOA)</option>
+                    <option value="HOAT_DONG">Đang hoạt động (HOAT_DONG)</option>
+                    <option value="TAM_KHOA">Tạm khóa đăng nhập (TAM_KHOA)</option>
                   </select>
                 </div>
               )}

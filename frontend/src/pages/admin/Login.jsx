@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+import SvgIcon from '../../components/SvgIcon';
 
 const CURRENT_YEAR = new Date().getFullYear();
 
@@ -99,16 +100,17 @@ function Login() {
         <div className="h-1.5 bg-brand-blue"></div>
 
         <div className="p-7 sm:p-9">
-          <div className="text-center mb-5">
-            <Link to="/" className="inline-block">
+          <div className="text-center mb-5 flex flex-col items-center">
+            <Link to="/" className="block mb-3">
               <img
                 src="/img/logo-luc-giac.png"
                 alt="Logo Công ty Cổ phần Lục Giác"
-                className="h-16 object-contain mx-auto mb-3 transition-transform hover:scale-105"
+                className="h-16 object-contain mx-auto transition-transform hover:scale-105"
               />
             </Link>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-[11px] font-bold uppercase tracking-wider mb-2 border border-slate-200">
-              📷 Hệ Thống Quản Trị QR CSKH
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-slate-100 text-slate-700 text-[11px] font-bold uppercase tracking-wider mb-2 border border-slate-200">
+              <SvgIcon name="qr" className="w-3.5 h-3.5 text-brand-blue" />
+              <span>Hệ Thống Quản Trị QR CSKH</span>
             </span>
             <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">
               {authMode === 'LOGIN' ? 'Cổng Đăng Nhập Nội Bộ' : 'Đăng Ký Tài Khoản CSKH'}
@@ -123,37 +125,39 @@ function Login() {
             <button
               type="button"
               onClick={() => handleSwitchMode('LOGIN')}
-              className={`py-2 rounded-lg transition cursor-pointer ${
+              className={`py-2 rounded-lg transition cursor-pointer inline-flex items-center justify-center gap-1.5 ${
                 authMode === 'LOGIN'
                   ? 'bg-white text-slate-900 shadow-2xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              🔐 Đăng Nhập
+              <SvgIcon name="lock" className="w-3.5 h-3.5" />
+              <span>Đăng Nhập</span>
             </button>
             <button
               type="button"
               onClick={() => handleSwitchMode('REGISTER')}
-              className={`py-2 rounded-lg transition cursor-pointer ${
+              className={`py-2 rounded-lg transition cursor-pointer inline-flex items-center justify-center gap-1.5 ${
                 authMode === 'REGISTER'
                   ? 'bg-white text-slate-900 shadow-2xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              ✨ Đăng Ký Tài Khoản
+              <SvgIcon name="user-plus" className="w-3.5 h-3.5" />
+              <span>Đăng Ký Tài Khoản</span>
             </button>
           </div>
 
           {error && (
             <div role="alert" className="bg-red-50 text-red-700 p-3.5 rounded-xl text-xs mb-5 font-semibold text-center border border-red-200 flex items-center justify-center gap-2">
-              <span>⚠️</span>
+              <SvgIcon name="alert" className="w-4 h-4 shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           {successMsg && (
-            <div role="status" className="bg-slate-50 text-slate-800 p-3.5 rounded-xl text-xs mb-5 font-semibold text-center border border-slate-200 flex items-center justify-center gap-2">
-              <span>✅</span>
+            <div role="status" className="bg-emerald-50 text-emerald-800 p-3.5 rounded-xl text-xs mb-5 font-semibold text-center border border-emerald-200 flex items-center justify-center gap-2">
+              <SvgIcon name="check-circle" className="w-4 h-4 shrink-0" />
               <span>{successMsg}</span>
             </div>
           )}
@@ -212,10 +216,10 @@ function Login() {
                   onChange={handleChange}
                   className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white focus:outline-none focus:border-brand-blue text-sm font-semibold text-slate-800 transition"
                 >
-                  <option value="LE_TAN">👩‍💼 Lễ Tân &amp; Tiếp Nhận QR (LE_TAN)</option>
-                  <option value="KY_THUAT_VIEN">🎧 Chuyên Viên Hỗ Trợ Kỹ Thuật (KY_THUAT_VIEN)</option>
-                  <option value="QUAN_LY">🏬 Trưởng Bộ Phận CSKH (QUAN_LY)</option>
-                  <option value="ADMIN">🛡️ Quản Trị Hệ Thống &amp; Cấu Hình Client (ADMIN)</option>
+                  <option value="LE_TAN">Lễ Tân &amp; Tiếp Nhận QR (LE_TAN)</option>
+                  <option value="KY_THUAT_VIEN">Chuyên Viên Hỗ Trợ Kỹ Thuật (KY_THUAT_VIEN)</option>
+                  <option value="QUAN_LY">Trưởng Bộ Phận CSKH (QUAN_LY)</option>
+                  <option value="ADMIN">Quản Trị Hệ Thống &amp; Cấu Hình (ADMIN)</option>
                 </select>
               </div>
             )}
@@ -264,9 +268,10 @@ function Login() {
 
           {/* Gợi ý tài khoản bộ phận CSKH khi ở chế độ Đăng nhập */}
           {authMode === 'LOGIN' && (
-            <div className="mt-6 rounded-2xl border border-slate-200/90 bg-slate-50/80 p-4">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2.5 text-center">
-                🔑 Chọn nhanh vai trò Bộ phận CSKH (Mật khẩu: 123456)
+            <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50/80 p-4">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2.5 flex items-center justify-center gap-1.5">
+                <SvgIcon name="key" className="w-3.5 h-3.5 text-slate-500" />
+                <span>Đăng nhập nhanh (Mật khẩu: 123456)</span>
               </p>
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <button
@@ -274,7 +279,7 @@ function Login() {
                   onClick={() => setFormData({ ...formData, username: 'admin', password: '123456' })}
                   className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-2.5 font-semibold text-slate-700 hover:bg-blue-50 hover:border-blue-200 transition shadow-2xs text-left cursor-pointer"
                 >
-                  <span className="text-lg">🛡️</span>
+                  <SvgIcon name="shield" className="w-4 h-4 text-brand-blue shrink-0" />
                   <div>
                     <p className="text-[11px] font-bold text-slate-800 leading-tight">Quản Trị Hệ Thống</p>
                     <p className="text-[10px] text-slate-400">@admin</p>
@@ -285,7 +290,7 @@ function Login() {
                   onClick={() => setFormData({ ...formData, username: 'quanly', password: '123456' })}
                   className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-2.5 font-semibold text-slate-700 hover:bg-blue-50 hover:border-blue-200 transition shadow-2xs text-left cursor-pointer"
                 >
-                  <span className="text-lg">🏬</span>
+                  <SvgIcon name="building" className="w-4 h-4 text-brand-blue shrink-0" />
                   <div>
                     <p className="text-[11px] font-bold text-slate-800 leading-tight">Trưởng BP CSKH</p>
                     <p className="text-[10px] text-slate-400">@quanly</p>
@@ -296,7 +301,7 @@ function Login() {
                   onClick={() => setFormData({ ...formData, username: 'letan', password: '123456' })}
                   className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-2.5 font-semibold text-slate-700 hover:bg-blue-50 hover:border-blue-200 transition shadow-2xs text-left cursor-pointer"
                 >
-                  <span className="text-lg">👩‍💼</span>
+                  <SvgIcon name="user" className="w-4 h-4 text-brand-blue shrink-0" />
                   <div>
                     <p className="text-[11px] font-bold text-slate-800 leading-tight">Lễ Tân &amp; Tiếp Nhận</p>
                     <p className="text-[10px] text-slate-400">@letan</p>
@@ -307,7 +312,7 @@ function Login() {
                   onClick={() => setFormData({ ...formData, username: 'kythuat', password: '123456' })}
                   className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-2.5 font-semibold text-slate-700 hover:bg-blue-50 hover:border-blue-200 transition shadow-2xs text-left cursor-pointer"
                 >
-                  <span className="text-lg">🎧</span>
+                  <SvgIcon name="wrench" className="w-4 h-4 text-brand-blue shrink-0" />
                   <div>
                     <p className="text-[11px] font-bold text-slate-800 leading-tight">Chuyên Viên Hỗ Trợ</p>
                     <p className="text-[10px] text-slate-400">@kythuat</p>

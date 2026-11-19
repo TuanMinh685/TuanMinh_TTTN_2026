@@ -7,6 +7,7 @@ import QRCode from 'qrcode';
 import PaymentMethodSelector from '../../components/PaymentMethodSelector';
 import { getAccessibleBaseUrl } from '../../utils/network';
 import { playNotificationChime, triggerDeviceVibration } from '../../utils/webNotification';
+import SvgIcon from '../../components/SvgIcon';
 
 const STATUS_LABELS = {
   'CHỜ_KHÁM': 'Chờ tiếp nhận máy',
@@ -28,38 +29,43 @@ const isNotificationCorrupted = (item) => {
 const ROLE_META = {
   ADMIN: {
     level: 100,
+    icon: 'shield',
     title: 'Quản Trị Hệ Thống CSKH',
-    badge: '🛡️ Quản Trị Hệ Thống CSKH',
+    badge: 'Quản Trị Hệ Thống CSKH',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     permissionsText: 'Toàn quyền quản trị hệ thống CSKH, cấu hình kỹ thuật và quản lý nhân sự.'
   },
   GIAM_DOC: {
     level: 100,
+    icon: 'shield',
     title: 'Quản Trị Hệ Thống CSKH',
-    badge: '🛡️ Quản Trị Hệ Thống CSKH',
+    badge: 'Quản Trị Hệ Thống CSKH',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     permissionsText: 'Toàn quyền điều hành dịch vụ CSKH, phê duyệt chi phí và phân quyền nhân sự.'
   },
   QUAN_LY: {
     level: 80,
+    icon: 'building',
     title: 'Trưởng Bộ Phận CSKH',
-    badge: '🏬 Trưởng Bộ Phận CSKH',
+    badge: 'Trưởng Bộ Phận CSKH',
     badgeClass: 'bg-blue-50 text-brand-blue border-blue-200',
-    permissionsText: 'Điều hành toàn bộ hoạt động Chăm sóc khách hàng, giám sát tiến độ xử lý hồ sơ QR và quản lý nhân sự CSKH.'
+    permissionsText: 'Điều hành hoạt động Chăm sóc khách hàng, giám sát tiến độ xử lý hồ sơ QR và quản lý nhân sự CSKH.'
   },
   KY_THUAT_VIEN: {
     level: 40,
+    icon: 'wrench',
     title: 'Chuyên Viên Hỗ Trợ CSKH',
-    badge: '🎧 Chuyên Viên Hỗ Trợ CSKH',
+    badge: 'Chuyên Viên Hỗ Trợ CSKH',
     badgeClass: 'bg-emerald-50 text-emerald-800 border-emerald-200',
-    permissionsText: 'Tiếp nhận phân loại yêu cầu, cập nhật nhật ký xử lý tiến độ thời gian thực và kích hoạt bảo hành điện tử (e-Warranty).'
+    permissionsText: 'Tiếp nhận phân loại yêu cầu, cập nhật nhật ký xử lý tiến độ và kích hoạt bảo hành điện tử.'
   },
   LE_TAN: {
     level: 30,
+    icon: 'user',
     title: 'Lễ Tân & Tiếp Nhận QR',
-    badge: '👩‍💼 Lễ Tân & Tiếp Nhận QR',
+    badge: 'Lễ Tân & Tiếp Nhận QR',
     badgeClass: 'bg-amber-50 text-amber-800 border-amber-200',
-    permissionsText: 'Khởi tạo hồ sơ QR tại quầy, lưu biên bản ảnh hiện trạng, tiếp nhận lịch hẹn và in phiếu nhiệt QR 80mm.'
+    permissionsText: 'Tạo hồ sơ QR tại quầy, lưu ảnh hiện trạng, tiếp nhận lịch hẹn và in phiếu nhiệt QR 80mm.'
   }
 };
 
@@ -225,7 +231,7 @@ function Dashboard() {
   const submitChangePassword = async (e) => {
     e.preventDefault();
     if (pwForm.newPassword !== pwForm.confirmPassword) {
-      return showToast('⚠️ Mật khẩu xác nhận không khớp!');
+      return showToast('Mật khẩu xác nhận không khớp.');
     }
     setSavingPw(true);
     try {
@@ -233,14 +239,14 @@ function Dashboard() {
         currentPassword: pwForm.currentPassword,
         newPassword: pwForm.newPassword
       });
-      showToast(`🔒 ${res.data?.message || 'Đã đổi mật khẩu bảo mật thành công!'}`);
+      showToast(res.data?.message || 'Đã đổi mật khẩu bảo mật thành công.');
       setPwForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
       if (canManageEmployees) {
         const auditData = await fetchAuditLogs();
         setAuditLogs(auditData.logs || []);
       }
     } catch (err) {
-      showToast(`❌ ${err.response?.data?.message || 'Lỗi đổi mật khẩu'}`);
+      showToast(err.response?.data?.message || 'Lỗi đổi mật khẩu.');
     } finally {
       setSavingPw(false);
     }
@@ -420,9 +426,9 @@ function Dashboard() {
       if (canViewStats) {
         setStats(await fetchStats());
       }
-      showToast(`✅ Đã cập nhật trạng thái: ${STATUS_LABELS[status] || status}`);
+      showToast(`Đã cập nhật trạng thái: ${STATUS_LABELS[status] || status}`);
     } catch (err) {
-      showToast(`❌ ${err.response?.data?.message || 'Lỗi cập nhật trạng thái hồ sơ'}`);
+      showToast(err.response?.data?.message || 'Lỗi cập nhật trạng thái hồ sơ.');
     }
   };
 
@@ -433,12 +439,12 @@ function Dashboard() {
       await refreshTickets();
       const autoTicketCode = res.data?.data?.autoCreatedTicketCode;
       if (autoTicketCode) {
-        showToast(`🎉 Đã tiếp nhận khách & tự động khởi tạo Hồ sơ QR: ${autoTicketCode}`);
+        showToast(`Đã tiếp nhận khách & tạo Hồ sơ QR: ${autoTicketCode}`);
       } else {
-        showToast('✅ Đã cập nhật trạng thái lịch hẹn CSKH');
+        showToast('Đã cập nhật trạng thái lịch hẹn CSKH.');
       }
     } catch (err) {
-      showToast(`❌ ${err.response?.data?.message || 'Lỗi cập nhật lịch hẹn'}`);
+      showToast(err.response?.data?.message || 'Lỗi cập nhật lịch hẹn.');
     }
   };
 
@@ -458,8 +464,8 @@ function Dashboard() {
 
       playNotificationChime();
       triggerDeviceVibration([200, 100, 300]);
-      showToast(`✓ Đã xác nhận thanh toán [${method === 'VIETQR' ? 'VietQR' : 'Tiền mặt'}] cho phiếu #${targetTicket.ma_phieu}!`);
-      setCashierSuccessMsg(`⚡ Xác nhận thành công! Hồ sơ #${targetTicket.ma_phieu} đã chuyển sang trạng thái ĐÃ THANH TOÁN.`);
+      showToast(`Đã xác nhận thanh toán [${method === 'VIETQR' ? 'VietQR' : 'Tiền mặt'}] cho phiếu #${targetTicket.ma_phieu}.`);
+      setCashierSuccessMsg(`Xác nhận thành công. Hồ sơ #${targetTicket.ma_phieu} đã chuyển sang trạng thái ĐÃ THANH TOÁN.`);
       setCashierNote('');
 
       await refreshTickets();
@@ -467,7 +473,7 @@ function Dashboard() {
         setStats(await fetchStats());
       }
     } catch (err) {
-      showToast(`❌ Lỗi xác nhận thanh toán: ${err.response?.data?.message || err.message}`);
+      showToast(`Lỗi xác nhận thanh toán: ${err.response?.data?.message || err.message}`);
     } finally {
       setConfirmingPayment(false);
     }
@@ -506,14 +512,14 @@ function Dashboard() {
         fullName: '', phone: '', deviceName: '', serialImei: '', issueDescription: '',
         photoBase64: '', photoNote: ''
       });
-      showToast(`🎉 Đã tạo hồ sơ QR tại quầy ${newCode || ''} thành công! Mở cửa sổ in phiếu 80mm...`);
+      showToast(`Đã tạo hồ sơ QR tại quầy ${newCode || ''}. Mở cửa sổ in phiếu 80mm...`);
       const createdTicket = latestList.find(t => t.ma_phieu === newCode);
       if (createdTicket) {
         setReceiptQr('');
         setReceiptTicket(createdTicket);
       }
     } catch (err) {
-      showToast(`❌ ${err.response?.data?.message || 'Không tạo được hồ sơ tại quầy'}`);
+      showToast(err.response?.data?.message || 'Không tạo được hồ sơ tại quầy.');
     } finally {
       setSavingPos(false);
     }
@@ -546,9 +552,9 @@ function Dashboard() {
         });
         setTicketPhotos(prev => [...prev, res.data.data]);
         setNewPhotoNote('');
-        showToast('📸 Đã lưu ảnh minh chứng hiện trạng thành công!');
+        showToast('Đã lưu ảnh minh chứng hiện trạng thành công.');
       } catch (err) {
-        showToast(`❌ ${err.response?.data?.message || 'Lỗi lưu ảnh'}`);
+        showToast(err.response?.data?.message || 'Lỗi lưu ảnh.');
       } finally {
         setSavingPhoto(false);
       }
@@ -578,9 +584,9 @@ function Dashboard() {
       });
       setZaloAlert({
         type: 'success',
-        message: res.data?.message || 'Đã gửi thông báo Zalo ZNS thành công!'
+        message: res.data?.message || 'Đã gửi thông báo Zalo ZNS thành công.'
       });
-      showToast(`📲 Đã gửi Zalo ZNS tới ${zaloTicket.ho_ten_khach} (${zaloTicket.so_dien_thoai})!`);
+      showToast(`Đã gửi Zalo ZNS tới ${zaloTicket.ho_ten_khach} (${zaloTicket.so_dien_thoai}).`);
       fetchTickets().then(setTickets).catch(() => {});
       setTimeout(() => {
         setShowZaloModal(false);
@@ -633,7 +639,7 @@ function Dashboard() {
           trang_thai: employeeForm.trang_thai,
           mat_khau: employeeForm.mat_khau.trim() || undefined
         });
-        showToast(`✅ ${res.data?.message || 'Đã cập nhật tài khoản nhân sự!'}`);
+        showToast(res.data?.message || 'Đã cập nhật tài khoản nhân sự.');
       } else {
         const res = await api.post('/admin/employees', {
           ho_ten: employeeForm.ho_ten.trim(),
@@ -641,7 +647,7 @@ function Dashboard() {
           mat_khau: employeeForm.mat_khau.trim(),
           vai_tro: employeeForm.vai_tro
         });
-        showToast(`🎉 ${res.data?.message || 'Đã tạo tài khoản nhân sự mới!'}`);
+        showToast(res.data?.message || 'Đã tạo tài khoản nhân sự mới.');
       }
       setEmployees(await fetchEmployees());
       setShowEmployeeModal(false);
@@ -656,10 +662,10 @@ function Dashboard() {
     const nextStatus = emp.trang_thai === 'HOAT_DONG' ? 'KHOA' : 'HOAT_DONG';
     try {
       await api.patch(`/admin/employees/${emp.id}`, { trang_thai: nextStatus });
-      showToast(nextStatus === 'KHOA' ? `🔒 Đã khóa tài khoản @${emp.ten_dang_nhap}` : `🔓 Đã mở khóa tài khoản @${emp.ten_dang_nhap}`);
+      showToast(nextStatus === 'KHOA' ? `Đã khóa tài khoản @${emp.ten_dang_nhap}` : `Đã mở khóa tài khoản @${emp.ten_dang_nhap}`);
       setEmployees(await fetchEmployees());
     } catch (err) {
-      showToast(`❌ ${err.response?.data?.message || 'Không cập nhật được trạng thái tài khoản'}`);
+      showToast(err.response?.data?.message || 'Không cập nhật được trạng thái tài khoản.');
     }
   };
 
@@ -667,10 +673,10 @@ function Dashboard() {
     if (!window.confirm(`Xác nhận xóa tài khoản @${emp.ten_dang_nhap} (${emp.ho_ten})?`)) return;
     try {
       await api.delete(`/admin/employees/${emp.id}`);
-      showToast(`🗑️ Đã xóa tài khoản @${emp.ten_dang_nhap}`);
+      showToast(`Đã xóa tài khoản @${emp.ten_dang_nhap}`);
       setEmployees(await fetchEmployees());
     } catch (err) {
-      showToast(`❌ ${err.response?.data?.message || 'Không xóa được tài khoản'}`);
+      showToast(err.response?.data?.message || 'Không xóa được tài khoản.');
     }
   };
 
@@ -739,9 +745,10 @@ function Dashboard() {
           )}
           <button
             onClick={() => setActiveTab('PAYMENT_GATEWAY')}
-            className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${activeTab === 'PAYMENT_GATEWAY' ? 'bg-brand-blue text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
+            className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 cursor-pointer ${activeTab === 'PAYMENT_GATEWAY' ? 'bg-brand-blue text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
           >
-            <span>💵 Quầy Thu Ngân &amp; Xác Nhận TT</span>
+            <SvgIcon name="cash" className="w-4 h-4" />
+            <span>Quầy Thu Ngân &amp; Xác Nhận TT</span>
             {tickets.filter(t => t.trang_thai_thanh_toan !== 'DA_THANH_TOAN').length > 0 && (
               <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
                 activeTab === 'PAYMENT_GATEWAY' ? 'bg-white text-brand-blue' : 'bg-amber-100 text-amber-800'
@@ -760,9 +767,10 @@ function Dashboard() {
                   setSecurityStatus(data.securityStatus || null);
                 } catch {}
               }}
-              className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'SECURITY' ? 'bg-brand-blue text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
+              className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-1.5 cursor-pointer ${activeTab === 'SECURITY' ? 'bg-brand-blue text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
             >
-              🛡️ Bảo Mật &amp; Audit
+              <SvgIcon name="shield" className="w-4 h-4" />
+              <span>Bảo Mật &amp; Audit</span>
             </button>
           )}
           <button
@@ -817,9 +825,10 @@ function Dashboard() {
                   <button
                     type="button"
                     onClick={() => setShowPosModal(true)}
-                    className="rounded-lg bg-brand-blue px-3.5 py-2 text-xs font-extrabold text-white shadow-sm hover:bg-blue-700 whitespace-nowrap flex items-center gap-1.5"
+                    className="rounded-lg bg-brand-blue px-3.5 py-2 text-xs font-bold text-white shadow-2xs hover:bg-brand-blue-hover whitespace-nowrap flex items-center gap-1.5 cursor-pointer"
                   >
-                    <span>📷</span> + Tiếp Nhận Nhanh Tại Quầy (POS)
+                    <SvgIcon name="plus" className="w-3.5 h-3.5" />
+                    <span>Tiếp Nhận Nhanh Tại Quầy (POS)</span>
                   </button>
                 )}
                 <button
@@ -848,24 +857,27 @@ function Dashboard() {
                       signRole: 'TRƯỞNG BỘ PHẬN CSKH'
                     });
                   }}
-                  className="rounded-lg bg-white hover:bg-slate-50 border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 shadow-2xs whitespace-nowrap transition cursor-pointer"
+                  className="rounded-lg bg-white hover:bg-slate-50 border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 shadow-2xs whitespace-nowrap transition cursor-pointer inline-flex items-center gap-1.5"
                 >
-                  📊 Xuất Danh Sách Hồ Sơ (.xlsx)
+                  <SvgIcon name="download" className="w-3.5 h-3.5 text-slate-600" />
+                  <span>Xuất Danh Sách (.xlsx)</span>
                 </button>
                 <div className="relative w-full sm:w-64">
+                  <SvgIcon name="search" className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
                     type="text"
-                    placeholder="🔍 Tìm mã QR, SĐT, tên KH..."
+                    placeholder="Tìm mã QR, SĐT, tên KH..."
                     value={ticketSearch}
                     onChange={(e) => setTicketSearch(e.target.value)}
-                    className="w-full pl-3 pr-8 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-brand-blue"
+                    className="w-full pl-8 pr-8 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-brand-blue"
                   />
                   {ticketSearch && (
                     <button
                       onClick={() => setTicketSearch('')}
-                      className="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 text-sm font-bold"
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                      aria-label="Xóa tìm kiếm"
                     >
-                      ✕
+                      <SvgIcon name="x" className="w-3.5 h-3.5" />
                     </button>
                   )}
                 </div>
@@ -881,19 +893,20 @@ function Dashboard() {
                   { key: 'ĐANG_CHUẨN_ĐOÁN', label: 'Đang kiểm tra & phân loại' },
                   { key: 'ĐANG_SỬA', label: 'Đang xử lý hỗ trợ' },
                   { key: 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN', label: 'Hoàn tất CSKH & Bảo hành' },
-                  { key: 'YÊU_CẦU_BẢO_HÀNH', label: '🛡️ Yêu cầu bảo hành' }
+                  { key: 'YÊU_CẦU_BẢO_HÀNH', label: 'Yêu cầu bảo hành', icon: 'shield' }
                 ].map(tab => (
                   <button
                     key={tab.key}
                     type="button"
                     onClick={() => setStatusFilter(tab.key)}
-                    className={`px-3 py-1 rounded-full text-xs font-bold transition ${
+                    className={`px-3 py-1 rounded-full text-xs font-bold transition inline-flex items-center gap-1 cursor-pointer ${
                       statusFilter === tab.key
-                        ? 'bg-brand-blue text-white shadow-xs'
+                        ? 'bg-brand-blue text-white shadow-2xs'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                     }`}
                   >
-                    {tab.label}
+                    {tab.icon && <SvgIcon name={tab.icon} className="w-3.5 h-3.5" />}
+                    <span>{tab.label}</span>
                   </button>
                 ))}
               </div>
@@ -902,7 +915,7 @@ function Dashboard() {
                   type="text"
                   value={statusNote}
                   onChange={e => setStatusNote(e.target.value)}
-                  placeholder="✍️ Ghi chú nhật ký CSKH (hiển thị khi khách quét QR)..."
+                  placeholder="Ghi chú nhật ký CSKH (hiển thị khi khách quét QR)..."
                   className="w-full px-3 py-1.5 text-xs border border-blue-200 bg-blue-50/40 rounded-lg focus:outline-none focus:border-brand-blue"
                 />
               </div>
@@ -966,12 +979,14 @@ function Dashboard() {
                       <td className="py-3 px-4">
                         {t.trang_thai === 'YÊU_CẦU_BẢO_HÀNH' ? (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200">
-                            🛡️ Yêu cầu BH qua QR
+                            <SvgIcon name="shield" className="w-3.5 h-3.5" />
+                            <span>Yêu cầu BH qua QR</span>
                           </span>
                         ) : warrantyRemainingDays > 0 ? (
                           <div>
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-slate-50 text-slate-700 border border-slate-200">
-                              🛡️ Còn {warrantyRemainingDays} ngày BH
+                              <SvgIcon name="shield" className="w-3.5 h-3.5 text-brand-blue" />
+                              <span>Còn {warrantyRemainingDays} ngày BH</span>
                             </span>
                             <div className="text-[10px] text-slate-400 mt-0.5">
                               Hạn: {new Date(t.han_bao_hanh).toLocaleDateString('vi-VN')}
@@ -983,41 +998,45 @@ function Dashboard() {
                       </td>
                       <td className="py-3 px-4 text-center">
                         <div className="flex flex-wrap items-center justify-center gap-1.5">
-                          {/* 1. NÚT CHÍNH DUY NHẤT: BƯỚC QUY TRÌNH KẾ TIẾP (Màu xanh nhận diện) */}
+                          {/* 1. NÚT CHÍNH DUY NHẤT: BƯỚC QUY TRÌNH KẾ TIẾP */}
                           {canTechAction && (t.trang_thai === 'CHỜ_KHÁM' || t.trang_thai === 'YÊU_CẦU_BẢO_HÀNH') && (
                             <button
                               type="button"
                               onClick={() => updateStatus(t.id, 'ĐANG_CHUẨN_ĐOÁN', 'Đã tiếp nhận thiết bị / yêu cầu phần mềm, Kỹ thuật viên đang kiểm tra và chẩn đoán lỗi.')}
-                              className="bg-brand-blue hover:bg-brand-blue-hover text-white px-2.5 py-1 rounded text-xs font-semibold shadow-2xs transition shrink-0 cursor-pointer"
+                              className="bg-brand-blue hover:bg-brand-blue-hover text-white px-2.5 py-1 rounded text-xs font-semibold shadow-2xs transition shrink-0 cursor-pointer inline-flex items-center gap-1"
                             >
-                              🔍 Khám &amp; Chẩn đoán
+                              <SvgIcon name="search" className="w-3.5 h-3.5" />
+                              <span>Khám &amp; Chẩn đoán</span>
                             </button>
                           )}
                           {canTechAction && t.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' && (
                             <button
                               type="button"
                               onClick={() => updateStatus(t.id, 'ĐANG_SỬA', 'Kỹ thuật viên đang tiến hành sửa chữa máy tính và khắc phục sự cố phần mềm cho khách hàng.')}
-                              className="bg-brand-blue hover:bg-brand-blue-hover text-white px-2.5 py-1 rounded text-xs font-semibold shadow-2xs transition shrink-0 cursor-pointer"
+                              className="bg-brand-blue hover:bg-brand-blue-hover text-white px-2.5 py-1 rounded text-xs font-semibold shadow-2xs transition shrink-0 cursor-pointer inline-flex items-center gap-1"
                             >
-                              🔧 Sửa chữa &amp; Xử lý
+                              <SvgIcon name="wrench" className="w-3.5 h-3.5" />
+                              <span>Sửa chữa &amp; Xử lý</span>
                             </button>
                           )}
                           {(canTechAction || canReceptionAction) && t.trang_thai === 'ĐANG_SỬA' && (
                             <button
                               type="button"
                               onClick={() => updateStatus(t.id, 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN', 'Đã hoàn tất sửa chữa máy tính / phần mềm, bàn giao khách hàng và kích hoạt Sổ bảo hành điện tử (e-Warranty) 06 tháng.')}
-                              className="bg-brand-blue hover:bg-brand-blue-hover text-white px-2.5 py-1 rounded text-xs font-semibold shadow-2xs transition shrink-0 cursor-pointer"
+                              className="bg-brand-blue hover:bg-brand-blue-hover text-white px-2.5 py-1 rounded text-xs font-semibold shadow-2xs transition shrink-0 cursor-pointer inline-flex items-center gap-1"
                             >
-                              ✅ Hoàn tất &amp; Cấp e-Warranty
+                              <SvgIcon name="check-circle" className="w-3.5 h-3.5" />
+                              <span>Hoàn tất &amp; Cấp BH</span>
                             </button>
                           )}
                           {t.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN' && (
                             <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
-                              ✓ Đã bàn giao
+                              <SvgIcon name="check" className="w-3 h-3" />
+                              <span>Đã bàn giao</span>
                             </span>
                           )}
 
-                          {/* 2. CÁC NÚT PHỤ: TIỆN ÍCH HỒ SƠ (Màu trung tính: nền trắng viền xám tinh gọn) */}
+                          {/* 2. CÁC NÚT PHỤ */}
                           <button
                             type="button"
                             onClick={() => {
@@ -1025,30 +1044,33 @@ function Dashboard() {
                               setCashierAmount(t.tien_sau_giam || t.tong_tien || '');
                               setActiveTab('PAYMENT_GATEWAY');
                             }}
-                            className={`px-2 py-1 rounded text-xs font-semibold transition shrink-0 cursor-pointer flex items-center gap-1 ${
+                            className={`px-2 py-1 rounded text-xs font-semibold transition shrink-0 cursor-pointer inline-flex items-center gap-1 ${
                               t.trang_thai_thanh_toan === 'DA_THANH_TOAN'
                                 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
                                 : 'bg-amber-50 text-amber-800 border border-amber-300 hover:bg-amber-100 font-bold'
                             }`}
                             title={t.trang_thai_thanh_toan === 'DA_THANH_TOAN' ? 'Đã thanh toán - Bấm để xem chi tiết / in biên lai' : 'Chưa thanh toán - Bấm để mở quầy thu ngân xác nhận'}
                           >
-                            <span>{t.trang_thai_thanh_toan === 'DA_THANH_TOAN' ? '✓ Đã TT' : '💵 Thu tiền'}</span>
+                            <SvgIcon name={t.trang_thai_thanh_toan === 'DA_THANH_TOAN' ? 'check' : 'cash'} className="w-3.5 h-3.5" />
+                            <span>{t.trang_thai_thanh_toan === 'DA_THANH_TOAN' ? 'Đã TT' : 'Thu tiền'}</span>
                           </button>
                           <button
                             type="button"
                             onClick={() => openPhotoModal(t)}
-                            className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-2 py-1 rounded text-xs font-medium transition shrink-0 cursor-pointer"
+                            className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-2 py-1 rounded text-xs font-medium transition shrink-0 cursor-pointer inline-flex items-center gap-1"
                             title="Xem & Tải ảnh ngoại quan thiết bị"
                           >
-                            📸 Ảnh ngoại quan
+                            <SvgIcon name="camera" className="w-3.5 h-3.5 text-slate-500" />
+                            <span>Ảnh ngoại quan</span>
                           </button>
                           <button
                             type="button"
                             onClick={() => openReceipt(t)}
-                            className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-2 py-1 rounded text-xs font-medium transition shrink-0 cursor-pointer"
+                            className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-2 py-1 rounded text-xs font-medium transition shrink-0 cursor-pointer inline-flex items-center gap-1"
                             title="In phiếu nhiệt 80mm có mã QR"
                           >
-                            🖨️ In Phiếu QR
+                            <SvgIcon name="printer" className="w-3.5 h-3.5 text-slate-500" />
+                            <span>In Phiếu QR</span>
                           </button>
                         </div>
                       </td>
@@ -1074,8 +1096,9 @@ function Dashboard() {
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
             <div>
               <h3 className="text-xl font-bold text-slate-800">Lịch Hẹn Tư Vấn &amp; Chăm Sóc Khách Hàng Qua Web QR</h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                💡 Khi bấm <b>Khách Đã Đến (Tạo Phiếu QR)</b>, hệ thống sẽ tự động khởi tạo Hồ sơ phiếu QR CSKH cho khách hàng.
+              <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1.5">
+                <SvgIcon name="info" className="w-3.5 h-3.5 text-brand-blue shrink-0" />
+                <span>Khi bấm <b>Khách Đã Đến (Tạo Phiếu QR)</b>, hệ thống sẽ tự động tạo Hồ sơ phiếu QR cho khách hàng.</span>
               </p>
             </div>
           </div>
@@ -1124,9 +1147,10 @@ function Dashboard() {
                             <button
                               type="button"
                               onClick={() => updateBookingStatus(bk.id, 'DA_XAC_NHAN')}
-                              className="bg-brand-blue hover:bg-brand-blue-hover text-white px-3 py-1 rounded text-xs font-semibold shadow-2xs transition cursor-pointer"
+                              className="bg-brand-blue hover:bg-brand-blue-hover text-white px-3 py-1 rounded text-xs font-semibold shadow-2xs transition cursor-pointer inline-flex items-center gap-1"
                             >
-                              📞 Xác Nhận
+                              <SvgIcon name="phone" className="w-3.5 h-3.5" />
+                              <span>Xác Nhận</span>
                             </button>
                             <button
                               type="button"
@@ -1141,9 +1165,10 @@ function Dashboard() {
                           <button
                             type="button"
                             onClick={() => updateBookingStatus(bk.id, 'KHACH_DA_DEN')}
-                            className="bg-brand-blue hover:bg-brand-blue-hover text-white px-3 py-1 rounded text-xs font-semibold shadow-2xs transition cursor-pointer"
+                            className="bg-brand-blue hover:bg-brand-blue-hover text-white px-3 py-1 rounded text-xs font-semibold shadow-2xs transition cursor-pointer inline-flex items-center gap-1"
                           >
-                            ✅ Đã Đến (Tạo Phiếu QR)
+                            <SvgIcon name="check-circle" className="w-3.5 h-3.5" />
+                            <span>Đã Đến (Tạo Phiếu QR)</span>
                           </button>
                         )}
                       </div>
@@ -1224,9 +1249,10 @@ function Dashboard() {
                       signRole: 'TRƯỞNG BỘ PHẬN CSKH'
                     });
                   }}
-                  className="rounded-lg bg-brand-blue px-4 py-2 text-xs font-bold text-white hover:bg-blue-900"
+                  className="rounded-lg bg-brand-blue hover:bg-brand-blue-hover px-4 py-2 text-xs font-bold text-white inline-flex items-center gap-1.5 cursor-pointer"
                 >
-                  📊 Xuất Báo Cáo Thống Kê (.xlsx)
+                  <SvgIcon name="download" className="w-3.5 h-3.5" />
+                  <span>Xuất Báo Cáo Thống Kê (.xlsx)</span>
                 </button>
               </div>
             </div>
@@ -1277,8 +1303,9 @@ function Dashboard() {
           <div className="bg-white p-6 rounded-2xl shadow-xs border border-slate-200/90">
             <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
               <div>
-                <h3 className="text-lg font-extrabold text-brand-blue flex items-center gap-2">
-                  <span>🏛️</span> Phân Quyền &amp; Nhân Sự CSKH (RBAC)
+                <h3 className="text-lg font-bold text-brand-blue flex items-center gap-2">
+                  <SvgIcon name="users" className="w-5 h-5" />
+                  <span>Phân Quyền &amp; Nhân Sự CSKH (RBAC)</span>
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
                   Quản trị viên (ADMIN) và Trưởng bộ phận CSKH (QUAN_LY) cấp phát tài khoản và phân quyền vận hành cho nhân sự.
@@ -1305,14 +1332,15 @@ function Dashboard() {
                   <div key={item.key} className="rounded-xl border border-slate-200/90 p-3.5 bg-slate-50/60 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between gap-2 mb-1.5">
-                        <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-extrabold border ${meta.badgeClass}`}>
-                          {meta.badge}
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold border ${meta.badgeClass}`}>
+                          <SvgIcon name={meta.icon || 'user'} className="w-3.5 h-3.5" />
+                          <span>{meta.badge}</span>
                         </span>
                       </div>
                       <p className="text-xs text-slate-600 leading-relaxed mt-1">{meta.permissionsText}</p>
                     </div>
                     <p className="text-[11px] font-bold text-brand-blue mt-2 pt-2 border-t border-slate-200/70">
-                      📌 Nghiệp vụ: <span className="font-semibold text-slate-700">{item.pages}</span>
+                      Nghiệp vụ: <span className="font-semibold text-slate-700">{item.pages}</span>
                     </p>
                   </div>
                 );
@@ -1329,11 +1357,13 @@ function Dashboard() {
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
-                <span className="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-bold text-brand-blue border border-blue-200">
-                  🎧 Đang xử lý: {tickets.filter(t => t.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' || t.trang_thai === 'ĐANG_SỬA').length} hồ sơ
+                <span className="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-bold text-brand-blue border border-blue-200 inline-flex items-center gap-1.5">
+                  <SvgIcon name="wrench" className="w-3.5 h-3.5" />
+                  <span>Đang xử lý: {tickets.filter(t => t.trang_thai === 'ĐANG_CHUẨN_ĐOÁN' || t.trang_thai === 'ĐANG_SỬA').length} hồ sơ</span>
                 </span>
-                <span className="rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 border border-emerald-200">
-                  ✅ Đã hoàn tất: {tickets.filter(t => t.trang_thai === 'ĐÃ_SỬA_XONG' || t.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN').length} hồ sơ
+                <span className="rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 border border-emerald-200 inline-flex items-center gap-1.5">
+                  <SvgIcon name="check-circle" className="w-3.5 h-3.5" />
+                  <span>Đã hoàn tất: {tickets.filter(t => t.trang_thai === 'ĐÃ_SỬA_XONG' || t.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN').length} hồ sơ</span>
                 </span>
               </div>
             </div>
@@ -1370,18 +1400,21 @@ function Dashboard() {
                         </td>
                         <td className="py-3 px-4 font-mono font-bold text-brand-blue">@{emp.ten_dang_nhap}</td>
                         <td className="py-3 px-4">
-                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${empMeta.badgeClass}`}>
-                            {empMeta.badge}
+                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold border ${empMeta.badgeClass}`}>
+                            <SvgIcon name={empMeta.icon || 'user'} className="w-3.5 h-3.5" />
+                            <span>{empMeta.badge}</span>
                           </span>
                         </td>
                         <td className="py-3 px-4 text-center">
                           {emp.trang_thai === 'HOAT_DONG' ? (
-                            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">
-                              ● Hoạt động
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                              <span>Hoạt động</span>
                             </span>
                           ) : (
-                            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-700">
-                              🔒 Đã khóa
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                              <SvgIcon name="lock" className="w-3 h-3" />
+                              <span>Đã khóa</span>
                             </span>
                           )}
                         </td>
@@ -1391,28 +1424,30 @@ function Dashboard() {
                               <button
                                 type="button"
                                 onClick={() => openEditEmployeeModal(emp)}
-                                className="px-2.5 py-1 rounded bg-brand-blue hover:bg-brand-blue-hover text-white text-xs font-semibold shadow-2xs transition"
+                                className="px-2.5 py-1 rounded bg-brand-blue hover:bg-brand-blue-hover text-white text-xs font-semibold shadow-2xs transition inline-flex items-center gap-1 cursor-pointer"
                               >
-                                ✏️ Phân quyền / Đổi MK
+                                <SvgIcon name="edit" className="w-3.5 h-3.5" />
+                                <span>Phân quyền / Đổi MK</span>
                               </button>
                               <button
                                 type="button"
                                 onClick={() => toggleEmployeeLock(emp)}
-                                className="px-2.5 py-1 rounded bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-medium transition"
+                                className="px-2.5 py-1 rounded bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-medium transition cursor-pointer"
                               >
                                 {emp.trang_thai === 'HOAT_DONG' ? 'Khóa TK' : 'Mở khóa'}
                               </button>
                               <button
                                 type="button"
                                 onClick={() => removeEmployee(emp)}
-                                className="px-2.5 py-1 rounded bg-white hover:bg-slate-50 border border-slate-200 text-slate-500 hover:text-red-600 text-xs font-medium transition"
+                                className="px-2.5 py-1 rounded bg-white hover:bg-slate-50 border border-slate-200 text-slate-500 hover:text-red-600 text-xs font-medium transition cursor-pointer"
                               >
                                 Xóa
                               </button>
                             </div>
                           ) : (
-                            <span className="text-xs font-semibold text-slate-400">
-                              {isSelf ? '🛡️ Tài khoản đang dùng' : '🔒 Cấp trên / Ngang cấp'}
+                            <span className="text-xs font-semibold text-slate-400 inline-flex items-center gap-1 justify-end">
+                              <SvgIcon name={isSelf ? 'shield' : 'lock'} className="w-3.5 h-3.5" />
+                              <span>{isSelf ? 'Tài khoản đang dùng' : 'Cấp trên / Ngang cấp'}</span>
                             </span>
                           )}
                         </td>
@@ -1451,23 +1486,24 @@ function Dashboard() {
         return (
           <div className="space-y-5">
             {/* Thanh tiêu đề Quầy Thu Ngân */}
-            <div className="bg-white p-5 rounded-2xl border-t-4 border-emerald-500 shadow-sm flex flex-wrap items-center justify-between gap-4">
+            <div className="bg-white p-5 rounded-xl border border-slate-200 border-t-4 border-t-emerald-500 shadow-xs flex flex-wrap items-center justify-between gap-4">
               <div>
-                <h3 className="text-xl font-extrabold text-slate-800 flex items-center gap-2">
-                  <span>💵</span> Quầy Thu Ngân &amp; Xác Nhận Thanh Toán Tại Quầy
+                <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                  <SvgIcon name="cash" className="w-5 h-5 text-emerald-600" />
+                  <span>Quầy Thu Ngân &amp; Xác Nhận Thanh Toán Tại Quầy</span>
                 </h3>
                 <p className="text-xs text-slate-500 mt-1">
-                  Dành riêng cho <strong>Lễ Tân / CSKH</strong> thu tiền mặt hoặc xác nhận chuyển khoản VietQR, in biên nhận và kích hoạt bảo hành điện tử e-Warranty.
+                  Dành cho <strong>Lễ Tân / CSKH</strong> thu tiền mặt hoặc xác nhận chuyển khoản VietQR, in biên nhận và kích hoạt bảo hành.
                 </p>
               </div>
 
               {/* Thống kê thu ngân */}
               <div className="flex items-center gap-2">
-                <span className="px-3 py-1.5 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                <span className="px-3 py-1.5 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-amber-500"></span>
                   Chờ thu: <strong>{unpaidCount} hồ sơ</strong>
                 </span>
-                <span className="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold flex items-center gap-1.5">
+                <span className="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                   Đã thu: <strong>{paidCount} hồ sơ</strong>
                 </span>
@@ -1496,33 +1532,37 @@ function Dashboard() {
                     <div className="flex items-center gap-1">
                       {[
                         { key: 'ALL', label: 'Tất cả' },
-                        { key: 'UNPAID', label: '⏳ Chờ thu' },
-                        { key: 'PAID', label: '✓ Đã thu' }
+                        { key: 'UNPAID', label: 'Chờ thu', icon: 'clock' },
+                        { key: 'PAID', label: 'Đã thu', icon: 'check' }
                       ].map(f => (
                         <button
                           key={f.key}
                           type="button"
                           onClick={() => setCashierFilter(f.key)}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
+                          className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer inline-flex items-center gap-1 ${
                             cashierFilter === f.key
                               ? 'bg-brand-blue text-white shadow-2xs'
                               : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                           }`}
                         >
-                          {f.label}
+                          {f.icon && <SvgIcon name={f.icon} className="w-3 h-3" />}
+                          <span>{f.label}</span>
                         </button>
                       ))}
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <input
-                      type="text"
-                      placeholder="🔍 Gõ mã phiếu, tên KH, SĐT..."
-                      value={cashierSearch}
-                      onChange={(e) => setCashierSearch(e.target.value)}
-                      className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-brand-blue"
-                    />
+                    <div className="relative">
+                      <SvgIcon name="search" className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      <input
+                        type="text"
+                        placeholder="Gõ mã phiếu, tên KH, SĐT..."
+                        value={cashierSearch}
+                        onChange={(e) => setCashierSearch(e.target.value)}
+                        className="w-full pl-8 pr-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-brand-blue"
+                      />
+                    </div>
                     <select
                       value={paymentTicketCode}
                       onChange={(e) => {
@@ -1536,7 +1576,7 @@ function Dashboard() {
                     >
                       {filteredCashierTickets.map((t) => (
                         <option key={t.id} value={t.ma_phieu}>
-                          {t.ma_phieu} — {t.ho_ten_khach} ({t.trang_thai_thanh_toan === 'DA_THANH_TOAN' ? '✓ Đã TT' : 'Chờ TT'})
+                          {t.ma_phieu} — {t.ho_ten_khach} ({t.trang_thai_thanh_toan === 'DA_THANH_TOAN' ? 'Đã TT' : 'Chờ TT'})
                         </option>
                       ))}
                       {filteredCashierTickets.length === 0 && <option value="">Không có hồ sơ nào phù hợp</option>}
@@ -1546,7 +1586,7 @@ function Dashboard() {
 
                 {/* 2. Chi tiết hồ sơ phiếu được chọn */}
                 {currentTicket ? (
-                  <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+                  <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs space-y-4">
                     {/* Header thông tin phiếu */}
                     <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100">
                       <div>
@@ -1554,12 +1594,13 @@ function Dashboard() {
                           <span className="text-lg font-extrabold text-brand-blue font-mono">
                             #{currentTicket.ma_phieu}
                           </span>
-                          <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-extrabold border ${
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-bold border ${
                             isCurrentPaid
                               ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                               : 'bg-amber-50 text-amber-800 border-amber-200'
                           }`}>
-                            {isCurrentPaid ? '✓ ĐÃ THANH TOÁN' : '⏳ CHỜ THU TIỀN'}
+                            <SvgIcon name={isCurrentPaid ? 'check-circle' : 'clock'} className="w-3.5 h-3.5" />
+                            <span>{isCurrentPaid ? 'ĐÃ THANH TOÁN' : 'CHỜ THU TIỀN'}</span>
                           </span>
                         </div>
                         <p className="text-xs text-slate-500 mt-0.5">
@@ -1574,7 +1615,7 @@ function Dashboard() {
                         className="text-xs text-brand-blue hover:underline font-bold flex items-center gap-1"
                       >
                         <span>Mở trang QR khách xem</span>
-                        <span>↗</span>
+                        <SvgIcon name="external-link" className="w-3.5 h-3.5" />
                       </a>
                     </div>
 
@@ -1583,7 +1624,10 @@ function Dashboard() {
                       <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 space-y-1">
                         <span className="text-slate-400 font-bold uppercase text-[10px] block">Khách hàng</span>
                         <p className="font-extrabold text-slate-800 text-sm">{currentTicket.ho_ten_khach}</p>
-                        <p className="font-mono text-slate-600">📞 {currentTicket.so_dien_thoai}</p>
+                        <p className="font-mono text-slate-600 flex items-center gap-1">
+                          <SvgIcon name="phone" className="w-3.5 h-3.5 text-slate-400" />
+                          <span>{currentTicket.so_dien_thoai}</span>
+                        </p>
                       </div>
 
                       <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 space-y-1">
@@ -1648,15 +1692,15 @@ function Dashboard() {
                         </div>
                       </div>
 
-                      {/* HAI NÚT BẤM XÁC NHẬN NỔI BẬT CHO LỄ TÂN */}
+                      {/* HAI NÚT BẤM XÁC NHẬN CHO LỄ TÂN */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
                         <button
                           type="button"
                           disabled={confirmingPayment}
                           onClick={() => handleConfirmCashierPayment(currentTicket, 'TIEN_MAT')}
-                          className="py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-extrabold text-xs sm:text-sm shadow-sm transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                          className="py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs sm:text-sm shadow-2xs transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                         >
-                          <span className="text-base">💵</span>
+                          <SvgIcon name="cash" className="w-4 h-4" />
                           <span>{confirmingPayment ? 'Đang xử lý...' : 'Xác Nhận ĐÃ THU TIỀN MẶT'}</span>
                         </button>
 
@@ -1664,9 +1708,9 @@ function Dashboard() {
                           type="button"
                           disabled={confirmingPayment}
                           onClick={() => handleConfirmCashierPayment(currentTicket, 'VIETQR')}
-                          className="py-3 px-4 rounded-xl bg-brand-blue hover:bg-blue-700 active:bg-blue-800 text-white font-extrabold text-xs sm:text-sm shadow-sm transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                          className="py-3 px-4 rounded-xl bg-brand-blue hover:bg-brand-blue-hover text-white font-bold text-xs sm:text-sm shadow-2xs transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                         >
-                          <span className="text-base">🏦</span>
+                          <SvgIcon name="bank" className="w-4 h-4" />
                           <span>{confirmingPayment ? 'Đang xử lý...' : 'Xác Nhận ĐÃ CHUYỂN KHOẢN'}</span>
                         </button>
                       </div>
@@ -1678,7 +1722,7 @@ function Dashboard() {
                           onClick={() => openReceipt(currentTicket)}
                           className="text-xs font-bold text-slate-600 hover:text-brand-blue flex items-center gap-1.5 py-1 px-2 rounded-lg hover:bg-slate-100 transition cursor-pointer"
                         >
-                          <span>🖨️</span>
+                          <SvgIcon name="printer" className="w-4 h-4" />
                           <span>In Phiếu Thu Ngân / Hóa Đơn Nhiệt 80mm</span>
                         </button>
                       </div>
@@ -1693,10 +1737,10 @@ function Dashboard() {
 
               {/* CỘT PHẢI: MÀN HÌNH HIỂN THỊ MÃ CHO KHÁCH TẠI BÀN (5 CỘT) */}
               <div className="lg:col-span-5 space-y-4">
-                <div className="bg-slate-900 text-white p-3 rounded-2xl text-xs flex items-center justify-between">
+                <div className="bg-slate-900 text-white p-3 rounded-xl text-xs flex items-center justify-between">
                   <span className="font-bold flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    MÀN HÌNH HIỂN THỊ KHÁCH HÀNG (CUSTOMER DISPLAY)
+                    <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    MÀN HÌNH HIỂN THỊ KHÁCH HÀNG
                   </span>
                   <span className="text-[10px] text-slate-400">Quầy Lễ Tân 615 Âu Cơ</span>
                 </div>
@@ -1710,11 +1754,11 @@ function Dashboard() {
                     ticket={currentTicket}
                     onPaymentSuccess={async () => {
                       await refreshTickets();
-                      showToast(`✓ Đã nhận thanh toán cho hồ sơ #${currentTicket.ma_phieu}!`);
+                      showToast(`Đã nhận thanh toán cho hồ sơ #${currentTicket.ma_phieu}.`);
                     }}
                   />
                 ) : (
-                  <div className="bg-white p-8 rounded-3xl border border-slate-200 text-center text-slate-400 text-xs">
+                  <div className="bg-white p-8 rounded-2xl border border-slate-200 text-center text-slate-400 text-xs">
                     Chưa chọn hồ sơ.
                   </div>
                 )}
@@ -1724,129 +1768,129 @@ function Dashboard() {
         );
       })()}
 
-      {/* TAB 5: BẢO MẬT DOANH NGHIỆP & NHẬT KÝ KIỂM TOÁN (ENTERPRISE SECURITY & AUDIT - CHỈ QUẢN TRỊ HỆ THỐNG / ADMIN) */}
+      {/* TAB 5: BẢO MẬT & NHẬT KÝ KIỂM TOÁN */}
       {activeTab === 'SECURITY' && isSystemAdmin && (
         <div className="space-y-6">
-          {/* BANNER TỔNG QUAN KIẾN TRÚC BẢO MẬT CHUẨN DOANH NGHIỆP */}
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-7 shadow-sm space-y-6">
+          {/* BANNER TỔNG QUAN BẢO MẬT */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-7 shadow-xs space-y-6">
             <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-5">
               <div className="flex items-center gap-3.5">
-                <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-200 text-brand-blue flex items-center justify-center text-2xl shadow-xs">
-                  🛡️
+                <div className="w-11 h-11 rounded-xl bg-blue-50 border border-blue-200 text-brand-blue flex items-center justify-center">
+                  <SvgIcon name="shield" className="w-6 h-6" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="text-lg font-black text-slate-900 tracking-tight">
-                      Kiến Trúc An Toàn Thông Tin Chuẩn Doanh Nghiệp
+                    <h3 className="text-lg font-bold text-slate-900 tracking-tight">
+                      Cấu Hình An Toàn Thông Tin &amp; Kiểm Toán
                     </h3>
-                    <span className="hidden sm:inline-block px-2.5 py-0.5 rounded-full text-[11px] font-black bg-blue-50 text-brand-blue border border-blue-200 uppercase tracking-wider">
-                      Enterprise Suite v2.0
-                    </span>
                   </div>
                   <p className="text-xs text-slate-500 mt-1 max-w-2xl leading-relaxed">
-                    Hệ thống tự động phòng thủ chủ động 6 lớp, bảo vệ toàn vẹn dữ liệu khách hàng, xác thực phiên làm việc thời gian thực và ghi vết mọi thao tác điều hành vào Nhật ký Kiểm toán.
+                    Tổng hợp 6 lớp kiểm soát truy cập, mã hóa dữ liệu khách hàng và ghi nhận lịch sử thao tác quản trị.
                   </p>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-black shadow-2xs">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                  </span>
-                  6/6 Lớp Bảo Mật Đang Hoạt Động (100%)
+                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold">
+                  <SvgIcon name="check-circle" className="w-4 h-4 text-emerald-600" />
+                  <span>6/6 Lớp Đang Hoạt Động</span>
                 </span>
               </div>
             </div>
 
             {/* 4 CHỈ SỐ NHANH BẢO MẬT */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-              <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+              <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Xác Thực Phiên</span>
-                <p className="text-sm font-black text-slate-900 flex items-center gap-1.5">
-                  <span>🔐</span> JWT HS256 Strict
+                <p className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                  <SvgIcon name="lock" className="w-4 h-4 text-brand-blue" />
+                  <span>JWT HS256 Strict</span>
                 </p>
-                <span className="text-[11px] text-slate-500 mt-0.5 block">Xác thực token theo thời gian thực</span>
+                <span className="text-[11px] text-slate-500 mt-0.5 block">Kiểm tra token mỗi phiên làm việc</span>
               </div>
 
-              <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+              <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Mã Hóa Mật Khẩu</span>
-                <p className="text-sm font-black text-slate-900 flex items-center gap-1.5">
-                  <span>🧬</span> Bcrypt (10 Salt Rounds)
+                <p className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                  <SvgIcon name="key" className="w-4 h-4 text-brand-blue" />
+                  <span>Bcrypt (10 Salt Rounds)</span>
                 </p>
-                <span className="text-[11px] text-slate-500 mt-0.5 block">Chống tấn công từ điển & Rainbow</span>
+                <span className="text-[11px] text-slate-500 mt-0.5 block">Băm mật khẩu một chiều</span>
               </div>
 
-              <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Cơ Chế Lọc Dữ Liệu</span>
-                <p className="text-sm font-black text-slate-900 flex items-center gap-1.5">
-                  <span>🧼</span> SQLi, XSS & HPP Sanitizer
+              <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Lọc Dữ Liệu Đầu Vào</span>
+                <p className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                  <SvgIcon name="shield" className="w-4 h-4 text-brand-blue" />
+                  <span>SQLi, XSS &amp; HPP</span>
                 </p>
-                <span className="text-[11px] text-slate-500 mt-0.5 block">Tự động làm sạch input ở mọi API</span>
+                <span className="text-[11px] text-slate-500 mt-0.5 block">Làm sạch dữ liệu tại API</span>
               </div>
 
-              <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Kết Nối Đám Mây</span>
-                <p className="text-sm font-black text-slate-900 flex items-center gap-1.5">
-                  <span>☁️</span> Supabase Cloud TLS/SSL
+              <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Kết Nối Cơ Sở Dữ Liệu</span>
+                <p className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                  <SvgIcon name="database" className="w-4 h-4 text-brand-blue" />
+                  <span>PostgreSQL TLS/SSL</span>
                 </p>
-                <span className="text-[11px] text-slate-500 mt-0.5 block">Transaction Pooler mã hóa cổng 6543</span>
+                <span className="text-[11px] text-slate-500 mt-0.5 block">Transaction Pooler cổng 6543</span>
               </div>
             </div>
 
-            {/* 6 LÁ CHẮN BẢO MẬT CHI TIẾT */}
+            {/* 6 LỚP BẢO MẬT CHI TIẾT */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-1">
               {[
                 {
-                  icon: '🔐',
+                  icon: 'lock',
                   badge: 'Lớp 01 • Authentication',
-                  title: '1. Xác Thực JWT HS256 & Thu Hồi Tức Thì',
-                  desc: securityStatus?.jwtAlgorithm || 'Kiểm tra chữ ký số HS256 nghiêm ngặt, đối chiếu trạng thái hoạt động của tài khoản trực tiếp từ CSDL ở từng request.'
+                  title: '1. Xác Thực JWT HS256',
+                  desc: securityStatus?.jwtAlgorithm || 'Kiểm tra chữ ký số HS256 và đối chiếu trạng thái hoạt động của tài khoản từ CSDL ở từng request.'
                 },
                 {
-                  icon: '🧬',
+                  icon: 'key',
                   badge: 'Lớp 02 • One-Way Hash',
-                  title: '2. Mã Hóa Mật Khẩu Một Chiều Bcrypt',
-                  desc: securityStatus?.passwordHashing || 'Mật khẩu nhân sự được băm một chiều với 10 vòng muối (10 Salt Rounds), đảm bảo an toàn tuyệt đối không thể giải mã ngược.'
+                  title: '2. Mã Hóa Mật Khẩu Bcrypt',
+                  desc: securityStatus?.passwordHashing || 'Mật khẩu nhân sự được băm một chiều với 10 vòng muối (10 Salt Rounds), không lưu mật khẩu thô.'
                 },
                 {
-                  icon: '🧼',
+                  icon: 'shield',
                   badge: 'Lớp 03 • Input Sanitizer',
-                  title: '3. Lọc & Chống Mã Độc XSS, SQLi & HPP',
-                  desc: securityStatus?.inputProtection || 'Tự động làm sạch thẻ độc hại, chống Prototype Pollution và loại trừ tham số trùng lặp (HTTP Parameter Pollution).'
+                  title: '3. Lọc XSS, SQLi & HPP',
+                  desc: securityStatus?.inputProtection || 'Loại bỏ thẻ HTML độc hại, chống Prototype Pollution và tham số trùng lặp (HTTP Parameter Pollution).'
                 },
                 {
-                  icon: '🧱',
+                  icon: 'globe',
                   badge: 'Lớp 04 • HTTP Hardening',
-                  title: '4. Helmet HTTP Security Headers & CSP',
-                  desc: securityStatus?.httpHeaders || 'Thiết lập Content-Security-Policy (CSP), cấm nhúng iframe trái phép (X-Frame-Options: DENY) và chặn đoán MIME-type.'
+                  title: '4. Helmet Security Headers',
+                  desc: securityStatus?.httpHeaders || 'Thiết lập Content-Security-Policy (CSP), X-Frame-Options: DENY và bảo vệ MIME-type.'
                 },
                 {
-                  icon: '🚦',
+                  icon: 'activity',
                   badge: 'Lớp 05 • Rate Limiting',
-                  title: '5. Chống Dò Mật Khẩu (Brute-Force Lockout)',
-                  desc: securityStatus?.rateLimiting || 'Tự động khóa tài khoản tạm thời 15 phút nếu đăng nhập sai 5 lần liên tiếp; giới hạn tần suất tạo phiếu QR để ngăn spam.'
+                  title: '5. Giới Hạn Tần Suất (Rate Limit)',
+                  desc: securityStatus?.rateLimiting || 'Khóa tạm thời 15 phút nếu đăng nhập sai 5 lần liên tiếp và giới hạn tần suất tạo phiếu tránh spam.'
                 },
                 {
-                  icon: '☁️',
+                  icon: 'database',
                   badge: 'Lớp 06 • Transport Security',
-                  title: '6. Kết Nối CSDL Đám Mây Mã Hóa SSL/TLS',
-                  desc: securityStatus?.databaseEncryption || 'Truyền tải dữ liệu qua Supabase PostgreSQL Cloud Transaction Pooler (Cổng :6543) chuẩn mã hóa SSL/TLS 1.3.'
+                  title: '6. Kết Nối CSDL Mã Hóa SSL/TLS',
+                  desc: securityStatus?.databaseEncryption || 'Truyền tải dữ liệu qua Supabase PostgreSQL Pooler (Cổng :6543) có mã hóa SSL/TLS.'
                 }
               ].map((shield, idx) => (
                 <div
                   key={idx}
-                  className="rounded-2xl border border-slate-200 bg-white p-5 hover:border-blue-300 hover:shadow-sm transition space-y-3 flex flex-col justify-between"
+                  className="rounded-xl border border-slate-200 bg-white p-5 hover:border-blue-300 transition space-y-3 flex flex-col justify-between"
                 >
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-2xl">{shield.icon}</span>
-                      <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                      <div className="w-8 h-8 rounded-lg bg-blue-50 text-brand-blue flex items-center justify-center border border-blue-100">
+                        <SvgIcon name={shield.icon} className="w-4 h-4" />
+                      </div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200">
                         {shield.badge}
                       </span>
                     </div>
-                    <h4 className="font-extrabold text-sm text-slate-900 tracking-tight">
+                    <h4 className="font-bold text-sm text-slate-900 tracking-tight">
                       {shield.title}
                     </h4>
                     <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
@@ -1854,9 +1898,9 @@ function Dashboard() {
                     </p>
                   </div>
                   <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
-                    <span className="text-slate-400 font-medium">Trạng thái bảo vệ:</span>
-                    <span className="inline-flex items-center gap-1 text-emerald-600 font-extrabold">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> Đang Bảo Vệ
+                    <span className="text-slate-400 font-medium">Trạng thái:</span>
+                    <span className="inline-flex items-center gap-1 text-emerald-600 font-bold">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> Đang hoạt động
                     </span>
                   </div>
                 </div>
@@ -1865,21 +1909,22 @@ function Dashboard() {
           </div>
 
           {/* KHỐI ĐỔI MẬT KHẨU BẢO MẬT CÁ NHÂN */}
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-7 shadow-sm space-y-5">
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-7 shadow-xs space-y-5">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
               <div>
-                <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
-                  <span>🔑</span> Đổi Mật Khẩu Bảo Mật Cá Nhân
-                  <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 font-mono">
+                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                  <SvgIcon name="key" className="w-4 h-4 text-brand-blue" />
+                  <span>Đổi Mật Khẩu Cá Nhân</span>
+                  <span className="text-xs font-bold px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-700 font-mono">
                     @{currentUsername || role}
                   </span>
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Mật khẩu mới sẽ được mã hóa tự động bằng thuật toán Bcrypt (10 Salt Rounds) và lưu vết vào Nhật ký Kiểm toán.
+                  Mật khẩu mới được mã hóa bằng Bcrypt và ghi nhận vào nhật ký kiểm toán.
                 </p>
               </div>
-              <span className="text-[11px] font-bold text-slate-400">
-                Tối thiểu 6 ký tự • Khuyến nghị kèm số &amp; ký tự đặc biệt
+              <span className="text-[11px] font-semibold text-slate-400">
+                Tối thiểu 6 ký tự
               </span>
             </div>
 
@@ -1926,30 +1971,31 @@ function Dashboard() {
                 <button
                   type="submit"
                   disabled={savingPw}
-                  className="w-full rounded-xl bg-brand-blue hover:bg-blue-700 active:bg-blue-800 text-white font-extrabold text-xs py-2.5 px-4 shadow-sm transition disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="w-full rounded-xl bg-brand-blue hover:bg-brand-blue-hover text-white font-bold text-xs py-2.5 px-4 shadow-2xs transition disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
                 >
-                  <span>🔐</span>
-                  <span>{savingPw ? 'Đang mã hóa Bcrypt...' : 'Cập Nhật Mật Khẩu'}</span>
+                  <SvgIcon name="lock" className="w-3.5 h-3.5" />
+                  <span>{savingPw ? 'Đang cập nhật...' : 'Cập Nhật Mật Khẩu'}</span>
                 </button>
               </div>
             </form>
           </div>
 
-          {/* BẢNG NHẬT KÝ KIỂM TOÁN BẢO MẬT DOANH NGHIỆP (SECURITY AUDIT TRAIL) */}
+          {/* BẢNG NHẬT KÝ KIỂM TOÁN */}
           {canManageEmployees && (
-            <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-7 shadow-sm space-y-5">
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-7 shadow-xs space-y-5">
               <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
-                      <span>📋</span> Nhật Ký Kiểm Toán Bảo Mật Thời Gian Thực (Security Audit Trail)
+                    <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                      <SvgIcon name="clipboard" className="w-4 h-4 text-brand-blue" />
+                      <span>Nhật Ký Kiểm Toán Hệ Thống (Audit Log)</span>
                     </h3>
-                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200">
                       {auditLogs.length} sự kiện
                     </span>
                   </div>
                   <p className="text-xs text-slate-500 mt-1">
-                    Ghi vết bất biến toàn bộ sự kiện: đăng nhập hệ thống, phân quyền nhân sự, khởi tạo mã QR và thay đổi trạng thái hồ sơ.
+                    Ghi nhận lịch sử đăng nhập, phân quyền nhân sự, tạo phiếu QR và cập nhật trạng thái hồ sơ.
                   </p>
                 </div>
 
@@ -1970,16 +2016,16 @@ function Dashboard() {
                     exportEnterpriseExcel({
                       filename: `Nhat_Ky_Bao_Mat_Audit_Log_${new Date().toISOString().slice(0, 10)}.xlsx`,
                       sheetName: 'Security Audit Log',
-                      title: 'BÁO CÁO NHẬT KÝ KIỂM TOÁN BẢO MẬT HỆ THỐNG (SECURITY AUDIT TRAIL) - CÔNG TY CỔ PHẦN LỤC GIÁC',
+                      title: 'BÁO CÁO NHẬT KÝ KIỂM TOÁN BẢO MẬT HỆ THỐNG - CÔNG TY CỔ PHẦN LỤC GIÁC',
                       headers: ['STT', 'Thời Gian (+07:00)', 'Tài Khoản Thực Hiện', 'Vai Trò', 'Hành Động (Action)', 'Đối Tượng Tác Động', 'Địa Chỉ IP', 'Trạng Thái', 'Chi Tiết Sự Kiện Bảo Mật'],
                       rows,
                       summaryRow: ['', 'TỔNG SỐ SỰ KIỆN GHI VẾT', `${auditLogs.length} bản ghi`, '', '', '', '', '', ''],
                       signRole: 'QUẢN TRỊ AN TOÀN THÔNG TIN'
                     });
                   }}
-                  className="rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 font-extrabold text-xs px-4 py-2.5 shadow-2xs transition cursor-pointer flex items-center gap-1.5"
+                  className="rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 font-bold text-xs px-4 py-2.5 shadow-2xs transition cursor-pointer flex items-center gap-1.5"
                 >
-                  <span>📊</span>
+                  <SvgIcon name="download" className="w-4 h-4 text-slate-600" />
                   <span>Xuất Nhật Ký Bảo Mật (.xlsx)</span>
                 </button>
               </div>
@@ -2153,8 +2199,9 @@ function Dashboard() {
           <div className="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl">
             <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-200">
               <div>
-                <h3 className="text-lg font-extrabold text-brand-blue">
-                  {editingEmployee ? `✏️ Phân Quyền Nhân Sự: ${editingEmployee.ho_ten}` : '👤 Tạo Tài Khoản Nhân Sự CSKH Mới'}
+                <h3 className="text-lg font-bold text-brand-blue flex items-center gap-2">
+                  <SvgIcon name={editingEmployee ? 'edit' : 'user-plus'} className="w-5 h-5" />
+                  <span>{editingEmployee ? `Phân Quyền Nhân Sự: ${editingEmployee.ho_ten}` : 'Tạo Tài Khoản Nhân Sự Mới'}</span>
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
                   Cấp phát tài khoản vận hành hệ thống CSKH và Dịch vụ Kỹ thuật.
@@ -2163,9 +2210,10 @@ function Dashboard() {
               <button
                 type="button"
                 onClick={() => setShowEmployeeModal(false)}
-                className="text-slate-400 hover:text-slate-700 text-2xl font-bold"
+                className="text-slate-400 hover:text-slate-700 p-1 cursor-pointer"
+                aria-label="Đóng"
               >
-                ×
+                <SvgIcon name="x" className="w-5 h-5" />
               </button>
             </div>
 
@@ -2225,12 +2273,12 @@ function Dashboard() {
                 >
                   {isExecutive && (
                     <>
-                      <option value="ADMIN">🛡️ Quản Trị Hệ Thống CSKH (ADMIN)</option>
-                      <option value="QUAN_LY">🏬 Trưởng Bộ Phận CSKH (QUAN_LY)</option>
+                      <option value="ADMIN">Quản Trị Hệ Thống CSKH (ADMIN)</option>
+                      <option value="QUAN_LY">Trưởng Bộ Phận CSKH (QUAN_LY)</option>
                     </>
                   )}
-                  <option value="KY_THUAT_VIEN">🎧 Chuyên Viên Hỗ Trợ CSKH (KY_THUAT_VIEN)</option>
-                  <option value="LE_TAN">👩‍💼 Lễ Tân &amp; Tiếp Nhận QR (LE_TAN)</option>
+                  <option value="KY_THUAT_VIEN">Chuyên Viên Hỗ Trợ CSKH (KY_THUAT_VIEN)</option>
+                  <option value="LE_TAN">Lễ Tân &amp; Tiếp Nhận QR (LE_TAN)</option>
                 </select>
                 <p className="mt-1.5 text-[11px] text-slate-500 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
                   {ROLE_META[employeeForm.vai_tro]?.permissionsText}
@@ -2245,8 +2293,8 @@ function Dashboard() {
                     onChange={(e) => setEmployeeForm({ ...employeeForm, trang_thai: e.target.value })}
                     className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 font-semibold focus:border-brand-blue outline-none"
                   >
-                    <option value="HOAT_DONG">● Đang hoạt động (Cho phép đăng nhập)</option>
-                    <option value="KHOA">🔒 Khóa tài khoản (Chặn đăng nhập)</option>
+                    <option value="HOAT_DONG">Đang hoạt động (Cho phép đăng nhập)</option>
+                    <option value="KHOA">Khóa tài khoản (Chặn đăng nhập)</option>
                   </select>
                 </div>
               )}
@@ -2302,7 +2350,7 @@ function Dashboard() {
               <p className="mt-1"><strong>Trạng thái hiện tại:</strong> {STATUS_LABELS[receiptTicket.trang_thai] || receiptTicket.trang_thai}</p>
               <hr className="my-3 border-dashed border-slate-400" />
               <p className="mt-2 text-[10px] text-slate-600 border border-slate-200 p-2 rounded text-center">
-                🛡️ <strong>Sổ bảo hành điện tử (e-Warranty):</strong> Kích hoạt 06 tháng (180 ngày) sau khi hoàn tất hỗ trợ. Quý khách quét mã QR bên dưới để theo dõi tiến độ xử lý thời gian thực hoặc gửi yêu cầu bảo hành.
+                <strong>Sổ bảo hành điện tử (e-Warranty):</strong> Kích hoạt 06 tháng (180 ngày) sau khi hoàn tất hỗ trợ. Quý khách quét mã QR bên dưới để theo dõi tiến độ xử lý hoặc gửi yêu cầu bảo hành.
               </p>
               {receiptQr && (
                 <div className="mt-4 text-center">
@@ -2317,9 +2365,10 @@ function Dashboard() {
                 type="button"
                 onClick={() => window.print()}
                 disabled={!receiptQr}
-                className="rounded-lg bg-brand-blue px-5 py-2 font-bold text-white hover:bg-blue-700 disabled:opacity-50"
+                className="rounded-lg bg-brand-blue hover:bg-brand-blue-hover px-5 py-2 font-bold text-white disabled:opacity-50 inline-flex items-center gap-1.5 cursor-pointer"
               >
-                🖨️ In Phiếu QR (80mm)
+                <SvgIcon name="printer" className="w-4 h-4" />
+                <span>In Phiếu QR (80mm)</span>
               </button>
             </div>
           </div>
@@ -2332,10 +2381,15 @@ function Dashboard() {
           <div className="bg-white rounded-2xl w-full max-w-xl max-h-[92vh] overflow-y-auto shadow-2xl p-6">
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-200">
               <div>
-                <h3 className="text-lg font-extrabold text-brand-blue">📷 Khởi Tạo Hồ Sơ QR Tại Quầy (CSKH)</h3>
-                <p className="text-xs text-slate-500">Tạo nhanh phiếu yêu cầu CSKH &amp; tự động bật cửa sổ in phiếu nhiệt QR 80mm.</p>
+                <h3 className="text-lg font-bold text-brand-blue flex items-center gap-2">
+                  <SvgIcon name="qr" className="w-5 h-5" />
+                  <span>Tạo Hồ Sơ QR Tại Quầy</span>
+                </h3>
+                <p className="text-xs text-slate-500">Tạo nhanh phiếu tiếp nhận &amp; mở cửa sổ in phiếu nhiệt QR 80mm.</p>
               </div>
-              <button type="button" onClick={() => setShowPosModal(false)} className="text-slate-400 hover:text-slate-700 text-2xl font-bold">×</button>
+              <button type="button" onClick={() => setShowPosModal(false)} className="text-slate-400 hover:text-slate-700 p-1 cursor-pointer" aria-label="Đóng">
+                <SvgIcon name="x" className="w-5 h-5" />
+              </button>
             </div>
 
             <form onSubmit={submitPosWalkIn} className="space-y-4 text-sm">
@@ -2401,7 +2455,10 @@ function Dashboard() {
               </div>
 
               <div className="rounded-xl bg-amber-50/70 p-3.5 border border-amber-200">
-                <label className="block text-xs font-bold text-amber-900 mb-2">📸 Đính kèm ảnh minh chứng hiện trạng lúc tiếp nhận (Tùy chọn):</label>
+                <label className="flex items-center gap-1.5 text-xs font-bold text-amber-900 mb-2">
+                  <SvgIcon name="camera" className="w-4 h-4" />
+                  <span>Đính kèm ảnh hiện trạng lúc tiếp nhận (Tùy chọn):</span>
+                </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <input
                     type="text"
@@ -2447,7 +2504,8 @@ function Dashboard() {
             <div className="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
               <div>
                 <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                  <span>📸</span> Ảnh Minh Chứng Hiện Trạng — Hồ Sơ {photoTicket.ma_phieu}
+                  <SvgIcon name="camera" className="w-5 h-5 text-brand-blue" />
+                  <span>Ảnh Hiện Trạng — Hồ Sơ {photoTicket.ma_phieu}</span>
                 </h3>
                 <p className="text-xs text-slate-500">{photoTicket.ten_thiet_bi} • Khách hàng: {photoTicket.ho_ten_khach}</p>
               </div>
@@ -2541,14 +2599,14 @@ function Dashboard() {
             {/* Header Modal */}
             <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-[#0068ff] text-white flex items-center justify-center font-bold text-lg shadow-xs">
-                  💬
+                <div className="w-9 h-9 rounded-xl bg-[#0068ff] text-white flex items-center justify-center shadow-2xs">
+                  <SvgIcon name="mail" className="w-5 h-5" />
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-slate-800 flex items-center gap-1.5">
                     Trung Tâm Gửi Thông Báo Zalo ZNS CSKH
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-[#0068ff]">
-                      Tự động qua mã QR
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-100 text-[#0068ff]">
+                      Mã QR
                     </span>
                   </h3>
                   <p className="text-xs text-slate-500">
@@ -2559,9 +2617,10 @@ function Dashboard() {
               <button
                 type="button"
                 onClick={() => setShowZaloModal(false)}
-                className="text-slate-400 hover:text-slate-700 text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-200 cursor-pointer"
+                className="text-slate-400 hover:text-slate-700 w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-200 cursor-pointer"
+                aria-label="Đóng"
               >
-                &times;
+                <SvgIcon name="x" className="w-5 h-5" />
               </button>
             </div>
 
@@ -2575,29 +2634,33 @@ function Dashboard() {
                     : 'bg-rose-50 text-rose-800 border border-rose-200'
                 }`}>
                   <span>{zaloAlert.message}</span>
-                  <button type="button" onClick={() => setZaloAlert(null)} className="text-base font-bold">×</button>
+                  <button type="button" onClick={() => setZaloAlert(null)} className="p-1 cursor-pointer" aria-label="Đóng">
+                    <SvgIcon name="x" className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               )}
 
-              {/* MÔ PHỎNG GIAO DIỆN TIN NHẮN ZALO ZNS TRÊN ĐIỆN THOẠI KHÁCH HÀNG */}
-              <div className="bg-[#eef3f8] p-4 rounded-2xl border border-slate-200">
+              {/* BẢN XEM TRƯỚC TIN NHẮN ZALO ZNS */}
+              <div className="bg-[#eef3f8] p-4 rounded-xl border border-slate-200">
                 <div className="flex items-center justify-between mb-3 text-[11px] text-slate-500 font-semibold">
-                  <span className="flex items-center gap-1 text-[#0068ff]">
-                    <span>📱</span> Bản xem trước tin nhắn Zalo ZNS trên điện thoại khách hàng:
+                  <span className="flex items-center gap-1.5 text-[#0068ff]">
+                    <SvgIcon name="smartphone" className="w-3.5 h-3.5" />
+                    <span>Bản xem trước tin nhắn trên điện thoại khách hàng:</span>
                   </span>
-                  <span className="bg-white px-2 py-0.5 rounded-md border border-slate-200 text-emerald-600 font-bold">
-                    ✓ Official Account Đã Xác Thực
+                  <span className="bg-white px-2 py-0.5 rounded-md border border-slate-200 text-emerald-600 font-bold inline-flex items-center gap-1">
+                    <SvgIcon name="check" className="w-3 h-3" />
+                    <span>Official Account</span>
                   </span>
                 </div>
 
                 {/* Bong bóng tin nhắn Zalo OA */}
-                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 max-w-lg mx-auto space-y-3">
+                <div className="bg-white rounded-xl shadow-xs border border-slate-200 p-4 max-w-lg mx-auto space-y-3">
                   <div className="flex items-center gap-2 pb-2.5 border-b border-slate-100">
                     <img src="/img/logo-luc-giac.png" alt="Logo Lục Giác" className="w-8 h-8 object-contain rounded-full bg-slate-50 p-1 border border-slate-200" />
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1.5">
                         <span className="text-xs font-bold text-slate-900 truncate">CSKH CÔNG TY CỔ PHẦN LỤC GIÁC</span>
-                        <span className="text-blue-500 text-xs" title="Tài khoản Zalo doanh nghiệp xác thực">☑️</span>
+                        <SvgIcon name="check-circle" className="w-3.5 h-3.5 text-blue-500 shrink-0" />
                       </div>
                       <span className="text-[10px] text-slate-400">Zalo Notification Service (ZNS)</span>
                     </div>
@@ -2627,13 +2690,16 @@ function Dashboard() {
                       <span className="text-slate-500">Trạng thái:</span>
                       <span className="font-bold text-emerald-600">
                         {zaloTicket.trang_thai === 'ĐÃ_SỬA_XONG' || zaloTicket.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN'
-                          ? '✅ ĐÃ SỬA XONG — SẴN SÀNG TRẢ MÁY'
+                          ? 'ĐÃ SỬA XONG — SẴN SÀNG TRẢ MÁY'
                           : STATUS_LABELS[zaloTicket.trang_thai] || zaloTicket.trang_thai}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-500">Sổ bảo hành:</span>
-                      <strong className="text-amber-600">🛡️ e-Warranty 06 tháng</strong>
+                      <strong className="text-amber-600 inline-flex items-center gap-1">
+                        <SvgIcon name="shield" className="w-3.5 h-3.5" />
+                        <span>e-Warranty 06 tháng</span>
+                      </strong>
                     </div>
                     {zaloCustomNote && (
                       <div className="pt-1.5 mt-1 border-t border-slate-200 text-[11px] text-slate-600">
@@ -2642,15 +2708,16 @@ function Dashboard() {
                     )}
                   </div>
 
-                  {/* Nút giả lập hành động trong Zalo */}
+                  {/* Nút xem chi tiết */}
                   <div className="pt-1">
                     <a
                       href={`/track/${zaloTicket.ma_phieu}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="block w-full py-2 bg-[#0068ff]/10 hover:bg-[#0068ff]/20 text-[#0068ff] font-bold text-center text-xs rounded-xl transition"
+                      className="flex items-center justify-center gap-1.5 w-full py-2 bg-[#0068ff]/10 hover:bg-[#0068ff]/20 text-[#0068ff] font-bold text-center text-xs rounded-xl transition"
                     >
-                      🔗 Bấm để xem Hồ sơ & Sổ bảo hành điện tử (e-Warranty)
+                      <SvgIcon name="external-link" className="w-3.5 h-3.5" />
+                      <span>Xem Hồ sơ &amp; Sổ bảo hành điện tử</span>
                     </a>
                   </div>
                 </div>
@@ -2658,14 +2725,15 @@ function Dashboard() {
 
               {/* Ô nhập ghi chú riêng của kỹ thuật viên */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  ✍️ Thêm lời nhắn / Ghi chú kỹ thuật gửi kèm qua Zalo (Tùy chọn):
+                <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 mb-1">
+                  <SvgIcon name="edit" className="w-3.5 h-3.5 text-brand-blue" />
+                  <span>Thêm lời nhắn / Ghi chú kỹ thuật (Tùy chọn):</span>
                 </label>
                 <textarea
                   rows="2"
                   value={zaloCustomNote}
                   onChange={(e) => setZaloCustomNote(e.target.value)}
-                  placeholder="VD: Đã thay keo tản nhiệt MX-4, cài Windows 11 và tối ưu phần mềm miễn phí. Mời anh/chị ghé quầy kỹ thuật nhận máy..."
+                  placeholder="VD: Đã thay keo tản nhiệt, cài Windows 11. Mời anh/chị ghé quầy kỹ thuật nhận máy..."
                   className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl focus:border-brand-blue outline-none bg-white"
                 />
               </div>
@@ -2679,17 +2747,18 @@ function Dashboard() {
                 rel="noreferrer"
                 onClick={() => {
                   const trackUrl = `${window.location.origin}/track/${zaloTicket.ma_phieu}`;
-                  const textToCopy = `[CSKH CÔNG TY CỔ PHẦN LỤC GIÁC]\nKính gửi ${zaloTicket.ho_ten_khach}, thông báo tiến độ hồ sơ QR: ${zaloTicket.ma_phieu}\n- Thiết bị: ${zaloTicket.ten_thiet_bi}\n- Trạng thái: ${STATUS_LABELS[zaloTicket.trang_thai] || zaloTicket.trang_thai}${zaloCustomNote ? `\n- Ghi chú KTV: ${zaloCustomNote}` : ''}\n👉 Xem chi tiết & Sổ bảo hành điện tử tại: ${trackUrl}`;
+                  const textToCopy = `[CSKH CÔNG TY CỔ PHẦN LỤC GIÁC]\nKính gửi ${zaloTicket.ho_ten_khach}, thông báo tiến độ hồ sơ QR: ${zaloTicket.ma_phieu}\n- Thiết bị: ${zaloTicket.ten_thiet_bi}\n- Trạng thái: ${STATUS_LABELS[zaloTicket.trang_thai] || zaloTicket.trang_thai}${zaloCustomNote ? `\n- Ghi chú KTV: ${zaloCustomNote}` : ''}\nXem chi tiết & Sổ bảo hành điện tử tại: ${trackUrl}`;
                   if (navigator.clipboard) {
                     navigator.clipboard.writeText(textToCopy).catch(() => {});
                   }
-                  showToast(`📋 Đã tự động copy nội dung tin nhắn! Hãy bấm Ctrl+V (Dán) vào cửa sổ Zalo của ${zaloTicket.so_dien_thoai}.`);
+                  showToast(`Đã copy nội dung tin nhắn. Bấm Ctrl+V vào cửa sổ Zalo của ${zaloTicket.so_dien_thoai}.`);
                 }}
                 className="px-4 py-2 border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-bold rounded-xl text-xs flex items-center gap-1.5 transition"
                 title="Tự động copy nội dung tin nhắn và mở Zalo trực tiếp với số điện thoại này"
               >
-                <span>💬 Mở Zalo Thật &amp; Dán Tin Nhắn ({zaloTicket.so_dien_thoai})</span>
-                <span>↗</span>
+                <SvgIcon name="mail" className="w-3.5 h-3.5 text-brand-blue" />
+                <span>Mở Zalo &amp; Dán Tin Nhắn ({zaloTicket.so_dien_thoai})</span>
+                <SvgIcon name="external-link" className="w-3 h-3 text-slate-400" />
               </a>
 
               <div className="flex items-center gap-2">
@@ -2704,12 +2773,12 @@ function Dashboard() {
                   type="button"
                   disabled={zaloSending}
                   onClick={handleSendZalo}
-                  className={`px-5 py-2 bg-[#0068ff] hover:bg-[#0055d4] text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shadow-sm transition ${
+                  className={`px-5 py-2 bg-[#0068ff] hover:bg-[#0055d4] text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shadow-2xs transition ${
                     zaloSending ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer active:brightness-95'
                   }`}
                 >
-                  <span>⚡</span>
-                  <span>{zaloSending ? 'Đang gửi Zalo Cloud...' : 'Gửi Zalo ZNS Tự Động (Giả Lập)'}</span>
+                  <SvgIcon name="send" className="w-3.5 h-3.5" />
+                  <span>{zaloSending ? 'Đang gửi...' : 'Gửi Thông Báo ZNS'}</span>
                 </button>
               </div>
             </div>

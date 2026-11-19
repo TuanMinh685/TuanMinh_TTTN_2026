@@ -2,6 +2,7 @@ import { Component, lazy, Suspense, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import api from './services/api';
 import ResponsiveText from './components/ResponsiveText';
+import SvgIcon from './components/SvgIcon';
 
 const IntakeForm = lazy(() => import('./pages/public/IntakeForm'));
 const Tracking = lazy(() => import('./pages/public/Tracking'));
@@ -43,8 +44,8 @@ class ErrorBoundary extends Component {
     if (this.state.hasError) {
       return (
         <div className="container mx-auto px-4 py-20 text-center">
-          <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-amber-50 text-4xl mb-4">
-            ⚠️
+          <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 text-amber-600 mb-4">
+            <SvgIcon name="alert" className="w-8 h-8" />
           </div>
           <h2 className="text-xl font-bold text-slate-800 mb-2">Đã xảy ra gián đoạn hiển thị</h2>
           <p className="text-slate-500 text-sm max-w-md mx-auto mb-6">
@@ -77,32 +78,32 @@ class ErrorBoundary extends Component {
 
 const ROLE_NAV_CONFIG = {
   GIAM_DOC: {
-    shortLabel: '🛡️ Quản Trị CSKH',
-    fullTitle: '🛡️ Quản Trị Hệ Thống QR CSKH',
+    shortLabel: 'Quản Trị CSKH',
+    fullTitle: 'Quản Trị Hệ Thống QR CSKH',
     link: '/admin',
     bgClass: 'bg-brand-blue text-white hover:bg-brand-blue-hover active:brightness-95'
   },
   ADMIN: {
-    shortLabel: '🛡️ Quản Trị CSKH',
-    fullTitle: '🛡️ Quản Trị Hệ Thống QR CSKH',
+    shortLabel: 'Quản Trị CSKH',
+    fullTitle: 'Quản Trị Hệ Thống QR CSKH',
     link: '/admin',
     bgClass: 'bg-brand-blue text-white hover:bg-brand-blue-hover active:brightness-95'
   },
   QUAN_LY: {
-    shortLabel: '🏬 Trưởng BP CSKH',
-    fullTitle: '🏬 Trưởng Bộ Phận CSKH',
+    shortLabel: 'Trưởng BP CSKH',
+    fullTitle: 'Trưởng Bộ Phận CSKH',
     link: '/admin/quan-ly',
     bgClass: 'bg-brand-blue text-white hover:bg-brand-blue-hover active:brightness-95'
   },
   KY_THUAT_VIEN: {
-    shortLabel: '🎧 Chuyên Viên Hỗ Trợ',
-    fullTitle: '🎧 Chuyên Viên Hỗ Trợ & Xử Lý',
+    shortLabel: 'Chuyên Viên Hỗ Trợ',
+    fullTitle: 'Chuyên Viên Hỗ Trợ & Xử Lý',
     link: '/admin',
     bgClass: 'bg-brand-blue text-white hover:bg-brand-blue-hover active:brightness-95'
   },
   LE_TAN: {
-    shortLabel: '👩‍💼 Lễ Tân & Tiếp Nhận',
-    fullTitle: '👩‍💼 Lễ Tân & Tiếp Nhận QR',
+    shortLabel: 'Lễ Tân & Tiếp Nhận',
+    fullTitle: 'Lễ Tân & Tiếp Nhận QR',
     link: '/admin',
     bgClass: 'bg-brand-blue text-white hover:bg-brand-blue-hover active:brightness-95'
   }
@@ -223,14 +224,14 @@ function AppContent() {
 
   const navRoleInfo = isLoggedIn
     ? (ROLE_NAV_CONFIG[role] || {
-        shortLabel: '💼 ' + (role || 'Nội Bộ'),
-        fullTitle: '💼 Cổng Quản Trị Hệ Thống',
+        shortLabel: role || 'Nội Bộ',
+        fullTitle: 'Cổng Quản Trị Hệ Thống',
         link: '/admin',
         bgClass: 'bg-brand-blue text-white hover:bg-brand-blue-hover active:brightness-95'
       })
     : {
-        shortLabel: '🔐 Cổng Nhân Viên',
-        fullTitle: '🔐 Đăng Nhập Nhân Viên',
+        shortLabel: 'Cổng Nhân Viên',
+        fullTitle: 'Đăng Nhập Nhân Viên',
         link: '/login',
         bgClass: 'bg-brand-blue text-white hover:bg-brand-blue-hover active:brightness-95'
       };
@@ -333,9 +334,10 @@ function AppContent() {
                         <button
                           type="button"
                           onClick={markAllNotificationsRead}
-                          className="mb-2 text-[11px] text-slate-500 hover:text-brand-blue block text-left"
+                          className="mb-2 text-[11px] text-slate-500 hover:text-brand-blue inline-flex items-center gap-1 text-left"
                         >
-                          ✓ Đánh dấu tất cả đã đọc
+                          <SvgIcon name="check" className="w-3.5 h-3.5" />
+                          <span>Đánh dấu tất cả đã đọc</span>
                         </button>
                       )}
                       <div className="max-h-80 space-y-1.5 overflow-y-auto">
@@ -403,10 +405,10 @@ function AppContent() {
             <button 
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden text-slate-700 text-xl p-2 rounded-lg hover:bg-slate-100 transition-colors flex items-center justify-center w-10 h-10 border border-slate-200"
+              className="lg:hidden text-slate-700 p-2 rounded-lg hover:bg-slate-100 transition-colors flex items-center justify-center w-10 h-10 border border-slate-200"
               aria-label="Toggle Navigation Menu"
             >
-              {mobileMenuOpen ? '✕' : '☰'}
+              <SvgIcon name={mobileMenuOpen ? 'x' : 'menu'} className="w-5 h-5" />
             </button>
           </div>
 
@@ -534,8 +536,8 @@ function AppContent() {
               </h3>
               <p className="text-slate-500 text-xs sm:text-sm leading-relaxed">
                 <ResponsiveText
-                  mobile="Hệ thống CSKH & Bảo hành điện tử QR mảng sửa chữa máy tính và phần mềm."
-                  desktop="Hệ thống Web Quét Mã QR Chăm Sóc Khách Hàng Về Mảng Sửa Chữa Máy Tính Và Phần Mềm – Nền tảng số hóa quy trình tiếp nhận thiết bị & yêu cầu phần mềm qua mã QR, theo dõi tiến độ kiểm tra - khắc phục sự cố thời gian thực, cấp sổ bảo hành điện tử (e-Warranty) và đánh giá chất lượng phục vụ thuộc Công ty Cổ phần Lục Giác."
+                  mobile="Hệ thống tiếp nhận sửa chữa và tra cứu bảo hành điện tử qua mã QR."
+                  desktop="Hệ thống tiếp nhận thiết bị máy tính, theo dõi tiến độ kiểm tra – sửa chữa và quản lý bảo hành điện tử qua mã QR thuộc Công ty Cổ phần Lục Giác."
                 />
               </p>
             </div>

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import api from '../../services/api';
 import ResponsiveText from '../../components/ResponsiveText';
+import SvgIcon from '../../components/SvgIcon';
 
 function BookingForm() {
   const location = useLocation();
@@ -68,12 +69,12 @@ function BookingForm() {
   if (success) {
     return (
       <div className="bg-[#f0f5fa] min-h-[80vh] flex items-center justify-center p-3 sm:p-4">
-        <div className="max-w-xl w-full bg-white rounded-3xl shadow-xl p-5 sm:p-6 md:p-8 text-center border-t-8 border-brand-green">
-          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-green-100 text-emerald-600 rounded-full flex items-center justify-center text-2xl sm:text-3xl mx-auto mb-3 sm:mb-4">
-            ✓
+        <div className="max-w-xl w-full bg-white rounded-2xl shadow-sm p-5 sm:p-6 md:p-8 text-center border border-slate-200 border-t-4 border-t-brand-green">
+          <div className="w-12 h-12 sm:w-14 sm:h-14 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+            <SvgIcon name="check" className="w-6 h-6" strokeWidth={2.5} />
           </div>
           <h2 className="text-xl sm:text-2xl font-bold text-brand-blue mb-1.5 sm:mb-2">
-            <ResponsiveText mobile="Đặt Lịch Thành Công!" desktop="Đặt Lịch Hẹn CSKH Thành Công!" />
+            <ResponsiveText mobile="Đặt lịch thành công" desktop="Đặt Lịch Hẹn Thành Công" />
           </h2>
           <p className="text-slate-600 text-xs md:text-sm mb-4 sm:mb-5">
             <ResponsiveText
@@ -84,60 +85,58 @@ function BookingForm() {
               }
               desktop={
                 <>
-                  Cảm ơn bạn <strong>{formData.fullName}</strong> đã đặt lịch hẹn trước. Hệ thống đã tự động gửi xác nhận qua <strong>Zalo ZNS / Tin nhắn SMS</strong> đến số điện thoại <strong>{formData.phone}</strong>.
+                  Cảm ơn <strong>{formData.fullName}</strong> đã đặt lịch. Hệ thống đã gửi tin nhắn SMS xác nhận đến số điện thoại <strong>{formData.phone}</strong>.
                 </>
               }
             />
           </p>
 
-          {/* KHUNG THÔNG BÁO XÁC NHẬN ZALO / SMS TỰ ĐỘNG */}
-          <div className="mb-5 sm:mb-6 p-3.5 sm:p-4 rounded-2xl bg-gradient-to-br from-blue-50 to-emerald-50 border border-blue-200/70 text-left space-y-2.5 sm:space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-1 border-b border-blue-100 pb-2">
-              <span className="inline-flex items-center gap-2 text-xs font-bold text-brand-blue">
-                <span className="relative flex h-2.5 w-2.5 shrink-0">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-                </span>
-                <ResponsiveText mobile="📲 Đã gửi SMS xác nhận" desktop="📲 Đã gửi tin nhắn xác nhận tự động qua Zalo ZNS / SMS" />
+          {/* Khung tóm tắt lịch hẹn */}
+          <div className="mb-5 sm:mb-6 p-4 rounded-xl bg-slate-50 border border-slate-200 text-left space-y-2.5 text-xs">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-2.5">
+              <span className="inline-flex items-center gap-1.5 font-bold text-slate-800">
+                <SvgIcon name="building" className="w-4 h-4 text-brand-blue" />
+                <span>CÔNG TY CỔ PHẦN LỤC GIÁC</span>
               </span>
-              <span className="text-[11px] font-bold bg-white text-emerald-700 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                Gửi tới: {formData.phone}
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-md border border-emerald-200">
+                <SvgIcon name="check-circle" className="w-3.5 h-3.5" />
+                <span>Đã ghi nhận ({formData.phone})</span>
               </span>
             </div>
 
-            {/* Bong bóng tin nhắn mô phỏng thực tế Zalo OA */}
-            <div className="bg-white rounded-xl p-3 sm:p-3.5 border border-slate-200/80 shadow-2xs space-y-2 text-xs">
-              <div className="hidden sm:flex items-center justify-between border-b border-slate-100 pb-2">
-                <div className="flex items-center gap-1.5 font-bold text-slate-800 text-xs">
-                  <span>🏢 CÔNG TY CỔ PHẦN LỤC GIÁC</span>
-                  <span className="text-blue-500 text-xs" title="Tài khoản Doanh nghiệp xác thực">☑️</span>
-                </div>
-                <span className="text-[10px] text-slate-400">Tin nhắn Zalo OA / SMS</span>
-              </div>
-              <p className="hidden sm:block text-slate-700 leading-relaxed">
-                Kính gửi <strong>{formData.fullName}</strong>, lịch hẹn chăm sóc &amp; kiểm tra máy tính của Quý khách đã được xác nhận thành công:
+            <div className="space-y-1.5 text-slate-700">
+              <p>
+                <strong>Thời gian hẹn:</strong>{' '}
+                <span className="text-brand-blue font-bold">{formData.gioHen}</span> - Ngày{' '}
+                <span className="text-brand-blue font-bold">{formData.ngayHen}</span>
               </p>
-              <div className="bg-slate-50 rounded-lg p-2.5 text-[11px] text-slate-700 space-y-1 border border-slate-100">
-                <p>• <strong>Thời gian hẹn:</strong> <span className="text-brand-blue font-bold">{formData.gioHen}</span> - Ngày <span className="text-brand-blue font-bold">{formData.ngayHen}</span></p>
-                <p>• <strong>Thiết bị / Dịch vụ:</strong> {formData.deviceName || 'Máy tính / Phần mềm theo lịch hẹn'}</p>
-                <p>• <strong>Địa điểm quầy CSKH:</strong> 615 Âu Cơ, P. Phú Trung, Q. Tân Phú, TP.HCM</p>
-              </div>
-              <div className="hidden sm:block text-[11px] text-slate-500 italic bg-amber-50/60 p-2 rounded border border-amber-100">
-                💡 <strong>Quý khách lưu ý:</strong> Vui lòng mở ứng dụng <strong>Zalo</strong> hoặc kiểm tra tin nhắn <strong>SMS</strong> trên máy ({formData.phone}). Khi đến quầy lễ tân, bạn chỉ cần đọc số điện thoại để được tiếp nhận ngay mà không cần chờ đợi!
-              </div>
+              <p>
+                <strong>Thiết bị / Dịch vụ:</strong> {formData.deviceName || 'Máy tính / Phần mềm theo lịch hẹn'}
+              </p>
+              <p>
+                <strong>Địa điểm quầy CSKH:</strong> 615 Âu Cơ, P. Phú Trung, Q. Tân Phú, TP.HCM
+              </p>
             </div>
+
+            <p className="hidden sm:flex items-start gap-2 text-[11px] text-slate-600 bg-white p-2.5 rounded-lg border border-slate-200">
+              <SvgIcon name="info" className="w-3.5 h-3.5 text-brand-blue mt-0.5 shrink-0" />
+              <span>
+                Vui lòng kiểm tra tin nhắn SMS trên số <strong>{formData.phone}</strong>. Khi đến quầy lễ tân, bạn chỉ cần đọc số điện thoại để được tiếp nhận nhanh.
+              </span>
+            </p>
           </div>
 
           <div className="flex flex-col sm:flex-row justify-center gap-2.5 sm:gap-3">
             <Link
               to="/tra-cuu"
-              className="px-5 py-2.5 bg-brand-blue text-white font-bold text-xs rounded-xl hover:bg-blue-700 transition shadow-sm"
+              className="px-5 py-2.5 bg-brand-blue text-white font-bold text-xs rounded-xl hover:bg-brand-blue-hover transition shadow-2xs inline-flex items-center justify-center gap-1.5"
             >
-              📷 Mở Cổng Quét QR &amp; Tra Cứu
+              <SvgIcon name="qr" className="w-4 h-4" />
+              <span>Mở Cổng Quét QR &amp; Tra Cứu</span>
             </Link>
             <Link
               to="/"
-              className="px-5 py-2.5 border border-slate-200 text-slate-700 font-bold text-xs rounded-xl hover:bg-slate-50 transition"
+              className="px-5 py-2.5 border border-slate-200 text-slate-700 font-bold text-xs rounded-xl hover:bg-slate-50 transition inline-flex items-center justify-center"
             >
               Trở về Trang chủ
             </Link>
@@ -150,11 +149,12 @@ function BookingForm() {
   return (
     <div className="bg-[#f0f5fa] flex flex-col">
       <main className="flex-1 container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-2xl">
-        <div className="bg-white rounded-3xl shadow-xl overflow-hidden border-t-8 border-brand-orange">
+        <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-200 border-t-4 border-t-brand-orange">
           <div className="p-5 sm:p-6 md:p-8">
             <div className="text-center mb-5 sm:mb-6">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 text-brand-orange text-xs font-bold uppercase tracking-wider mb-1.5 sm:mb-2">
-                <ResponsiveText mobile="📅 Đặt Lịch Hẹn" desktop="📅 Đặt Lịch Hẹn Dịch Vụ & Hỗ Trợ Kỹ Thuật" />
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-orange-50 text-brand-orange border border-orange-200 text-xs font-semibold uppercase tracking-wider mb-1.5 sm:mb-2">
+                <SvgIcon name="calendar" className="w-3.5 h-3.5" />
+                <ResponsiveText mobile="Đặt Lịch Hẹn" desktop="Đặt Lịch Hẹn Dịch Vụ & Hỗ Trợ Kỹ Thuật" />
               </span>
               <h1 className="text-xl sm:text-2xl font-bold text-brand-blue mb-1">
                 <ResponsiveText mobile="Đặt Lịch Kiểm Tra & Hỗ Trợ" desktop="Đặt Lịch Hẹn Kiểm Tra Máy Tính & Hỗ Trợ Phần Mềm" />
@@ -162,15 +162,15 @@ function BookingForm() {
               <p className="text-slate-500 text-xs md:text-sm">
                 <ResponsiveText
                   mobile="Đặt lịch trước để được ưu tiên tiếp nhận tại quầy 615 Âu Cơ."
-                  desktop="Đặt lịch trước để được ưu tiên tiếp nhận kiểm tra phần cứng, xử lý sự cố phần mềm và cấp Mã QR Hồ sơ CSKH ngay khi đến quầy."
+                  desktop="Đặt lịch trước để được ưu tiên tiếp nhận kiểm tra phần cứng, xử lý sự cố phần mềm khi đến quầy."
                 />
               </p>
             </div>
 
             {selectedServiceBanner && (
-              <div className="mb-5 sm:mb-6 p-3.5 sm:p-4 bg-orange-50 border-l-4 border-brand-orange rounded-r-xl flex items-center justify-between animate-in fade-in">
+              <div className="mb-5 sm:mb-6 p-3.5 sm:p-4 bg-orange-50/70 border-l-4 border-brand-orange rounded-r-xl flex items-center justify-between">
                 <div className="flex items-center gap-3 min-w-0">
-                  <span className="text-2xl shrink-0">⚡</span>
+                  <SvgIcon name="wrench" className="w-5 h-5 text-brand-orange shrink-0" />
                   <div className="min-w-0">
                     <div className="text-[10px] uppercase font-extrabold text-brand-orange tracking-wider">Nội dung hẹn</div>
                     <div className="font-bold text-slate-800 text-sm md:text-base truncate">{selectedServiceBanner}</div>
@@ -200,7 +200,7 @@ function BookingForm() {
                 >
                   <option value="TAI_CUA_HANG">Kiểm tra &amp; Sửa chữa phần cứng Máy tính / Laptop tại quầy (615 Âu Cơ)</option>
                   <option value="TU_VAN_HO_TRO">Hỗ trợ cài đặt &amp; Khắc phục sự cố Phần mềm / Hệ điều hành</option>
-                  <option value="BAO_HANH_DINH_KY">Bảo hành định kỳ &amp; Chăm sóc sau sửa chữa (e-Warranty)</option>
+                  <option value="BAO_HANH_DINH_KY">Bảo hành định kỳ &amp; Chăm sóc sau sửa chữa</option>
                 </select>
               </div>
 
@@ -220,7 +220,8 @@ function BookingForm() {
                     </label>
                     {zaloCheckStatus === 'LINKED' && (
                       <span className="text-[11px] font-bold text-emerald-600 flex items-center gap-1">
-                        ✓ Tự động gửi Zalo/SMS
+                        <SvgIcon name="check" className="w-3 h-3" />
+                        <span>Tự động gửi SMS</span>
                       </span>
                     )}
                     {zaloCheckStatus === 'INVALID' && (
@@ -265,17 +266,17 @@ function BookingForm() {
                 <label className="block text-xs font-bold text-slate-700 mb-1">
                   <ResponsiveText mobile="Mô tả sự cố *" desktop="Mô tả tình trạng máy tính / Sự cố phần mềm cần hỗ trợ *" />
                 </label>
-                <textarea required rows="3" placeholder="Mô tả chi tiết lỗi phần cứng máy tính hoặc sự cố phần mềm bạn cần hỗ trợ..."
+                <textarea required rows="3" placeholder="Mô tả tình trạng lỗi phần cứng hoặc sự cố phần mềm cần hỗ trợ..."
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-brand-blue focus:ring focus:ring-blue-200 outline-none text-sm"
                   value={formData.moTaLoi} onChange={e => setFormData({...formData, moTaLoi: e.target.value})}></textarea>
               </div>
 
               <button type="submit" disabled={loading}
-                className="w-full py-3.5 bg-brand-blue hover:bg-blue-700 text-white font-bold text-sm sm:text-base rounded-xl shadow-lg hover:shadow-xl transition-all mt-3 sm:mt-4 disabled:opacity-50 cursor-pointer">
+                className="w-full py-3.5 bg-brand-blue hover:bg-brand-blue-hover text-white font-bold text-sm sm:text-base rounded-xl shadow-xs transition-all mt-3 sm:mt-4 disabled:opacity-50 cursor-pointer">
                 {loading ? (
                   'Đang gửi thông tin...'
                 ) : (
-                  <ResponsiveText mobile="Xác Nhận Đặt Lịch →" desktop="XÁC NHẬN ĐẶT LỊCH HẸN CSKH" />
+                  <ResponsiveText mobile="Xác Nhận Đặt Lịch →" desktop="XÁC NHẬN ĐẶT LỊCH HẸN" />
                 )}
               </button>
             </form>

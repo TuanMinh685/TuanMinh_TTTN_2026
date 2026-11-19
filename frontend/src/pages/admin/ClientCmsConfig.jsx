@@ -2,6 +2,22 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import AdminNav from '../../components/AdminNav';
+import SvgIcon, { DynamicIcon } from '../../components/SvgIcon';
+
+const CMS_ICON_OPTIONS = [
+  { value: 'laptop', label: 'Laptop' },
+  { value: 'desktop', label: 'Máy tính bàn' },
+  { value: 'disc', label: 'Phần mềm / OS' },
+  { value: 'wrench', label: 'Sửa chữa' },
+  { value: 'shield', label: 'Bảo hành' },
+  { value: 'lock', label: 'Bảo mật / Dữ liệu' },
+  { value: 'globe', label: 'Mạng / Internet' },
+  { value: 'zap', label: 'Nâng cấp / Tốc độ' },
+  { value: 'clock', label: 'Tiến độ' },
+  { value: 'star', label: 'Đánh giá' },
+  { value: 'file-text', label: 'Phiếu tiếp nhận' },
+  { value: 'camera', label: 'Hình ảnh' }
+];
 
 export default function ClientCmsConfig() {
   const [config, setConfig] = useState(null);
@@ -73,7 +89,7 @@ export default function ClientCmsConfig() {
         ...(prev?.services || []),
         {
           id: `srv-${Date.now()}`,
-          icon: '💻',
+          icon: 'laptop',
           tag: 'Dịch vụ mới',
           title: 'Hạng Mục Dịch Vụ Mới',
           desc: 'Mô tả chi tiết hạng mục dịch vụ kỹ thuật...',
@@ -137,13 +153,13 @@ export default function ClientCmsConfig() {
         setHasChanges(false);
         setStatusMessage({
           type: 'success',
-          text: '🎉 Đã lưu và cập nhật nội dung thành công! Trang chủ khách hàng đã nhận phiên bản mới nhất.'
+          text: 'Đã lưu và cập nhật nội dung thành công. Trang chủ khách hàng đã nhận phiên bản mới nhất.'
         });
       }
     } catch (err) {
       setStatusMessage({
         type: 'error',
-        text: '❌ Lỗi lưu cấu hình: ' + (err.response?.data?.message || err.message)
+        text: 'Lỗi lưu cấu hình: ' + (err.response?.data?.message || err.message)
       });
     } finally {
       setSaving(false);
@@ -163,13 +179,13 @@ export default function ClientCmsConfig() {
         setHasChanges(false);
         setStatusMessage({
           type: 'success',
-          text: '🔄 Đã khôi phục toàn bộ giao diện trang chủ về bản chuẩn mặc định thành công!'
+          text: 'Đã khôi phục toàn bộ nội dung trang chủ về mặc định.'
         });
       }
     } catch (err) {
       setStatusMessage({
         type: 'error',
-        text: '❌ Không thể khôi phục mặc định: ' + (err.response?.data?.message || err.message)
+        text: 'Không thể khôi phục mặc định: ' + (err.response?.data?.message || err.message)
       });
     } finally {
       setSaving(false);
@@ -181,26 +197,25 @@ export default function ClientCmsConfig() {
       <div className="mx-auto max-w-7xl space-y-6">
         <AdminNav activeKey="CMS_CLIENT" />
 
-        {/* HEADER STUDIO HIỆN ĐẠI */}
-        <div className="relative overflow-hidden rounded-3xl bg-white p-6 shadow-sm border border-slate-200/90">
-          <div className="absolute top-0 right-0 h-40 w-40 bg-gradient-to-bl from-blue-100/60 to-transparent rounded-full blur-2xl pointer-events-none -mr-10 -mt-10"></div>
-          
-          <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+        {/* HEADER QUẢN TRỊ NỘI DUNG */}
+        <div className="rounded-2xl bg-white p-6 shadow-xs border border-slate-200">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-1.5">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-extrabold uppercase tracking-wider text-brand-blue border border-blue-200/60">
-                  <span className="h-2 w-2 rounded-full bg-brand-blue animate-pulse"></span>
-                  CMS Studio Pro v2.5
+                <span className="inline-flex items-center gap-1.5 rounded-md bg-blue-50 px-2.5 py-0.5 text-xs font-bold text-brand-blue border border-blue-200">
+                  <SvgIcon name="edit" className="w-3.5 h-3.5" />
+                  <span>Cấu Hình Trang Chủ</span>
                 </span>
-                <span className="inline-flex items-center gap-1 text-xs text-slate-500 font-semibold">
-                  <span>●</span> Đồng bộ trực tiếp Trang chủ
+                <span className="inline-flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                  <span>Đồng bộ trực tiếp với Trang chủ</span>
                 </span>
               </div>
-              <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-                Quản Trị &amp; Biên Tập Giao Diện Client
+              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                Quản Trị Nội Dung Giao Diện Khách Hàng
               </h1>
               <p className="text-xs sm:text-sm text-slate-500 max-w-3xl leading-relaxed">
-                Tùy biến thương hiệu, thanh thông báo ưu đãi, tiêu đề Hero, hình ảnh quảng bá và danh mục dịch vụ tiếp nhận khách hàng với chế độ xem trước trực quan.
+                Chỉnh sửa thông tin đơn vị, thông báo đầu trang, tiêu đề Hero, ảnh banner và danh mục dịch vụ hiển thị ngoài trang chủ.
               </p>
             </div>
 
@@ -210,12 +225,12 @@ export default function ClientCmsConfig() {
                 to="/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 transition cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 transition cursor-pointer"
                 title="Mở tab mới xem giao diện thực tế"
               >
-                <span>🌐</span>
-                <span>Xem Live Trang Chủ</span>
-                <span className="text-[10px] text-slate-400">↗</span>
+                <SvgIcon name="globe" className="w-4 h-4 text-slate-600" />
+                <span>Xem Trang Chủ</span>
+                <SvgIcon name="external-link" className="w-3 h-3 text-slate-400" />
               </Link>
 
               <button
@@ -225,7 +240,7 @@ export default function ClientCmsConfig() {
                 className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 transition disabled:opacity-50 cursor-pointer"
                 title="Trả về cấu hình gốc mặc định của hệ thống"
               >
-                <span>🔄</span>
+                <SvgIcon name="refresh" className="w-4 h-4 text-slate-600" />
                 <span>Khôi Phục Gốc</span>
               </button>
 
@@ -233,14 +248,14 @@ export default function ClientCmsConfig() {
                 type="button"
                 onClick={handleSaveConfig}
                 disabled={saving || loading}
-                className={`inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-extrabold text-white shadow-sm transition cursor-pointer disabled:opacity-50 ${
+                className={`inline-flex items-center gap-1.5 rounded-xl px-5 py-2.5 text-xs font-bold text-white shadow-2xs transition cursor-pointer disabled:opacity-50 ${
                   hasChanges
-                    ? 'bg-emerald-600 hover:bg-emerald-700 ring-2 ring-emerald-500/20 animate-pulse'
+                    ? 'bg-emerald-600 hover:bg-emerald-700'
                     : 'bg-brand-blue hover:bg-brand-blue-hover'
                 }`}
               >
-                <span>💾</span>
-                <span>{saving ? 'Đang xuất bản...' : hasChanges ? 'Xuất Bản Thay Đổi *' : 'Đã Lưu Mới Nhất'}</span>
+                <SvgIcon name="save" className="w-4 h-4" />
+                <span>{saving ? 'Đang lưu...' : hasChanges ? 'Lưu Thay Đổi *' : 'Đã Lưu Mới Nhất'}</span>
               </button>
             </div>
           </div>
@@ -248,65 +263,66 @@ export default function ClientCmsConfig() {
           {/* THÔNG BÁO TRẠNG THÁI */}
           {statusMessage.text && (
             <div
-              className={`mt-4 rounded-2xl border p-4 text-xs font-bold flex items-center justify-between shadow-xs transition-all ${
+              className={`mt-4 rounded-xl border p-4 text-xs font-bold flex items-center justify-between shadow-2xs transition-all ${
                 statusMessage.type === 'success'
-                  ? 'border-emerald-200 bg-emerald-50/80 text-emerald-800'
-                  : 'border-red-200 bg-red-50/80 text-red-700'
+                  ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                  : 'border-red-200 bg-red-50 text-red-700'
               }`}
             >
               <div className="flex items-center gap-2">
-                <span className="text-base">{statusMessage.type === 'success' ? '✓' : '⚠️'}</span>
+                <SvgIcon name={statusMessage.type === 'success' ? 'check-circle' : 'alert'} className="w-4 h-4 shrink-0" />
                 <span>{statusMessage.text}</span>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <Link to="/" target="_blank" className="underline font-extrabold text-brand-blue hover:text-blue-800">
+                <Link to="/" target="_blank" className="underline font-bold text-brand-blue hover:text-blue-800">
                   Kiểm tra ngay →
                 </Link>
                 <button
                   type="button"
                   onClick={() => setStatusMessage({ type: '', text: '' })}
-                  className="text-slate-400 hover:text-slate-700 ml-2 font-black text-sm"
+                  className="text-slate-400 hover:text-slate-700 ml-2 p-1 cursor-pointer"
+                  aria-label="Đóng"
                 >
-                  ✕
+                  <SvgIcon name="x" className="w-4 h-4" />
                 </button>
               </div>
             </div>
           )}
 
-          {/* THANH SEGMENTED TABS HIỆN ĐẠI */}
+          {/* THANH TABS */}
           <div className="mt-6 flex flex-wrap gap-2 border-t border-slate-100 pt-5">
             {[
               {
                 id: 'HERO_BRAND',
-                icon: '🏢',
-                title: 'Thương Hiệu & Hero Banner',
+                icon: 'building',
+                title: 'Thương Hiệu & Phần Đầu Trang',
                 desc: 'Logo, Banner, Tiêu đề chính'
               },
               {
                 id: 'SERVICES',
-                icon: '🛠️',
-                title: `Danh Mục Dịch Vụ & Báo Giá (${config?.services?.length || 0})`,
+                icon: 'wrench',
+                title: `Danh Mục Dịch Vụ (${config?.services?.length || 0})`,
                 desc: 'Ảnh, Bảng giá, Nội dung dịch vụ'
               },
               {
                 id: 'PILLARS',
-                icon: '⭐',
-                title: `4 Trụ Cột Quy Trình QR (${config?.pillars?.length || 0})`,
-                desc: 'Các bước chuẩn tiếp nhận CSKH'
+                icon: 'star',
+                title: `Quy Trình Tiếp Nhận QR (${config?.pillars?.length || 0})`,
+                desc: 'Các bước tiếp nhận & bảo hành'
               }
             ].map(tab => (
               <button
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 min-w-[200px] text-left rounded-2xl p-3 border transition-all cursor-pointer ${
+                className={`flex-1 min-w-[200px] text-left rounded-xl p-3 border transition-all cursor-pointer ${
                   activeTab === tab.id
-                    ? 'border-brand-blue bg-blue-50/80 shadow-xs ring-2 ring-blue-500/20'
+                    ? 'border-brand-blue bg-blue-50/80 shadow-2xs ring-1 ring-blue-500/20'
                     : 'border-slate-200 bg-slate-50/70 hover:bg-slate-100'
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-base">{tab.icon}</span>
+                  <SvgIcon name={tab.icon} className={`w-4 h-4 ${activeTab === tab.id ? 'text-brand-blue' : 'text-slate-500'}`} />
                   <span className={`text-xs font-bold ${activeTab === tab.id ? 'text-brand-blue' : 'text-slate-800'}`}>
                     {tab.title}
                   </span>
@@ -319,14 +335,11 @@ export default function ClientCmsConfig() {
           </div>
         </div>
 
-        {/* LOADING SHIMMER */}
+        {/* LOADING */}
         {loading || !config ? (
-          <div className="rounded-3xl border border-slate-200 bg-white p-16 text-center shadow-sm">
-            <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-brand-blue text-2xl animate-spin mb-3">
-              ⚡
-            </div>
-            <p className="text-sm font-extrabold text-slate-700">Đang đồng bộ cấu hình từ hệ thống...</p>
-            <p className="text-xs text-slate-400 mt-1">Vui lòng chờ trong giây lát</p>
+          <div className="rounded-2xl border border-slate-200 bg-white p-16 text-center shadow-xs">
+            <div className="w-10 h-10 rounded-full border-4 border-brand-blue border-t-transparent animate-spin mx-auto mb-3"></div>
+            <p className="text-sm font-bold text-slate-700">Đang tải cấu hình từ hệ thống...</p>
           </div>
         ) : (
           <form onSubmit={handleSaveConfig} className="space-y-6">
@@ -339,21 +352,22 @@ export default function ClientCmsConfig() {
                 
                 {/* CỘT TRÁI: THƯƠNG HIỆU & THANH PROMO BANNER (6 CỘT) */}
                 <div className="lg:col-span-6 space-y-5">
-                  <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+                  <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">
                     <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                      <h3 className="text-sm font-black uppercase tracking-wider text-slate-800 flex items-center gap-2">
-                        <span>🏢</span> Nhận Diện Thương Hiệu &amp; Header
+                      <h3 className="text-sm font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                        <SvgIcon name="building" className="w-4 h-4 text-brand-blue" />
+                        <span>Thông Tin Đơn Vị &amp; Header</span>
                       </h3>
-                      <span className="text-[11px] font-bold text-brand-blue bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200">
-                        Brand Identity
+                      <span className="text-[11px] font-semibold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-md border border-slate-200">
+                        Đầu trang
                       </span>
                     </div>
 
                     {/* TOGGLE PROMO BANNER */}
-                    <div className="rounded-2xl bg-gradient-to-r from-blue-50/60 to-slate-50 border border-blue-100 p-4 flex items-center justify-between gap-3">
+                    <div className="rounded-xl bg-slate-50 border border-slate-200 p-4 flex items-center justify-between gap-3">
                       <div>
-                        <p className="text-xs font-bold text-slate-800">Thanh Thông Báo / Ưu Đãi Đầu Trang</p>
-                        <p className="text-[11px] text-slate-500 mt-0.5">Hiển thị dòng thông báo chạy đầu trang chủ website</p>
+                        <p className="text-xs font-bold text-slate-800">Thanh Thông Báo Đầu Trang</p>
+                        <p className="text-[11px] text-slate-500 mt-0.5">Hiển thị dòng thông báo trên đầu trang chủ</p>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input
@@ -368,15 +382,16 @@ export default function ClientCmsConfig() {
 
                     {config.brand?.showPromoBanner && (
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                          📢 Nội dung dòng thông báo ưu đãi
+                        <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 mb-1.5">
+                          <SvgIcon name="bell" className="w-3.5 h-3.5 text-brand-blue" />
+                          <span>Nội dung dòng thông báo</span>
                         </label>
                         <input
                           type="text"
                           value={config.brand?.promoBannerText || ''}
                           onChange={(e) => handleBrandChange('promoBannerText', e.target.value)}
                           className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:border-brand-blue focus:ring-2 focus:ring-blue-100"
-                          placeholder="Ví dụ: Kênh CSKH Điện Tử QR: Miễn phí kiểm tra lỗi tại quầy..."
+                          placeholder="Ví dụ: Miễn phí kiểm tra lỗi tại quầy 615 Âu Cơ..."
                         />
                       </div>
                     )}
@@ -444,7 +459,8 @@ export default function ClientCmsConfig() {
                           />
                           <div className="flex items-center gap-2">
                             <label className="inline-flex items-center gap-1.5 rounded-lg bg-white border border-slate-300 px-3 py-1 text-[11px] font-bold text-slate-700 hover:bg-slate-100 cursor-pointer shadow-2xs transition">
-                              <span>📁 Tải Logo Từ Máy</span>
+                              <SvgIcon name="upload" className="w-3.5 h-3.5" />
+                              <span>Tải Logo Từ Máy</span>
                               <input
                                 type="file"
                                 accept="image/*"
@@ -468,13 +484,14 @@ export default function ClientCmsConfig() {
 
                 {/* CỘT PHẢI: HERO BANNER & TIÊU ĐỀ LỚN (6 CỘT) */}
                 <div className="lg:col-span-6 space-y-5">
-                  <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+                  <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">
                     <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                      <h3 className="text-sm font-black uppercase tracking-wider text-slate-800 flex items-center gap-2">
-                        <span>🖼️</span> Tiêu Đề Hero &amp; Banner Minh Họa
+                      <h3 className="text-sm font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                        <SvgIcon name="image" className="w-4 h-4 text-brand-blue" />
+                        <span>Tiêu Đề &amp; Ảnh Banner Trang Chủ</span>
                       </h3>
-                      <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                        Hero Section
+                      <span className="text-[11px] font-semibold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-md border border-slate-200">
+                        Banner chính
                       </span>
                     </div>
 
@@ -564,7 +581,8 @@ export default function ClientCmsConfig() {
                             />
                             <div className="flex flex-wrap items-center gap-2">
                               <label className="inline-flex items-center gap-1.5 rounded-lg bg-brand-blue hover:bg-brand-blue-hover px-3 py-1.5 text-[11px] font-bold text-white cursor-pointer shadow-2xs transition">
-                                <span>📁 Tải Ảnh Mới</span>
+                                <SvgIcon name="upload" className="w-3.5 h-3.5" />
+                                <span>Tải Ảnh Mới</span>
                                 <input
                                   type="file"
                                   accept="image/*"
@@ -594,27 +612,28 @@ export default function ClientCmsConfig() {
             {/* TAB 2: DANH MỤC DỊCH VỤ & BẢNG GIÁ                       */}
             {/* ======================================================== */}
             {activeTab === 'SERVICES' && (
-              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-6">
+              <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="text-base font-black text-slate-900 uppercase tracking-wider">
-                        🛠️ Quản Lý Hạng Mục Dịch Vụ Tiếp Nhận ({config.services?.length || 0})
+                      <h3 className="text-base font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                        <SvgIcon name="wrench" className="w-4 h-4 text-brand-blue" />
+                        <span>Quản Lý Hạng Mục Dịch Vụ ({config.services?.length || 0})</span>
                       </h3>
-                      <span className="text-xs font-bold bg-blue-50 text-brand-blue px-2.5 py-0.5 rounded-full border border-blue-200">
-                        Realtime Catalog
+                      <span className="text-xs font-semibold bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded-md border border-slate-200">
+                        Danh mục
                       </span>
                     </div>
                     <p className="text-xs text-slate-500 mt-1 max-w-2xl leading-relaxed">
-                      Các hạng mục này hiển thị trực tiếp trên trang chủ khách hàng và danh sách chọn khi đặt lịch hẹn trực tuyến.
+                      Các hạng mục này hiển thị trên trang chủ khách hàng và danh sách chọn khi đặt lịch hẹn.
                     </p>
                   </div>
                   <button
                     type="button"
                     onClick={handleAddService}
-                    className="inline-flex items-center gap-2 rounded-2xl bg-brand-blue hover:bg-brand-blue-hover px-5 py-2.5 text-xs font-extrabold text-white shadow-sm transition shrink-0 cursor-pointer"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-brand-blue hover:bg-brand-blue-hover px-5 py-2.5 text-xs font-bold text-white shadow-2xs transition shrink-0 cursor-pointer"
                   >
-                    <span className="text-sm">+</span>
+                    <SvgIcon name="plus" className="w-4 h-4" />
                     <span>Thêm Hạng Mục Mới</span>
                   </button>
                 </div>
@@ -623,12 +642,12 @@ export default function ClientCmsConfig() {
                   {(config.services || []).map((srv, idx) => (
                     <div
                       key={srv.id || idx}
-                      className="rounded-3xl border border-slate-200/90 bg-gradient-to-b from-white to-slate-50/40 p-5 space-y-3.5 shadow-2xs hover:shadow-xs hover:border-slate-300 transition-all"
+                      className="rounded-2xl border border-slate-200 bg-slate-50/40 p-5 space-y-3.5 hover:border-slate-300 transition-all"
                     >
                       {/* HEADER DỊCH VỤ */}
-                      <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                      <div className="flex items-center justify-between border-b border-slate-200/70 pb-2.5">
                         <div className="flex items-center gap-2">
-                          <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-50 text-xs font-extrabold text-brand-blue border border-blue-200">
+                          <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-50 text-xs font-bold text-brand-blue border border-blue-200">
                             {idx + 1}
                           </span>
                           <span className="text-xs font-bold text-slate-800 truncate max-w-[200px]">
@@ -638,20 +657,20 @@ export default function ClientCmsConfig() {
                         <button
                           type="button"
                           onClick={() => handleRemoveService(idx)}
-                          className="rounded-xl border border-red-200 bg-red-50/50 hover:bg-red-100 text-red-600 px-2.5 py-1 text-[11px] font-bold transition cursor-pointer flex items-center gap-1"
+                          className="rounded-lg border border-red-200 bg-red-50/50 hover:bg-red-100 text-red-600 px-2.5 py-1 text-[11px] font-bold transition cursor-pointer flex items-center gap-1"
                           title="Xóa hạng mục dịch vụ này"
                         >
-                          <span>🗑️</span>
+                          <SvgIcon name="trash" className="w-3.5 h-3.5" />
                           <span>Xóa</span>
                         </button>
                       </div>
 
                       {/* KHUNG ẢNH DỊCH VỤ */}
-                      <div className="flex items-center gap-3.5 bg-white p-3 rounded-2xl border border-slate-200">
+                      <div className="flex items-center gap-3.5 bg-white p-3 rounded-xl border border-slate-200">
                         <img
                           src={srv.imageUrl || '/img/cskh-banner.svg'}
                           alt={srv.title}
-                          className="h-16 w-24 rounded-xl object-cover border border-slate-200 bg-slate-50 shrink-0"
+                          className="h-16 w-24 rounded-lg object-cover border border-slate-200 bg-slate-50 shrink-0"
                         />
                         <div className="flex-1 min-w-0 space-y-1.5">
                           <input
@@ -663,7 +682,8 @@ export default function ClientCmsConfig() {
                           />
                           <div className="flex items-center gap-2">
                             <label className="inline-flex items-center gap-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 text-[11px] font-bold cursor-pointer transition">
-                              <span>📷 Tải ảnh</span>
+                              <SvgIcon name="camera" className="w-3.5 h-3.5" />
+                              <span>Tải ảnh</span>
                               <input
                                 type="file"
                                 accept="image/*"
@@ -687,14 +707,24 @@ export default function ClientCmsConfig() {
                       {/* 3 CỘT: ICON, TAG, BÁO GIÁ */}
                       <div className="grid grid-cols-3 gap-2.5">
                         <div>
-                          <label className="block text-[11px] font-bold text-slate-600 mb-1">Icon</label>
-                          <input
-                            type="text"
-                            value={srv.icon || ''}
-                            onChange={(e) => handleServiceChange(idx, 'icon', e.target.value)}
-                            className="w-full rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-center text-sm font-bold focus:outline-none focus:border-brand-blue"
-                            placeholder="💻"
-                          />
+                          <label className="block text-[11px] font-bold text-slate-600 mb-1">Biểu tượng SVG</label>
+                          <div className="flex items-center gap-1.5">
+                            <span className="h-8 w-8 rounded-lg bg-blue-50 text-brand-blue border border-blue-100 flex items-center justify-center shrink-0">
+                              <DynamicIcon value={srv.icon} className="w-4 h-4" />
+                            </span>
+                            <select
+                              value={srv.icon || 'laptop'}
+                              onChange={(e) => handleServiceChange(idx, 'icon', e.target.value)}
+                              className="w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-xs font-semibold text-slate-700 focus:outline-none focus:border-brand-blue"
+                            >
+                              {!CMS_ICON_OPTIONS.some(opt => opt.value === srv.icon) && srv.icon && (
+                                <option value={srv.icon}>Hiện tại ({srv.icon})</option>
+                              )}
+                              {CMS_ICON_OPTIONS.map(opt => (
+                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                              ))}
+                            </select>
+                          </div>
                         </div>
                         <div>
                           <label className="block text-[11px] font-bold text-slate-600 mb-1">Nhãn Tag</label>
@@ -747,21 +777,22 @@ export default function ClientCmsConfig() {
             )}
 
             {/* ======================================================== */}
-            {/* TAB 3: 4 TRỤ CỘT QUY TRÌNH QR                            */}
+            {/* TAB 3: QUY TRÌNH TIẾP NHẬN QR                            */}
             {/* ======================================================== */}
             {activeTab === 'PILLARS' && (
-              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-6">
+              <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-6">
                 <div className="border-b border-slate-100 pb-4">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-base font-black text-slate-900 uppercase tracking-wider">
-                      ⭐ 4 Trụ Cột Quy Trình Chăm Sóc Khách Hàng Qua Mã QR
+                    <h3 className="text-base font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                      <SvgIcon name="star" className="w-4 h-4 text-brand-blue" />
+                      <span>Quy Trình Tiếp Nhận &amp; Theo Dõi Qua Mã QR</span>
                     </h3>
-                    <span className="text-xs font-bold bg-amber-50 text-amber-800 px-2.5 py-0.5 rounded-full border border-amber-200">
-                      Standard Workflow
+                    <span className="text-xs font-semibold bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded-md border border-slate-200">
+                      4 bước chuẩn
                     </span>
                   </div>
                   <p className="text-xs text-slate-500 mt-1 max-w-2xl leading-relaxed">
-                    Quy trình 4 bước chuẩn xuyên suốt từ lúc tiếp nhận thiết bị, khám chẩn đoán, bàn giao thanh toán đến kích hoạt Sổ bảo hành điện tử e-Warranty.
+                    Quy trình 4 bước từ tiếp nhận thiết bị, kiểm tra sửa chữa, bàn giao thanh toán đến bảo hành điện tử.
                   </p>
                 </div>
 
@@ -769,30 +800,39 @@ export default function ClientCmsConfig() {
                   {(config.pillars || []).map((pillar, idx) => (
                     <div
                       key={pillar.step || idx}
-                      className="rounded-3xl border border-slate-200 bg-slate-50/60 p-5 space-y-3.5 shadow-2xs hover:border-slate-300 transition"
+                      className="rounded-2xl border border-slate-200 bg-slate-50/60 p-5 space-y-3.5 hover:border-slate-300 transition"
                     >
                       <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-brand-blue font-black text-xs border border-blue-200">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-blue-50 text-brand-blue font-bold text-xs border border-blue-200">
                           BƯỚC {pillar.step || `0${idx + 1}`}
                         </span>
                         <div className="flex items-center gap-2">
                           <span className="text-[11px] font-bold text-slate-500">Biểu tượng:</span>
-                          <input
-                            type="text"
-                            value={pillar.icon || ''}
+                          <span className="h-8 w-8 rounded-lg bg-white text-brand-blue border border-slate-200 flex items-center justify-center">
+                            <DynamicIcon value={pillar.icon} className="w-4 h-4" />
+                          </span>
+                          <select
+                            value={pillar.icon || 'laptop'}
                             onChange={(e) => handlePillarChange(idx, 'icon', e.target.value)}
-                            className="w-14 rounded-xl border border-slate-200 bg-white py-1 text-center text-base focus:outline-none focus:border-brand-blue font-bold"
-                          />
+                            className="rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 focus:outline-none focus:border-brand-blue"
+                          >
+                            {!CMS_ICON_OPTIONS.some(opt => opt.value === pillar.icon) && pillar.icon && (
+                              <option value={pillar.icon}>Hiện tại ({pillar.icon})</option>
+                            )}
+                            {CMS_ICON_OPTIONS.map(opt => (
+                              <option key={opt.value} value={opt.value}>{opt.label}</option>
+                            ))}
+                          </select>
                         </div>
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-600 mb-1">Tiêu Đề Trụ Cột</label>
+                        <label className="block text-[11px] font-bold text-slate-600 mb-1">Tiêu Đề Bước</label>
                         <input
                           type="text"
                           value={pillar.title || ''}
                           onChange={(e) => handlePillarChange(idx, 'title', e.target.value)}
-                          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-900 focus:outline-none focus:border-brand-blue"
+                          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-brand-blue"
                         />
                       </div>
 
@@ -811,16 +851,13 @@ export default function ClientCmsConfig() {
               </div>
             )}
 
-            {/* THANH THAO TÁC CỐ ĐỊNH PHÍA DƯỚI (STICKY BOTTOM BAR KHI CÓ THAY ĐỔI) */}
+            {/* THANH THAO TÁC CỐ ĐỊNH PHÍA DƯỚI */}
             {hasChanges && (
-              <div className="sticky bottom-4 z-40 rounded-2xl bg-slate-900 text-white p-4 shadow-xl border border-slate-700 flex flex-wrap items-center justify-between gap-3 animate-in fade-in slide-in-from-bottom-2">
+              <div className="sticky bottom-4 z-40 rounded-xl bg-slate-900 text-white p-4 shadow-lg border border-slate-700 flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5">
-                  <span className="flex h-3 w-3 relative">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
-                  </span>
+                  <span className="h-2.5 w-2.5 rounded-full bg-amber-400"></span>
                   <span className="text-xs font-bold text-amber-300">
-                    Bạn đang có thay đổi chưa xuất bản lên trang chủ!
+                    Bạn đang có thay đổi chưa lưu lên trang chủ.
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -835,10 +872,10 @@ export default function ClientCmsConfig() {
                     type="button"
                     onClick={handleSaveConfig}
                     disabled={saving}
-                    className="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-xs font-black text-white shadow-md transition cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+                    className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-xs font-bold text-white shadow-xs transition cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
                   >
-                    <span>💾</span>
-                    <span>{saving ? 'Đang xuất bản...' : 'Lưu & Áp Dụng Ngay'}</span>
+                    <SvgIcon name="save" className="w-4 h-4" />
+                    <span>{saving ? 'Đang lưu...' : 'Lưu & Áp Dụng Ngay'}</span>
                   </button>
                 </div>
               </div>

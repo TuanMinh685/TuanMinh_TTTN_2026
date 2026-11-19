@@ -99,7 +99,7 @@ export async function requestNotificationPermission() {
  * Bắn thông báo đẩy hiển thị trên màn hình khóa điện thoại kèm rung và chuông
  */
 export async function showPushNotification({
-  title = '🔔 CSKH Công Ty Cổ Phần Lục Giác',
+  title = 'CSKH Công Ty Cổ Phần Lục Giác',
   body = 'Hồ sơ thiết bị của bạn đã có cập nhật tiến độ mới!',
   ticketCode = '',
   isCompleted = false
