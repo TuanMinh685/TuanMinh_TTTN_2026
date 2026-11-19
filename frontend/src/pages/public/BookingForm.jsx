@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import api from '../../services/api';
 import ResponsiveText from '../../components/ResponsiveText';
@@ -22,31 +22,17 @@ function BookingForm() {
   const [selectedServiceBanner, setSelectedServiceBanner] = useState(targetService);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  // 'IDLE' | 'CHECKING' | 'LINKED' | 'INVALID'
-  const [zaloCheckStatus, setZaloCheckStatus] = useState('IDLE');
-
+  const vnMobileRegex = /^(0[35789])[0-9]{8}$/;
+  const cleanPhoneInput = (formData.phone || '').replace(/\s+/g, '');
   // Tự động kiểm tra liên kết tài khoản Zalo ngay khi nhập SĐT (không cần nhập 2 lần)
-  useEffect(() => {
-    const cleanPhone = (formData.phone || '').replace(/\s+/g, '');
-    if (!cleanPhone || cleanPhone.length < 9) {
-      setZaloCheckStatus('IDLE');
-      return;
-    }
-    setZaloCheckStatus('CHECKING');
-    const timer = setTimeout(() => {
-      const vnMobileRegex = /^(0[35789])[0-9]{8}$/;
-      if (vnMobileRegex.test(cleanPhone)) {
-        setZaloCheckStatus('LINKED');
-        setFormData(prev => ({ ...prev, zaloId: cleanPhone }));
-      } else if (cleanPhone.length >= 10) {
-        setZaloCheckStatus('INVALID');
-        setFormData(prev => ({ ...prev, zaloId: '' }));
-      } else {
-        setZaloCheckStatus('IDLE');
-      }
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [formData.phone]);
+  // 'IDLE' | 'LINKED' | 'INVALID'
+  const zaloCheckStatus = !cleanPhoneInput || cleanPhoneInput.length < 9
+    ? 'IDLE'
+    : vnMobileRegex.test(cleanPhoneInput)
+      ? 'LINKED'
+      : cleanPhoneInput.length >= 10
+        ? 'INVALID'
+        : 'IDLE';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -232,7 +218,12 @@ function BookingForm() {
                   </div>
                   <input type="tel" required placeholder="0901234567"
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-brand-blue focus:ring focus:ring-blue-200 outline-none text-sm"
-                    value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
+                    value={formData.phone} onChange={e => {
+                      const phoneVal = e.target.value;
+                      const cleaned = phoneVal.replace(/\s+/g, '');
+                      const validZalo = vnMobileRegex.test(cleaned) ? cleaned : '';
+                      setFormData(prev => ({ ...prev, phone: phoneVal, zaloId: validZalo }));
+                    }} />
                 </div>
               </div>
 

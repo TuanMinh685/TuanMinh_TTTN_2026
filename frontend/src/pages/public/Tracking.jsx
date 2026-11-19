@@ -6,8 +6,6 @@ import PaymentMethodSelector from '../../components/PaymentMethodSelector';
 import ResponsiveText from '../../components/ResponsiveText';
 import SvgIcon from '../../components/SvgIcon';
 import {
-  getNotificationPermission,
-  requestNotificationPermission,
   showPushNotification,
   playNotificationChime,
   triggerDeviceVibration
@@ -88,7 +86,6 @@ function formatLogStatusTitle(rawStatus) {
 function Tracking() {
   const { ticketCode } = useParams();
   const location = useLocation();
-  const [showSuccessBanner, setShowSuccessBanner] = useState(() => !!location.state?.isNew);
   const [ticket, setTicket] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -105,7 +102,6 @@ function Tracking() {
   const [selectedPreviewImage, setSelectedPreviewImage] = useState(null);
   const [ticketQr, setTicketQr] = useState('');
   const [copiedCode, setCopiedCode] = useState(false);
-  const [notifPermission, setNotifPermission] = useState(() => getNotificationPermission());
   const [activeTab, setActiveTab] = useState('status'); // 'status' | 'payment' | 'warranty'
 
   useEffect(() => {
@@ -200,14 +196,6 @@ function Tracking() {
       window.clearInterval(intervalId);
     };
   }, [fetchTicket, ticketCode]);
-
-  const handleEnableNotification = async () => {
-    const perm = await requestNotificationPermission();
-    setNotifPermission(perm);
-    if (perm === 'granted') {
-      setStatusNotice('Đã bật thông báo trình duyệt. Bạn sẽ nhận được thông báo khi máy sửa xong.');
-    }
-  };
 
   const handleSubmitReview = async (event) => {
     event.preventDefault();

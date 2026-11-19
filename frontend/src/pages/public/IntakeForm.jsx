@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import ResponsiveText from '../../components/ResponsiveText';
@@ -17,34 +17,27 @@ function IntakeForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [photos, setPhotos] = useState([]);
-  // 'IDLE' | 'CHECKING' | 'LINKED' | 'INVALID'
-  const [zaloCheckStatus, setZaloCheckStatus] = useState('IDLE');
-
+  const vnMobileRegex = /^(0[35789])[0-9]{8}$/;
+  const cleanPhone = (formData.phone || '').replace(/\s+/g, '');
   // Tự động kiểm tra tài khoản Zalo từ SĐT ngay khi nhập (không cần nhập 2 lần)
-  useEffect(() => {
-    const cleanPhone = (formData.phone || '').replace(/\s+/g, '');
-    if (!cleanPhone || cleanPhone.length < 9) {
-      setZaloCheckStatus('IDLE');
-      return;
-    }
-    setZaloCheckStatus('CHECKING');
-    const timer = setTimeout(() => {
-      const vnMobileRegex = /^(0[35789])[0-9]{8}$/;
-      if (vnMobileRegex.test(cleanPhone)) {
-        setZaloCheckStatus('LINKED');
-        setFormData(prev => ({ ...prev, zaloId: cleanPhone }));
-      } else if (cleanPhone.length >= 10) {
-        setZaloCheckStatus('INVALID');
-        setFormData(prev => ({ ...prev, zaloId: '' }));
-      } else {
-        setZaloCheckStatus('IDLE');
-      }
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [formData.phone]);
+  // 'IDLE' | 'LINKED' | 'INVALID'
+  const zaloCheckStatus = !cleanPhone || cleanPhone.length < 9
+    ? 'IDLE'
+    : vnMobileRegex.test(cleanPhone)
+      ? 'LINKED'
+      : cleanPhone.length >= 10
+        ? 'INVALID'
+        : 'IDLE';
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === 'phone') {
+      const cleaned = value.replace(/\s+/g, '');
+      const validZalo = vnMobileRegex.test(cleaned) ? cleaned : '';
+      setFormData(prev => ({ ...prev, phone: value, zaloId: validZalo }));
+      return;
+    }
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handlePhotoUpload = (e) => {

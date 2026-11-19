@@ -163,9 +163,9 @@ const notificationService = {
         }
 
         console.log(`\n======================================================`);
-        console.log(`📲 [AUTO NOTIFICATION DISPATCHER]`);
-        console.log(`🎯 Loại: ${type} | Người nhận: ${customerName} (${cleanPhone})`);
-        console.log(`💬 Nội dung gửi: "${content}"`);
+        console.log(`[NOTIFICATION DISPATCHER]`);
+        console.log(`Loại: ${type} | Người nhận: ${customerName} (${cleanPhone})`);
+        console.log(`Nội dung gửi: "${content}"`);
 
         // 1. Thử gửi qua cổng SMS eSMS thật
         let realProviderResult = await this.sendViaEsms(cleanPhone, content);
@@ -186,11 +186,11 @@ const notificationService = {
         }
 
         if (realProviderResult && !realProviderResult.failed) {
-            console.log(`✅ [GATEWAY THỰC TẾ]: Đã bắn tin nhắn thành công qua đối tác ${realProviderResult.provider}! Mã SMS: ${realProviderResult.smsId || 'OK'}`);
+            console.log(`[GATEWAY] Đã gửi thành công qua ${realProviderResult.provider} (SMS ID: ${realProviderResult.smsId || 'OK'})`);
         } else if (realProviderResult && realProviderResult.failed) {
-            console.warn(`⚠️ [GATEWAY CẢNH BÁO]: Gửi qua ${realProviderResult.provider} không thành công. Hệ thống tự động chuyển sang cơ chế fallback & lưu nhật ký.`);
+            console.warn(`[GATEWAY] Gửi qua ${realProviderResult.provider} không thành công. Đã chuyển sang ghi nhật ký.`);
         } else {
-            console.log(`⚡ [AUTO LOG & SIMULATION]: Đã mô phỏng gửi thành công qua Zalo ZNS / SMS Gateway (Sẵn sàng kích hoạt thật khi điền Key vào .env)!`);
+            console.log(`[NOTIFICATION] Đã ghi nhật ký gửi tin nhắn (chưa cấu hình SMS Gateway Key).`);
         }
         console.log(`======================================================\n`);
 

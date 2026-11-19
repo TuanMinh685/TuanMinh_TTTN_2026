@@ -45,7 +45,29 @@ export default function ClientCmsConfig() {
   };
 
   useEffect(() => {
-    fetchConfig();
+    let ignore = false;
+    api.get('/public/cms-config')
+      .then((res) => {
+        if (!ignore && res.data?.success && res.data?.data) {
+          setConfig(res.data.data);
+        }
+      })
+      .catch((err) => {
+        if (!ignore) {
+          setStatusMessage({
+            type: 'error',
+            text: 'Không thể tải cấu hình giao diện: ' + (err.response?.data?.message || err.message)
+          });
+        }
+      })
+      .finally(() => {
+        if (!ignore) {
+          setLoading(false);
+        }
+      });
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   const handleBrandChange = (field, value) => {

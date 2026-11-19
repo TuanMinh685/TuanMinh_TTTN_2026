@@ -47,7 +47,7 @@ const smartQuery = async (text, params) => {
     } catch (err) {
       if (isConnectionFailure(err)) {
         if (isPgAvailable !== false) {
-          console.warn('⚠️ Supabase Cloud tạm dừng hoặc mạng gián đoạn. Tự động chuyển sang chế độ dữ liệu dự phòng (Local Resilience Store).');
+          console.warn('[DB] Supabase Cloud tạm dừng hoặc mạng gián đoạn. Chuyển sang Local Resilience Store.');
           isPgAvailable = false;
         }
       } else {
@@ -97,9 +97,9 @@ const connectDB = async () => {
     await smartQuery("SET TIME ZONE 'Asia/Ho_Chi_Minh'");
     const res = await smartQuery("SELECT current_database() AS db, current_setting('TIMEZONE') AS tz, NOW() AS now");
     if (isPgAvailable) {
-      console.log(`✅ Đã kết nối trực tiếp Supabase PostgreSQL Cloud (DB: ${res.rows[0]?.db} | Timezone: ${res.rows[0]?.tz})!`);
+      console.log(`[DB] Đã kết nối Supabase PostgreSQL Cloud (DB: ${res.rows[0]?.db} | Timezone: ${res.rows[0]?.tz})`);
     } else {
-      console.log('✅ Hệ thống dữ liệu đã sẵn sàng phục vụ (Local Resilience Store)!');
+      console.log('[DB] Hệ thống dữ liệu đã sẵn sàng (Local Resilience Store)');
     }
 
     // Tự động khởi tạo & đăng ký trực tiếp các tài khoản nhân sự chuẩn Bcrypt Hash vào Database
@@ -127,9 +127,9 @@ const connectDB = async () => {
         ON CONFLICT (ten_dang_nhap) DO UPDATE 
         SET mat_khau = EXCLUDED.mat_khau, trang_thai = 'HOAT_DONG';
       `, [hashedPassword]);
-      console.log('✅ Đã đăng ký & cập nhật mật khẩu băm chuẩn Bcrypt vào cơ sở dữ liệu!');
+      console.log('[DB] Đã đồng bộ tài khoản nhân sự mặc định với mật khẩu băm Bcrypt.');
     } catch (seedErr) {
-      console.warn('⚠️ Ghi chú đồng bộ tài khoản CSDL:', seedErr.message);
+      console.warn('[DB] Ghi chú đồng bộ tài khoản:', seedErr.message);
     }
   } catch (err) {
     console.error('Lỗi khởi tạo DB:', err.message);

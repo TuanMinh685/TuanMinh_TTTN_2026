@@ -87,15 +87,24 @@ function Dashboard() {
 
   const [tickets, setTickets] = useState([]);
   const [bookings, setBookings] = useState([]);
-  const [activeTab, setActiveTab] = useState('TICKETS');
-  const [ticketSearch, setTicketSearch] = useState('');
+  const [searchParams] = useSearchParams();
+  const initialTicketParam = searchParams.get('ticket') || searchParams.get('search');
+  const initialTabParam = searchParams.get('tab');
+  const [rawActiveTab, setActiveTab] = useState(() => (
+    initialTicketParam ? 'TICKETS' : (initialTabParam ? initialTabParam.toUpperCase() : 'TICKETS')
+  ));
+  const [ticketSearch, setTicketSearch] = useState(() => (
+    initialTicketParam ? initialTicketParam.trim().toUpperCase() : ''
+  ));
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [statusNote, setStatusNote] = useState('');
   const [reportPeriod, setReportPeriod] = useState('week');
-  const [searchParams] = useSearchParams();
+  const [nowTs] = useState(() => Date.now());
+  const [prevSearchStr, setPrevSearchStr] = useState(() => searchParams.toString());
 
-  // Tự động mở hồ sơ phiếu tương ứng khi bấm vào thông báo hệ thống
-  useEffect(() => {
+  const currentSearchStr = searchParams.toString();
+  if (currentSearchStr !== prevSearchStr) {
+    setPrevSearchStr(currentSearchStr);
     const ticketParam = searchParams.get('ticket') || searchParams.get('search');
     const tabParam = searchParams.get('tab');
     if (ticketParam) {
@@ -105,7 +114,7 @@ function Dashboard() {
     } else if (tabParam) {
       setActiveTab(tabParam.toUpperCase());
     }
-  }, [searchParams]);
+  }
 
   const [stats, setStats] = useState({
     statusData: [],
@@ -125,13 +134,6 @@ function Dashboard() {
   // 80mm QR thermal receipt modal state
   const [receiptTicket, setReceiptTicket] = useState(null);
   const [receiptQr, setReceiptQr] = useState('');
-
-  // Zalo ZNS / SMS Notification modal state
-  const [showZaloModal, setShowZaloModal] = useState(false);
-  const [zaloTicket, setZaloTicket] = useState(null);
-  const [zaloCustomNote, setZaloCustomNote] = useState('');
-  const [zaloSending, setZaloSending] = useState(false);
-  const [zaloAlert, setZaloAlert] = useState(null);
 
   // Notifications state
   const [notifications, setNotifications] = useState(() => {
@@ -288,11 +290,7 @@ function Dashboard() {
     };
   }, [canReceptionAction, canViewStats, canManageEmployees, isSystemAdmin, fetchTickets, fetchBookings, fetchStats, fetchEmployees, fetchAuditLogs]);
 
-  useEffect(() => {
-    if (!isSystemAdmin && activeTab === 'SECURITY') {
-      setActiveTab('TICKETS');
-    }
-  }, [isSystemAdmin, activeTab]);
+  const activeTab = (!isSystemAdmin && rawActiveTab === 'SECURITY') ? 'TICKETS' : rawActiveTab;
 
   useEffect(() => {
     try {
@@ -565,40 +563,6 @@ function Dashboard() {
   const openReceipt = (ticket) => {
     setReceiptQr('');
     setReceiptTicket(ticket);
-  };
-
-  const openZaloModal = (ticket) => {
-    setZaloTicket(ticket);
-    setZaloCustomNote('');
-    setZaloAlert(null);
-    setShowZaloModal(true);
-  };
-
-  const handleSendZalo = async () => {
-    if (!zaloTicket) return;
-    setZaloSending(true);
-    setZaloAlert(null);
-    try {
-      const res = await api.post(`/tickets/${zaloTicket.id}/notify-zalo`, {
-        customMessage: zaloCustomNote.trim() || undefined
-      });
-      setZaloAlert({
-        type: 'success',
-        message: res.data?.message || 'Đã gửi thông báo Zalo ZNS thành công.'
-      });
-      showToast(`Đã gửi Zalo ZNS tới ${zaloTicket.ho_ten_khach} (${zaloTicket.so_dien_thoai}).`);
-      fetchTickets().then(setTickets).catch(() => {});
-      setTimeout(() => {
-        setShowZaloModal(false);
-      }, 1800);
-    } catch (err) {
-      setZaloAlert({
-        type: 'error',
-        message: err.response?.data?.message || 'Không thể gửi thông báo Zalo ZNS!'
-      });
-    } finally {
-      setZaloSending(false);
-    }
   };
 
   const openCreateEmployeeModal = () => {
@@ -937,14 +901,14 @@ function Dashboard() {
               <tbody>
                 {filteredTickets.map(t => {
                   const warrantyRemainingDays = t.han_bao_hanh
-                    ? Math.ceil((new Date(t.han_bao_hanh).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+                    ? Math.ceil((new Date(t.han_bao_hanh).getTime() - nowTs) / (1000 * 60 * 60 * 24))
                     : 0;
                   return (
                     <tr key={t.id} className="border-b hover:bg-slate-50 text-sm">
                       <td className="py-3 px-4 font-bold text-brand-blue">
                         <Link to={`/track/${t.ma_phieu}`} target="_blank" className="hover:underline flex items-center gap-1" title="Mở trang khách hàng quét QR">
                           <span>{t.ma_phieu}</span>
-                          <span className="text-xs">↗</span>
+                          <SvgIcon name="external-link" className="w-3.5 h-3.5" />
                         </Link>
                         <div className="text-[11px] font-normal text-slate-400 mt-0.5">
                           {t.ngay_tao ? new Date(t.ngay_tao).toLocaleDateString('vi-VN') : ''}
@@ -1204,7 +1168,10 @@ function Dashboard() {
             </div>
             <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
               <p className="text-xs font-bold uppercase tracking-wide text-slate-400">Chỉ Số Hài Lòng (CSAT)</p>
-              <p className="mt-2 text-3xl font-extrabold text-amber-500">{stats.avgRating || '5.0'} / 5.0 ⭐</p>
+              <p className="mt-2 text-3xl font-extrabold text-amber-500 flex items-center gap-2">
+                <span>{stats.avgRating || '5.0'} / 5.0</span>
+                <SvgIcon name="star" className="w-6 h-6 text-amber-400 fill-current" />
+              </p>
               <p className="mt-1 text-xs text-slate-500">Đánh giá trực tiếp sau khi quét mã QR</p>
             </div>
             <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
@@ -2587,200 +2554,6 @@ function Dashboard() {
               >
                 Đóng
               </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL 5: TÍCH HỢP GỬI THÔNG BÁO ZALO ZNS / SMS TỰ ĐỘNG (GIẢ LẬP CLOUD & CHAT THỰC TẾ) */}
-      {showZaloModal && zaloTicket && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border-t-4 border-brand-blue">
-            {/* Header Modal */}
-            <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-[#0068ff] text-white flex items-center justify-center shadow-2xs">
-                  <SvgIcon name="mail" className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-slate-800 flex items-center gap-1.5">
-                    Trung Tâm Gửi Thông Báo Zalo ZNS CSKH
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-100 text-[#0068ff]">
-                      Mã QR
-                    </span>
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    Hồ sơ: <strong className="text-brand-blue">{zaloTicket.ma_phieu}</strong> • Khách hàng: <strong>{zaloTicket.ho_ten_khach}</strong> ({zaloTicket.so_dien_thoai})
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowZaloModal(false)}
-                className="text-slate-400 hover:text-slate-700 w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-200 cursor-pointer"
-                aria-label="Đóng"
-              >
-                <SvgIcon name="x" className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Nội dung Modal */}
-            <div className="p-5 overflow-y-auto flex-1 space-y-4">
-              {/* Thông báo kết quả gửi */}
-              {zaloAlert && (
-                <div className={`p-3.5 rounded-xl text-xs font-semibold flex items-center justify-between ${
-                  zaloAlert.type === 'success'
-                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                    : 'bg-rose-50 text-rose-800 border border-rose-200'
-                }`}>
-                  <span>{zaloAlert.message}</span>
-                  <button type="button" onClick={() => setZaloAlert(null)} className="p-1 cursor-pointer" aria-label="Đóng">
-                    <SvgIcon name="x" className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              )}
-
-              {/* BẢN XEM TRƯỚC TIN NHẮN ZALO ZNS */}
-              <div className="bg-[#eef3f8] p-4 rounded-xl border border-slate-200">
-                <div className="flex items-center justify-between mb-3 text-[11px] text-slate-500 font-semibold">
-                  <span className="flex items-center gap-1.5 text-[#0068ff]">
-                    <SvgIcon name="smartphone" className="w-3.5 h-3.5" />
-                    <span>Bản xem trước tin nhắn trên điện thoại khách hàng:</span>
-                  </span>
-                  <span className="bg-white px-2 py-0.5 rounded-md border border-slate-200 text-emerald-600 font-bold inline-flex items-center gap-1">
-                    <SvgIcon name="check" className="w-3 h-3" />
-                    <span>Official Account</span>
-                  </span>
-                </div>
-
-                {/* Bong bóng tin nhắn Zalo OA */}
-                <div className="bg-white rounded-xl shadow-xs border border-slate-200 p-4 max-w-lg mx-auto space-y-3">
-                  <div className="flex items-center gap-2 pb-2.5 border-b border-slate-100">
-                    <img src="/img/logo-luc-giac.png" alt="Logo Lục Giác" className="w-8 h-8 object-contain rounded-full bg-slate-50 p-1 border border-slate-200" />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-bold text-slate-900 truncate">CSKH CÔNG TY CỔ PHẦN LỤC GIÁC</span>
-                        <SvgIcon name="check-circle" className="w-3.5 h-3.5 text-blue-500 shrink-0" />
-                      </div>
-                      <span className="text-[10px] text-slate-400">Zalo Notification Service (ZNS)</span>
-                    </div>
-                    <span className="text-[10px] text-slate-400">Vừa xong</span>
-                  </div>
-
-                  <div>
-                    <h4 className="text-xs font-bold text-[#0068ff] uppercase tracking-wide">
-                      THÔNG BÁO HOÀN TẤT DỊCH VỤ SỬA CHỮA & CSKH
-                    </h4>
-                    <p className="text-xs text-slate-600 mt-1">
-                      Kính gửi <strong>{zaloTicket.ho_ten_khach}</strong>, thiết bị của Quý khách đã được Bộ phận Kỹ thuật kiểm tra và xử lý hoàn tất.
-                    </p>
-                  </div>
-
-                  {/* Bảng chi tiết trong tin nhắn */}
-                  <div className="bg-slate-50 rounded-xl p-3 text-xs space-y-1.5 border border-slate-100 font-sans">
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">Mã tra cứu QR:</span>
-                      <strong className="text-brand-blue font-mono">{zaloTicket.ma_phieu}</strong>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">Thiết bị:</span>
-                      <strong className="text-slate-800">{zaloTicket.ten_thiet_bi}</strong>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">Trạng thái:</span>
-                      <span className="font-bold text-emerald-600">
-                        {zaloTicket.trang_thai === 'ĐÃ_SỬA_XONG' || zaloTicket.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN'
-                          ? 'ĐÃ SỬA XONG — SẴN SÀNG TRẢ MÁY'
-                          : STATUS_LABELS[zaloTicket.trang_thai] || zaloTicket.trang_thai}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">Sổ bảo hành:</span>
-                      <strong className="text-amber-600 inline-flex items-center gap-1">
-                        <SvgIcon name="shield" className="w-3.5 h-3.5" />
-                        <span>e-Warranty 06 tháng</span>
-                      </strong>
-                    </div>
-                    {zaloCustomNote && (
-                      <div className="pt-1.5 mt-1 border-t border-slate-200 text-[11px] text-slate-600">
-                        <span className="text-slate-500">Ghi chú KTV:</span> <em>{zaloCustomNote}</em>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Nút xem chi tiết */}
-                  <div className="pt-1">
-                    <a
-                      href={`/track/${zaloTicket.ma_phieu}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex items-center justify-center gap-1.5 w-full py-2 bg-[#0068ff]/10 hover:bg-[#0068ff]/20 text-[#0068ff] font-bold text-center text-xs rounded-xl transition"
-                    >
-                      <SvgIcon name="external-link" className="w-3.5 h-3.5" />
-                      <span>Xem Hồ sơ &amp; Sổ bảo hành điện tử</span>
-                    </a>
-                  </div>
-                </div>
-              </div>
-
-              {/* Ô nhập ghi chú riêng của kỹ thuật viên */}
-              <div>
-                <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 mb-1">
-                  <SvgIcon name="edit" className="w-3.5 h-3.5 text-brand-blue" />
-                  <span>Thêm lời nhắn / Ghi chú kỹ thuật (Tùy chọn):</span>
-                </label>
-                <textarea
-                  rows="2"
-                  value={zaloCustomNote}
-                  onChange={(e) => setZaloCustomNote(e.target.value)}
-                  placeholder="VD: Đã thay keo tản nhiệt, cài Windows 11. Mời anh/chị ghé quầy kỹ thuật nhận máy..."
-                  className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl focus:border-brand-blue outline-none bg-white"
-                />
-              </div>
-            </div>
-
-            {/* Footer Modal: 2 nút gửi */}
-            <div className="p-4 border-t border-slate-200 bg-slate-50 flex flex-wrap items-center justify-between gap-2">
-              <a
-                href={`https://zalo.me/${(zaloTicket.so_dien_thoai || '').replace(/\D/g, '')}`}
-                target="_blank"
-                rel="noreferrer"
-                onClick={() => {
-                  const trackUrl = `${window.location.origin}/track/${zaloTicket.ma_phieu}`;
-                  const textToCopy = `[CSKH CÔNG TY CỔ PHẦN LỤC GIÁC]\nKính gửi ${zaloTicket.ho_ten_khach}, thông báo tiến độ hồ sơ QR: ${zaloTicket.ma_phieu}\n- Thiết bị: ${zaloTicket.ten_thiet_bi}\n- Trạng thái: ${STATUS_LABELS[zaloTicket.trang_thai] || zaloTicket.trang_thai}${zaloCustomNote ? `\n- Ghi chú KTV: ${zaloCustomNote}` : ''}\nXem chi tiết & Sổ bảo hành điện tử tại: ${trackUrl}`;
-                  if (navigator.clipboard) {
-                    navigator.clipboard.writeText(textToCopy).catch(() => {});
-                  }
-                  showToast(`Đã copy nội dung tin nhắn. Bấm Ctrl+V vào cửa sổ Zalo của ${zaloTicket.so_dien_thoai}.`);
-                }}
-                className="px-4 py-2 border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-bold rounded-xl text-xs flex items-center gap-1.5 transition"
-                title="Tự động copy nội dung tin nhắn và mở Zalo trực tiếp với số điện thoại này"
-              >
-                <SvgIcon name="mail" className="w-3.5 h-3.5 text-brand-blue" />
-                <span>Mở Zalo &amp; Dán Tin Nhắn ({zaloTicket.so_dien_thoai})</span>
-                <SvgIcon name="external-link" className="w-3 h-3 text-slate-400" />
-              </a>
-
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowZaloModal(false)}
-                  className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-xl text-xs transition cursor-pointer"
-                >
-                  Đóng
-                </button>
-                <button
-                  type="button"
-                  disabled={zaloSending}
-                  onClick={handleSendZalo}
-                  className={`px-5 py-2 bg-[#0068ff] hover:bg-[#0055d4] text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shadow-2xs transition ${
-                    zaloSending ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer active:brightness-95'
-                  }`}
-                >
-                  <SvgIcon name="send" className="w-3.5 h-3.5" />
-                  <span>{zaloSending ? 'Đang gửi...' : 'Gửi Thông Báo ZNS'}</span>
-                </button>
-              </div>
             </div>
           </div>
         </div>

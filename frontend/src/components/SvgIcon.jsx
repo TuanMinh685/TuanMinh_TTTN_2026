@@ -368,89 +368,8 @@ const ICON_PATHS = {
   )
 };
 
-const EMOJI_TO_ICON = {
-  '💻': 'laptop',
-  '🖥️': 'desktop',
-  '🖥': 'desktop',
-  '💿': 'disc',
-  '🚀': 'zap',
-  '⚡': 'zap',
-  '🔐': 'lock',
-  '🔒': 'lock',
-  '🔓': 'unlock',
-  '🌐': 'globe',
-  '🛡️': 'shield',
-  '🛡': 'shield',
-  '🛠️': 'wrench',
-  '🛠': 'wrench',
-  '🔧': 'wrench',
-  '📷': 'camera',
-  '📸': 'camera',
-  '🔍': 'search',
-  '📝': 'file-text',
-  '📋': 'clipboard',
-  '📅': 'calendar',
-  '🏢': 'building',
-  '🏬': 'building',
-  '🏛️': 'building',
-  '🏛': 'building',
-  '💳': 'credit-card',
-  '🏦': 'bank',
-  '💵': 'cash',
-  '🖨️': 'printer',
-  '🖨': 'printer',
-  '🔔': 'bell',
-  '📢': 'bell',
-  '👤': 'user',
-  '👩': 'user',
-  '👑': 'user',
-  '👥': 'users',
-  '📞': 'phone',
-  '☎': 'phone',
-  '📲': 'smartphone',
-  '📱': 'smartphone',
-  '📩': 'mail',
-  '💬': 'mail',
-  '📍': 'map-pin',
-  '📌': 'map-pin',
-  '🕒': 'clock',
-  '⏰': 'clock',
-  '✅': 'check-circle',
-  '✓': 'check',
-  '☑': 'check-circle',
-  '⚠️': 'alert',
-  '⚠': 'alert',
-  '❌': 'x',
-  '✕': 'x',
-  '🔑': 'key',
-  '🔄': 'refresh',
-  '💾': 'save',
-  '🗑️': 'trash',
-  '🗑': 'trash',
-  '➕': 'plus',
-  '✏️': 'edit',
-  '✏': 'edit',
-  '✍️': 'edit',
-  '✍': 'edit',
-  '📊': 'chart',
-  '⭐': 'star',
-  '★': 'star',
-  '✨': 'star',
-  '🎉': 'check-circle',
-  '🎧': 'headphones',
-  '💼': 'box',
-  '📦': 'box',
-  '📁': 'folder',
-  '🖼️': 'image',
-  '🖼': 'image',
-  '🎨': 'image',
-  '🧭': 'compass',
-  '💡': 'info',
-  '☰': 'menu'
-};
-
 export function SvgIcon({ name = 'info', className = 'w-4 h-4', strokeWidth = 1.8 }) {
-  const resolved = EMOJI_TO_ICON[name] || (ICON_PATHS[name] ? name : 'info');
+  const resolved = ICON_PATHS[name] ? name : 'info';
   const fillStar = resolved === 'star' && className.includes('fill-current');
   return (
     <svg
@@ -471,7 +390,7 @@ export function SvgIcon({ name = 'info', className = 'w-4 h-4', strokeWidth = 1.
 
 export function DynamicIcon({ value, className = 'w-5 h-5' }) {
   const trimmed = String(value || '').trim();
-  const iconName = EMOJI_TO_ICON[trimmed] || (ICON_PATHS[trimmed] ? trimmed : 'wrench');
+  const iconName = ICON_PATHS[trimmed] ? trimmed : 'wrench';
   return <SvgIcon name={iconName} className={className} />;
 }
 

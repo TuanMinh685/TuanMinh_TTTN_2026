@@ -11,16 +11,16 @@ const initSocket = (server) => {
     });
 
     io.on('connection', (socket) => {
-        console.log(`🔌 Client kết nối Socket: ${socket.id}`);
+        console.log(`[Socket] Client kết nối: ${socket.id}`);
 
         // Lễ tân tham gia room để nhận thông báo realtime
         socket.on('join_receptionist', () => {
             socket.join('receptionist_room');
-            console.log(`Lễ tân ${socket.id} đã tham gia receptionist_room`);
+            console.log(`[Socket] Lễ tân ${socket.id} đã tham gia receptionist_room`);
         });
 
         socket.on('disconnect', () => {
-            console.log(`🔴 Client ngắt kết nối: ${socket.id}`);
+            console.log(`[Socket] Client ngắt kết nối: ${socket.id}`);
         });
     });
 
