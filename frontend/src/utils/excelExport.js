@@ -108,7 +108,7 @@ export async function exportEnterpriseExcel({
 
   ws.mergeCells(`A3:${midColLetter1}3`);
   const cA3 = ws.getCell('A3');
-  cA3.value = 'Đ/C: 615 Âu Cơ, P. Phú Trung, Q. Tân Phú, TP.HCM | Hotline: 1900 6868';
+  cA3.value = 'Đ/C: 615 Âu Cơ, P. Phú Trung, Q. Tân Phú, TP.HCM | Hotline: (028) 3860 4999';
   cA3.font = { name: 'Times New Roman', size: 10, italic: true, color: { argb: 'FF555555' } };
   cA3.alignment = { horizontal: 'left', vertical: 'middle' };
 

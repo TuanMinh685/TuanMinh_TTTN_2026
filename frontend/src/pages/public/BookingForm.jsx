@@ -135,20 +135,16 @@ function BookingForm() {
   return (
     <div className="bg-[#f0f5fa] flex flex-col">
       <main className="flex-1 container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-2xl">
-        <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-200 border-t-4 border-t-brand-orange">
+        <div className="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-200">
           <div className="p-5 sm:p-6 md:p-8">
             <div className="text-center mb-5 sm:mb-6">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-orange-50 text-brand-orange border border-orange-200 text-xs font-semibold uppercase tracking-wider mb-1.5 sm:mb-2">
-                <SvgIcon name="calendar" className="w-3.5 h-3.5" />
-                <ResponsiveText mobile="Đặt Lịch Hẹn" desktop="Đặt Lịch Hẹn Dịch Vụ & Hỗ Trợ Kỹ Thuật" />
-              </span>
-              <h1 className="text-xl sm:text-2xl font-bold text-brand-blue mb-1">
-                <ResponsiveText mobile="Đặt Lịch Kiểm Tra & Hỗ Trợ" desktop="Đặt Lịch Hẹn Kiểm Tra Máy Tính & Hỗ Trợ Phần Mềm" />
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 mb-1">
+                <ResponsiveText mobile="Đặt Lịch Kiểm Tra & Hỗ Trợ" desktop="Đặt Lịch Hẹn Kiểm Tra Máy Tính & Phần Mềm" />
               </h1>
               <p className="text-slate-500 text-xs md:text-sm">
                 <ResponsiveText
                   mobile="Đặt lịch trước để được ưu tiên tiếp nhận tại quầy 615 Âu Cơ."
-                  desktop="Đặt lịch trước để được ưu tiên tiếp nhận kiểm tra phần cứng, xử lý sự cố phần mềm khi đến quầy."
+                  desktop="Đặt lịch trước để được ưu tiên tiếp nhận khi đến quầy 615 Âu Cơ."
                 />
               </p>
             </div>
@@ -263,11 +259,11 @@ function BookingForm() {
               </div>
 
               <button type="submit" disabled={loading}
-                className="w-full py-3.5 bg-brand-blue hover:bg-brand-blue-hover text-white font-bold text-sm sm:text-base rounded-xl shadow-xs transition-all mt-3 sm:mt-4 disabled:opacity-50 cursor-pointer">
+                className="w-full py-3.5 bg-brand-blue hover:bg-brand-blue-hover text-white font-semibold text-sm sm:text-base rounded-xl shadow-xs transition-all mt-3 sm:mt-4 disabled:opacity-50 cursor-pointer">
                 {loading ? (
                   'Đang gửi thông tin...'
                 ) : (
-                  <ResponsiveText mobile="Xác Nhận Đặt Lịch →" desktop="XÁC NHẬN ĐẶT LỊCH HẸN" />
+                  <ResponsiveText mobile="Xác nhận đặt lịch →" desktop="Xác nhận đặt lịch hẹn" />
                 )}
               </button>
             </form>

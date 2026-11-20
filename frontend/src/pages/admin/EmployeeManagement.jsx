@@ -10,11 +10,11 @@ const ROLE_PERMISSIONS_DETAIL = {
     icon: 'shield',
     badge: 'Quản Trị Hệ Thống CSKH',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
-    description: 'Quản trị toàn diện hệ thống CSKH, phê duyệt chi phí và phân quyền mọi cấp bậc nhân sự.',
+    description: 'Toàn quyền quản lý hệ thống CSKH, phê duyệt chi phí và phân quyền nhân sự.',
     canCreate: ['ADMIN', 'QUAN_LY', 'KY_THUAT_VIEN', 'LE_TAN']
   },
   ADMIN: {
-    title: 'Quản Trị Hệ Thống CSKH (System Admin)',
+    title: 'Quản Trị Hệ Thống CSKH',
     level: 100,
     icon: 'shield',
     badge: 'Quản Trị Hệ Thống CSKH',
@@ -23,12 +23,12 @@ const ROLE_PERMISSIONS_DETAIL = {
     canCreate: ['QUAN_LY', 'KY_THUAT_VIEN', 'LE_TAN']
   },
   QUAN_LY: {
-    title: 'Trưởng Bộ Phận CSKH (CSKH Manager)',
+    title: 'Trưởng Bộ Phận CSKH',
     level: 80,
     icon: 'building',
     badge: 'Trưởng Bộ Phận CSKH',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
-    description: 'Điều hành hoạt động bộ phận CSKH: theo dõi tiến độ xử lý hồ sơ QR, duyệt lịch hẹn và quản lý nhân sự (< Level 80).',
+    description: 'Quản lý hoạt động bộ phận CSKH: theo dõi tiến độ xử lý hồ sơ QR, duyệt lịch hẹn và quản lý nhân sự cấp dưới.',
     canCreate: ['KY_THUAT_VIEN', 'LE_TAN']
   },
   KE_TOAN: {
@@ -250,14 +250,14 @@ export default function EmployeeManagement() {
                 </h2>
               </div>
               <p className="mt-2 text-sm text-blue-100 max-w-2xl leading-relaxed">
-                Quản lý tài khoản và phân quyền truy cập từ cấp Quản trị (Level 100), Quản lý (Level 80) đến Kế toán, Kho, Kỹ thuật viên và Lễ tân.
+                Quản lý tài khoản và phân quyền truy cập theo từng vị trí công việc trong bộ phận CSKH.
               </p>
               <div className="mt-3 flex flex-wrap gap-2 text-xs">
                 <span className="rounded-md bg-white/10 border border-white/20 px-3 py-1 font-semibold">
                   Vai trò của bạn: <strong>{currentRoleInfo.title}</strong>
                 </span>
                 <span className="rounded-md bg-white/10 border border-white/20 px-3 py-1 font-semibold">
-                  {isExecutive ? 'Quyền hạn: Tạo & phân cấp mọi vị trí' : 'Quyền hạn: Tạo & quản lý nhân sự cấp dưới (< Level 80)'}
+                  {isExecutive ? 'Quyền hạn: Quản lý mọi vị trí' : 'Quyền hạn: Quản lý nhân sự cấp dưới'}
                 </span>
               </div>
             </div>
@@ -296,11 +296,11 @@ export default function EmployeeManagement() {
           </div>
         </div>
 
-        {/* Hierarchical Role Matrix Visual Cards */}
+        {/* Role Cards */}
         <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
           <h3 className="text-base font-semibold text-slate-800 mb-4 flex items-center gap-2">
             <SvgIcon name="shield" className="w-4 h-4 text-brand-blue" />
-            <span>Ma Trận Cấp Bậc &amp; Quyền Hạn Trong Cửa Hàng</span>
+            <span>Phân Quyền Theo Vai Trò</span>
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {Object.entries(ROLE_PERMISSIONS_DETAIL).map(([key, roleItem]) => {

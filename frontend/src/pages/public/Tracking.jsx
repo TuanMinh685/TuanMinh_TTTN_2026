@@ -55,14 +55,14 @@ const STATUS_META = {
     lightBadge: 'bg-slate-50 text-slate-700 border-slate-200'
   },
   ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN: {
-    label: 'Đã bàn giao máy & Kích hoạt bảo hành điện tử (e-Warranty)',
+    label: 'Đã bàn giao máy & Kích hoạt bảo hành điện tử',
     shortLabel: 'HOÀN TẤT & BẢO HÀNH',
     badgeClass: 'bg-white/20 text-white border-white/30',
     dotClass: 'bg-emerald-500',
     lightBadge: 'bg-slate-50 text-slate-700 border-slate-200'
   },
   YÊU_CẦU_BẢO_HÀNH: {
-    label: 'Đang tiếp nhận yêu cầu hỗ trợ bảo hành (e-Warranty)',
+    label: 'Đang tiếp nhận yêu cầu hỗ trợ bảo hành',
     shortLabel: 'YÊU CẦU BẢO HÀNH',
     badgeClass: 'bg-white/20 text-white border-white/30',
     dotClass: 'bg-amber-500',
@@ -169,10 +169,10 @@ function Tracking() {
             });
           } else if (
             currentTicket &&
-            Array.isArray(updatedTicket.logs) &&
-            updatedTicket.logs.length > (currentTicket.logs?.length || 0)
+            Array.isArray(updatedTicket.nhat_ky) &&
+            updatedTicket.nhat_ky.length > (currentTicket.nhat_ky?.length || 0)
           ) {
-            const newestLog = updatedTicket.logs[0];
+            const newestLog = updatedTicket.nhat_ky[0];
             if (newestLog?.ghi_chu) {
               setStatusNotice(`Thông báo mới từ CSKH: ${newestLog.ghi_chu}`);
               showPushNotification({
@@ -536,8 +536,8 @@ function Tracking() {
                     <SvgIcon name="check" className="w-3.5 h-3.5 text-emerald-600 mt-0.5 shrink-0" />
                     <p className="leading-relaxed">
                       <ResponsiveText
-                        mobile={<><strong>Bảo mật dữ liệu:</strong> Giữ an toàn 100% dữ liệu cá nhân.</>}
-                        desktop={<><strong>Bảo mật dữ liệu:</strong> Cam kết giữ an toàn và bảo mật tuyệt đối dữ liệu cá nhân trên thiết bị của khách hàng.</>}
+                        mobile={<><strong>Bảo mật dữ liệu:</strong> Giữ an toàn dữ liệu cá nhân.</>}
+                        desktop={<><strong>Bảo mật dữ liệu:</strong> Giữ an toàn dữ liệu cá nhân trên thiết bị của khách hàng.</>}
                       />
                     </p>
                   </div>
@@ -546,7 +546,7 @@ function Tracking() {
                     <p className="leading-relaxed">
                       <ResponsiveText
                         mobile={<><strong>Bảo hành điện tử:</strong> Bảo hành QR 03 - 06 tháng.</>}
-                        desktop={<><strong>Bảo hành điện tử (e-Warranty):</strong> Cấp mã QR bảo hành từ 03 - 06 tháng, tra cứu thuận tiện mọi lúc.</>}
+                        desktop={<><strong>Bảo hành điện tử:</strong> Cấp mã QR bảo hành từ 03 - 06 tháng để tra cứu khi cần.</>}
                       />
                     </p>
                   </div>
@@ -648,13 +648,13 @@ function Tracking() {
               )}
             </div>
 
-            {/* Sổ bảo hành e-Warranty */}
-            <div className="p-4 sm:p-5 bg-emerald-50/50 border border-emerald-200 rounded-2xl shadow-xs">
+            {/* Sổ bảo hành điện tử */}
+            <div className="p-4 sm:p-5 bg-emerald-50/50 border border-emerald-200 rounded-xl shadow-xs">
               <div className="flex items-center justify-between gap-2 mb-2">
                 <div className="flex items-center gap-2">
                   <SvgIcon name="shield" className="w-5 h-5 text-emerald-700" />
-                  <h3 className="font-extrabold text-slate-800 text-sm">
-                    <ResponsiveText mobile="Bảo Hành Điện Tử" desktop="Sổ Bảo Hành Điện Tử (e-Warranty)" />
+                  <h3 className="font-bold text-slate-800 text-sm">
+                    <ResponsiveText mobile="Bảo Hành Điện Tử" desktop="Sổ Bảo Hành Điện Tử" />
                   </h3>
                 </div>
                 <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${ticket.bao_hanh?.con_han ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700'}`}>
@@ -754,7 +754,7 @@ function Tracking() {
                 </button>
               </div>
               <p className="text-xs text-slate-500 mb-4">
-                Nếu bạn cần hỗ trợ bảo hành hoặc chăm sóc hậu mãi trong thời hạn e-Warranty, vui lòng nhập nội dung bên dưới. Bộ phận CSKH tại <strong>615 Âu Cơ</strong> sẽ liên hệ xử lý ngay.
+                Nếu bạn cần hỗ trợ bảo hành trong thời hạn quy định, vui lòng nhập nội dung bên dưới. Bộ phận CSKH tại <strong>615 Âu Cơ</strong> sẽ liên hệ hỗ trợ.
               </p>
               <form onSubmit={handleClaimWarranty} className="space-y-4">
                 <div>
@@ -840,7 +840,7 @@ function Tracking() {
           {ticketQr && (
             <div className="text-center my-3">
               <img src={ticketQr} alt="QR Tra cứu" className="w-28 h-28 mx-auto" />
-              <p className="text-[10px] text-gray-600 mt-1">Quét mã QR bằng điện thoại để tra cứu tiến độ và sổ bảo hành e-Warranty</p>
+              <p className="text-[10px] text-gray-600 mt-1">Quét mã QR bằng điện thoại để tra cứu tiến độ và sổ bảo hành</p>
             </div>
           )}
 

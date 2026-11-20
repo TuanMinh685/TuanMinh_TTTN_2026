@@ -166,9 +166,8 @@ function Dashboard() {
     trang_thai: 'HOAT_DONG'
   });
 
-  // Enterprise Security & Audit Logs state
+  // Audit Logs state
   const [auditLogs, setAuditLogs] = useState([]);
-  const [securityStatus, setSecurityStatus] = useState(null);
   const [pwForm, setPwForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [savingPw, setSavingPw] = useState(false);
   const [paymentTicketCode, setPaymentTicketCode] = useState('RP-839400');
@@ -279,7 +278,6 @@ function Dashboard() {
         .then(data => {
           if (active) {
             setAuditLogs(data.logs || []);
-            setSecurityStatus(data.securityStatus || null);
           }
         })
         .catch(err => console.error('Không tải được nhật ký bảo mật:', err));
@@ -666,7 +664,7 @@ function Dashboard() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-900">Trung Tâm Điều Hành Dịch Vụ &amp; Chăm Sóc Khách Hàng</h2>
+          <h2 className="text-xl font-bold text-slate-900">Quản Lý Tiếp Nhận &amp; Chăm Sóc Khách Hàng</h2>
           <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
             <span className={`px-2 py-0.5 rounded-md font-semibold border ${currentRoleInfo.badgeClass}`}>
               {currentRoleInfo.badge}
@@ -681,14 +679,14 @@ function Dashboard() {
             onClick={() => setActiveTab('TICKETS')}
             className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'TICKETS' ? 'bg-brand-blue text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
           >
-            Hồ Sơ Phiếu QR ({tickets.length})
+            Phiếu QR ({tickets.length})
           </button>
           {canReceptionAction && (
             <button
               onClick={() => setActiveTab('BOOKINGS')}
               className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'BOOKINGS' ? 'bg-brand-blue text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
             >
-              Lịch Hẹn CSKH ({bookings.filter(b => b.trang_thai === 'CHO_XAC_NHAN').length})
+              Lịch hẹn ({bookings.filter(b => b.trang_thai === 'CHO_XAC_NHAN').length})
             </button>
           )}
           {canViewStats && (
@@ -696,7 +694,7 @@ function Dashboard() {
               onClick={() => setActiveTab('STATS')}
               className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'STATS' ? 'bg-brand-blue text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
             >
-              Thống Kê &amp; Đánh Giá CSKH
+              Thống kê &amp; Đánh giá
             </button>
           )}
           {canManageEmployees && (
@@ -704,7 +702,7 @@ function Dashboard() {
               onClick={() => setActiveTab('EMPLOYEES')}
               className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'EMPLOYEES' ? 'bg-brand-blue text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
             >
-              Nhân Sự CSKH ({employees.length})
+              Nhân sự ({employees.length})
             </button>
           )}
           <button
@@ -712,7 +710,7 @@ function Dashboard() {
             className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 cursor-pointer ${activeTab === 'PAYMENT_GATEWAY' ? 'bg-brand-blue text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
           >
             <SvgIcon name="cash" className="w-4 h-4" />
-            <span>Quầy Thu Ngân &amp; Xác Nhận TT</span>
+            <span>Thu ngân</span>
             {tickets.filter(t => t.trang_thai_thanh_toan !== 'DA_THANH_TOAN').length > 0 && (
               <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
                 activeTab === 'PAYMENT_GATEWAY' ? 'bg-white text-brand-blue' : 'bg-amber-100 text-amber-800'
@@ -728,13 +726,12 @@ function Dashboard() {
                 try {
                   const data = await fetchAuditLogs();
                   setAuditLogs(data.logs || []);
-                  setSecurityStatus(data.securityStatus || null);
                 } catch {}
               }}
               className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-1.5 cursor-pointer ${activeTab === 'SECURITY' ? 'bg-brand-blue text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
             >
               <SvgIcon name="shield" className="w-4 h-4" />
-              <span>Bảo Mật &amp; Audit</span>
+              <span>Nhật ký &amp; Mật khẩu</span>
             </button>
           )}
           <button
@@ -775,14 +772,11 @@ function Dashboard() {
 
       {/* TAB 1: DANH SÁCH HỒ SƠ PHIẾU QR CSKH */}
       {activeTab === 'TICKETS' && (
-        <div className="bg-white p-6 rounded-xl shadow border-t-4 border-brand-blue">
+        <div className="bg-white p-6 rounded-xl shadow-xs border border-slate-200">
           <div className="mb-4 flex flex-col gap-3">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
               <div>
-                <h3 className="text-xl font-bold text-slate-800">Danh Sách Hồ Sơ CSKH Qua Mã QR (Máy Tính &amp; Phần Mềm)</h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Quản lý tiếp nhận thiết bị máy tính &amp; yêu cầu phần mềm, cập nhật nhật ký kiểm tra - sửa chữa, lưu ảnh ngoại quan và cấp Sổ bảo hành điện tử (e-Warranty).
-                </p>
+                <h3 className="text-lg font-bold text-slate-900">Danh Sách Phiếu Tiếp Nhận</h3>
               </div>
               <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                 {canReceptionAction && (
@@ -792,7 +786,7 @@ function Dashboard() {
                     className="rounded-lg bg-brand-blue px-3.5 py-2 text-xs font-bold text-white shadow-2xs hover:bg-brand-blue-hover whitespace-nowrap flex items-center gap-1.5 cursor-pointer"
                   >
                     <SvgIcon name="plus" className="w-3.5 h-3.5" />
-                    <span>Tiếp Nhận Nhanh Tại Quầy (POS)</span>
+                    <span>Tạo phiếu mới</span>
                   </button>
                 )}
                 <button
@@ -889,13 +883,13 @@ function Dashboard() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b-2 border-slate-200 text-xs font-bold uppercase text-slate-500">
-                  <th className="py-2.5 px-4">Mã Phiếu QR</th>
-                  <th className="py-2.5 px-4">Khách Hàng &amp; SĐT</th>
-                  <th className="py-2.5 px-4">Thiết Bị Máy Tính / Phần Mềm &amp; Tình Trạng Lỗi</th>
-                  <th className="py-2.5 px-4">Trạng Thái Xử Lý CSKH</th>
-                  <th className="py-2.5 px-4">Sổ Bảo Hành (e-Warranty)</th>
-                  <th className="py-2.5 px-4 text-center">Thao Tác Điều Hành CSKH</th>
+                <tr className="border-b border-slate-200 bg-slate-50/70 text-xs font-semibold text-slate-600">
+                  <th className="py-2.5 px-4">Mã phiếu</th>
+                  <th className="py-2.5 px-4">Khách hàng</th>
+                  <th className="py-2.5 px-4">Thiết bị &amp; Tình trạng</th>
+                  <th className="py-2.5 px-4">Trạng thái</th>
+                  <th className="py-2.5 px-4">Bảo hành</th>
+                  <th className="py-2.5 px-4 text-center">Thao tác</th>
                 </tr>
               </thead>
               <tbody>
@@ -1056,7 +1050,7 @@ function Dashboard() {
 
       {/* TAB 2: QUẢN LÝ LỊCH HẸN TƯ VẤN & CSKH */}
       {activeTab === 'BOOKINGS' && canReceptionAction && (
-        <div className="bg-white p-6 rounded-xl shadow border-t-4 border-brand-blue">
+        <div className="bg-white p-6 rounded-xl shadow-xs border border-slate-200">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
             <div>
               <h3 className="text-xl font-bold text-slate-800">Lịch Hẹn Tư Vấn &amp; Chăm Sóc Khách Hàng Qua Web QR</h3>
@@ -1315,7 +1309,7 @@ function Dashboard() {
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl shadow-xs border-t-4 border-brand-blue">
+          <div className="bg-white p-6 rounded-xl shadow-xs border border-slate-200">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h3 className="text-xl font-extrabold text-slate-800">Danh Sách Tài Khoản Nhân Sự CSKH ({employees.length})</h3>
@@ -1453,7 +1447,7 @@ function Dashboard() {
         return (
           <div className="space-y-5">
             {/* Thanh tiêu đề Quầy Thu Ngân */}
-            <div className="bg-white p-5 rounded-xl border border-slate-200 border-t-4 border-t-emerald-500 shadow-xs flex flex-wrap items-center justify-between gap-4">
+            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-4">
               <div>
                 <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
                   <SvgIcon name="cash" className="w-5 h-5 text-emerald-600" />
@@ -1704,13 +1698,6 @@ function Dashboard() {
 
               {/* CỘT PHẢI: MÀN HÌNH HIỂN THỊ MÃ CHO KHÁCH TẠI BÀN (5 CỘT) */}
               <div className="lg:col-span-5 space-y-4">
-                <div className="bg-slate-900 text-white p-3 rounded-xl text-xs flex items-center justify-between">
-                  <span className="font-bold flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-                    MÀN HÌNH HIỂN THỊ KHÁCH HÀNG
-                  </span>
-                  <span className="text-[10px] text-slate-400">Quầy Lễ Tân 615 Âu Cơ</span>
-                </div>
 
                 {currentTicket ? (
                   <PaymentMethodSelector
@@ -1735,148 +1722,11 @@ function Dashboard() {
         );
       })()}
 
-      {/* TAB 5: BẢO MẬT & NHẬT KÝ KIỂM TOÁN */}
+      {/* TAB 5: ĐỔI MẬT KHẨU & NHẬT KÝ HOẠT ĐỘNG */}
       {activeTab === 'SECURITY' && isSystemAdmin && (
         <div className="space-y-6">
-          {/* BANNER TỔNG QUAN BẢO MẬT */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-7 shadow-xs space-y-6">
-            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-5">
-              <div className="flex items-center gap-3.5">
-                <div className="w-11 h-11 rounded-xl bg-blue-50 border border-blue-200 text-brand-blue flex items-center justify-center">
-                  <SvgIcon name="shield" className="w-6 h-6" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-lg font-bold text-slate-900 tracking-tight">
-                      Cấu Hình An Toàn Thông Tin &amp; Kiểm Toán
-                    </h3>
-                  </div>
-                  <p className="text-xs text-slate-500 mt-1 max-w-2xl leading-relaxed">
-                    Tổng hợp 6 lớp kiểm soát truy cập, mã hóa dữ liệu khách hàng và ghi nhận lịch sử thao tác quản trị.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold">
-                  <SvgIcon name="check-circle" className="w-4 h-4 text-emerald-600" />
-                  <span>6/6 Lớp Đang Hoạt Động</span>
-                </span>
-              </div>
-            </div>
-
-            {/* 4 CHỈ SỐ NHANH BẢO MẬT */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-              <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Xác Thực Phiên</span>
-                <p className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-                  <SvgIcon name="lock" className="w-4 h-4 text-brand-blue" />
-                  <span>JWT HS256 Strict</span>
-                </p>
-                <span className="text-[11px] text-slate-500 mt-0.5 block">Kiểm tra token mỗi phiên làm việc</span>
-              </div>
-
-              <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Mã Hóa Mật Khẩu</span>
-                <p className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-                  <SvgIcon name="key" className="w-4 h-4 text-brand-blue" />
-                  <span>Bcrypt (10 Salt Rounds)</span>
-                </p>
-                <span className="text-[11px] text-slate-500 mt-0.5 block">Băm mật khẩu một chiều</span>
-              </div>
-
-              <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Lọc Dữ Liệu Đầu Vào</span>
-                <p className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-                  <SvgIcon name="shield" className="w-4 h-4 text-brand-blue" />
-                  <span>SQLi, XSS &amp; HPP</span>
-                </p>
-                <span className="text-[11px] text-slate-500 mt-0.5 block">Làm sạch dữ liệu tại API</span>
-              </div>
-
-              <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Kết Nối Cơ Sở Dữ Liệu</span>
-                <p className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-                  <SvgIcon name="database" className="w-4 h-4 text-brand-blue" />
-                  <span>PostgreSQL TLS/SSL</span>
-                </p>
-                <span className="text-[11px] text-slate-500 mt-0.5 block">Transaction Pooler cổng 6543</span>
-              </div>
-            </div>
-
-            {/* 6 LỚP BẢO MẬT CHI TIẾT */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-1">
-              {[
-                {
-                  icon: 'lock',
-                  badge: 'Lớp 01 • Authentication',
-                  title: '1. Xác Thực JWT HS256',
-                  desc: securityStatus?.jwtAlgorithm || 'Kiểm tra chữ ký số HS256 và đối chiếu trạng thái hoạt động của tài khoản từ CSDL ở từng request.'
-                },
-                {
-                  icon: 'key',
-                  badge: 'Lớp 02 • One-Way Hash',
-                  title: '2. Mã Hóa Mật Khẩu Bcrypt',
-                  desc: securityStatus?.passwordHashing || 'Mật khẩu nhân sự được băm một chiều với 10 vòng muối (10 Salt Rounds), không lưu mật khẩu thô.'
-                },
-                {
-                  icon: 'shield',
-                  badge: 'Lớp 03 • Input Sanitizer',
-                  title: '3. Lọc XSS, SQLi & HPP',
-                  desc: securityStatus?.inputProtection || 'Loại bỏ thẻ HTML độc hại, chống Prototype Pollution và tham số trùng lặp (HTTP Parameter Pollution).'
-                },
-                {
-                  icon: 'globe',
-                  badge: 'Lớp 04 • HTTP Hardening',
-                  title: '4. Helmet Security Headers',
-                  desc: securityStatus?.httpHeaders || 'Thiết lập Content-Security-Policy (CSP), X-Frame-Options: DENY và bảo vệ MIME-type.'
-                },
-                {
-                  icon: 'activity',
-                  badge: 'Lớp 05 • Rate Limiting',
-                  title: '5. Giới Hạn Tần Suất (Rate Limit)',
-                  desc: securityStatus?.rateLimiting || 'Khóa tạm thời 15 phút nếu đăng nhập sai 5 lần liên tiếp và giới hạn tần suất tạo phiếu tránh spam.'
-                },
-                {
-                  icon: 'database',
-                  badge: 'Lớp 06 • Transport Security',
-                  title: '6. Kết Nối CSDL Mã Hóa SSL/TLS',
-                  desc: securityStatus?.databaseEncryption || 'Truyền tải dữ liệu qua Supabase PostgreSQL Pooler (Cổng :6543) có mã hóa SSL/TLS.'
-                }
-              ].map((shield, idx) => (
-                <div
-                  key={idx}
-                  className="rounded-xl border border-slate-200 bg-white p-5 hover:border-blue-300 transition space-y-3 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="w-8 h-8 rounded-lg bg-blue-50 text-brand-blue flex items-center justify-center border border-blue-100">
-                        <SvgIcon name={shield.icon} className="w-4 h-4" />
-                      </div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200">
-                        {shield.badge}
-                      </span>
-                    </div>
-                    <h4 className="font-bold text-sm text-slate-900 tracking-tight">
-                      {shield.title}
-                    </h4>
-                    <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
-                      {shield.desc}
-                    </p>
-                  </div>
-                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
-                    <span className="text-slate-400 font-medium">Trạng thái:</span>
-                    <span className="inline-flex items-center gap-1 text-emerald-600 font-bold">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> Đang hoạt động
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* KHỐI ĐỔI MẬT KHẨU BẢO MẬT CÁ NHÂN */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-7 shadow-xs space-y-5">
+          {/* KHỐI ĐỔI MẬT KHẨU CÁ NHÂN */}
+          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs space-y-5">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
               <div>
                 <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">

@@ -113,7 +113,7 @@ function PaymentMethodSelector({
 
       {/* Thông báo thanh toán */}
       {confirmMessage && (
-        <div className="mt-4 p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 font-semibold flex items-center justify-between">
+        <div className="mt-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 font-semibold flex items-center justify-between">
           <span>{confirmMessage}</span>
           <button type="button" onClick={() => setConfirmMessage('')} className="text-slate-400 hover:text-slate-700 font-bold ml-2">×</button>
         </div>
@@ -128,9 +128,9 @@ function PaymentMethodSelector({
           <button
             type="button"
             onClick={() => setPaymentMethod('VIETQR')}
-            className={`py-2.5 sm:py-3 px-3 rounded-2xl border text-center transition cursor-pointer flex flex-col items-center justify-center gap-1 ${
+            className={`py-2.5 sm:py-3 px-3 rounded-xl border text-center transition cursor-pointer flex flex-col items-center justify-center gap-1 ${
               paymentMethod === 'VIETQR'
-                ? 'border-brand-blue bg-blue-50/90 text-brand-blue font-bold shadow-xs ring-2 ring-blue-500/20'
+                ? 'border-brand-blue bg-blue-50/90 text-brand-blue font-bold shadow-xs'
                 : 'border-slate-200 bg-slate-50/70 text-slate-600 hover:bg-slate-100 font-semibold'
             }`}
           >
@@ -144,9 +144,9 @@ function PaymentMethodSelector({
           <button
             type="button"
             onClick={() => setPaymentMethod('TIEN_MAT')}
-            className={`py-2.5 sm:py-3 px-3 rounded-2xl border text-center transition cursor-pointer flex flex-col items-center justify-center gap-1 ${
+            className={`py-2.5 sm:py-3 px-3 rounded-xl border text-center transition cursor-pointer flex flex-col items-center justify-center gap-1 ${
               paymentMethod === 'TIEN_MAT'
-                ? 'border-emerald-600 bg-emerald-50/90 text-emerald-700 font-bold shadow-xs ring-2 ring-emerald-500/20'
+                ? 'border-emerald-600 bg-emerald-50/90 text-emerald-700 font-bold shadow-xs'
                 : 'border-slate-200 bg-slate-50/70 text-slate-600 hover:bg-slate-100 font-semibold'
             }`}
           >
@@ -161,13 +161,13 @@ function PaymentMethodSelector({
 
       {/* NỘI DUNG 1: CHUYỂN KHOẢN QUA VIETQR */}
       {paymentMethod === 'VIETQR' && (
-        <div className="mt-4 p-3.5 sm:p-4 rounded-2xl bg-blue-50/40 border border-blue-200/80 space-y-3">
+        <div className="mt-4 p-3.5 sm:p-4 rounded-xl bg-blue-50/40 border border-blue-200/80 space-y-3">
           <div className="flex items-center gap-2 text-xs font-bold text-brand-blue">
             <SvgIcon name="bank" className="w-4 h-4" />
-            <ResponsiveText mobile="QUÉT MÃ VIETQR NGÂN HÀNG" desktop="QUÉT MÃ VIETQR QUA ỨNG DỤNG NGÂN HÀNG" />
+            <ResponsiveText mobile="Quét mã VietQR ngân hàng" desktop="Quét mã VietQR qua ứng dụng ngân hàng" />
           </div>
           <p className="hidden sm:block text-xs text-slate-600 leading-relaxed">
-            Mở ứng dụng ngân hàng bất kỳ, quét mã VietQR bên dưới hoặc chuyển khoản theo đúng thông tin để hệ thống đối soát tự động ghi nhận ngay sau 3 - 5 giây.
+            Mở ứng dụng ngân hàng, quét mã VietQR bên dưới hoặc chuyển khoản theo đúng nội dung để nhân viên xác nhận thanh toán.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center gap-4 bg-white p-4 rounded-2xl border border-slate-200">
@@ -250,10 +250,10 @@ function PaymentMethodSelector({
                 type="button"
                 disabled={isVerifying}
                 onClick={handleSimulatePayment}
-                className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold text-xs rounded-xl border border-slate-300 transition flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl border border-slate-300 transition flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
                 <SvgIcon name={isVerifying ? 'clock' : 'check-circle'} className="w-3.5 h-3.5" />
-                <span>{isVerifying ? 'Đang kiểm tra đối soát...' : 'Xác nhận đối soát VietQR (Nhân viên)'}</span>
+                <span>{isVerifying ? 'Đang cập nhật...' : 'Đánh dấu đã nhận chuyển khoản'}</span>
               </button>
             </div>
           )}

@@ -220,24 +220,14 @@ export default function ClientCmsConfig() {
         <AdminNav activeKey="CMS_CLIENT" />
 
         {/* HEADER QUẢN TRỊ NỘI DUNG */}
-        <div className="rounded-2xl bg-white p-6 shadow-xs border border-slate-200">
+        <div className="rounded-xl bg-white p-6 shadow-xs border border-slate-200">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-            <div className="space-y-1.5">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-md bg-blue-50 px-2.5 py-0.5 text-xs font-bold text-brand-blue border border-blue-200">
-                  <SvgIcon name="edit" className="w-3.5 h-3.5" />
-                  <span>Cấu Hình Trang Chủ</span>
-                </span>
-                <span className="inline-flex items-center gap-1.5 text-xs text-slate-500 font-medium">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                  <span>Đồng bộ trực tiếp với Trang chủ</span>
-                </span>
-              </div>
-              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-                Quản Trị Nội Dung Giao Diện Khách Hàng
+            <div className="space-y-1">
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+                Quản Trị Nội Dung Trang Chủ
               </h1>
               <p className="text-xs sm:text-sm text-slate-500 max-w-3xl leading-relaxed">
-                Chỉnh sửa thông tin đơn vị, thông báo đầu trang, tiêu đề Hero, ảnh banner và danh mục dịch vụ hiển thị ngoài trang chủ.
+                Chỉnh sửa thông tin đơn vị, thông báo đầu trang, tiêu đề chính, ảnh banner và danh mục dịch vụ hiển thị ngoài trang chủ.
               </p>
             </div>
 
@@ -441,7 +431,7 @@ export default function ClientCmsConfig() {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1.5">Nhãn Huy Hiệu (Badge) Tiêu Đề</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">Nhãn tiêu đề phụ</label>
                       <input
                         type="text"
                         value={config.brand?.badgeText || ''}
@@ -518,27 +508,27 @@ export default function ClientCmsConfig() {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1.5">Tiêu Đề Dòng 1 (Chữ đen đậm)</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">Tiêu Đề Dòng 1</label>
                       <input
                         type="text"
                         value={config.hero?.titleLine1 || ''}
                         onChange={(e) => handleHeroChange('titleLine1', e.target.value)}
-                        className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-extrabold text-slate-900 focus:outline-none focus:border-brand-blue"
+                        className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:border-brand-blue"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1.5">Tiêu Đề Điểm Nhấn (Màu xanh nhận diện)</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">Tiêu Đề Điểm Nhấn</label>
                       <input
                         type="text"
                         value={config.hero?.titleHighlight || ''}
                         onChange={(e) => handleHeroChange('titleHighlight', e.target.value)}
-                        className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-black text-brand-blue focus:outline-none focus:border-brand-blue"
+                        className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-bold text-brand-blue focus:outline-none focus:border-brand-blue"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1.5">Đoạn Văn Giới Thiệu Tổng Quan Hệ Thống</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">Mô Tả Ngắn Đầu Trang</label>
                       <textarea
                         rows={3}
                         value={config.hero?.description || ''}
@@ -549,7 +539,7 @@ export default function ClientCmsConfig() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1.5">Tiêu Đề Kiosk QR Tại Quầy</label>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">Tiêu Đề Khung QR Tại Quầy</label>
                         <input
                           type="text"
                           value={config.hero?.kioskTitle || ''}
@@ -558,7 +548,7 @@ export default function ClientCmsConfig() {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1.5">Địa Điểm Kiosk QR</label>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">Chi Nhánh / Địa Điểm</label>
                         <input
                           type="text"
                           value={config.hero?.kioskBranch || ''}

@@ -28,13 +28,13 @@ export default function AdminNav({ activeKey = 'VAN_HANH' }) {
   const navItems = [
     {
       key: 'VAN_HANH',
-      label: 'Bàn điều hành hồ sơ QR',
+      label: 'Quản lý phiếu QR',
       path: '/admin',
       visible: true
     },
     {
       key: 'QUAN_LY',
-      label: 'Tổng quan bộ phận CSKH',
+      label: 'Tổng quan CSKH',
       path: '/admin/quan-ly',
       visible: isManagerOrAbove
     },
@@ -46,7 +46,7 @@ export default function AdminNav({ activeKey = 'VAN_HANH' }) {
     },
     {
       key: 'CMS_CLIENT',
-      label: 'Cấu hình giao diện trang chủ',
+      label: 'Giao diện trang chủ',
       path: '/admin/cau-hinh-client',
       visible: isManagerOrAbove
     }
@@ -65,7 +65,7 @@ export default function AdminNav({ activeKey = 'VAN_HANH' }) {
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">
-                TRUNG TÂM ĐIỀU HÀNH &amp; CSKH • CÔNG TY CỔ PHẦN LỤC GIÁC
+                QUẢN LÝ TIẾP NHẬN &amp; CSKH • CÔNG TY CỔ PHẦN LỤC GIÁC
               </h1>
               <span className="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700">
                 {roleInfo.name}

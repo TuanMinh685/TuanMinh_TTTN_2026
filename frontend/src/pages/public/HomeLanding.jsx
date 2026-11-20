@@ -23,7 +23,7 @@ const CORE_PILLARS = [
   {
     step: '03',
     icon: 'shield',
-    title: 'Quản Lý Bảo Hành Điện Tử (e-Warranty)',
+    title: 'Quản Lý Bảo Hành Điện Tử',
     desc: 'Thông tin bảo hành 06 tháng và số Serial linh kiện được lưu trực tiếp trên mã QR hồ sơ, thuận tiện tra cứu khi cần hỗ trợ.'
   },
   {
@@ -38,44 +38,44 @@ const COMPUTER_SOFTWARE_SERVICES = [
   {
     icon: 'desktop',
     tag: 'Phần cứng Laptop & PC',
-    title: 'Kiểm Tra & Sửa Chữa Phần Cứng Chuyên Sâu',
-    desc: 'Chẩn đoán lỗi Mainboard, nguồn, màn hình, bàn phím, bản lề và hệ thống tản nhiệt cho Laptop Dell, HP, Asus, Lenovo, MacBook & PC văn phòng.',
+    title: 'Kiểm Tra & Sửa Chữa Phần Cứng',
+    desc: 'Kiểm tra và xử lý lỗi Mainboard, nguồn, màn hình, bàn phím, bản lề và tản nhiệt cho Laptop Dell, HP, Asus, Lenovo, MacBook & PC.',
     serviceParam: 'Kiểm tra & Sửa chữa phần cứng Máy tính / Laptop'
   },
   {
     icon: 'disc',
     tag: 'Hệ điều hành & Phần mềm',
     title: 'Cài Đặt & Khắc Phục Sự Cố Phần Mềm',
-    desc: 'Xử lý lỗi Windows 10/11, macOS, Microsoft Office, phần mềm kế toán - đồ họa, xung đột hệ thống, màn hình xanh (BSOD) và tối ưu tốc độ máy.',
+    desc: 'Xử lý lỗi Windows 10/11, macOS, Microsoft Office, phần mềm kế toán - đồ họa và các lỗi hệ thống thường gặp.',
     serviceParam: 'Cài đặt & Khắc phục sự cố Phần mềm / Hệ điều hành'
   },
   {
     icon: 'zap',
     tag: 'Nâng cấp linh kiện',
     title: 'Nâng Cấp SSD, RAM & Linh Kiện Chính Hãng',
-    desc: 'Tư vấn nâng cấp ổ cứng SSD NVMe, RAM, Pin, Sạc chuẩn hãng. Mã Serial linh kiện được lưu trực tiếp vào hồ sơ bảo hành điện tử.',
+    desc: 'Tư vấn nâng cấp ổ cứng SSD NVMe, RAM, Pin, Sạc chính hãng. Số Serial linh kiện được lưu vào hồ sơ bảo hành điện tử.',
     serviceParam: 'Nâng cấp SSD / RAM & Linh kiện máy tính'
   },
   {
     icon: 'lock',
     tag: 'Dữ liệu & Bảo mật',
-    title: 'Cứu Dữ Liệu, Sao Lưu & Diệt Virus Mã Độc',
-    desc: 'Khôi phục dữ liệu ổ cứng/SSD lỗi phân vùng, sao lưu an toàn dữ liệu doanh nghiệp và quét sạch mã độc, phần mềm gián điệp.',
+    title: 'Cứu Dữ Liệu, Sao Lưu & Diệt Virus',
+    desc: 'Khôi phục dữ liệu ổ cứng/SSD lỗi phân vùng, sao lưu dữ liệu và xử lý virus, phần mềm độc hại.',
     serviceParam: 'Cứu dữ liệu, Sao lưu & Diệt Virus bảo mật'
   },
   {
     icon: 'globe',
     tag: 'Mạng nội bộ & Máy in',
     title: 'Khắc Phục Lỗi Mạng LAN/Wi-Fi & Máy In',
-    desc: 'Cấu hình Driver máy in, chia sẻ dữ liệu nội bộ, khắc phục lỗi mất kết nối Wi-Fi/Bluetooth, cổng USB/HDMI và thiết bị văn phòng.',
+    desc: 'Cài đặt Driver máy in, chia sẻ máy in nội bộ, xử lý mất kết nối Wi-Fi/Bluetooth và cổng USB/HDMI.',
     serviceParam: 'Khắc phục lỗi Mạng, Driver & Thiết bị ngoại vi'
   },
   {
     icon: 'shield',
-    tag: 'Bảo dưỡng & Hậu mãi',
-    title: 'Bảo Dưỡng Định Kỳ & Kiểm Tra Phần Cứng',
-    desc: 'Vệ sinh laptop chuyên sâu, tra keo tản nhiệt, kiểm tra sức khỏe ổ cứng định kỳ và hỗ trợ bảo hành qua mã QR.',
-    serviceParam: 'Bảo dưỡng định kỳ & Chăm sóc hậu mãi e-Warranty'
+    tag: 'Bảo dưỡng định kỳ',
+    title: 'Vệ Sinh Laptop & Kiểm Tra Phần Cứng',
+    desc: 'Vệ sinh laptop, tra keo tản nhiệt, kiểm tra sức khỏe ổ cứng định kỳ và theo dõi bảo hành qua mã QR.',
+    serviceParam: 'Bảo dưỡng định kỳ & Hỗ trợ bảo hành'
   }
 ];
 
@@ -190,17 +190,16 @@ function HomeLanding() {
         </div>
       )}
 
-      {/* SECTION 01: HERO - CHUẨN MÀU NỀN CÔNG TY CỔ PHẦN LỤC GIÁC (CẤU HÌNH ĐỘNG TỪ BE) */}
-      <section className="bg-gradient-to-b from-[#e8f1f8] via-[#f1f6fa] to-[#f0f5fa] border-b border-slate-200 py-7 sm:py-12 lg:py-16">
+      {/* SECTION 01: HERO */}
+      <section className="bg-[#f4f7fb] border-b border-slate-200 py-7 sm:py-12 lg:py-16">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-10 items-center">
             
             {/* CỘT TRÁI (7/12): THÔNG TIN CHÍNH & HỘP TRA CỨU */}
             <div className="lg:col-span-7 space-y-4 sm:space-y-5">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-white border border-slate-200 text-xs font-semibold uppercase tracking-wider text-slate-700 shadow-2xs">
-                <span className="w-2 h-2 rounded-full bg-brand-green shrink-0"></span>
+              <p className="text-xs font-semibold uppercase tracking-wider text-brand-blue">
                 <ResponsiveText mobile="TT CSKH • LỤC GIÁC" desktop={brand.badgeText} />
-              </div>
+              </p>
 
               <div className="space-y-1.5 sm:space-y-2">
                 <h1 className="text-2xl sm:text-4xl font-bold text-slate-900 leading-tight tracking-tight">
@@ -284,16 +283,11 @@ function HomeLanding() {
 
             {/* CỘT PHẢI (5/12): KIOSK MÃ QR TẠI QUẦY GỌN GÀNG */}
             <div className="lg:col-span-5 flex justify-center">
-              <div className="w-full max-w-sm bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
+              <div className="w-full max-w-sm bg-white rounded-xl border border-slate-200 p-5 shadow-xs">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-3.5">
-                  <div>
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                      MÃ QR QUẦY TIẾP NHẬN
-                    </span>
-                    <h2 className="font-bold text-sm text-slate-900">
-                      {hero.kioskTitle || 'Cổng Quét QR Tự Phục Vụ'}
-                    </h2>
-                  </div>
+                  <h2 className="font-bold text-sm text-slate-900">
+                    {hero.kioskTitle || 'Mã QR Quầy Tiếp Nhận'}
+                  </h2>
                   <span className="px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-700 font-semibold text-xs border border-slate-200">
                     {hero.kioskBranch || '615 Âu Cơ'}
                   </span>
@@ -568,9 +562,9 @@ function HomeLanding() {
                   <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto bg-white border border-slate-200 rounded-xl flex items-center justify-center text-lg sm:text-xl font-bold text-slate-800 mb-2 sm:mb-3">
                     3
                   </div>
-                  <h3 className="text-sm font-bold text-slate-900 mb-1">Nhận máy &amp; Bảo hành e-Warranty</h3>
+                  <h3 className="text-sm font-bold text-slate-900 mb-1">Nhận máy &amp; Bảo hành điện tử</h3>
                   <p className="text-xs text-slate-600 leading-relaxed line-clamp-2 sm:line-clamp-none">
-                    Hoàn tất hỗ trợ, tự động kích hoạt Sổ bảo hành điện tử 06 tháng trên mã QR và gửi đánh giá dịch vụ.
+                    Hoàn tất hỗ trợ, kích hoạt sổ bảo hành điện tử 06 tháng trên mã QR để tiện tra cứu khi cần.
                   </p>
                 </div>
               </div>

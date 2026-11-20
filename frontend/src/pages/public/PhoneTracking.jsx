@@ -54,24 +54,20 @@ function PhoneTracking() {
   return (
     <div className="bg-[#f0f5fa] flex flex-col">
       <main className="flex-1 container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-3xl">
-        <div className="text-center mb-5 sm:mb-8">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-orange-50 text-brand-orange border border-orange-200 text-xs font-semibold uppercase tracking-wider mb-1.5 sm:mb-2">
-            <SvgIcon name="qr" className="w-3.5 h-3.5" />
-            <ResponsiveText mobile="Tra Cứu & Bảo Hành" desktop="Tra Cứu Tiến Độ Sửa Chữa & Bảo Hành Điện Tử" />
-          </span>
-          <h1 className="text-xl sm:text-3xl font-bold text-brand-blue mb-1.5 sm:mb-3">
-            <ResponsiveText mobile="Quét Mã QR & Tra Cứu" desktop="Quét Mã QR & Tra Cứu Hồ Sơ CSKH" />
+        <div className="text-center mb-5 sm:mb-7">
+          <h1 className="text-xl sm:text-3xl font-bold text-slate-900 mb-1.5 sm:mb-2">
+            <ResponsiveText mobile="Quét Mã QR & Tra Cứu" desktop="Quét Mã QR & Tra Cứu Hồ Sơ" />
           </h1>
           <p className="text-slate-500 text-xs sm:text-base">
             <ResponsiveText
               mobile="Quét QR trên phiếu hoặc nhập SĐT / Serial để xem tiến độ."
-              desktop="Quét mã QR trên biên nhận hoặc nhập Số điện thoại / Số Serial máy để theo dõi tiến độ sửa chữa và kiểm tra thời hạn bảo hành."
+              desktop="Quét mã QR trên biên nhận hoặc nhập Số điện thoại / Số Serial máy để xem tiến độ và thời hạn bảo hành."
             />
           </p>
         </div>
 
         {/* Nút chuyển Tab chế độ tra cứu */}
-        <div className="flex bg-slate-200/80 p-1 sm:p-1.5 rounded-xl max-w-md mx-auto mb-5 sm:mb-8 shadow-inner">
+        <div className="flex bg-slate-200/80 p-1 rounded-xl max-w-md mx-auto mb-5 sm:mb-7">
           <button
             type="button"
             onClick={() => setActiveTab('QR_CODE')}
@@ -100,7 +96,7 @@ function PhoneTracking() {
 
         {/* TAB 1: TRA CỨU BẰNG MÃ PHIẾU HOẶC QUÉT CAMERA QR */}
         {activeTab === 'QR_CODE' && (
-          <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-200 border-t-4 border-t-brand-blue p-5 sm:p-8 mb-6 sm:mb-8">
+          <div className="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-200 p-5 sm:p-8 mb-6 sm:mb-8">
             <div className="text-center mb-4 sm:mb-6">
               <h2 className="text-lg sm:text-xl font-bold text-slate-800 mb-1">
                 <ResponsiveText mobile="Quét QR hoặc Nhập mã" desktop="Quét mã QR hoặc Nhập mã phiếu" />
@@ -152,7 +148,7 @@ function PhoneTracking() {
 
         {/* TAB 2: TRA CỨU THEO SỐ ĐIỆN THOẠI / IMEI / SERIAL */}
         {activeTab === 'PHONE' && (
-          <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-200 border-t-4 border-t-brand-blue p-5 sm:p-8 mb-6 sm:mb-8">
+          <div className="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-200 p-5 sm:p-8 mb-6 sm:mb-8">
             <div className="text-center mb-4 sm:mb-6">
               <h2 className="text-lg sm:text-xl font-bold text-slate-800 mb-1">
                 <ResponsiveText

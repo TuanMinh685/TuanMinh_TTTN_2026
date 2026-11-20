@@ -1,6 +1,5 @@
 import { Component, lazy, Suspense, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
-import api from './services/api';
 import ResponsiveText from './components/ResponsiveText';
 import SvgIcon from './components/SvgIcon';
 
@@ -141,7 +140,6 @@ function AppContent() {
   // Đọc thông tin đăng nhập trực tiếp từ localStorage theo từng lượt render
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   const role = typeof window !== 'undefined' ? localStorage.getItem('role') : null;
-  const username = typeof window !== 'undefined' ? localStorage.getItem('username') : '';
   const fullName = typeof window !== 'undefined' ? (localStorage.getItem('fullName') || '') : '';
   const isLoggedIn = Boolean(token && role);
 
@@ -189,34 +187,6 @@ function AppContent() {
     }
   };
 
-  const handleQuickSwitchRole = async (targetUser) => {
-    if (!targetUser) return;
-    try {
-      const res = await api.post('/auth/login', {
-        username: targetUser,
-        password: '123456'
-      });
-      if (res.data.success) {
-        const { token: nextToken, role: nextRole, fullName: nextName, username: nextUname, accountId } = res.data.data;
-        localStorage.setItem('token', nextToken);
-        localStorage.setItem('role', nextRole);
-        localStorage.setItem('fullName', nextName);
-        localStorage.setItem('username', nextUname || targetUser);
-        if (accountId) localStorage.setItem('accountId', String(accountId));
-        
-        // Điều hướng chính xác theo vai trò chuyên biệt CSKH
-        if (nextRole === 'QUAN_LY') {
-          window.location.href = '/admin/quan-ly';
-        } else {
-          window.location.href = '/admin';
-        }
-      }
-    } catch (e) {
-      console.error('Lỗi chuyển vai trò:', e);
-      alert('Không thể chuyển vai trò: ' + (e.response?.data?.message || 'Lỗi đăng nhập'));
-    }
-  };
-
   const handleLogout = () => {
     localStorage.clear();
     window.location.href = '/login';
@@ -259,7 +229,7 @@ function AppContent() {
           <nav className="hidden lg:flex items-center gap-1 text-xs font-semibold text-slate-600 h-full">
             {[
               { path: '/', label: 'Trang chủ' },
-              { path: '/tra-cuu', label: 'Quét mã QR & Tra cứu' },
+              { path: '/tra-cuu', label: 'Tra cứu phiếu' },
               { path: '/intake', label: 'Tạo phiếu QR' },
               { path: '/dat-lich', label: 'Đặt lịch hẹn' }
             ].map((item) => {
@@ -284,22 +254,6 @@ function AppContent() {
           <div className="flex items-center gap-2">
             {isLoggedIn ? (
               <div className="hidden sm:flex items-center gap-2">
-                {/* Bộ chuyển nhanh vai trò tối giản */}
-                <div className="flex items-center gap-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg px-2.5 py-1.5 transition" title="Chuyển nhanh vai trò kiểm thử">
-                  <span className="text-[11px] font-medium text-slate-500">Vai trò:</span>
-                  <select
-                    value={username === 'giamdoc' ? 'admin' : (username || (role === 'GIAM_DOC' || role === 'ADMIN' ? 'admin' : role === 'QUAN_LY' ? 'quanly' : role === 'KY_THUAT_VIEN' ? 'kythuat' : 'letan'))}
-                    onChange={(e) => handleQuickSwitchRole(e.target.value)}
-                    aria-label="Chuyển vai trò"
-                    className="text-xs font-semibold text-slate-700 bg-transparent outline-none cursor-pointer"
-                  >
-                    <option value="kythuat">Chuyên viên hỗ trợ</option>
-                    <option value="letan">Lễ tân &amp; Tiếp nhận</option>
-                    <option value="quanly">Trưởng BP CSKH</option>
-                    <option value="admin">Quản trị hệ thống</option>
-                  </select>
-                </div>
-
                 {/* Nút Thông Báo đơn sắc */}
                 <div className="relative">
                   <button
@@ -374,12 +328,12 @@ function AppContent() {
                   )}
                 </div>
 
-                {/* Nút Mở Bàn Điều Hành Quản Trị (Nút điểm nhấn duy nhất trên Header) */}
+                {/* Nút Mở Trang Quản Trị */}
                 <Link 
                   to={navRoleInfo.link} 
                   className="px-4 py-2 font-semibold rounded-lg transition-colors text-xs bg-brand-blue text-white hover:bg-brand-blue-hover"
                 >
-                  Bàn điều hành
+                  Trang quản trị
                 </Link>
 
                 {/* Nút Đăng Xuất */}
@@ -436,7 +390,7 @@ function AppContent() {
                   to={navRoleInfo.link} 
                   className="py-2.5 px-4 font-semibold rounded-lg text-center bg-brand-blue text-white text-xs"
                 >
-                  {isLoggedIn ? 'Bàn điều hành CSKH' : 'Đăng nhập nội bộ'}
+                  {isLoggedIn ? 'Trang quản trị' : 'Đăng nhập nội bộ'}
                 </Link>
                 {isLoggedIn && (
                   <button
@@ -546,13 +500,10 @@ function AppContent() {
               <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 mb-2 sm:mb-3">Địa chỉ liên hệ</h3>
               <ul className="text-slate-600 text-xs sm:text-sm space-y-1.5 sm:space-y-2">
                 <li>
-                  <strong className="text-slate-800">Trụ sở chính:</strong> 615 Âu Cơ, Phường Phú Trung, Quận Tân Phú, TP. Hồ Chí Minh.
+                  <strong className="text-slate-800">Địa chỉ:</strong> 615 Âu Cơ, Phường Phú Trung, Quận Tân Phú, TP. Hồ Chí Minh.
                 </li>
                 <li className="hidden sm:list-item">
-                  <strong className="text-slate-800">Đơn vị thực hiện:</strong> Công ty Cổ phần Lục Giác
-                </li>
-                <li className="hidden sm:list-item">
-                  <strong className="text-slate-800">Trung tâm bảo hành &amp; CSKH:</strong> Chi nhánh Công ty Cổ phần Lục Giác
+                  <strong className="text-slate-800">Giờ làm việc:</strong> 08:00 – 17:30 (Thứ 2 – Thứ 7)
                 </li>
               </ul>
             </div>

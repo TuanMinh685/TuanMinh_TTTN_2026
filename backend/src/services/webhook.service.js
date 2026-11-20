@@ -102,9 +102,9 @@ const reconcileBankingTransaction = async (payload = {}) => {
         const { rows } = await client.query(updateQuery, [referenceCode, ticketId]);
 
         // 3. Ghi vết kiểm toán (Audit Trail) vào nhật ký sửa chữa
-        const logNote = `[Open Banking Webhook] Khớp lệnh chuyển khoản VietQR tự động thành công (1 giây): ${
-            amountReceived > 0 ? amountReceived.toLocaleString('vi-VN') + ' đ' : 'Khớp đúng hóa đơn'
-        } qua ${bankName}. Mã giao dịch ngân hàng: ${referenceCode}.`;
+        const logNote = `Đã nhận thanh toán chuyển khoản VietQR: ${
+            amountReceived > 0 ? amountReceived.toLocaleString('vi-VN') + ' đ' : 'Khớp hóa đơn'
+        } qua ${bankName} (Mã GD: ${referenceCode}).`;
 
         await client.query(
             `INSERT INTO nhat_ky_sua_chua (phieu_sua_chua_id, nhan_vien_id, trang_thai_cu, trang_thai_moi, ghi_chu) 

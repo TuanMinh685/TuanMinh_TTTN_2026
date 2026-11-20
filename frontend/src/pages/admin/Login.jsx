@@ -96,27 +96,21 @@ function Login() {
 
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-[#f0f5fa] flex items-center justify-center p-4 py-10">
-      <div className="bg-white max-w-md w-full rounded-2xl shadow-sm overflow-hidden border border-slate-200">
-        <div className="h-1.5 bg-brand-blue"></div>
-
+      <div className="bg-white max-w-md w-full rounded-xl shadow-xs overflow-hidden border border-slate-200">
         <div className="p-7 sm:p-9">
           <div className="text-center mb-5 flex flex-col items-center">
             <Link to="/" className="block mb-3">
               <img
                 src="/img/logo-luc-giac.png"
                 alt="Logo Công ty Cổ phần Lục Giác"
-                className="h-16 object-contain mx-auto transition-transform hover:scale-105"
+                className="h-14 object-contain mx-auto"
               />
             </Link>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-slate-100 text-slate-700 text-[11px] font-bold uppercase tracking-wider mb-2 border border-slate-200">
-              <SvgIcon name="qr" className="w-3.5 h-3.5 text-brand-blue" />
-              <span>Hệ Thống Quản Trị QR CSKH</span>
-            </span>
-            <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">
-              {authMode === 'LOGIN' ? 'Cổng Đăng Nhập Nội Bộ' : 'Đăng Ký Tài Khoản CSKH'}
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+              {authMode === 'LOGIN' ? 'Đăng Nhập Nội Bộ' : 'Đăng Ký Tài Khoản'}
             </h1>
-            <p className="text-slate-500 text-xs mt-1 font-medium">
-              Trung Tâm Dịch Vụ &amp; Chăm Sóc Khách Hàng • Công ty Cổ phần Lục Giác
+            <p className="text-slate-500 text-xs mt-1">
+              Công ty Cổ phần Lục Giác • Bộ phận CSKH
             </p>
           </div>
 
@@ -256,13 +250,13 @@ function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-2 py-3 bg-brand-blue hover:bg-brand-blue-hover active:brightness-95 text-white font-bold rounded-xl transition shadow-xs text-sm uppercase tracking-wider disabled:opacity-50 cursor-pointer"
+              className="w-full mt-2 py-3 bg-brand-blue hover:bg-brand-blue-hover active:brightness-95 text-white font-semibold rounded-xl transition shadow-xs text-sm disabled:opacity-50 cursor-pointer"
             >
               {loading
                 ? 'Đang xử lý...'
                 : authMode === 'LOGIN'
-                  ? 'ĐĂNG NHẬP HỆ THỐNG CSKH'
-                  : 'TẠO TÀI KHOẢN & ĐĂNG NHẬP NGAY'}
+                  ? 'Đăng nhập'
+                  : 'Tạo tài khoản'}
             </button>
           </form>
 
