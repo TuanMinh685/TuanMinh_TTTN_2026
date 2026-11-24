@@ -237,9 +237,8 @@ export default function EmployeeManagement() {
     <div className="bg-[#f0f5fa] p-4 md:p-6 rounded-2xl">
       <AdminNav activeKey="NHAN_SU" />
 
-      {/* Main Content */}
       <div className="space-y-6">
-        {/* Banner RBAC Introduction */}
+        {/* Giới thiệu phân quyền */}
         <section className="rounded-xl border border-blue-800/20 bg-brand-blue p-6 text-white shadow-xs">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
@@ -272,7 +271,7 @@ export default function EmployeeManagement() {
           </div>
         </section>
 
-        {/* Quick KPI Stats */}
+        {/* Thống kê nhân sự */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
             <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Tổng Số Nhân Sự</p>
@@ -296,7 +295,7 @@ export default function EmployeeManagement() {
           </div>
         </div>
 
-        {/* Role Cards */}
+        {/* Phân quyền theo vai trò */}
         <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
           <h3 className="text-base font-semibold text-slate-800 mb-4 flex items-center gap-2">
             <SvgIcon name="shield" className="w-4 h-4 text-brand-blue" />
@@ -324,7 +323,7 @@ export default function EmployeeManagement() {
           </div>
         </section>
 
-        {/* Employee Table & Filter Controls */}
+        {/* Bảng danh sách & bộ lọc */}
         <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between mb-6">
             <h3 className="text-lg font-semibold text-slate-800">
@@ -332,7 +331,6 @@ export default function EmployeeManagement() {
             </h3>
 
             <div className="flex flex-wrap items-center gap-3">
-              {/* Search input */}
               <div className="relative w-full sm:w-64">
                 <SvgIcon name="search" className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input

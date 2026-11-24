@@ -1,9 +1,9 @@
 const cmsService = require('../services/cms.service');
 const { logSecurityEvent } = require('../utils/auditLogger');
 
-const getPublicCmsConfig = (req, res, next) => {
+const getPublicCmsConfig = async (req, res, next) => {
     try {
-        const config = cmsService.getCmsConfig();
+        const config = await cmsService.getCmsConfig();
         res.status(200).json({
             success: true,
             data: config
@@ -13,10 +13,10 @@ const getPublicCmsConfig = (req, res, next) => {
     }
 };
 
-const updateCmsConfig = (req, res, next) => {
+const updateCmsConfig = async (req, res, next) => {
     try {
         const actor = req.user?.Username || 'admin';
-        const updated = cmsService.updateCmsConfig(req.body || {}, actor);
+        const updated = await cmsService.updateCmsConfig(req.body || {}, actor);
 
         logSecurityEvent({
             req,
@@ -30,7 +30,7 @@ const updateCmsConfig = (req, res, next) => {
 
         res.status(200).json({
             success: true,
-            message: 'Đã lưu cấu hình giao diện Client (Hình ảnh, Text, Dịch vụ) lên Backend thành công!',
+            message: 'Đã lưu cấu hình giao diện Client (Hình ảnh, Text, Dịch vụ) thành công!',
             data: updated
         });
     } catch (error) {
@@ -38,10 +38,10 @@ const updateCmsConfig = (req, res, next) => {
     }
 };
 
-const resetCmsConfig = (req, res, next) => {
+const resetCmsConfig = async (req, res, next) => {
     try {
         const actor = req.user?.Username || 'admin';
-        const restored = cmsService.resetCmsConfig(actor);
+        const restored = await cmsService.resetCmsConfig(actor);
 
         res.status(200).json({
             success: true,

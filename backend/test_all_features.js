@@ -10,10 +10,10 @@ async function runTests() {
     await new Promise((resolve) => server.listen(0, resolve));
     const port = server.address().port;
     const baseUrl = `http://127.0.0.1:${port}/api`;
-    console.log(`\n======================================================`);
-    console.log(`BẮT ĐẦU KIỂM THỬ TOÀN DIỆN BACKEND <-> SUPABASE CLOUD`);
-    console.log(`Server test đang chạy tại: ${baseUrl}`);
-    console.log(`======================================================\n`);
+    console.log(`\n------------------------------------------------------`);
+    console.log(`KIỂM THỬ BACKEND & SUPABASE`);
+    console.log(`Server test: ${baseUrl}`);
+    console.log(`------------------------------------------------------\n`);
 
     let passedCount = 0;
     let failedCount = 0;
@@ -96,7 +96,7 @@ async function runTests() {
         }
     });
 
-    // 5. LUỒNG 1: Lễ tân tạo phiên tiếp nhận mã QR (POST /tickets/init-session)
+    // 5. Lễ tân tạo phiên tiếp nhận mã QR (POST /tickets/init-session)
     await testCase('Lễ tân tạo phiên tiếp nhận mã QR (POST /tickets/init-session)', async () => {
         const res = await fetch(`${baseUrl}/tickets/init-session`, {
             method: 'POST',
@@ -116,7 +116,7 @@ async function runTests() {
         }
     });
 
-    // 6. LUỒNG 2: Khách hàng quét mã gửi thông tin sự cố (POST /tickets/session/:token/submit)
+    // 6. Khách hàng quét mã gửi thông tin sự cố (POST /tickets/session/:token/submit)
     const testPayload = {
         fullName: 'Trần Minh Quân (Test Supabase)',
         phone: '0909123456',
@@ -155,7 +155,7 @@ async function runTests() {
         }
     });
 
-    // 7. RÀ SOÁT DỮ LIỆU MẪU TRÊN SUPABASE (Kiểm tra fullName, phone, issueDescription, serialImei, timezone)
+    // 7. Kiểm tra dữ liệu vừa tạo trên CSDL
     await testCase('Rà soát dữ liệu mẫu ghi mới trên Supabase (Không mất trường, đúng múi giờ +07:00)', async () => {
         const res = await fetch(`${baseUrl}/tickets`, {
             headers: { Authorization: `Bearer ${technicianToken}` }
@@ -176,7 +176,7 @@ async function runTests() {
         }
     });
 
-    // 8. LUỒNG 3: Kỹ thuật viên tra cứu và cập nhật trạng thái thiết bị (PATCH /tickets/:id/status - updateTicketStatus)
+    // 8. Kỹ thuật viên cập nhật trạng thái thiết bị (PATCH /tickets/:id/status)
     await testCase('Kỹ thuật viên cập nhật trạng thái thiết bị (updateTicketStatus -> ĐANG_CHUẨN_ĐOÁN -> ĐANG_SỬA)', async () => {
         const res1 = await fetch(`${baseUrl}/tickets/${createdTicketId}/status`, {
             method: 'PATCH',
@@ -293,8 +293,8 @@ async function runTests() {
         }
     });
 
-    // 16. Kiểm tra Bảo mật Enterprise Health Probe & HTTP Security Headers (/api/health)
-    await testCase('Enterprise Security Headers & Health Probe (/api/health)', async () => {
+    // 16. Kiểm tra health probe & security headers (/api/health)
+    await testCase('Security Headers & Health Probe (/api/health)', async () => {
         const res = await fetch(`${baseUrl}/health`);
         const data = await res.json();
         if (!data.success || data.status !== 'HEALTHY') throw new Error('Health check thất bại');
@@ -321,8 +321,8 @@ async function runTests() {
         }
     });
 
-    // 18. Kiểm tra Nhật ký Kiểm toán Bảo mật Doanh nghiệp (/admin/audit-logs)
-    await testCase('Admin truy xuất Nhật ký Kiểm toán Bảo mật (/admin/audit-logs)', async () => {
+    // 18. Kiểm tra nhật ký hoạt động (/admin/audit-logs)
+    await testCase('Admin truy xuất nhật ký hoạt động (/admin/audit-logs)', async () => {
         const res = await fetch(`${baseUrl}/admin/audit-logs`, {
             headers: { Authorization: `Bearer ${adminToken}` }
         });
@@ -339,9 +339,9 @@ async function runTests() {
     await pool.query("DELETE FROM lich_hen WHERE so_dien_thoai = '0988776655'").catch(() => {});
     await pool.query("DELETE FROM khach_hang WHERE so_dien_thoai IN ('0909123456', '0988776655') AND ho_ten LIKE '%Supabase%'").catch(() => {});
 
-    console.log(`\n======================================================`);
-    console.log(`KẾT QUẢ KIỂM THỬ SUPABASE: ${passedCount} THÀNH CÔNG, ${failedCount} THẤT BẠI`);
-    console.log(`======================================================\n`);
+    console.log(`\n------------------------------------------------------`);
+    console.log(`KẾT QUẢ KIỂM THỬ: ${passedCount} THÀNH CÔNG, ${failedCount} THẤT BẠI`);
+    console.log(`------------------------------------------------------\n`);
 
     server.close();
     await pool.end();

@@ -1,11 +1,20 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../../services/api';
 import ResponsiveText from '../../components/ResponsiveText';
 import SvgIcon from '../../components/SvgIcon';
 
 function IntakeForm() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const sessionToken = (searchParams.get('session') || '').trim();
+  const [sessionCheck, setSessionCheck] = useState({ token: '', status: 'VALID', message: '' });
+  const sessionState = !sessionToken
+    ? 'NONE'
+    : sessionCheck.token !== sessionToken
+      ? 'CHECKING'
+      : sessionCheck.status;
+  const sessionMessage = sessionCheck.token === sessionToken ? sessionCheck.message : '';
   const [formData, setFormData] = useState({
     fullName: '',
     phone: '',
@@ -17,10 +26,40 @@ function IntakeForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [photos, setPhotos] = useState([]);
+
+  useEffect(() => {
+    if (!sessionToken) return;
+
+    let cancelled = false;
+    api.get(`/tickets/session/${encodeURIComponent(sessionToken)}`)
+      .then((res) => {
+        if (cancelled) return;
+        if (res.data?.success) {
+          setSessionCheck({ token: sessionToken, status: 'VALID', message: '' });
+        } else {
+          setSessionCheck({
+            token: sessionToken,
+            status: 'INVALID',
+            message: res.data?.message || 'Phiên tiếp nhận mã QR không hợp lệ hoặc đã hết hạn.'
+          });
+        }
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setSessionCheck({
+          token: sessionToken,
+          status: 'INVALID',
+          message: err.response?.data?.message || 'Mã QR tiếp nhận không tồn tại hoặc đã hết hạn.'
+        });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [sessionToken]);
   const vnMobileRegex = /^(0[35789])[0-9]{8}$/;
   const cleanPhone = (formData.phone || '').replace(/\s+/g, '');
-  // Tự động kiểm tra tài khoản Zalo từ SĐT ngay khi nhập (không cần nhập 2 lần)
-  // 'IDLE' | 'LINKED' | 'INVALID'
+  // Kiểm tra định dạng SĐT di động Việt Nam
   const zaloCheckStatus = !cleanPhone || cleanPhone.length < 9
     ? 'IDLE'
     : vnMobileRegex.test(cleanPhone)
@@ -69,14 +108,21 @@ function IntakeForm() {
     setLoading(true);
     setError('');
     
+    if (sessionToken && sessionState === 'INVALID') {
+      setLoading(false);
+      setError(sessionMessage || 'Phiên mã QR đã hết hạn hoặc đã được sử dụng.');
+      return;
+    }
+
     try {
-      // Gọi API Tiếp nhận hồ sơ CSKH & cấp Mã QR
-      const response = await api.post('/tickets/intake', {
+      const endpoint = sessionToken
+        ? `/tickets/session/${encodeURIComponent(sessionToken)}/submit`
+        : '/tickets/intake';
+      const response = await api.post(endpoint, {
         ...formData,
         photos
       });
       if (response.data.success) {
-        // Chuyển sang trang Hồ sơ QR & Tra cứu tiến độ ngay lập tức với mã phiếu
         navigate(`/track/${response.data.data.ticketCode}`, {
           state: { isNew: true, ticketCode: response.data.data.ticketCode }
         });
@@ -90,13 +136,9 @@ function IntakeForm() {
 
   return (
     <div className="max-w-xl mx-auto my-4 sm:my-10 px-3 sm:px-4">
-      <div className="bg-white rounded-2xl p-5 sm:p-8 shadow-sm border border-slate-200 border-t-4 border-t-brand-blue">
+      <div className="bg-white rounded-xl p-5 sm:p-8 shadow-xs border border-slate-200">
         <div className="text-center mb-5 sm:mb-7">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold uppercase tracking-wider mb-2">
-            <SvgIcon name="qr" className="w-3.5 h-3.5 text-brand-blue" />
-            <ResponsiveText mobile="Tiếp Nhận CSKH" desktop="Tiếp Nhận Thiết Bị & Hỗ Trợ Kỹ Thuật" />
-          </span>
-          <h1 className="text-xl sm:text-3xl font-bold text-brand-blue mb-1.5 sm:mb-2">
+          <h1 className="text-xl sm:text-3xl font-bold text-slate-900 mb-1.5 sm:mb-2">
             <ResponsiveText mobile="Tạo Phiếu Tiếp Nhận" desktop="Tạo Phiếu Tiếp Nhận Chăm Sóc Khách Hàng" />
           </h1>
           <p className="text-slate-500 text-xs sm:text-sm">
@@ -111,8 +153,40 @@ function IntakeForm() {
           </p>
         </div>
 
+        {sessionState === 'CHECKING' && (
+          <div className="bg-blue-50 text-brand-blue p-3 sm:p-4 rounded-xl mb-4 sm:mb-6 text-xs sm:text-sm border border-blue-200 font-medium">
+            Đang kiểm tra phiên mã QR tiếp nhận...
+          </div>
+        )}
+        {sessionState === 'VALID' && (
+          <div className="bg-emerald-50 text-emerald-800 p-3 sm:p-4 rounded-xl mb-4 sm:mb-6 text-xs sm:text-sm border border-emerald-200 font-medium flex items-center gap-2">
+            <SvgIcon name="check-circle" className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>Phiên QR tiếp nhận tại quầy hợp lệ (dùng 1 lần). Vui lòng điền thông tin thiết bị bên dưới.</span>
+          </div>
+        )}
+        {sessionState === 'INVALID' && (
+          <div className="bg-amber-50 text-amber-900 p-4 rounded-xl mb-4 sm:mb-6 text-xs sm:text-sm border border-amber-200 space-y-2.5">
+            <p className="font-semibold">{sessionMessage}</p>
+            <div className="flex flex-wrap gap-2">
+              <Link
+                to="/intake"
+                className="inline-flex items-center px-3 py-1.5 rounded-lg bg-brand-blue text-white font-semibold hover:bg-brand-blue-hover transition"
+              >
+                Mở form tiếp nhận mới
+              </Link>
+              <Link
+                to="/"
+                className="inline-flex items-center px-3 py-1.5 rounded-lg bg-white border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 transition"
+              >
+                Về trang chủ
+              </Link>
+            </div>
+          </div>
+        )}
+
         {error && <div className="bg-red-50 text-red-600 p-3 sm:p-4 rounded-xl mb-4 sm:mb-6 text-xs sm:text-sm border border-red-200">{error}</div>}
 
+        {sessionState !== 'INVALID' && (
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 items-end">
             <div>
@@ -209,7 +283,7 @@ function IntakeForm() {
             )}
           </div>
 
-          <button disabled={loading} type="submit" className="w-full py-3.5 sm:py-4 bg-brand-blue hover:bg-brand-blue-hover text-white font-bold rounded-xl shadow-xs transition-all cursor-pointer text-sm sm:text-base">
+          <button disabled={loading || sessionState === 'CHECKING'} type="submit" className="w-full py-3.5 sm:py-4 bg-brand-blue hover:bg-brand-blue-hover text-white font-bold rounded-xl shadow-xs transition-all cursor-pointer text-sm sm:text-base disabled:opacity-60">
             {loading ? (
               'Đang tạo phiếu...'
             ) : (
@@ -217,6 +291,7 @@ function IntakeForm() {
             )}
           </button>
         </form>
+        )}
       </div>
     </div>
   );

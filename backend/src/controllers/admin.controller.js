@@ -158,7 +158,7 @@ const updateEmployee = async (req, res, next) => {
             mat_khau: nextMatKhau
         });
 
-        // Xóa cache trạng thái tài khoản ngay lập tức để thu hồi/cập nhật quyền thời gian thực
+        // Xóa cache tài khoản để cập nhật quyền ngay
         invalidateAccountCache(targetId);
 
         logSecurityEvent({
@@ -239,7 +239,7 @@ const getSecurityAuditLogs = async (req, res, next) => {
                 securityStatus: {
                     jwtAlgorithm: 'HS256 (Strict Verification)',
                     passwordHashing: 'Bcrypt (10 Salt Rounds)',
-                    httpHeaders: 'Helmet + Enterprise Security Headers (CSP, HSTS, X-Frame-Options: DENY)',
+                    httpHeaders: 'Helmet + Security Headers (CSP, HSTS, X-Frame-Options: DENY)',
                     inputProtection: 'Anti-XSS, Anti-Prototype Pollution & HPP Sanitizer',
                     rateLimiting: 'Active (Global API + Brute-Force Auth Lockout)',
                     databaseEncryption: pool.isCloudConnected && pool.isCloudConnected()

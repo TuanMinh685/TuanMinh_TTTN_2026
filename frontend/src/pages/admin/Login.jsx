@@ -114,7 +114,7 @@ function Login() {
             </p>
           </div>
 
-          {/* Chuyển đổi Đăng Nhập / Đăng Ký kết nối API Backend */}
+          {/* Tab đăng nhập / đăng ký */}
           <div className="grid grid-cols-2 gap-1.5 bg-slate-100 p-1 rounded-xl mb-5 text-xs font-bold">
             <button
               type="button"
@@ -260,7 +260,7 @@ function Login() {
             </button>
           </form>
 
-          {/* Gợi ý tài khoản bộ phận CSKH khi ở chế độ Đăng nhập */}
+          {/* Tài khoản đăng nhập nhanh */}
           {authMode === 'LOGIN' && (
             <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50/80 p-4">
               <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2.5 flex items-center justify-center gap-1.5">

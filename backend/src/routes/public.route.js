@@ -4,10 +4,10 @@ const os = require('os');
 const publicController = require('../controllers/public.controller');
 const cmsController = require('../controllers/cms.controller');
 
-// Lấy cấu hình giao diện Client (Hình ảnh, Text, Dịch vụ, Banner) từ Backend
+// Cấu hình nội dung trang chủ công khai
 router.get('/cms-config', cmsController.getPublicCmsConfig);
 
-// Lấy IP mạng hoặc Origin công khai để sinh mã QR cho điện thoại quét được
+// Trả về IP LAN khi chạy local để tạo QR quét trên điện thoại cùng mạng Wi-Fi
 router.get('/network-ip', (req, res) => {
     const origin = req.headers.origin || req.headers.referer;
     if (origin && !origin.includes('localhost') && !origin.includes('127.0.0.1')) {
@@ -35,19 +35,19 @@ router.get('/network-ip', (req, res) => {
     });
 });
 
-// Tra cứu thông tin hồ sơ CSKH theo Mã QR / Mã phiếu (RP-xxxxxx)
+// Tra cứu phiếu theo mã QR / mã phiếu
 router.get('/track/:ticketCode', publicController.trackTicket);
 
-// Khách hàng tra cứu tất cả hồ sơ CSKH theo Số điện thoại / Mã định danh Serial
+// Tra cứu phiếu theo SĐT, Serial hoặc mã phiếu
 router.get('/track/phone/:phone', publicController.trackByPhone);
 
-// Khách hàng gửi đánh giá mức độ hài lòng dịch vụ CSKH (1 - 5 sao) sau khi hoàn tất
+// Gửi đánh giá 1-5 sao sau khi hoàn tất
 router.post('/track/:ticketCode/review', publicController.submitReview);
 
-// Khách hàng gửi yêu cầu hỗ trợ bảo hành điện tử (e-Warranty)
+// Gửi yêu cầu hỗ trợ bảo hành
 router.post('/track/:ticketCode/warranty-claim', publicController.claimWarranty);
 
-// Lấy danh sách đánh giá chất lượng dịch vụ 5 sao
+// Danh sách đánh giá nổi bật
 router.get('/reviews', publicController.getTopReviews);
 router.get('/reviews/top', publicController.getTopReviews);
 

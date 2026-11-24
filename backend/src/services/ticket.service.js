@@ -47,7 +47,7 @@ const submitIntake = async (customerData) => {
             customerId = newUser.rows[0].id;
         }
         
-        // 2. Tạo bản ghi Sản phẩm / Dịch vụ cần hỗ trợ CSKH
+        // 2. Tạo bản ghi thiết bị cần hỗ trợ
         const newDevice = await client.query(`
             INSERT INTO thiet_bi (khach_hang_id, ten_may, so_imei_serial, tinh_trang_may)
             VALUES ($1, $2, $3, $4)
@@ -55,7 +55,7 @@ const submitIntake = async (customerData) => {
         `, [customerId, resolvedDeviceName, resolvedSerial, resolvedIssue]);
         deviceId = newDevice.rows[0].id;
 
-        // 3. Tạo Hồ sơ phiếu CSKH & cấp Mã QR định danh RP-XXXXXX
+        // 3. Tạo phiếu tiếp nhận và mã tra cứu RP-XXXXXX
         const ticketCode = 'RP-' + Math.floor(100000 + Math.random() * 900000);
         
         const newTicket = await client.query(`
@@ -66,12 +66,12 @@ const submitIntake = async (customerData) => {
 
         const ticket = newTicket.rows[0];
 
-        // 3b. Nếu gửi từ phiên QR động (init-session), cập nhật trạng thái phiên sang SUBMITTED
+        // 3b. Cập nhật trạng thái phiên QR sang SUBMITTED nếu gửi từ QR động
         if (sessionToken) {
             await markQrSessionSubmitted(sessionToken, ticket.id, client);
         }
 
-        // 3c. Lưu ảnh minh chứng hiện trạng nếu có gửi kèm lúc tiếp nhận
+        // 3c. Lưu ảnh hiện trạng nếu có gửi kèm
         if (Array.isArray(photos) && photos.length > 0) {
             for (const img of photos) {
                 if (img && (img.duong_dan_anh || typeof img === 'string')) {
@@ -86,7 +86,7 @@ const submitIntake = async (customerData) => {
             }
         }
 
-        // 4. Lưu nhật ký tiến độ xử lý CSKH
+        // 4. Lưu nhật ký tiếp nhận
         const logNote = sessionToken
             ? `Khách hàng vừa quét mã QR phiên (${sessionToken.slice(0, 8)}...) và gửi yêu cầu CSKH`
             : 'Khách hàng vừa khởi tạo hồ sơ yêu cầu Chăm sóc khách hàng qua mã QR';
@@ -99,7 +99,7 @@ const submitIntake = async (customerData) => {
 
         const createdAtVN = formatVietnamISO(ticket.ngay_tao || new Date());
 
-        // 5. Bắn thông báo Socket.io
+        // 5. Gửi thông báo Socket.io cho lễ tân
         try {
             const io = getIo();
             io.to('receptionist_room').emit('new_ticket', {
@@ -111,7 +111,7 @@ const submitIntake = async (customerData) => {
             });
         } catch (socketErr) {}
 
-        // 6. Tự động gửi tin nhắn xác nhận tới SĐT / Zalo của khách hàng
+        // 6. Gửi tin nhắn xác nhận cho khách hàng
         notificationService.sendNotification({
             type: 'TICKET_CREATED',
             phone: resolvedPhone,
@@ -213,7 +213,7 @@ const updateTicketStatus = async (idOrCode, status, ghiChu = '', employeeId = nu
             'ĐANG_CHUẨN_ĐOÁN': 'Bộ phận Lễ tân đã tiếp nhận và phân loại hồ sơ yêu cầu CSKH.',
             'ĐANG_SỬA': 'Chuyên viên Chăm sóc khách hàng đang trực tiếp xử lý yêu cầu hỗ trợ.',
             'ĐÃ_SỬA_XONG': 'Chuyên viên đã xử lý xong yêu cầu hỗ trợ của khách hàng.',
-            'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN': 'Đã hoàn tất hỗ trợ CSKH, bàn giao hồ sơ và kích hoạt Sổ bảo hành điện tử (e-Warranty 06 tháng).'
+            'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN': 'Đã hoàn tất hỗ trợ CSKH, bàn giao hồ sơ và kích hoạt bảo hành điện tử (06 tháng).'
         };
         const noteText = (typeof ghiChu === 'string' && ghiChu.trim())
             ? ghiChu.trim()
@@ -229,7 +229,7 @@ const updateTicketStatus = async (idOrCode, status, ghiChu = '', employeeId = nu
             io.emit('ticket_status_changed', { ticketId, status });
         } catch (err) {}
 
-        // Tự động thông báo qua SMS / Zalo khi máy tính/phần mềm đã xử lý xong
+        // Gửi thông báo qua SMS/Zalo khi thiết bị đã xử lý xong
         if (status === 'ĐÃ_SỬA_XONG' && currentTicket.so_dien_thoai) {
             notificationService.sendNotification({
                 type: 'DEVICE_READY',
@@ -299,7 +299,7 @@ const submitBooking = async (bookingData) => {
             });
         } catch (err) {}
 
-        // Tự động gửi tin nhắn xác nhận đặt lịch hẹn tới SĐT / Zalo của khách hàng
+        // Gửi thông báo xác nhận đặt lịch hẹn cho khách hàng
         notificationService.sendNotification({
             type: 'BOOKING_CONFIRMATION',
             phone: phone,
@@ -520,7 +520,7 @@ const confirmPayment = async (ticketId, paymentData = {}, employeeId = null) => 
             io.emit('ticket_status_changed', { ticketId: ticket.id, status: ticket.trang_thai });
         } catch (e) {}
 
-        // Tự động gửi SMS / Zalo xác nhận thanh toán & kích hoạt Sổ bảo hành điện tử e-Warranty
+        // Gửi SMS/Zalo xác nhận thanh toán và kích hoạt bảo hành
         if (ticket.so_dien_thoai) {
             notificationService.sendNotification({
                 type: 'PAYMENT_CONFIRMATION',

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-// Tự động dùng /api hoặc chuẩn hóa URL nếu thiếu tiền tố /api
+// Chuẩn hóa base URL gọi API
 let rawApiUrl = (import.meta.env.VITE_API_URL || '/api').trim();
 if (rawApiUrl.startsWith('http') && !rawApiUrl.endsWith('/api') && !rawApiUrl.endsWith('/api/')) {
   rawApiUrl = rawApiUrl.replace(/\/+$/, '') + '/api';
@@ -9,14 +9,14 @@ const API_URL = rawApiUrl;
 
 const api = axios.create({
   baseURL: API_URL,
-  timeout: 15000, // Timeout 15 giây chuẩn doanh nghiệp chống treo kết nối
+  timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
-    'X-Client-Version': '2.0.0-Enterprise'
+    'X-Client-Version': '2.0.0'
   }
 });
 
-// Middleware request: tự động gắn JWT Token vào Header nếu có
+// Tự động đính kèm token đăng nhập nếu có
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -25,7 +25,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Middleware response: Phân tách rõ 401 (Hết hạn / Khóa TK -> Đăng xuất) và 403 (Thiếu quyền RBAC -> Giữ nguyên phiên)
+// Tự động đăng xuất khi token hết hạn (401), giữ nguyên phiên nếu thiếu quyền (403)
 api.interceptors.response.use(
   (response) => response,
   (error) => {

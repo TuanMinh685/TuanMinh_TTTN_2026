@@ -39,7 +39,7 @@ const trackTicket = async (ticketCode) => {
     `, [ticket.id]);
     ticket.hinh_anh_ngoai_quan = photosRes.rows || [];
 
-    // Sổ bảo hành điện tử (e-Warranty)
+    // Thông tin bảo hành
     if (ticket.han_bao_hanh) {
         const hanDate = new Date(ticket.han_bao_hanh);
         const now = new Date();

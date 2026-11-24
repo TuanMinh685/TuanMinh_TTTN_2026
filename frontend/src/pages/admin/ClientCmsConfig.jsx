@@ -356,13 +356,9 @@ export default function ClientCmsConfig() {
         ) : (
           <form onSubmit={handleSaveConfig} className="space-y-6">
             
-            {/* ======================================================== */}
-            {/* TAB 1: THƯƠNG HIỆU & HERO BANNER                         */}
-            {/* ======================================================== */}
+            {/* Tab 1: Thương hiệu & Banner */}
             {activeTab === 'HERO_BRAND' && (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                
-                {/* CỘT TRÁI: THƯƠNG HIỆU & THANH PROMO BANNER (6 CỘT) */}
                 <div className="lg:col-span-6 space-y-5">
                   <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">
                     <div className="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -494,7 +490,7 @@ export default function ClientCmsConfig() {
                   </div>
                 </div>
 
-                {/* CỘT PHẢI: HERO BANNER & TIÊU ĐỀ LỚN (6 CỘT) */}
+                {/* Cột phải: Tiêu đề & Banner */}
                 <div className="lg:col-span-6 space-y-5">
                   <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">
                     <div className="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -620,9 +616,7 @@ export default function ClientCmsConfig() {
               </div>
             )}
 
-            {/* ======================================================== */}
-            {/* TAB 2: DANH MỤC DỊCH VỤ & BẢNG GIÁ                       */}
-            {/* ======================================================== */}
+            {/* Tab 2: Danh mục dịch vụ */}
             {activeTab === 'SERVICES' && (
               <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
@@ -788,9 +782,7 @@ export default function ClientCmsConfig() {
               </div>
             )}
 
-            {/* ======================================================== */}
-            {/* TAB 3: QUY TRÌNH TIẾP NHẬN QR                            */}
-            {/* ======================================================== */}
+            {/* Tab 3: Quy trình tiếp nhận */}
             {activeTab === 'PILLARS' && (
               <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-6">
                 <div className="border-b border-slate-100 pb-4">
@@ -863,7 +855,7 @@ export default function ClientCmsConfig() {
               </div>
             )}
 
-            {/* THANH THAO TÁC CỐ ĐỊNH PHÍA DƯỚI */}
+            {/* Thanh lưu thay đổi */}
             {hasChanges && (
               <div className="sticky bottom-4 z-40 rounded-xl bg-slate-900 text-white p-4 shadow-lg border border-slate-700 flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5">

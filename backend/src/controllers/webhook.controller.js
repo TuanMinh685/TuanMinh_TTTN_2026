@@ -1,19 +1,43 @@
 const webhookService = require('../services/webhook.service');
 const { logSecurityEvent } = require('../utils/auditLogger');
 
-// Xử lý Webhook chuẩn từ các cổng Open Banking (Casso, SePay, PayOS, VietQR Hub, v.v.)
+// Xử lý webhook từ cổng thanh toán (Casso, SePay, PayOS, VietQR)
 const handleBankingWebhook = async (req, res, next) => {
     try {
+        const expectedSecret = (process.env.BANK_WEBHOOK_SECRET || '').trim();
+        if (expectedSecret) {
+            const authHeader = String(req.headers['authorization'] || '').replace(/^Bearer\s+/i, '').trim();
+            const apiKeyHeader = String(req.headers['x-api-key'] || req.headers['secure-token'] || '').trim();
+            if (authHeader !== expectedSecret && apiKeyHeader !== expectedSecret) {
+                logSecurityEvent({
+                    req,
+                    actor: 'WEBHOOK_CLIENT',
+                    role: 'EXTERNAL',
+                    action: 'OPEN_BANKING_WEBHOOK_REJECTED',
+                    target: 'Banking Webhook',
+                    status: 'BLOCKED',
+                    details: 'Từ chối webhook ngân hàng do thiếu hoặc sai secret xác thực'
+                });
+                return res.status(401).json({
+                    error: true,
+                    success: false,
+                    errorCode: 'INVALID_WEBHOOK_SECRET',
+                    message: 'Webhook secret không hợp lệ.'
+                });
+            }
+        }
+
         const payload = req.body || {};
         
-        // Log sự kiện nhận Webhook để kiểm toán bảo mật
+        // Ghi nhận sự kiện webhook
         logSecurityEvent({
-            eventType: 'OPEN_BANKING_WEBHOOK_RECEIVED',
-            ip: req.ip || req.connection?.remoteAddress,
-            details: {
-                headers: req.headers['authorization'] ? 'Present' : 'None',
-                contentLength: req.headers['content-length']
-            }
+            req,
+            actor: 'WEBHOOK_CLIENT',
+            role: 'EXTERNAL',
+            action: 'OPEN_BANKING_WEBHOOK_RECEIVED',
+            target: String(payload.ticketCode || 'VIETQR_WEBHOOK'),
+            status: 'SUCCESS',
+            details: `Nhận webhook ngân hàng (${req.headers['authorization'] || req.headers['x-api-key'] ? 'có header xác thực' : 'không header'})`
         });
 
         const result = await webhookService.reconcileBankingTransaction(payload);
@@ -32,7 +56,7 @@ const handleBankingWebhook = async (req, res, next) => {
             error: false,
             success: true,
             code: '00',
-            message: 'Đã tự động khớp lệnh chuyển khoản VietQR thành công trong 1 giây!',
+            message: 'Đã tự động khớp lệnh chuyển khoản VietQR thành công!',
             data: result.data
         });
     } catch (error) {
@@ -40,7 +64,7 @@ const handleBankingWebhook = async (req, res, next) => {
     }
 };
 
-// API mô phỏng khớp lệnh Webhook tự động (Dành cho việc Demo bảo vệ & Kiểm thử)
+// API mô phỏng khớp lệnh webhook để kiểm thử
 const simulateBankingWebhook = async (req, res, next) => {
     try {
         const { ticketCode, amount, bankName, referenceCode } = req.body;
@@ -62,13 +86,25 @@ const simulateBankingWebhook = async (req, res, next) => {
 
         const result = await webhookService.reconcileBankingTransaction(simulatedPayload);
 
+        if (result.success) {
+            logSecurityEvent({
+                req,
+                actor: req.user?.Username || 'staff',
+                role: req.user?.Role || 'STAFF',
+                action: 'MANUAL_VIETQR_CONFIRM',
+                target: simulatedPayload.ticketCode,
+                status: 'SUCCESS',
+                details: `Nhân sự xác nhận đối soát VietQR cho phiếu ${simulatedPayload.ticketCode}`
+            });
+        }
+
         res.status(result.success ? 200 : 400).json(result);
     } catch (error) {
         next(error);
     }
 };
 
-// Kiểm tra trạng thái thanh toán thời gian thực theo mã phiếu
+// Kiểm tra trạng thái thanh toán theo mã phiếu
 const checkPaymentStatus = async (req, res, next) => {
     try {
         const { ticketCode } = req.params;

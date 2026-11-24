@@ -17,7 +17,8 @@ const INITIAL_STORE = {
     lich_hen: [],
     danh_gia: [],
     hinh_anh_phieu: [],
-    ticket_sessions: []
+    ticket_sessions: [],
+    cau_hinh_cms: []
 };
 
 let memoryStore = null;

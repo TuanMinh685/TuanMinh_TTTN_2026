@@ -25,14 +25,7 @@ const BORDER_DOUBLE_BOTTOM = {
 };
 
 /**
- * Xuất file Excel (.xlsx) chuẩn doanh nghiệp với:
- * - Font chữ: 100% Times New Roman
- * - Khung viền ô (cell borders) rõ ràng, kẻ bảng chuẩn hành chính
- * - Tiêu đề cơ quan chủ quản, tiêu đề báo cáo căn giữa in hoa
- * - Định dạng số tiền có dấu phẩy phân cách hàng nghìn (#,##0)
- * - Tự động giãn cột, không che khuất dữ liệu
- * - Dòng tổng cộng kế toán viền đôi
- * - Khối chữ ký phê duyệt 3 bên (Người lập, Thủ kho/Kế toán, Ban Giám Đốc)
+ * Xuất danh sách dữ liệu ra file Excel (.xlsx) với font Times New Roman và khối chữ ký 3 bên.
  */
 export async function exportEnterpriseExcel({
   filename = 'Bao_Cao.xlsx',
@@ -66,7 +59,7 @@ export async function exportEnterpriseExcel({
 
   const numCols = Math.max(headers.length, 7);
 
-  // Helper chuyển đổi số cột (1-indexed) sang chữ cái Excel (1 -> A, 2 -> B...)
+  // Chuyển số thứ tự cột (1-based) sang ký tự cột Excel (1 -> A, 27 -> AA)
   const getColLetter = (colIdx) => {
     let letter = '';
     while (colIdx > 0) {
@@ -81,7 +74,7 @@ export async function exportEnterpriseExcel({
   const midColLetter1 = getColLetter(Math.max(Math.floor(numCols / 2), 3));
   const midColLetter2 = getColLetter(Math.max(Math.floor(numCols / 2) + 1, 4));
 
-  // --- DÒNG 1, 2, 3: HEADER QUỐC HIỆU & DOANH NGHIỆP ---
+  // Phần đầu quốc hiệu & thông tin công ty
   ws.mergeCells(`A1:${midColLetter1}1`);
   const cA1 = ws.getCell('A1');
   cA1.value = 'CÔNG TY CỔ PHẦN LỤC GIÁC';
@@ -118,10 +111,10 @@ export async function exportEnterpriseExcel({
   cRight3.font = { name: 'Times New Roman', size: 10 };
   cRight3.alignment = { horizontal: 'center', vertical: 'middle' };
 
-  // Dòng 4 trống
+  // Dòng trống ngăn cách tiêu đề
   ws.addRow([]);
 
-  // --- DÒNG 5, 6, 7: TIÊU ĐỀ BÁO CÁO & METADATA ---
+  // Tiêu đề báo cáo và thông tin người xuất
   const titleRowIdx = 5;
   ws.mergeCells(`A${titleRowIdx}:${lastColLetter}${titleRowIdx}`);
   const cTitle = ws.getCell(`A${titleRowIdx}`);
@@ -144,10 +137,9 @@ export async function exportEnterpriseExcel({
   cScope.font = { name: 'Times New Roman', size: 10, italic: true, color: { argb: 'FF444444' } };
   cScope.alignment = { horizontal: 'center', vertical: 'middle' };
 
-  // Dòng 8 trống
   ws.addRow([]);
 
-  // --- DÒNG 9: HÀNG TIÊU ĐỀ BẢNG (TABLE HEADER) ---
+  // Tiêu đề các cột của bảng
   const headerRow = ws.addRow(headers);
   headerRow.height = 28;
   headerRow.eachCell((cell) => {
@@ -157,7 +149,7 @@ export async function exportEnterpriseExcel({
     cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
   });
 
-  // --- DÒNG 10..N: DỮ LIỆU BẢNG ---
+  // Đổ dữ liệu từng dòng
   rows.forEach((rowVals) => {
     const row = ws.addRow(rowVals);
     row.height = 22;
@@ -180,7 +172,7 @@ export async function exportEnterpriseExcel({
     });
   });
 
-  // --- DÒNG TỔNG CỘNG NẾU CÓ ---
+  // Dòng tổng cộng
   if (summaryRow && Array.isArray(summaryRow)) {
     const sumRow = ws.addRow(summaryRow);
     sumRow.height = 24;
@@ -198,7 +190,7 @@ export async function exportEnterpriseExcel({
     });
   }
 
-  // --- KHỐI CHỮ KÝ PHÊ DUYỆT 3 BÊN ---
+  // Khối chữ ký cuối trang
   ws.addRow([]);
   ws.addRow([]);
 
@@ -273,22 +265,21 @@ export async function exportEnterpriseExcel({
   nameC.font = { name: 'Times New Roman', size: 11, bold: true };
   nameC.alignment = { horizontal: 'center', vertical: 'middle' };
 
-  // --- TÍNH TOÁN ĐỘ RỘNG CỘT TỰ ĐỘNG CHUẨN XÁC ---
+  // Tự động căn chỉnh độ rộng các cột
   ws.columns = headers.map((h, colIdx) => {
     let maxLen = String(h ?? '').length;
     rows.forEach((r) => {
       const val = String(r[colIdx] ?? '');
       if (val.length > maxLen) maxLen = val.length;
     });
-    // Đảm bảo không cột nào quá hẹp
     let w = Math.max(maxLen + 4, 14);
-    if (colIdx === 0) w = Math.max(w, 8); // Cột STT
-    if (colIdx === 1) w = Math.max(w, 16); // Cột Mã
-    if (colIdx === 2) w = Math.max(w, 38); // Cột Tên
+    if (colIdx === 0) w = Math.max(w, 8);
+    if (colIdx === 1) w = Math.max(w, 16);
+    if (colIdx === 2) w = Math.max(w, 38);
     return { width: w };
   });
 
-  // Xuất file và kích hoạt tải về trên trình duyệt
+  // Tạo file và tải xuống trình duyệt
   const buffer = await wb.xlsx.writeBuffer();
   const safeFilename = filename.endsWith('.xlsx') ? filename : `${filename.replace(/\.csv$/i, '')}.xlsx`;
 

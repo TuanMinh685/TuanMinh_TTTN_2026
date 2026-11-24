@@ -2,19 +2,14 @@ const { pool } = require('../config/db.config');
 const { getIo } = require('../config/socket.config');
 const { formatVietnamISO } = require('./ticket_session.service');
 
-/**
- * Tự động bóc tách mã phiếu CSKH từ nội dung chuyển khoản ngân hàng
- * Ví dụ: "CSKH RP-839400 chuyen khoan", "TT RP-133037", "NAPAS247 FT261109 RP-839400"
- */
+// Bóc tách mã phiếu (RP-XXXXXX) từ nội dung chuyển khoản
 function extractTicketCode(text) {
     if (!text || typeof text !== 'string') return null;
     const match = text.match(/(?:CSKH\s+|TT\s+)?(RP-[A-Z0-9]{4,10})/i);
     return match ? match[1].toUpperCase() : null;
 }
 
-/**
- * Khớp lệnh chuyển khoản VietQR tự động qua Webhook Open Banking trong 1 giây
- */
+// Khớp lệnh chuyển khoản VietQR từ webhook ngân hàng
 const reconcileBankingTransaction = async (payload = {}) => {
     const rawContent = String(
         payload.content || 
@@ -101,7 +96,7 @@ const reconcileBankingTransaction = async (payload = {}) => {
         `;
         const { rows } = await client.query(updateQuery, [referenceCode, ticketId]);
 
-        // 3. Ghi vết kiểm toán (Audit Trail) vào nhật ký sửa chữa
+        // 3. Ghi lịch sử thanh toán vào nhật ký phiếu
         const logNote = `Đã nhận thanh toán chuyển khoản VietQR: ${
             amountReceived > 0 ? amountReceived.toLocaleString('vi-VN') + ' đ' : 'Khớp hóa đơn'
         } qua ${bankName} (Mã GD: ${referenceCode}).`;
@@ -114,7 +109,7 @@ const reconcileBankingTransaction = async (payload = {}) => {
 
         await client.query('COMMIT');
 
-        // 4. Phát tín hiệu Socket.IO thời gian thực tới Bàn điều hành Lễ tân & Trang tra cứu của Khách
+        // 4. Phát sự kiện Socket.IO cho lễ tân và trang tra cứu
         try {
             const io = getIo();
             io.emit('payment_confirmed', {
@@ -138,7 +133,7 @@ const reconcileBankingTransaction = async (payload = {}) => {
         const updatedRow = rows[0];
         return {
             success: true,
-            message: 'Đã tự động xác nhận chuyển khoản VietQR thành công qua Open Banking Webhook trong 1 giây!',
+            message: 'Đã xác nhận chuyển khoản VietQR thành công!',
             data: {
                 ticketCode,
                 ticketId,

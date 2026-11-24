@@ -262,7 +262,7 @@ function PhoneTracking() {
         )}
       </main>
 
-      {/* MODAL BẬT CAMERA QUÉT MÃ QR */}
+      {/* Modal quét mã QR */}
       <QrScannerModal
         isOpen={isScannerOpen}
         onClose={() => setIsScannerOpen(false)}

@@ -226,10 +226,12 @@ function executeMockQuery(sql, params = []) {
     // 13. trackTicket by ma_tra_cuu or id
     if (/SELECT .* FROM phieu_sua_chua p .* WHERE (?:p\.)?(?:ma_tra_cuu|id) = \$1/i.test(cleanSql)) {
         const key = params[0];
+        const altKey = params[1];
         const isNum = typeof key === 'number' || /^\d+$/.test(String(key).trim());
-        const p = isNum 
+        const p = (isNum
             ? (s.phieu_sua_chua.find(x => x.id === Number(key)) || s.phieu_sua_chua.find(x => x.ma_tra_cuu === key))
-            : s.phieu_sua_chua.find(x => x.ma_tra_cuu === key);
+            : s.phieu_sua_chua.find(x => x.ma_tra_cuu === key))
+            || (altKey ? s.phieu_sua_chua.find(x => x.ma_tra_cuu === String(altKey).trim()) : null);
         if (!p) return { rows: [] };
         const tb = s.thiet_bi.find(x => x.id === p.thiet_bi_id) || {};
         const kh = s.khach_hang.find(x => x.id === tb.khach_hang_id) || {};
@@ -239,6 +241,12 @@ function executeMockQuery(sql, params = []) {
             ma_tra_cuu: p.ma_tra_cuu,
             trang_thai: p.trang_thai,
             loai_dich_vu: p.loai_dich_vu || 'OFFLINE',
+            trang_thai_thanh_toan: p.trang_thai_thanh_toan || 'CHUA_THANH_TOAN',
+            phuong_thuc_thanh_toan: p.phuong_thuc_thanh_toan || null,
+            ma_giao_dich: p.ma_giao_dich || null,
+            tong_tien: p.tong_tien || 0,
+            tien_sau_giam: p.tien_sau_giam || 0,
+            ngay_thanh_toan: p.ngay_thanh_toan || null,
             han_bao_hanh: p.han_bao_hanh,
             ngay_tao: p.ngay_tao,
             ngay_cap_nhat: p.ngay_cap_nhat,
@@ -292,6 +300,12 @@ function executeMockQuery(sql, params = []) {
                 ma_tra_cuu: p.ma_tra_cuu,
                 trang_thai: p.trang_thai,
                 loai_dich_vu: p.loai_dich_vu || 'OFFLINE',
+                trang_thai_thanh_toan: p.trang_thai_thanh_toan || 'CHUA_THANH_TOAN',
+                phuong_thuc_thanh_toan: p.phuong_thuc_thanh_toan || null,
+                ma_giao_dich: p.ma_giao_dich || null,
+                tong_tien: p.tong_tien || 0,
+                tien_sau_giam: p.tien_sau_giam || 0,
+                ngay_thanh_toan: p.ngay_thanh_toan || null,
                 han_bao_hanh: p.han_bao_hanh,
                 ngay_tao: p.ngay_tao,
                 ngay_cap_nhat: p.ngay_cap_nhat || p.ngay_tao,
@@ -330,6 +344,42 @@ function executeMockQuery(sql, params = []) {
             return { rows: [{ ...p }] };
         }
         return { rows: [] };
+    }
+
+    // 17b. webhook VietQR payment update
+    if (/UPDATE phieu_sua_chua SET trang_thai_thanh_toan = 'DA_THANH_TOAN', phuong_thuc_thanh_toan = 'VIETQR', ma_giao_dich = \$1.*WHERE id = \$2/i.test(cleanSql)) {
+        const p = s.phieu_sua_chua.find(x => x.id === Number(params[1]));
+        if (!p) return { rows: [] };
+        p.trang_thai_thanh_toan = 'DA_THANH_TOAN';
+        p.phuong_thuc_thanh_toan = 'VIETQR';
+        p.ma_giao_dich = params[0];
+        p.ngay_cap_nhat = new Date().toISOString();
+        saveStore();
+        return { rows: [{ ...p }] };
+    }
+
+    // 17c. confirmPayment at cashier desk
+    if (/UPDATE phieu_sua_chua SET trang_thai_thanh_toan = 'DA_THANH_TOAN', phuong_thuc_thanh_toan = \$1, ma_giao_dich = \$2.*WHERE id = \$4/i.test(cleanSql)) {
+        const p = s.phieu_sua_chua.find(x => x.id === Number(params[3]));
+        if (!p) return { rows: [] };
+        const numAmount = Number(params[2] || 0);
+        const nowIso = new Date().toISOString();
+        p.trang_thai_thanh_toan = 'DA_THANH_TOAN';
+        p.phuong_thuc_thanh_toan = params[0];
+        p.ma_giao_dich = params[1];
+        p.ngay_thanh_toan = nowIso;
+        if (numAmount > 0) {
+            p.tong_tien = numAmount;
+            p.tien_sau_giam = numAmount;
+        }
+        if (!p.han_bao_hanh) {
+            const d = new Date();
+            d.setDate(d.getDate() + 180);
+            p.han_bao_hanh = d.toISOString();
+        }
+        p.ngay_cap_nhat = nowIso;
+        saveStore();
+        return { rows: [{ ...p }] };
     }
 
     // 18. submitBooking
@@ -430,6 +480,33 @@ function executeMockQuery(sql, params = []) {
             };
         });
         return { rows: list };
+    }
+
+    // 24. cau_hinh_cms
+    if (/CREATE TABLE IF NOT EXISTS cau_hinh_cms/i.test(cleanSql)) {
+        return { rows: [] };
+    }
+
+    if (/SELECT .* FROM cau_hinh_cms WHERE id = 1/i.test(cleanSql)) {
+        const list = Array.isArray(s.cau_hinh_cms) ? s.cau_hinh_cms : [];
+        const row = list.find(x => x.id === 1);
+        return { rows: row ? [{ ...row }] : [] };
+    }
+
+    if (/INSERT INTO cau_hinh_cms/i.test(cleanSql)) {
+        if (!Array.isArray(s.cau_hinh_cms)) s.cau_hinh_cms = [];
+        const parsedData = typeof params[0] === 'string' ? JSON.parse(params[0]) : params[0];
+        const row = {
+            id: 1,
+            du_lieu: parsedData,
+            nguoi_cap_nhat: params[1] || 'system',
+            ngay_cap_nhat: new Date().toISOString()
+        };
+        const idx = s.cau_hinh_cms.findIndex(x => x.id === 1);
+        if (idx >= 0) s.cau_hinh_cms[idx] = row;
+        else s.cau_hinh_cms.push(row);
+        saveStore();
+        return { rows: [row] };
     }
 
     return { rows: [] };

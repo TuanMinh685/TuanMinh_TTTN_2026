@@ -178,7 +178,7 @@ function HomeLanding() {
 
   return (
     <div className="font-sans text-slate-800 bg-[#f0f5fa]">
-      {/* THANH THÔNG BÁO ĐỘNG TỪ ADMIN CMS */}
+      {/* Thanh thông báo đầu trang */}
       {brand.showPromoBanner && brand.promoBannerText && (
         <div className="bg-slate-50 text-slate-700 py-2 px-4 text-center text-xs font-medium border-b border-slate-200">
           <div className="container mx-auto flex flex-wrap items-center justify-center gap-2">
@@ -190,12 +190,10 @@ function HomeLanding() {
         </div>
       )}
 
-      {/* SECTION 01: HERO */}
+      {/* Phần giới thiệu đầu trang */}
       <section className="bg-[#f4f7fb] border-b border-slate-200 py-7 sm:py-12 lg:py-16">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-10 items-center">
-            
-            {/* CỘT TRÁI (7/12): THÔNG TIN CHÍNH & HỘP TRA CỨU */}
             <div className="lg:col-span-7 space-y-4 sm:space-y-5">
               <p className="text-xs font-semibold uppercase tracking-wider text-brand-blue">
                 <ResponsiveText mobile="TT CSKH • LỤC GIÁC" desktop={brand.badgeText} />
@@ -222,7 +220,7 @@ function HomeLanding() {
                 </div>
               )}
 
-              {/* Hộp Tra cứu phiếu & Quét camera QR tinh giản */}
+              {/* Tra cứu nhanh theo mã phiếu */}
               <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-xs max-w-2xl">
                 <div className="mb-2.5">
                   <span className="text-xs font-bold text-slate-700">
@@ -255,7 +253,7 @@ function HomeLanding() {
                 </form>
               </div>
 
-              {/* 3 Nút nghiệp vụ chính đồng nhất */}
+              {/* Các nút chức năng chính */}
               <div className="flex flex-wrap gap-2.5 max-w-2xl pt-1">
                 <Link
                   to="/intake"
@@ -281,7 +279,7 @@ function HomeLanding() {
               </div>
             </div>
 
-            {/* CỘT PHẢI (5/12): KIOSK MÃ QR TẠI QUẦY GỌN GÀNG */}
+            {/* Khung mã QR tại quầy */}
             <div className="lg:col-span-5 flex justify-center">
               <div className="w-full max-w-sm bg-white rounded-xl border border-slate-200 p-5 shadow-xs">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-3.5">
@@ -321,7 +319,7 @@ function HomeLanding() {
                   </button>
                 </div>
 
-                {/* Ảnh Mã QR trung thực */}
+                {/* Ảnh mã QR */}
                 <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col items-center justify-center mb-3">
                   {qrDataUrl ? (
                     <div className="bg-white p-2 rounded-lg border border-slate-200 shadow-2xs">
@@ -376,7 +374,7 @@ function HomeLanding() {
         </div>
       </section>
 
-      {/* SECTION 02: QUY TRÌNH DỊCH VỤ QUA MÃ QR */}
+      {/* Quy trình tiếp nhận */}
       <section className="py-8 sm:py-14 bg-white border-b border-slate-200">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="text-center mb-6 sm:mb-10">
@@ -416,7 +414,7 @@ function HomeLanding() {
         </div>
       </section>
 
-      {/* SECTION 03: DANH MỤC HỖ TRỢ TRỌNG TÂM MẢNG SỬA CHỮA MÁY TÍNH & PHẦN MỀM */}
+      {/* Danh mục dịch vụ */}
       <section className="py-8 sm:py-14 bg-[#f0f5fa] border-b border-slate-200">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 sm:gap-4 mb-5 sm:mb-8">
@@ -494,7 +492,7 @@ function HomeLanding() {
         </div>
       </section>
 
-      {/* SECTION 04: HƯỚNG DẪN 3 BƯỚC */}
+      {/* Hướng dẫn 3 bước */}
       <section id="how-it-works" className="py-8 sm:py-14 bg-white border-b border-slate-200">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="text-center mb-5 sm:mb-8">
@@ -506,7 +504,6 @@ function HomeLanding() {
             </p>
           </div>
 
-          {/* Các nút chuyển Tab thanh lịch */}
           <div className="grid grid-cols-2 sm:flex sm:flex-row justify-center gap-2 mb-5 sm:mb-8">
             <button
               type="button"
@@ -630,7 +627,7 @@ function HomeLanding() {
         </div>
       </section>
 
-      {/* SECTION 05: PHẢN HỒI ĐÁNH GIÁ */}
+      {/* Phản hồi từ khách hàng */}
       {topReviews.length > 0 && (
         <section className="py-8 sm:py-14 bg-[#f0f5fa] border-b border-slate-200">
           <div className="container mx-auto px-4 sm:px-6">

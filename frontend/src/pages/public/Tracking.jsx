@@ -288,7 +288,7 @@ function Tracking() {
   return (
     <div className="bg-[#f0f5fa] pb-16 pt-2">
       <div className="max-w-5xl mx-auto px-4">
-        {/* Thông báo trạng thái Realtime */}
+        {/* Thông báo cập nhật trạng thái */}
         {statusNotice && (
           <div role="status" className="mb-5 flex items-center justify-between gap-3 rounded-2xl bg-emerald-50 border border-emerald-200 p-4 font-semibold text-emerald-800 shadow-sm">
             <span>{statusNotice}</span>
@@ -307,7 +307,7 @@ function Tracking() {
           </div>
         )}
 
-        {/* Thanh điều hướng & Thao tác nhanh */}
+        {/* Điều hướng & thao tác */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
           <nav className="text-sm text-slate-500 flex items-center gap-2">
             <Link to="/" className="hover:text-brand-blue hover:underline font-medium">Trang chủ</Link>
@@ -338,8 +338,8 @@ function Tracking() {
           </div>
         </div>
 
-        {/* SECTION 1: HERO BANNER HỒ SƠ PHIẾU ĐIỆN TỬ CSKH */}
-        <div className="rounded-2xl bg-brand-blue text-white p-5 md:p-7 shadow-sm border border-blue-800/30 mb-5">
+        {/* Thẻ thông tin phiếu */}
+        <div className="rounded-xl bg-brand-blue text-white p-5 md:p-7 shadow-sm border border-blue-800/30 mb-5">
           <div className="flex flex-col md:flex-row items-center justify-between gap-5">
             <div className="flex-1 w-full">
               <div className="flex flex-wrap items-center gap-2 mb-3">
@@ -373,7 +373,7 @@ function Tracking() {
                 </div>
               </div>
 
-              {/* Lưới thông tin 4 ô nhỏ gọn (2 cột mobile, 4 cột desktop) */}
+              {/* Thông tin khách hàng và thiết bị */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
                 <div className="bg-white/10 rounded-xl p-2.5 border border-white/15">
                   <p className="text-[10px] uppercase tracking-wider text-blue-200 font-bold">Khách hàng</p>
@@ -408,7 +408,7 @@ function Tracking() {
           </div>
         </div>
 
-        {/* SECTION 2: TABS CHUYỂN ĐỔI CHỨC NĂNG */}
+        {/* Các tab chi tiết */}
         <div className="flex bg-white rounded-xl p-1 sm:p-1.5 border border-slate-200 shadow-xs mb-4 sm:mb-5 gap-1">
           <button
             type="button"
@@ -803,7 +803,7 @@ function Tracking() {
             </div>
           </div>
         )}
-        {/* KHUNG IN PHIẾU ĐIỆN TỬ DÀNH CHO WINDOW.PRINT */}
+        {/* Khung in phiếu tiếp nhận */}
         <div id="printable-ticket" className="hidden print:block text-black bg-white p-6 font-sans">
           {/* Tiêu đề công ty */}
           <div className="text-center pb-3 border-b-2 border-black">

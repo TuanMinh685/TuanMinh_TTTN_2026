@@ -4,9 +4,9 @@ const authController = require('../controllers/account.controller');
 const rateLimit = require('express-rate-limit');
 const { verifyToken } = require('../middlewares/auth.middleware');
 
-// Giới hạn chống tấn công Brute-Force trên cổng đăng nhập
+// Giới hạn tần suất đăng nhập/đăng ký
 const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 phút
+    windowMs: 15 * 60 * 1000,
     max: 60,
     standardHeaders: true,
     legacyHeaders: false,
@@ -17,16 +17,9 @@ const loginLimiter = rateLimit({
     }
 });
 
-// URL: POST /api/auth/login
 router.post('/login', loginLimiter, authController.login);
-
-// URL: POST /api/auth/register
 router.post('/register', loginLimiter, authController.register);
-
-// URL: GET /api/auth/me
 router.get('/me', verifyToken, authController.getMe);
-
-// URL: POST /api/auth/change-password
 router.post('/change-password', verifyToken, authController.changePassword);
 
 module.exports = router;

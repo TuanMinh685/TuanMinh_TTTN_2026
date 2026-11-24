@@ -5,9 +5,9 @@ const ticketController = require('../controllers/ticket.controller');
 const { verifyToken, requireRole } = require('../middlewares/auth.middleware');
 const { validateTicketIntakeInput, validateBookingInput } = require('../middlewares/security.middleware');
 
-// Giới hạn chống Spam/Bot tạo phiếu giả mạo trên cổng công khai
+// Giới hạn tần suất gửi form từ trang công khai
 const publicSubmissionLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 phút
+    windowMs: 15 * 60 * 1000,
     max: 60,
     standardHeaders: true,
     legacyHeaders: false,
@@ -18,31 +18,29 @@ const publicSubmissionLimiter = rateLimit({
     }
 });
 
-// LUỒNG 1: Lễ tân / CSKH khởi tạo phiên tiếp nhận mã QR động (POST /api/tickets/init-session)
+// Phiên QR tạm tại quầy
 router.post(
     '/init-session',
     verifyToken,
     requireRole('ADMIN', 'GIAM_DOC', 'QUAN_LY', 'LE_TAN', 'KY_THUAT_VIEN'),
     ticketController.initSession
 );
-
-// LUỒNG 2: Khách hàng quét mã QR kiểm tra phiên & gửi thông tin yêu cầu CSKH
 router.get('/session/:token', ticketController.checkSession);
 router.post('/session/:token/submit', publicSubmissionLimiter, validateTicketIntakeInput, ticketController.submitIntake);
 
-// Khách hàng tạo phiếu CSKH qua cổng QR cố định (QR Intake)
+// Tạo phiếu trực tiếp qua cổng QR công khai
 router.post('/intake', publicSubmissionLimiter, validateTicketIntakeInput, ticketController.submitIntake);
 
-// Đặt lịch hẹn tư vấn & CSKH trước
+// Đặt lịch hẹn & quản lý lịch hẹn
 router.post('/booking', publicSubmissionLimiter, validateBookingInput, ticketController.submitBooking);
 router.get('/booking', verifyToken, ticketController.getBookings);
 router.patch('/booking/:id/status', verifyToken, ticketController.updateBookingStatus);
 
-// Nhân viên CSKH xem danh sách & cập nhật trạng thái hồ sơ QR
+// Danh sách phiếu & cập nhật tiến độ
 router.get('/', verifyToken, ticketController.getTickets);
 router.patch('/:id/status', verifyToken, ticketController.updateTicketStatus);
 
-// Tích hợp gửi thông báo tự động Zalo ZNS / SMS giả lập & liên kết Zalo trực tiếp
+// Gửi thông báo nhắc khách hàng
 router.post(
     '/:id/notify-zalo',
     verifyToken,
@@ -50,7 +48,7 @@ router.post(
     ticketController.sendZaloNotification
 );
 
-// Lễ tân / CSKH xác nhận thanh toán tại quầy (Tiền mặt hoặc VietQR)
+// Xác nhận thanh toán tại quầy (tiền mặt hoặc VietQR)
 router.post(
     '/:id/confirm-payment',
     verifyToken,
@@ -58,7 +56,7 @@ router.post(
     ticketController.confirmPayment
 );
 
-// Quản lý ảnh minh chứng hiện trạng đính kèm hồ sơ QR
+// Ảnh hiện trạng đính kèm phiếu
 router.get('/:id/photos', verifyToken, ticketController.getTicketPhotos);
 router.post('/:id/photos', verifyToken, ticketController.addTicketPhoto);
 

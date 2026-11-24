@@ -1,9 +1,7 @@
 const axios = require('axios');
 const { getIo } = require('../config/socket.config');
 
-/**
- * Service Quản lý gửi tin nhắn tự động qua Zalo ZNS và SMS Brandname / SMS Gateway
- */
+// Gửi thông báo qua Zalo ZNS và SMS
 const notificationService = {
     /**
      * Chuẩn hóa số điện thoại Việt Nam sang định dạng 84xxx hoặc 0xxx
@@ -16,12 +14,7 @@ const notificationService = {
     },
 
     /**
-     * Gửi tin nhắn SMS thật qua eSMS.vn (nếu cấu hình ESMS_API_KEY)
-     */
-    /**
-     * Gửi tin nhắn SMS thật qua eSMS.vn (nếu cấu hình ESMS_API_KEY)
-     * SmsType: 8 (Đầu số thông báo CSKH cố định - không yêu cầu duyệt trước template, gửi ngay lập tức)
-     * SmsType: 2 (Brandname CSKH riêng nếu đã đăng ký với nhà mạng)
+     * Gửi SMS qua eSMS.vn (SmsType 8: đầu số CSKH, SmsType 2: Brandname)
      */
     async sendViaEsms(phone, content) {
         const apiKey = process.env.ESMS_API_KEY || 'CAC19247A1D4D4EFB216A09FADA3D2';
@@ -57,9 +50,7 @@ const notificationService = {
         }
     },
 
-    /**
-     * Gửi tin nhắn SMS thật qua SpeedSMS.vn (nếu cấu hình SPEEDSMS_ACCESS_TOKEN)
-     */
+    // Gửi SMS qua SpeedSMS.vn
     async sendViaSpeedSms(phone, content) {
         const accessToken = process.env.SPEEDSMS_ACCESS_TOKEN;
         if (!accessToken) return null;
@@ -85,9 +76,7 @@ const notificationService = {
         }
     },
 
-    /**
-     * Gửi tin nhắn Zalo ZNS qua Zalo Official Account (nếu cấu hình ZALO_ACCESS_TOKEN)
-     */
+    // Gửi tin nhắn Zalo ZNS
     async sendViaZaloZns(phone, templateId, templateData) {
         const accessToken = process.env.ZALO_ACCESS_TOKEN;
         if (!accessToken || !templateId) return null;

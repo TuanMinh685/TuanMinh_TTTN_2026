@@ -12,7 +12,7 @@ const ROLE_HIERARCHY = {
 
 const getRoleLevel = (role) => ROLE_HIERARCHY[role] || 0;
 
-// Cache ngắn hạn (5 giây) trạng thái tài khoản nhân sự để vừa đảm bảo hiệu năng vừa thu hồi quyền tức thì khi khóa TK
+// Cache ngắn 5s trạng thái tài khoản để cập nhật nhanh khi khóa TK
 const accountStatusCache = new Map();
 const CACHE_TTL_MS = 5000;
 
@@ -44,7 +44,7 @@ const verifyToken = async (req, res, next) => {
     }
 
     try {
-        // Chỉ chấp nhận thuật toán HS256 để chống tấn công giả mạo thuật toán (alg: none)
+        // Chỉ chấp nhận thuật toán HS256
         const secret = process.env.JWT_SECRET || 'super_secret_jwt_key_cho_du_an_tttn_lehao';
         const verified = jwt.verify(token, secret, {
             algorithms: ['HS256']
@@ -116,7 +116,7 @@ const verifyToken = async (req, res, next) => {
     }
 };
 
-// Middleware kiểm tra quyền hạn (RBAC) - Admin luôn có quyền tối cao từ trên xuống
+// Kiểm tra quyền truy cập theo vai trò (ADMIN/GIAM_DOC có toàn quyền)
 const requireRole = (...roles) => {
     return (req, res, next) => {
         if (!req.user) {

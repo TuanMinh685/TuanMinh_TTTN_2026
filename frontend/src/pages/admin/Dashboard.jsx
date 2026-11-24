@@ -124,18 +124,18 @@ function Dashboard() {
     totalReviews: 0
   });
 
-  // Photo evidence modal state
+  // State ảnh minh chứng, in phiếu, thông báo, nhân sự, nhật ký, thu ngân, tạo phiếu tại quầy
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [photoTicket, setPhotoTicket] = useState(null);
   const [ticketPhotos, setTicketPhotos] = useState([]);
   const [newPhotoNote, setNewPhotoNote] = useState('');
   const [savingPhoto, setSavingPhoto] = useState(false);
 
-  // 80mm QR thermal receipt modal state
+  // State in phiếu nhiệt 80mm
   const [receiptTicket, setReceiptTicket] = useState(null);
   const [receiptQr, setReceiptQr] = useState('');
 
-  // Notifications state
+  // State thông báo
   const [notifications, setNotifications] = useState(() => {
     try {
       const saved = localStorage.getItem('ticketNotifications');
@@ -152,7 +152,7 @@ function Dashboard() {
   const [notificationFilter, setNotificationFilter] = useState('ALL');
   const [latestNotice, setLatestNotice] = useState(null);
 
-  // Employee management state
+  // State quản lý nhân sự
   const [employees, setEmployees] = useState([]);
   const [showEmployeeModal, setShowEmployeeModal] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState(null);
@@ -166,7 +166,7 @@ function Dashboard() {
     trang_thai: 'HOAT_DONG'
   });
 
-  // Audit Logs state
+  // State nhật ký & đổi mật khẩu
   const [auditLogs, setAuditLogs] = useState([]);
   const [pwForm, setPwForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [savingPw, setSavingPw] = useState(false);
@@ -178,9 +178,16 @@ function Dashboard() {
   const [cashierFilter, setCashierFilter] = useState('ALL'); // 'ALL' | 'UNPAID' | 'PAID'
   const [cashierSearch, setCashierSearch] = useState('');
 
-  // POS Walk-in QR Intake modal state
+  // State tạo phiếu nhanh tại quầy
   const [showPosModal, setShowPosModal] = useState(false);
   const [savingPos, setSavingPos] = useState(false);
+  const [qrSessionModal, setQrSessionModal] = useState({
+    open: false,
+    loading: false,
+    error: '',
+    data: null,
+    copied: false
+  });
   const [posForm, setPosForm] = useState({
     fullName: '',
     phone: '',
@@ -472,6 +479,39 @@ function Dashboard() {
       showToast(`Lỗi xác nhận thanh toán: ${err.response?.data?.message || err.message}`);
     } finally {
       setConfirmingPayment(false);
+    }
+  };
+
+  const handleCreateQrSession = async () => {
+    setQrSessionModal({ open: true, loading: true, error: '', data: null, copied: false });
+    try {
+      const originUrl = await getAccessibleBaseUrl();
+      const res = await api.post('/tickets/init-session', { originUrl });
+      if (res.data?.success) {
+        setQrSessionModal({
+          open: true,
+          loading: false,
+          error: '',
+          data: res.data.data,
+          copied: false
+        });
+      } else {
+        setQrSessionModal({
+          open: true,
+          loading: false,
+          error: res.data?.message || 'Không tạo được phiên QR tiếp nhận.',
+          data: null,
+          copied: false
+        });
+      }
+    } catch (err) {
+      setQrSessionModal({
+        open: true,
+        loading: false,
+        error: err.response?.data?.message || 'Lỗi khi tạo phiên QR tiếp nhận.',
+        data: null,
+        copied: false
+      });
     }
   };
 
@@ -770,7 +810,7 @@ function Dashboard() {
         </div>
       )}
 
-      {/* TAB 1: DANH SÁCH HỒ SƠ PHIẾU QR CSKH */}
+      {/* Tab 1: Danh sách phiếu */}
       {activeTab === 'TICKETS' && (
         <div className="bg-white p-6 rounded-xl shadow-xs border border-slate-200">
           <div className="mb-4 flex flex-col gap-3">
@@ -780,14 +820,25 @@ function Dashboard() {
               </div>
               <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                 {canReceptionAction && (
-                  <button
-                    type="button"
-                    onClick={() => setShowPosModal(true)}
-                    className="rounded-lg bg-brand-blue px-3.5 py-2 text-xs font-bold text-white shadow-2xs hover:bg-brand-blue-hover whitespace-nowrap flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <SvgIcon name="plus" className="w-3.5 h-3.5" />
-                    <span>Tạo phiếu mới</span>
-                  </button>
+                  <>
+                    <button
+                      type="button"
+                      onClick={handleCreateQrSession}
+                      className="rounded-lg bg-white hover:bg-blue-50 border border-brand-blue/40 px-3 py-2 text-xs font-bold text-brand-blue shadow-2xs whitespace-nowrap flex items-center gap-1.5 cursor-pointer"
+                      title="Tạo mã QR tiếp nhận dùng 1 lần có hiệu lực 15 phút cho khách quét tại quầy"
+                    >
+                      <SvgIcon name="qr" className="w-3.5 h-3.5" />
+                      <span>Tạo QR Quầy (15p)</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowPosModal(true)}
+                      className="rounded-lg bg-brand-blue px-3.5 py-2 text-xs font-bold text-white shadow-2xs hover:bg-brand-blue-hover whitespace-nowrap flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <SvgIcon name="plus" className="w-3.5 h-3.5" />
+                      <span>Tạo phiếu mới</span>
+                    </button>
+                  </>
                 )}
                 <button
                   type="button"
@@ -956,7 +1007,7 @@ function Dashboard() {
                       </td>
                       <td className="py-3 px-4 text-center">
                         <div className="flex flex-wrap items-center justify-center gap-1.5">
-                          {/* 1. NÚT CHÍNH DUY NHẤT: BƯỚC QUY TRÌNH KẾ TIẾP */}
+                          {/* Nút chuyển bước tiếp theo */}
                           {canTechAction && (t.trang_thai === 'CHỜ_KHÁM' || t.trang_thai === 'YÊU_CẦU_BẢO_HÀNH') && (
                             <button
                               type="button"
@@ -980,7 +1031,7 @@ function Dashboard() {
                           {(canTechAction || canReceptionAction) && t.trang_thai === 'ĐANG_SỬA' && (
                             <button
                               type="button"
-                              onClick={() => updateStatus(t.id, 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN', 'Đã hoàn tất sửa chữa máy tính / phần mềm, bàn giao khách hàng và kích hoạt Sổ bảo hành điện tử (e-Warranty) 06 tháng.')}
+                              onClick={() => updateStatus(t.id, 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN', 'Đã hoàn tất xử lý, bàn giao khách hàng và kích hoạt bảo hành điện tử 06 tháng.')}
                               className="bg-brand-blue hover:bg-brand-blue-hover text-white px-2.5 py-1 rounded text-xs font-semibold shadow-2xs transition shrink-0 cursor-pointer inline-flex items-center gap-1"
                             >
                               <SvgIcon name="check-circle" className="w-3.5 h-3.5" />
@@ -994,7 +1045,7 @@ function Dashboard() {
                             </span>
                           )}
 
-                          {/* 2. CÁC NÚT PHỤ */}
+                          {/* Các nút thao tác phụ */}
                           <button
                             type="button"
                             onClick={() => {
@@ -1048,7 +1099,7 @@ function Dashboard() {
         </div>
       )}
 
-      {/* TAB 2: QUẢN LÝ LỊCH HẸN TƯ VẤN & CSKH */}
+      {/* Tab 2: Lịch hẹn */}
       {activeTab === 'BOOKINGS' && canReceptionAction && (
         <div className="bg-white p-6 rounded-xl shadow-xs border border-slate-200">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
@@ -1146,7 +1197,7 @@ function Dashboard() {
         </div>
       )}
 
-      {/* TAB 3: THỐNG KÊ HIỆU SUẤT CSKH & ĐÁNH GIÁ HÀI LÒNG (CSAT) */}
+      {/* Tab 3: Thống kê & đánh giá */}
       {activeTab === 'STATS' && canViewStats && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1258,7 +1309,7 @@ function Dashboard() {
         </div>
       )}
 
-      {/* TAB 4: QUẢN LÝ & PHÂN QUYỀN NHÂN SỰ CSKH */}
+      {/* Tab 4: Nhân sự */}
       {activeTab === 'EMPLOYEES' && canManageEmployees && (
         <div className="space-y-6">
           <div className="bg-white p-6 rounded-2xl shadow-xs border border-slate-200/90">
@@ -1422,7 +1473,7 @@ function Dashboard() {
         </div>
       )}
 
-      {/* TAB 4B: QUẦY THU NGÂN & XÁC NHẬN THANH TOÁN (LỄ TÂN TẠI QUẦY) */}
+      {/* Tab 4B: Thu ngân */}
       {activeTab === 'PAYMENT_GATEWAY' && (() => {
         const currentTicket = tickets.find(t => t.ma_phieu === paymentTicketCode) || tickets[0] || null;
         const unpaidCount = tickets.filter(t => t.trang_thai_thanh_toan !== 'DA_THANH_TOAN').length;
@@ -1696,7 +1747,7 @@ function Dashboard() {
                 )}
               </div>
 
-              {/* CỘT PHẢI: MÀN HÌNH HIỂN THỊ MÃ CHO KHÁCH TẠI BÀN (5 CỘT) */}
+              {/* Khung hiển thị mã thanh toán cho khách */}
               <div className="lg:col-span-5 space-y-4">
 
                 {currentTicket ? (
@@ -1722,10 +1773,10 @@ function Dashboard() {
         );
       })()}
 
-      {/* TAB 5: ĐỔI MẬT KHẨU & NHẬT KÝ HOẠT ĐỘNG */}
+      {/* Tab 5: Đổi mật khẩu & nhật ký */}
       {activeTab === 'SECURITY' && isSystemAdmin && (
         <div className="space-y-6">
-          {/* KHỐI ĐỔI MẬT KHẨU CÁ NHÂN */}
+          {/* Đổi mật khẩu cá nhân */}
           <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs space-y-5">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
               <div>
@@ -1797,7 +1848,7 @@ function Dashboard() {
             </form>
           </div>
 
-          {/* BẢNG NHẬT KÝ KIỂM TOÁN */}
+          {/* Bảng nhật ký thao tác */}
           {canManageEmployees && (
             <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-7 shadow-xs space-y-5">
               <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
@@ -1916,7 +1967,7 @@ function Dashboard() {
         </div>
       )}
 
-      {/* TAB 6: THÔNG BÁO THỜI GIAN THỰC */}
+      {/* Tab 6: Thông báo */}
       {activeTab === 'NOTIFICATIONS' && (
         <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -2010,7 +2061,7 @@ function Dashboard() {
         </section>
       )}
 
-      {/* MODAL 1: TẠO MỚI / PHÂN QUYỀN NHÂN VIÊN */}
+      {/* Modal tạo mới / chỉnh sửa nhân sự */}
       {showEmployeeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
           <div className="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl">
@@ -2137,7 +2188,7 @@ function Dashboard() {
         </div>
       )}
 
-      {/* MODAL 2: IN PHIẾU TIẾP NHẬN & TRA CỨU MÃ QR CSKH (80MM) */}
+      {/* Modal in phiếu nhiệt 80mm */}
       {receiptTicket && (
         <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 p-4">
           <div className="max-h-[95vh] w-full max-w-md overflow-y-auto rounded-xl bg-white p-5 shadow-2xl">
@@ -2192,7 +2243,7 @@ function Dashboard() {
         </div>
       )}
 
-      {/* MODAL 3: TIẾP NHẬN NHANH TẠI QUẦY (POS WALK-IN) */}
+      {/* Modal tạo phiếu tại quầy */}
       {showPosModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-xl max-h-[92vh] overflow-y-auto shadow-2xl p-6">
@@ -2314,7 +2365,110 @@ function Dashboard() {
         </div>
       )}
 
-      {/* MODAL 4: QUẢN LÝ ẢNH MINH CHỨNG HIỆN TRẠNG ĐÍNH KÈM HỒ SƠ QR */}
+      {/* Modal phiên QR tiếp nhận tại quầy (hiệu lực 15 phút, dùng 1 lần) */}
+      {qrSessionModal.open && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="qr-session-modal-title"
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
+          onClick={() => setQrSessionModal(prev => ({ ...prev, open: false }))}
+        >
+          <div
+            className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden border border-slate-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+              <div>
+                <h3 id="qr-session-modal-title" className="text-base font-bold text-slate-900 flex items-center gap-2">
+                  <SvgIcon name="qr" className="w-5 h-5 text-brand-blue" />
+                  <span>Mã QR Tiếp Nhận Tại Quầy</span>
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">Phiên dùng 1 lần • Tự hết hạn sau 15 phút</p>
+              </div>
+              <button
+                type="button"
+                aria-label="Đóng hộp thoại mã QR"
+                onClick={() => setQrSessionModal(prev => ({ ...prev, open: false }))}
+                className="text-slate-400 hover:text-slate-700 text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-200 cursor-pointer"
+              >
+                &times;
+              </button>
+            </div>
+
+            <div className="p-6 text-center space-y-4">
+              {qrSessionModal.loading && (
+                <div className="py-10 text-sm text-slate-500 font-medium">Đang khởi tạo phiên mã QR...</div>
+              )}
+
+              {!qrSessionModal.loading && qrSessionModal.error && (
+                <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700 font-medium">
+                  {qrSessionModal.error}
+                </div>
+              )}
+
+              {!qrSessionModal.loading && qrSessionModal.data && (
+                <>
+                  <div className="inline-block p-3 bg-white rounded-2xl border-2 border-slate-200 shadow-xs">
+                    <img
+                      src={qrSessionModal.data.qrImageBase64}
+                      alt="Mã QR phiên tiếp nhận tại quầy"
+                      className="w-52 h-52 object-contain mx-auto"
+                    />
+                  </div>
+                  <div className="text-xs text-slate-600 space-y-1">
+                    <p>Đưa khách hàng quét mã này bằng camera điện thoại để tự điền thông tin phiếu.</p>
+                    {qrSessionModal.data.expiresAt && (
+                      <p className="font-semibold text-amber-700">
+                        Hết hạn lúc: {new Date(qrSessionModal.data.expiresAt).toLocaleTimeString('vi-VN')}
+                      </p>
+                    )}
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-2 text-left">
+                    <span className="text-[11px] font-mono text-slate-600 truncate">
+                      {qrSessionModal.data.intakeUrl}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (navigator?.clipboard && qrSessionModal.data?.intakeUrl) {
+                          navigator.clipboard.writeText(qrSessionModal.data.intakeUrl);
+                          setQrSessionModal(prev => ({ ...prev, copied: true }));
+                          setTimeout(() => {
+                            setQrSessionModal(prev => ({ ...prev, copied: false }));
+                          }, 2000);
+                        }
+                      }}
+                      className="shrink-0 px-2.5 py-1 rounded-lg bg-white border border-slate-300 text-xs font-semibold text-slate-700 hover:text-brand-blue cursor-pointer"
+                    >
+                      {qrSessionModal.copied ? 'Đã chép' : 'Sao chép'}
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap justify-center gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={handleCreateQrSession}
+                      className="px-3.5 py-2 rounded-lg bg-brand-blue text-white text-xs font-bold hover:bg-blue-900 cursor-pointer"
+                    >
+                      Cấp mã QR mới
+                    </button>
+                    <a
+                      href={qrSessionModal.data.intakeUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="px-3.5 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold"
+                    >
+                      Mở link tiếp nhận
+                    </a>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal ảnh hiện trạng thiết bị */}
       {showPhotoModal && photoTicket && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">

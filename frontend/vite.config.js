@@ -19,7 +19,7 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            if (id.includes('exceljs') || id.includes('xlsx')) {
+            if (id.includes('exceljs')) {
               return 'vendor-excel';
             }
             if (id.includes('recharts')) {

@@ -50,9 +50,7 @@ function sanitizeObject(obj, depth = 0) {
     return obj;
 }
 
-/**
- * 1. Middleware gắn Request Trace ID & HTTP Security Headers chuẩn Doanh nghiệp
- */
+// Gắn Request ID và các header bảo mật cơ bản
 function enterpriseSecurityHeaders(req, res, next) {
     const requestId = req.headers['x-request-id'] || (crypto.randomUUID ? crypto.randomUUID() : `req-${Date.now()}`);
     req.requestId = requestId;
@@ -69,9 +67,7 @@ function enterpriseSecurityHeaders(req, res, next) {
     next();
 }
 
-/**
- * 2. Middleware chống HTTP Parameter Pollution (HPP) và làm sạch dữ liệu đầu vào (XSS / Prototype Pollution)
- */
+// Chuẩn hóa và lọc dữ liệu đầu vào
 function sanitizeRequestInput(req, res, next) {
     try {
         if (req.body && typeof req.body === 'object') {
@@ -87,7 +83,7 @@ function sanitizeRequestInput(req, res, next) {
         if (req.query && typeof req.query === 'object') {
             for (const key of Object.keys(req.query)) {
                 const val = req.query[key];
-                // Chống HPP: Nếu kẻ tấn công truyền ?period=week&period=month (mảng), chỉ lấy phần tử đầu tiên
+                // Nếu query param là mảng thì chỉ lấy giá trị đầu
                 const singleVal = Array.isArray(val) ? val[0] : val;
                 if (typeof singleVal === 'string') {
                     req.query[key] = sanitizeString(singleVal);
@@ -100,9 +96,7 @@ function sanitizeRequestInput(req, res, next) {
     }
 }
 
-/**
- * 3. Kiểm tra hợp lệ dữ liệu tạo hồ sơ QR CSKH (/tickets/intake & /tickets/session/:token/submit)
- */
+// Kiểm tra dữ liệu tạo phiếu CSKH
 function validateTicketIntakeInput(req, res, next) {
     const { fullName, phone, deviceName, serialImei, serialNumber, issueDescription, photos } = req.body || {};
 
@@ -162,9 +156,7 @@ function validateTicketIntakeInput(req, res, next) {
     next();
 }
 
-/**
- * 4. Kiểm tra hợp lệ dữ liệu Đặt lịch hẹn CSKH (/tickets/booking)
- */
+// Kiểm tra dữ liệu đặt lịch hẹn
 function validateBookingInput(req, res, next) {
     const { fullName, phone, ngayHen, gioHen, moTaLoi } = req.body || {};
 

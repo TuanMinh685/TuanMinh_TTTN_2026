@@ -24,12 +24,13 @@ function PaymentMethodSelector({
   const currentRole = localStorage.getItem('role') || '';
   const isEmployee = isStaff || !!currentRole;
 
-  // Lựa chọn phương thức thanh toán: 'VIETQR' (Chuyển khoản) hoặc 'TIEN_MAT' (Tiền mặt tại quầy)
+  // Phương thức thanh toán: 'VIETQR' | 'TIEN_MAT'
   const [paymentMethod, setPaymentMethod] = useState('VIETQR');
 
   const [copiedField, setCopiedField] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [confirmMessage, setConfirmMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const [isAutoReconciled, setIsAutoReconciled] = useState(false);
 
   const numericAmount = Number(defaultAmount || (ticket && (ticket.tien_sau_giam || ticket.tong_tien)) || 0);
@@ -52,6 +53,7 @@ function PaymentMethodSelector({
   const handleSimulatePayment = async () => {
     setIsVerifying(true);
     setConfirmMessage('');
+    setErrorMessage('');
 
     try {
       const res = await api.post('/webhooks/banking/simulate', {
@@ -68,14 +70,12 @@ function PaymentMethodSelector({
         setConfirmMessage('Đã khớp lệnh thanh toán VietQR thành công. Trạng thái: ĐÃ THANH TOÁN.');
         if (onPaymentSuccess) onPaymentSuccess(res.data);
       } else {
-        setConfirmMessage(`Đã ghi nhận yêu cầu thanh toán cho hồ sơ #${ticketCode}.`);
+        setErrorMessage(res.data?.message || `Không thể xác nhận thanh toán cho hồ sơ #${ticketCode}.`);
       }
-    } catch {
-      setIsAutoReconciled(true);
-      playNotificationChime();
-      triggerDeviceVibration([200, 100, 300]);
-      setConfirmMessage('Khớp lệnh thanh toán thành công. Trạng thái: ĐÃ THANH TOÁN.');
-      if (onPaymentSuccess) onPaymentSuccess({ ticketCode, isPaid: true });
+    } catch (err) {
+      setErrorMessage(
+        err.response?.data?.message || 'Lỗi kết nối máy chủ khi xác nhận chuyển khoản. Trạng thái chưa được cập nhật.'
+      );
     } finally {
       setIsVerifying(false);
     }
@@ -113,9 +113,15 @@ function PaymentMethodSelector({
 
       {/* Thông báo thanh toán */}
       {confirmMessage && (
-        <div className="mt-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 font-semibold flex items-center justify-between">
+        <div role="status" className="mt-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 font-semibold flex items-center justify-between">
           <span>{confirmMessage}</span>
           <button type="button" onClick={() => setConfirmMessage('')} className="text-slate-400 hover:text-slate-700 font-bold ml-2">×</button>
+        </div>
+      )}
+      {errorMessage && (
+        <div role="alert" className="mt-4 p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700 font-semibold flex items-center justify-between">
+          <span>{errorMessage}</span>
+          <button type="button" onClick={() => setErrorMessage('')} className="text-red-400 hover:text-red-700 font-bold ml-2">×</button>
         </div>
       )}
 
@@ -243,7 +249,7 @@ function PaymentMethodSelector({
             </div>
           </div>
 
-          {/* Nút giả lập thanh toán chỉ dành cho nhân viên / Lễ tân test, ẩn đối với khách hàng thông thường */}
+          {/* Nút xác nhận chuyển khoản dành riêng cho nhân viên */}
           {isEmployee && !isPaid && (
             <div className="pt-1">
               <button
@@ -260,18 +266,18 @@ function PaymentMethodSelector({
         </div>
       )}
 
-      {/* NỘI DUNG 2: THANH TOÁN TIỀN MẶT TRỰC TIẾP */}
+      {/* Thanh toán tiền mặt tại quầy */}
       {paymentMethod === 'TIEN_MAT' && (
-        <div className="mt-4 p-3.5 sm:p-4 rounded-2xl bg-emerald-50/50 border border-emerald-200/80 space-y-2.5 sm:space-y-3">
+        <div className="mt-4 p-3.5 sm:p-4 rounded-xl bg-emerald-50/50 border border-emerald-200/80 space-y-2.5 sm:space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-emerald-900 flex items-center gap-1.5">
               <SvgIcon name="cash" className="w-4 h-4 text-emerald-700" />
-              <ResponsiveText mobile="THANH TOÁN TIỀN MẶT TẠI QUẦY" desktop="THANH TOÁN TIỀN MẶT TẠI QUẦY TIẾP NHẬN" />
+              <ResponsiveText mobile="Thanh toán tiền mặt tại quầy" desktop="Thanh toán tiền mặt tại quầy tiếp nhận" />
             </span>
           </div>
 
-          <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-emerald-200 text-xs text-slate-700 space-y-2 sm:space-y-2.5">
-            <p className="hidden sm:flex items-center gap-1.5 font-extrabold text-sm text-slate-800">
+          <div className="p-3.5 sm:p-4 rounded-xl bg-white border border-emerald-200 text-xs text-slate-700 space-y-2 sm:space-y-2.5">
+            <p className="hidden sm:flex items-center gap-1.5 font-bold text-sm text-slate-800">
               <SvgIcon name="clipboard" className="w-4 h-4 text-emerald-700" />
               <span>Quy trình thanh toán tiền mặt tại quầy:</span>
             </p>
@@ -290,8 +296,8 @@ function PaymentMethodSelector({
               </li>
               <li>
                 <ResponsiveText
-                  mobile="Nhận biên nhận & kích hoạt bảo hành e-Warranty."
-                  desktop={<>Lễ tân xác nhận thu tiền trên hệ thống, in biên nhận và kích hoạt <strong>Sổ bảo hành điện tử (e-Warranty)</strong>.</>}
+                  mobile="Nhận biên nhận & kích hoạt bảo hành điện tử."
+                  desktop={<>Lễ tân xác nhận thu tiền trên hệ thống, in biên nhận và kích hoạt <strong>Sổ bảo hành điện tử</strong>.</>}
                 />
               </li>
             </ol>
@@ -312,11 +318,10 @@ function PaymentMethodSelector({
         </div>
       )}
 
-      {/* Chân trang ghi chú bảo hành */}
       <div className="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-1 text-[11px] text-slate-400">
         <span className="inline-flex items-center gap-1">
           <SvgIcon name="shield" className="w-3.5 h-3.5 text-slate-400" />
-          <ResponsiveText mobile="Tự động kích hoạt e-Warranty" desktop="Kích hoạt e-Warranty tự động sau khi thanh toán" />
+          <ResponsiveText mobile="Tự động kích hoạt bảo hành" desktop="Kích hoạt bảo hành điện tử sau khi thanh toán" />
         </span>
         <ResponsiveText mobile="Hotline: 028.3860.4999" desktop="Công ty CP Lục Giác • Hotline: 028.3860.4999" />
       </div>

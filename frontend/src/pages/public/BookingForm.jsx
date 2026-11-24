@@ -24,8 +24,7 @@ function BookingForm() {
   const [success, setSuccess] = useState(false);
   const vnMobileRegex = /^(0[35789])[0-9]{8}$/;
   const cleanPhoneInput = (formData.phone || '').replace(/\s+/g, '');
-  // Tự động kiểm tra liên kết tài khoản Zalo ngay khi nhập SĐT (không cần nhập 2 lần)
-  // 'IDLE' | 'LINKED' | 'INVALID'
+  // Kiểm tra định dạng SĐT di động Việt Nam
   const zaloCheckStatus = !cleanPhoneInput || cleanPhoneInput.length < 9
     ? 'IDLE'
     : vnMobileRegex.test(cleanPhoneInput)

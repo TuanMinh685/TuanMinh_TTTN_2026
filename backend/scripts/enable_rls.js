@@ -9,20 +9,18 @@ const pool = new Pool({
 async function enableRLS() {
   const client = await pool.connect();
   try {
-    console.log('🔄 Đang kích hoạt Row Level Security (RLS) cho toàn bộ bảng schema public...');
+    console.log('[RLS] Kích hoạt Row Level Security cho schema public...');
 
     const tablesRes = await client.query(`
       SELECT tablename FROM pg_tables WHERE schemaname = 'public';
     `);
 
     const tables = tablesRes.rows.map(r => r.tablename);
-    console.log(`📋 Tìm thấy ${tables.length} bảng:`, tables.join(', '));
+    console.log(`[RLS] Tìm thấy ${tables.length} bảng:`, tables.join(', '));
 
     for (const table of tables) {
-      // 1. Kích hoạt Row Level Security (RLS)
       await client.query(`ALTER TABLE public."${table}" ENABLE ROW LEVEL SECURITY;`);
 
-      // 2. Tạo policy toàn quyền cho service_role và postgres
       const policyName = `service_role_all_${table}`;
       await client.query(`DROP POLICY IF EXISTS "${policyName}" ON public."${table}";`);
       await client.query(`
@@ -34,28 +32,24 @@ async function enableRLS() {
         WITH CHECK (true);
       `);
 
-      console.log(`✅ [${table}] -> Đã bật RLS & tạo policy bảo vệ.`);
+      console.log(`[OK] ${table}: đã bật RLS và tạo policy.`);
     }
 
-    // 3. Kiểm tra lại trạng thái sau khi bật
     const checkRes = await client.query(`
       SELECT tablename, rowsecurity FROM pg_tables WHERE schemaname = 'public';
     `);
 
-    console.log('\n=============================================');
-    console.log('KẾT QUẢ KIỂM TRA ROW LEVEL SECURITY (RLS):');
-    console.log('=============================================');
     let allEnabled = true;
     checkRes.rows.forEach(r => {
-      console.log(`- ${r.tablename}: RLS = ${r.rowsecurity ? 'ĐÃ BẬT (true)' : 'CHƯA BẬT (false)'}`);
+      console.log(`- ${r.tablename}: RLS = ${r.rowsecurity ? 'true' : 'false'}`);
       if (!r.rowsecurity) allEnabled = false;
     });
 
     if (allEnabled) {
-      console.log('\n🎉 TẤT CẢ 15 BẢNG ĐÃ ĐƯỢC BẬT RLS THÀNH CÔNG VÀ AN TOÀN TUYỆT ĐỐI!');
+      console.log(`[OK] Đã bật RLS cho ${checkRes.rows.length} bảng.`);
     }
   } catch (err) {
-    console.error('❌ Lỗi khi bật RLS:', err);
+    console.error('[RLS] Lỗi:', err);
   } finally {
     client.release();
     await pool.end();

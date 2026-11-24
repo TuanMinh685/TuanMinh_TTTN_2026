@@ -47,10 +47,7 @@ self.addEventListener('fetch', event => {
   );
 });
 
-// =============================================================================
-// WEB PUSH & HARDWARE VIBRATION NOTIFICATION EVENT HANDLERS
-// =============================================================================
-
+// Xử lý Web Push và click thông báo trên PWA
 self.addEventListener('push', event => {
   let data = {};
   try {

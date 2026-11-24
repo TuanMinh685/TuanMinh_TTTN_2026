@@ -7,7 +7,6 @@ const publicRoute = require('./public.route');
 const adminRoute = require('./admin.route');
 const webhookRoute = require('./webhook.route');
 
-// Định tuyến API cốt lõi
 router.use('/auth', authRoute);
 router.use('/tickets', ticketRoute);
 router.use('/public', publicRoute);

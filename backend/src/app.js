@@ -9,13 +9,10 @@ const { pool } = require('./config/db.config');
 
 const app = express();
 
-// Ẩn thông tin framework Express khỏi HTTP Header (Chống Fingerprinting)
 app.disable('x-powered-by');
-
-// Vercel / Reverse Proxy: lấy đúng IP thực của người dùng cuối
 app.set('trust proxy', 1);
 
-// 1. Kích hoạt Helmet với cấu hình bảo mật chuẩn Doanh nghiệp (Chống XSS, Clickjacking, MIME Sniffing)
+// Thiết lập HTTP security headers
 app.use(
     helmet({
         crossOriginResourcePolicy: { policy: 'cross-origin' },
@@ -31,10 +28,9 @@ app.use(
     })
 );
 
-// 2. Gắn Request Trace ID & các HTTP Security Headers bổ sung
 app.use(enterpriseSecurityHeaders);
 
-// 3. Cấu hình CORS bảo mật có kiểm soát Origin, Methods và Headers
+// Cấu hình CORS
 const allowedOrigins = (process.env.CORS_ORIGIN || '')
     .split(',')
     .map(o => o.trim())
@@ -42,7 +38,6 @@ const allowedOrigins = (process.env.CORS_ORIGIN || '')
 
 const corsOptions = {
     origin: (origin, callback) => {
-        // Cho phép request cùng domain, mobile app/curl (không có origin), localhost dev hoặc domain trong whitelist
         if (
             !origin ||
             /^https?:\/\/(localhost|127\.0\.0\.1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+)(:\d+)?$/.test(origin) ||
@@ -61,16 +56,16 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// 4. Giới hạn dung lượng JSON Payload (tránh tấn công DoS qua Payload lớn, đủ cho ảnh chụp ngoại quan Base64)
+// Giới hạn payload JSON (hỗ trợ ảnh chụp ngoại quan dạng Base64)
 app.use(express.json({ limit: '8mb' }));
 app.use(express.urlencoded({ limit: '8mb', extended: true }));
 
-// 5. Làm sạch toàn bộ dữ liệu đầu vào (Chống XSS, Prototype Pollution & HTTP Parameter Pollution)
+// Làm sạch dữ liệu đầu vào (XSS, Prototype Pollution, HPP)
 app.use(sanitizeRequestInput);
 
-// 6. Rate Limiter toàn cục cho tầng API (bảo vệ cả /api và root endpoints)
+// Giới hạn tần suất gọi API toàn cục
 const globalLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 phút
+    windowMs: 15 * 60 * 1000,
     max: 1000,
     standardHeaders: true,
     legacyHeaders: false,
@@ -82,34 +77,24 @@ const globalLimiter = rateLimit({
 });
 app.use(globalLimiter);
 
-// 7. Endpoint Kiểm tra Sức khỏe & Trạng thái Bảo mật Hệ thống (Enterprise Health Probe)
+// Kiểm tra trạng thái hoạt động của máy chủ
 const healthHandler = (req, res) => {
     res.status(200).json({
         success: true,
-        service: 'Luc Giac - Enterprise QR Customer Care API',
-        version: '2.0.0-Enterprise',
+        service: 'Luc Giac - QR Customer Care API',
+        version: '2.0.0',
         status: 'HEALTHY',
         database: pool.isCloudConnected && pool.isCloudConnected() ? 'SUPABASE_POSTGRESQL_CLOUD' : 'LOCAL_STORE_FALLBACK',
         timezone: 'Asia/Ho_Chi_Minh (+07:00)',
-        securityLayers: [
-            'Helmet CSP & HSTS',
-            'XSS & Prototype Pollution Sanitizer',
-            'HTTP Parameter Pollution (HPP) Guard',
-            'JWT HS256 Live RBAC Verification',
-            'Brute-Force Account Lockout',
-            'Enterprise Security Audit Trail'
-        ],
         uptimeSeconds: Math.round(process.uptime())
     });
 };
 app.get('/api/health', healthHandler);
 app.get('/health', healthHandler);
 
-// 8. Định tuyến API nghiệp vụ chính (Hỗ trợ cả /api và gọi trực tiếp không có tiền tố)
 app.use('/api', routes);
 app.use('/', routes);
 
-// 9. Xử lý 404 cho các API không tồn tại
 app.use((req, res) => {
     res.status(404).json({
         success: false,
@@ -119,7 +104,6 @@ app.use((req, res) => {
     });
 });
 
-// 10. Bộ xử lý lỗi tập trung chuẩn Doanh nghiệp (Không rò rỉ Stack Trace / Cấu trúc bảng SQL)
 app.use(errorHandler);
 
 module.exports = app;

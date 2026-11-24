@@ -7,7 +7,10 @@ const { logSecurityEvent } = require('../utils/auditLogger');
 const initSession = async (req, res, next) => {
     try {
         const createdBy = req.user?.AccountID || null;
-        const originUrl = req.headers.origin || process.env.CORS_ORIGIN || 'http://localhost:5173';
+        const requestedOrigin = typeof req.body?.originUrl === 'string' ? req.body.originUrl.trim() : '';
+        const originUrl = /^https?:\/\//i.test(requestedOrigin)
+            ? requestedOrigin
+            : (req.headers.origin || process.env.CORS_ORIGIN || 'http://localhost:5173');
         const sessionData = await ticketSessionService.initQrSession({ createdBy, originUrl });
 
         res.status(201).json({

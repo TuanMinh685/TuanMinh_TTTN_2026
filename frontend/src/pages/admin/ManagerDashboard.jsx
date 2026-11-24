@@ -50,7 +50,7 @@ export default function ManagerDashboard() {
     };
   }, []);
 
-  // CSKH Operational metrics
+  // Thống kê nhanh
   const pendingIntake = tickets.filter(t => t.trang_thai === 'CHỜ_KHÁM' || t.trang_thai === 'ĐANG_CHUẨN_ĐOÁN').length;
   const inProcessing = tickets.filter(t => t.trang_thai === 'ĐANG_SỬA' || t.trang_thai === 'YÊU_CẦU_BẢO_HÀNH').length;
   const completedCount = tickets.filter(t => t.trang_thai === 'ĐÃ_SỬA_XONG' || t.trang_thai === 'ĐÃ_GIAO_KHÁCH_VÀ_THU_TIỀN').length;
@@ -61,7 +61,7 @@ export default function ManagerDashboard() {
       <AdminNav activeKey="QUAN_LY" />
 
       <div className="space-y-6">
-        {/* CSKH Manager Banner */}
+        {/* Tiêu đề tổng quan */}
         <section className="rounded-xl border border-blue-800/20 bg-brand-blue p-6 text-white shadow-xs">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
@@ -109,7 +109,7 @@ export default function ManagerDashboard() {
           </div>
         )}
 
-        {/* Operational Priority Cards */}
+        {/* Các thẻ thống kê */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
             <div className="flex items-center justify-between">
@@ -148,9 +148,9 @@ export default function ManagerDashboard() {
           </div>
         </div>
 
-        {/* Live Operational Feeds: Tickets & Bookings */}
+        {/* Tiến độ phiếu & lịch hẹn */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Feed 1: Tiến Độ Hồ Sơ QR CSKH */}
+          {/* Danh sách phiếu gần đây */}
           <section className="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
             <div className="flex items-center justify-between mb-4">
               <div>
@@ -211,7 +211,7 @@ export default function ManagerDashboard() {
             )}
           </section>
 
-          {/* Feed 2: Lịch hẹn CSKH sắp tới */}
+          {/* Lịch hẹn mới nhất */}
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs flex flex-col">
             <div className="flex items-center justify-between mb-4">
               <div>
@@ -254,7 +254,7 @@ export default function ManagerDashboard() {
           </section>
         </div>
 
-        {/* Manager Action Cards */}
+        {/* Điều hướng nhanh */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Link
             to="/admin/nhan-su"

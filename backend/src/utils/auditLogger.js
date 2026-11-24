@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 
-// Lưu trữ tối đa 200 bản ghi Nhật ký Kiểm toán Bảo mật (Enterprise Security Audit Logs) gần nhất
+// Lưu tối đa 200 bản ghi nhật ký hoạt động gần nhất trong bộ nhớ
 const MAX_AUDIT_LOGS = 200;
 const auditLogs = [
     {
@@ -8,11 +8,11 @@ const auditLogs = [
         timestamp: new Date().toISOString(),
         actor: 'SYSTEM',
         role: 'SYSTEM',
-        action: 'SYSTEM_SECURITY_INIT',
-        target: 'Enterprise Security Suite v2.0',
+        action: 'SYSTEM_INIT',
+        target: 'Backend API',
         ip: '127.0.0.1',
         status: 'SUCCESS',
-        details: 'Kích hoạt Helmet HTTP Headers, XSS/Prototype Sanitizer, HPP Protection, JWT HS256 & RBAC Guard.'
+        details: 'Khởi tạo hệ thống ghi nhận nhật ký thao tác.'
     }
 ];
 

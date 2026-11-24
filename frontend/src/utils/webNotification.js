@@ -1,6 +1,5 @@
 /**
- * Tiện ích Web Push Notification, Rung phần cứng & Chuông báo âm thanh nổi
- * Đáp ứng tiêu chuẩn Web Notification API & Service Worker PWA
+ * Tiện ích thông báo trình duyệt, rung thiết bị và phát âm báo.
  */
 
 export function isNotificationSupported() {
@@ -9,12 +8,11 @@ export function isNotificationSupported() {
 
 export function getNotificationPermission() {
   if (!isNotificationSupported()) return 'unsupported';
-  return Notification.permission; // 'granted', 'denied', 'default'
+  return Notification.permission;
 }
 
 /**
- * Phát chuông báo âm thanh nổi (Melodious Chime) bằng Web Audio API
- * Không phụ thuộc file âm thanh bên ngoài, hoạt động mượt mà trên mọi trình duyệt
+ * Phát âm báo hai nốt bằng Web Audio API.
  */
 export function playNotificationChime() {
   try {
@@ -57,7 +55,7 @@ export function playNotificationChime() {
 }
 
 /**
- * Kích hoạt rung phần cứng trên điện thoại di động (Vibration API)
+ * Rung thiết bị di động khi có hỗ trợ navigator.vibrate.
  */
 export function triggerDeviceVibration(pattern = [300, 100, 300, 100, 450]) {
   try {
@@ -96,7 +94,7 @@ export async function requestNotificationPermission() {
 }
 
 /**
- * Bắn thông báo đẩy hiển thị trên màn hình khóa điện thoại kèm rung và chuông
+ * Hiển thị thông báo đẩy kèm âm báo và rung trên thiết bị.
  */
 export async function showPushNotification({
   title = 'CSKH Công Ty Cổ Phần Lục Giác',
@@ -104,14 +102,11 @@ export async function showPushNotification({
   ticketCode = '',
   isCompleted = false
 }) {
-  // 1. Phát chuông báo âm thanh
   playNotificationChime();
 
-  // 2. Rung phần cứng điện thoại (Nếu hoàn tất sửa thì rung dài hơn)
   const vibrationPattern = isCompleted ? [350, 120, 350, 120, 600] : [200, 100, 200];
   triggerDeviceVibration(vibrationPattern);
 
-  // 3. Nếu quyền đã được cấp, hiển thị thông báo hệ thống lên màn hình khóa
   if (isNotificationSupported() && Notification.permission === 'granted') {
     const notificationOptions = {
       body,
@@ -120,14 +115,13 @@ export async function showPushNotification({
       vibrate: vibrationPattern,
       tag: ticketCode ? `ticket-${ticketCode}` : 'cskh-update',
       renotify: true,
-      requireInteraction: isCompleted, // Giữ thông báo trên màn hình khóa nếu máy đã sửa xong
+      requireInteraction: isCompleted,
       data: {
         url: ticketCode ? `/track/${ticketCode}` : window.location.pathname
       }
     };
 
     try {
-      // Ưu tiên hiển thị qua Service Worker (chuẩn PWA màn hình khóa điện thoại)
       if ('serviceWorker' in navigator) {
         const registration = await navigator.serviceWorker.ready;
         if (registration && registration.showNotification) {
@@ -139,7 +133,7 @@ export async function showPushNotification({
       console.warn('Không thể gửi thông báo qua Service Worker, dùng Notification API:', swErr);
     }
 
-    // Dự phòng qua Notification API thông thường
+    // Dự phòng bằng Notification API trực tiếp
     try {
       const notif = new Notification(title, notificationOptions);
       notif.onclick = () => {

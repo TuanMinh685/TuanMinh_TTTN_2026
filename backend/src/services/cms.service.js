@@ -1,8 +1,10 @@
 const fs = require('fs');
 const path = require('path');
+const { pool } = require('../config/db.config');
 const { getIo } = require('../config/socket.config');
 
 const CMS_FILE_PATH = path.join(__dirname, '../config/cms_config.json');
+let cmsTableReady = false;
 
 const DEFAULT_CMS_CONFIG = {
     updatedAt: new Date().toISOString(),
@@ -122,28 +124,93 @@ const DEFAULT_CMS_CONFIG = {
     ]
 };
 
-const getCmsConfig = () => {
+const mergeCmsConfig = (parsed = {}) => ({
+    ...DEFAULT_CMS_CONFIG,
+    ...parsed,
+    brand: { ...DEFAULT_CMS_CONFIG.brand, ...(parsed.brand || {}) },
+    hero: { ...DEFAULT_CMS_CONFIG.hero, ...(parsed.hero || {}) },
+    pillars: Array.isArray(parsed.pillars) && parsed.pillars.length > 0 ? parsed.pillars : DEFAULT_CMS_CONFIG.pillars,
+    services: Array.isArray(parsed.services) && parsed.services.length > 0 ? parsed.services : DEFAULT_CMS_CONFIG.services
+});
+
+const readLocalCmsFile = () => {
     try {
         if (fs.existsSync(CMS_FILE_PATH)) {
             const raw = fs.readFileSync(CMS_FILE_PATH, 'utf8');
-            const parsed = JSON.parse(raw);
-            return {
-                ...DEFAULT_CMS_CONFIG,
-                ...parsed,
-                brand: { ...DEFAULT_CMS_CONFIG.brand, ...(parsed.brand || {}) },
-                hero: { ...DEFAULT_CMS_CONFIG.hero, ...(parsed.hero || {}) },
-                pillars: Array.isArray(parsed.pillars) && parsed.pillars.length > 0 ? parsed.pillars : DEFAULT_CMS_CONFIG.pillars,
-                services: Array.isArray(parsed.services) && parsed.services.length > 0 ? parsed.services : DEFAULT_CMS_CONFIG.services
-            };
+            return mergeCmsConfig(JSON.parse(raw));
         }
     } catch (err) {
-        console.warn('Không đọc được cms_config.json, dùng cấu hình mặc định:', err.message);
+        console.warn('Không đọc được cms_config.json:', err.message);
     }
+    return null;
+};
+
+const writeLocalCmsFile = (config) => {
+    try {
+        fs.writeFileSync(CMS_FILE_PATH, JSON.stringify(config, null, 2), 'utf8');
+    } catch (err) {
+        // Bỏ qua nếu môi trường deploy chỉ cho phép đọc ổ đĩa
+    }
+};
+
+const ensureCmsTable = async () => {
+    if (cmsTableReady) return;
+    try {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS cau_hinh_cms (
+                id INT PRIMARY KEY DEFAULT 1,
+                du_lieu JSONB NOT NULL,
+                nguoi_cap_nhat VARCHAR(100) DEFAULT 'system',
+                ngay_cap_nhat TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        cmsTableReady = true;
+    } catch (err) {
+        console.warn('Chưa khởi tạo được bảng cau_hinh_cms:', err.message);
+    }
+};
+
+const saveCmsToDb = async (config, actor) => {
+    await ensureCmsTable();
+    await pool.query(
+        `INSERT INTO cau_hinh_cms (id, du_lieu, nguoi_cap_nhat, ngay_cap_nhat)
+         VALUES (1, $1, $2, CURRENT_TIMESTAMP)
+         ON CONFLICT (id) DO UPDATE
+         SET du_lieu = EXCLUDED.du_lieu,
+             nguoi_cap_nhat = EXCLUDED.nguoi_cap_nhat,
+             ngay_cap_nhat = CURRENT_TIMESTAMP`,
+        [JSON.stringify(config), actor]
+    );
+};
+
+const getCmsConfig = async () => {
+    try {
+        await ensureCmsTable();
+        const { rows } = await pool.query(
+            'SELECT du_lieu, nguoi_cap_nhat, ngay_cap_nhat FROM cau_hinh_cms WHERE id = 1'
+        );
+        if (rows.length > 0 && rows[0].du_lieu) {
+            const rawData = typeof rows[0].du_lieu === 'string'
+                ? JSON.parse(rows[0].du_lieu)
+                : rows[0].du_lieu;
+            return mergeCmsConfig({
+                ...rawData,
+                updatedBy: rawData.updatedBy || rows[0].nguoi_cap_nhat,
+                updatedAt: rawData.updatedAt || rows[0].ngay_cap_nhat
+            });
+        }
+    } catch (err) {
+        console.warn('Không đọc được cấu hình CMS từ CSDL, dùng bản dự phòng:', err.message);
+    }
+
+    const localConfig = readLocalCmsFile();
+    if (localConfig) return localConfig;
+
     return JSON.parse(JSON.stringify(DEFAULT_CMS_CONFIG));
 };
 
-const updateCmsConfig = (newConfig = {}, actor = 'admin') => {
-    const current = getCmsConfig();
+const updateCmsConfig = async (newConfig = {}, actor = 'admin') => {
+    const current = await getCmsConfig();
     const merged = {
         ...current,
         ...newConfig,
@@ -155,7 +222,12 @@ const updateCmsConfig = (newConfig = {}, actor = 'admin') => {
         updatedBy: actor
     };
 
-    fs.writeFileSync(CMS_FILE_PATH, JSON.stringify(merged, null, 2), 'utf8');
+    try {
+        await saveCmsToDb(merged, actor);
+    } catch (err) {
+        console.warn('Lỗi lưu cấu hình CMS lên CSDL:', err.message);
+    }
+    writeLocalCmsFile(merged);
 
     try {
         const io = getIo();
@@ -165,13 +237,19 @@ const updateCmsConfig = (newConfig = {}, actor = 'admin') => {
     return merged;
 };
 
-const resetCmsConfig = (actor = 'admin') => {
+const resetCmsConfig = async (actor = 'admin') => {
     const fresh = {
         ...JSON.parse(JSON.stringify(DEFAULT_CMS_CONFIG)),
         updatedAt: new Date().toISOString(),
         updatedBy: actor
     };
-    fs.writeFileSync(CMS_FILE_PATH, JSON.stringify(fresh, null, 2), 'utf8');
+
+    try {
+        await saveCmsToDb(fresh, actor);
+    } catch (err) {
+        console.warn('Lỗi khôi phục cấu hình CMS trên CSDL:', err.message);
+    }
+    writeLocalCmsFile(fresh);
 
     try {
         const io = getIo();

@@ -2,7 +2,7 @@ const { pool } = require('../config/db.config');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-// Bộ theo dõi chống dò mật khẩu (Brute-Force Lockout: Khóa tạm thời 15 phút nếu nhập sai 5 lần liên tiếp)
+// Chặn tạm 15 phút nếu đăng nhập sai 5 lần liên tiếp
 const failedLoginMap = new Map();
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_DURATION_MS = 15 * 60 * 1000;
@@ -94,7 +94,7 @@ const login = async (username, password, clientIp = 'unknown') => {
         user.trang_thai = 'HOAT_DONG';
     }
 
-    // Ký JWT chuẩn HS256 với thời hạn 12 giờ
+    // Ký token JWT (hạn 12 giờ)
     const tokenPayload = {
         AccountID: user.id || 1,
         Username: user.ten_dang_nhap,

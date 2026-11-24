@@ -129,7 +129,7 @@ function AppContent() {
   const location = useLocation(); // Theo dõi chuyển hướng trang để cập nhật phiên đăng nhập tức thì
   const navigate = useNavigate();
 
-  // Đảm bảo giao diện luôn ở chế độ Sáng chuẩn nhận diện thương hiệu
+  // Giữ giao diện sáng mặc định
   useEffect(() => {
     try {
       document.documentElement.classList.remove('dark');
@@ -137,7 +137,6 @@ function AppContent() {
     } catch {}
   }, []);
 
-  // Đọc thông tin đăng nhập trực tiếp từ localStorage theo từng lượt render
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   const role = typeof window !== 'undefined' ? localStorage.getItem('role') : null;
   const fullName = typeof window !== 'undefined' ? (localStorage.getItem('fullName') || '') : '';
@@ -161,17 +160,14 @@ function AppContent() {
   };
 
   const handleNotificationClick = (n) => {
-    // Đánh dấu thông báo này là đã đọc
     const updated = notificationsList.map(item => item.id === n.id ? { ...item, read: true } : item);
     setNotificationsList(updated);
     try {
       localStorage.setItem('ticketNotifications', JSON.stringify(updated));
     } catch {}
 
-    // Đóng dropdown thông báo
     setShowNotificationsDropdown(false);
 
-    // Chuyển hướng trực tiếp đến đúng phiếu / lịch hẹn
     if (n.ticketCode) {
       if (isLoggedIn) {
         navigate(`/admin?ticket=${encodeURIComponent(n.ticketCode)}`);
@@ -208,11 +204,8 @@ function AppContent() {
 
   return (
     <div className="min-h-screen font-sans text-slate-800 bg-[#f0f5fa] flex flex-col">
-      {/* SECTION 01: HEADER & NAVBAR - TINH GỌN, ĐỒNG BỘ MÀU SẮC */}
       <header className="bg-white sticky top-0 z-50 border-b border-slate-200">
         <div className="container mx-auto px-4 flex justify-between items-center h-16 sm:h-20">
-          
-          {/* Logo & Brand Lockup */}
           <Link to="/" className="flex items-center gap-3 group shrink-0">
             <img src="/img/logo-luc-giac.png" alt="Logo Công ty Cổ phần Lục Giác" className="h-10 md:h-11 object-contain" />
             <div className="hidden sm:flex flex-col border-l border-slate-200 pl-3">
@@ -225,7 +218,7 @@ function AppContent() {
             </div>
           </Link>
 
-          {/* Menu máy tính để bàn (Desktop) - Đồng bộ kiểu chữ, không nhồi nút nhiều màu */}
+          {/* Menu desktop */}
           <nav className="hidden lg:flex items-center gap-1 text-xs font-semibold text-slate-600 h-full">
             {[
               { path: '/', label: 'Trang chủ' },
@@ -250,11 +243,10 @@ function AppContent() {
             })}
           </nav>
 
-          {/* Cụm Điều Hành Người Dùng (User Cluster) & Nút Menu Mobile */}
+          {/* Tài khoản & menu mobile */}
           <div className="flex items-center gap-2">
             {isLoggedIn ? (
               <div className="hidden sm:flex items-center gap-2">
-                {/* Nút Thông Báo đơn sắc */}
                 <div className="relative">
                   <button
                     type="button"
@@ -328,7 +320,6 @@ function AppContent() {
                   )}
                 </div>
 
-                {/* Nút Mở Trang Quản Trị */}
                 <Link 
                   to={navRoleInfo.link} 
                   className="px-4 py-2 font-semibold rounded-lg transition-colors text-xs bg-brand-blue text-white hover:bg-brand-blue-hover"
@@ -336,7 +327,6 @@ function AppContent() {
                   Trang quản trị
                 </Link>
 
-                {/* Nút Đăng Xuất */}
                 <button
                   type="button"
                   onClick={handleLogout}
@@ -355,7 +345,6 @@ function AppContent() {
               </Link>
             )}
 
-            {/* Nút bấm mở/đóng Menu Mobile */}
             <button 
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -368,7 +357,7 @@ function AppContent() {
 
         </div>
 
-        {/* MENU TRÊN DI ĐỘNG (MOBILE HAMBURGER MENU) */}
+        {/* Menu mobile */}
         {mobileMenuOpen && (
           <div className="lg:hidden bg-white border-t border-slate-200 px-6 py-4 shadow-lg">
             <div className="flex flex-col gap-1.5 text-sm font-medium text-slate-700" onClick={() => setMobileMenuOpen(false)}>
@@ -410,24 +399,17 @@ function AppContent() {
         )}
       </header>
 
-      {/* MAIN CONTENT AREA */}
       <main className="flex-1">
         <ErrorBoundary>
           <Suspense fallback={<div className="py-20 text-center font-bold text-slate-500">Đang tải trang...</div>}>
             <Routes>
-            {/* Landing Page */}
             <Route path="/" element={<HomeLanding />} />
-
-            {/* Public Pages */}
             <Route path="/dat-lich" element={<BookingForm />} />
-
-            {/* Các trang tra cứu & tiếp nhận QR CSKH */}
             <Route path="/tra-cuu" element={<PhoneTracking />} />
             <Route path="/intake" element={<IntakeForm />} />
+            <Route path="/tiep-nhan" element={<IntakeForm />} />
             <Route path="/track/:ticketCode" element={<Tracking />} />
             <Route path="/tra-cuu/:ticketCode" element={<Tracking />} />
-
-            {/* Admin Pages */}
             <Route path="/login" element={<Login />} />
             <Route element={<ProtectedRoute />}>
               <Route path="/admin" element={<Dashboard />} />
@@ -436,8 +418,6 @@ function AppContent() {
               <Route path="/admin/nhan-su" element={<EmployeeManagement />} />
               <Route path="/admin/cau-hinh-client" element={<ClientCmsConfig />} />
             </Route>
-
-            {/* 404 Page Not Found */}
             <Route
               path="*"
               element={
@@ -465,7 +445,7 @@ function AppContent() {
         </ErrorBoundary>
       </main>
 
-      {/* Floating Hotline & Contact Widget */}
+      {/* Nút gọi nhanh hotline */}
       <div className="fixed bottom-6 right-6 z-40 flex flex-col gap-4">
         <a 
           href="tel:02838604999" 
@@ -479,7 +459,7 @@ function AppContent() {
         </a>
       </div>
 
-      {/* SECTION 07: FOOTER - TỐI GIẢN, ĐỒNG BỘ MÀU TRẮNG & XÁM SLATE */}
+      {/* Footer */}
       <footer className="bg-white text-slate-600 py-7 sm:py-10 border-t border-slate-200">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-8">
