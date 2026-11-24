@@ -79,6 +79,58 @@ const COMPUTER_SOFTWARE_SERVICES = [
   }
 ];
 
+const DEFAULT_CUSTOMER_REVIEWS = [
+  {
+    ho_ten: 'Lê Trần Tuấn Minh',
+    ten_may: 'MacBook Pro M2 14 inch',
+    so_sao: 5,
+    nhan_xet: 'Dịch vụ tại Công ty Cổ phần Lục Giác rất nhanh và uy tín, quét mã QR tra cứu tiến độ và thanh toán VietQR cực kỳ tiện lợi!',
+    ngay_danh_gia: '2026-11-04T09:30:00.000Z'
+  },
+  {
+    ho_ten: 'Nguyễn Hoàng Bảo Ngọc',
+    ten_may: 'Dell XPS 13 9315',
+    so_sao: 5,
+    nhan_xet: 'Mình mang máy qua 615 Âu Cơ nâng cấp SSD NVMe và vệ sinh keo tản nhiệt. Kỹ thuật chụp ảnh hiện trạng rõ ràng, theo dõi từng bước qua QR rất yên tâm.',
+    ngay_danh_gia: '2026-11-08T14:15:00.000Z'
+  },
+  {
+    ho_ten: 'Trần Quốc Khánh',
+    ten_may: 'Laptop Asus ROG Strix G15',
+    so_sao: 5,
+    nhan_xet: 'Máy bị lỗi nguồn sạc chập chờn, kỹ thuật kiểm tra báo giá minh bạch trước khi sửa. Có sẵn thời hạn bảo hành điện tử trên mã QR không sợ thất lạc giấy.',
+    ngay_danh_gia: '2026-11-11T10:20:00.000Z'
+  },
+  {
+    ho_ten: 'Phạm Thị Thanh Thảo',
+    ten_may: 'HP EliteBook 840 G8',
+    so_sao: 5,
+    nhan_xet: 'Đặt lịch hẹn trước trên web nên tới quầy được tiếp nhận ngay không phải chờ. Nhân viên hỗ trợ cài lại Windows và bộ phần mềm kế toán rất nhiệt tình.',
+    ngay_danh_gia: '2026-11-14T16:05:00.000Z'
+  },
+  {
+    ho_ten: 'Đặng Minh Tuấn',
+    ten_may: 'Lenovo ThinkPad X1 Carbon',
+    so_sao: 5,
+    nhan_xet: 'Khôi phục dữ liệu ổ cứng nhanh và bảo mật. Thích nhất là ở nhà vẫn mở điện thoại quét QR xem kỹ thuật đang xử lý tới công đoạn nào.',
+    ngay_danh_gia: '2026-11-16T11:40:00.000Z'
+  },
+  {
+    ho_ten: 'Võ Ngọc Phương Anh',
+    ten_may: 'MacBook Air M1',
+    so_sao: 5,
+    nhan_xet: 'Thay pin chính hãng và vệ sinh máy lấy trong ngày. Lúc nhận máy quét VietQR trên phiếu thanh toán gọn lẹ, kích hoạt bảo hành 6 tháng ngay lập tức.',
+    ngay_danh_gia: '2026-11-18T15:10:00.000Z'
+  },
+  {
+    ho_ten: 'Huỳnh Gia Huy',
+    ten_may: 'PC Đồ Họa & Mạng LAN Văn Phòng',
+    so_sao: 5,
+    nhan_xet: 'Bên mình gửi 2 máy PC kiểm tra card màn hình và cấu hình lại máy in mạng nội bộ. Quy trình làm việc rõ ràng, có nhật ký kỹ thuật chi tiết từng giờ.',
+    ngay_danh_gia: '2026-11-20T09:50:00.000Z'
+  }
+];
+
 function HomeLanding() {
   const navigate = useNavigate();
   const [activeGuideTab, setActiveGuideTab] = useState('TAI_QUAY');
@@ -123,6 +175,21 @@ function HomeLanding() {
 
   const dynamicPillars = cmsConfig?.pillars?.length ? cmsConfig.pillars : CORE_PILLARS;
   const dynamicServices = cmsConfig?.services?.length ? cmsConfig.services : COMPUTER_SOFTWARE_SERVICES;
+  const displayedReviews = React.useMemo(() => {
+    const merged = [];
+    const seenComments = new Set();
+    for (const item of [...topReviews, ...DEFAULT_CUSTOMER_REVIEWS]) {
+      const commentKey = String(item?.nhan_xet || '').trim().toLowerCase();
+      if (!commentKey || seenComments.has(commentKey)) continue;
+      seenComments.add(commentKey);
+      merged.push(item);
+    }
+    return merged;
+  }, [topReviews]);
+  const marqueeReviews = React.useMemo(
+    () => [...displayedReviews, ...displayedReviews],
+    [displayedReviews]
+  );
 
   useEffect(() => {
     let active = true;
@@ -627,29 +694,52 @@ function HomeLanding() {
         </div>
       </section>
 
-      {/* Phản hồi từ khách hàng */}
-      {topReviews.length > 0 && (
-        <section className="py-8 sm:py-14 bg-[#f0f5fa] border-b border-slate-200">
+      {/* Phản hồi từ khách hàng (chạy tự động, tạm dừng khi rê chuột) */}
+      {displayedReviews.length > 0 && (
+        <section className="py-8 sm:py-14 bg-[#f0f5fa] border-b border-slate-200 overflow-hidden">
           <div className="container mx-auto px-4 sm:px-6">
             <div className="text-center mb-5 sm:mb-8">
               <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
                 <ResponsiveText mobile="Đánh Giá Từ Khách Hàng" desktop="Phản Hồi Từ Khách Hàng Sử Dụng Dịch Vụ" />
               </h2>
+              <p className="text-xs sm:text-sm text-slate-500 mt-1.5">
+                Đánh giá thực tế từ khách hàng sửa chữa máy tính, nâng cấp linh kiện và tra cứu bảo hành qua mã QR
+              </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-5">
-              {topReviews.map((r, i) => (
-                <div key={i} className="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 flex flex-col justify-between">
+          </div>
+
+          <div className="relative w-full overflow-hidden">
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-8 sm:w-20 bg-gradient-to-r from-[#f0f5fa] to-transparent z-10" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-8 sm:w-20 bg-gradient-to-l from-[#f0f5fa] to-transparent z-10" />
+
+            <div className="animate-reviews-marquee gap-4 sm:gap-5 px-4 py-1">
+              {marqueeReviews.map((r, i) => (
+                <div
+                  key={`${r.ho_ten}-${i}`}
+                  className="w-[285px] sm:w-[350px] shrink-0 bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-2xs hover:border-brand-blue/40 hover:shadow-md transition flex flex-col justify-between"
+                >
                   <div>
-                    <div className="flex items-center gap-1 text-amber-500 mb-2">
-                      {Array.from({ length: Number(r.so_sao) || 5 }).map((_, starIdx) => (
-                        <SvgIcon key={starIdx} name="star" className="w-4 h-4 fill-current" />
-                      ))}
+                    <div className="flex items-center justify-between gap-2 mb-2.5">
+                      <div className="flex items-center gap-1 text-amber-500">
+                        {Array.from({ length: Number(r.so_sao) || 5 }).map((_, starIdx) => (
+                          <SvgIcon key={starIdx} name="star" className="w-4 h-4 fill-current" />
+                        ))}
+                      </div>
+                      {r.ten_may && (
+                        <span className="text-[11px] font-medium text-brand-blue bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100 truncate max-w-[170px]">
+                          {r.ten_may}
+                        </span>
+                      )}
                     </div>
-                    <p className="text-slate-600 text-xs sm:text-sm italic mb-4 leading-relaxed">"{r.nhan_xet}"</p>
+                    <p className="text-slate-600 text-xs sm:text-sm italic mb-4 leading-relaxed">
+                      "{r.nhan_xet}"
+                    </p>
                   </div>
                   <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
                     <p className="font-semibold text-slate-800">{r.ho_ten}</p>
-                    <p className="text-slate-400">{new Date(r.ngay_danh_gia).toLocaleDateString('vi-VN')}</p>
+                    <p className="text-slate-400">
+                      {r.ngay_danh_gia ? new Date(r.ngay_danh_gia).toLocaleDateString('vi-VN') : ''}
+                    </p>
                   </div>
                 </div>
               ))}

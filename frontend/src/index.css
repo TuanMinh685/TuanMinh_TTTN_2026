@@ -45,6 +45,32 @@ p, li, blockquote {
   animation: fadeInUp 0.3s ease-out forwards;
 }
 
+@keyframes reviewsMarquee {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-reviews-marquee {
+  display: flex;
+  width: max-content;
+  animation: reviewsMarquee 42s linear infinite;
+  will-change: transform;
+}
+
+.animate-reviews-marquee:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-reviews-marquee {
+    animation: none;
+  }
+}
+
 @media print {
   @page {
     size: auto;

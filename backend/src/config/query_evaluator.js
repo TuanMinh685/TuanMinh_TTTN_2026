@@ -467,7 +467,7 @@ function executeMockQuery(sql, params = []) {
         return { rows: [d] };
     }
 
-    if (/SELECT d\.so_sao, d\.nhan_xet, d\.ngay_danh_gia, k\.ho_ten FROM danh_gia d/i.test(cleanSql)) {
+    if (/SELECT d\.so_sao.*FROM danh_gia d/i.test(cleanSql)) {
         const list = s.danh_gia.filter(x => x.so_sao >= 4).map(d => {
             const p = s.phieu_sua_chua.find(x => x.id === d.phieu_sua_chua_id) || {};
             const tb = s.thiet_bi.find(x => x.id === p.thiet_bi_id) || {};
@@ -476,7 +476,8 @@ function executeMockQuery(sql, params = []) {
                 so_sao: d.so_sao,
                 nhan_xet: d.nhan_xet,
                 ngay_danh_gia: d.ngay_danh_gia,
-                ho_ten: kh.ho_ten || 'Khách hàng'
+                ho_ten: kh.ho_ten || 'Khách hàng',
+                ten_may: tb.ten_may || ''
             };
         });
         return { rows: list };

@@ -136,14 +136,14 @@ const submitReview = async (ticketCode, so_sao, nhan_xet) => {
 
 const getTopReviews = async () => {
     const { rows } = await pool.query(`
-        SELECT d.so_sao, d.nhan_xet, d.ngay_danh_gia, k.ho_ten
+        SELECT d.so_sao, d.nhan_xet, d.ngay_danh_gia, k.ho_ten, t.ten_may
         FROM danh_gia d
         JOIN phieu_sua_chua p ON d.phieu_sua_chua_id = p.id
         JOIN thiet_bi t ON p.thiet_bi_id = t.id
         JOIN khach_hang k ON t.khach_hang_id = k.id
         WHERE d.so_sao >= 4
         ORDER BY d.ngay_danh_gia DESC
-        LIMIT 5
+        LIMIT 12
     `);
     return rows;
 };
